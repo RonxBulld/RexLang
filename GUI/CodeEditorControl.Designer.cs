@@ -38,9 +38,10 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.CodeTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.CodeTextBox.Location = new System.Drawing.Point(62, 0);
+            this.CodeTextBox.Location = new System.Drawing.Point(83, 0);
+            this.CodeTextBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.CodeTextBox.Name = "CodeTextBox";
-            this.CodeTextBox.Size = new System.Drawing.Size(802, 479);
+            this.CodeTextBox.Size = new System.Drawing.Size(1069, 599);
             this.CodeTextBox.TabIndex = 4;
             this.CodeTextBox.Text = "";
             this.CodeTextBox.WordWrap = false;
@@ -49,22 +50,23 @@
             // 
             // LineNoPanel
             // 
-            this.LineNoPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.LineNoPanel.Dock = System.Windows.Forms.DockStyle.Left;
             this.LineNoPanel.Location = new System.Drawing.Point(0, 0);
+            this.LineNoPanel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.LineNoPanel.Name = "LineNoPanel";
-            this.LineNoPanel.Size = new System.Drawing.Size(56, 479);
+            this.LineNoPanel.Size = new System.Drawing.Size(74, 599);
             this.LineNoPanel.TabIndex = 3;
             this.LineNoPanel.Paint += new System.Windows.Forms.PaintEventHandler(this.LineNoPanel_Paint);
             // 
             // CodeEditorControl
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.CodeTextBox);
             this.Controls.Add(this.LineNoPanel);
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "CodeEditorControl";
-            this.Size = new System.Drawing.Size(864, 479);
+            this.Size = new System.Drawing.Size(1152, 599);
             this.ResumeLayout(false);
 
         }
