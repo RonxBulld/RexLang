@@ -61,6 +61,9 @@
     </CustomBuild>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="openeLexerRules.g4" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>
