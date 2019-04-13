@@ -35,6 +35,9 @@
     <Reference Include="Antlr4.Runtime.Standard, Version=4.7.2.0, Culture=neutral, PublicKeyToken=e78b2c5abd1fcb3f, processorArchitecture=MSIL">
       <HintPath>..\packages\Antlr4.Runtime.Standard.4.7.2\lib\net35\Antlr4.Runtime.Standard.dll</HintPath>
     </Reference>
+    <Reference Include="LLVMSharp">
+      <HintPath>LLVMSharp\src\bin\Debug\netstandard1.1\LLVMSharp.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -45,6 +48,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AstGenerator.cs" />
+    <Compile Include="AstNode.cs" />
+    <Compile Include="ErrorManager.cs" />
     <Compile Include="Parser\openeBaseVisitor.cs" />
     <Compile Include="Parser\openeLexer.cs" />
     <Compile Include="Parser\openeParser.cs" />
@@ -60,9 +66,6 @@
       <Outputs>openeBaseVisitor.cs;openeLexer.cs;openeLexer.interp;openeLexer.tokens;openeParser.cs;openeVisitor.cs</Outputs>
     </CustomBuild>
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="openeLexerRules.g4" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

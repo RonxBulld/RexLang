@@ -56,11 +56,11 @@ public interface IopeneVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitLibrary_spec([NotNull] openeParser.Library_specContext context);
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="openeParser.prog_set_name"/>.
+	/// Visit a parse tree produced by <see cref="openeParser.prog_set"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitProg_set_name([NotNull] openeParser.Prog_set_nameContext context);
+	Result VisitProg_set([NotNull] openeParser.Prog_setContext context);
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="openeParser.prog_set_variable_decl_opt"/>.
 	/// </summary>

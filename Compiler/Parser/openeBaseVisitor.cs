@@ -74,7 +74,7 @@ public partial class openeBaseVisitor<Result> : AbstractParseTreeVisitor<Result>
 	/// <return>The visitor result.</return>
 	public virtual Result VisitLibrary_spec([NotNull] openeParser.Library_specContext context) { return VisitChildren(context); }
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="openeParser.prog_set_name"/>.
+	/// Visit a parse tree produced by <see cref="openeParser.prog_set"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -82,7 +82,7 @@ public partial class openeBaseVisitor<Result> : AbstractParseTreeVisitor<Result>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitProg_set_name([NotNull] openeParser.Prog_set_nameContext context) { return VisitChildren(context); }
+	public virtual Result VisitProg_set([NotNull] openeParser.Prog_setContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="openeParser.prog_set_variable_decl_opt"/>.
 	/// <para>

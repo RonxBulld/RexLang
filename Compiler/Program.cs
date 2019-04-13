@@ -20,6 +20,9 @@ namespace Compiler
             openeParser parser = new openeParser(tokens);
             parser.BuildParseTree = true;
             IParseTree tree = parser.opene_src();
+            AstGenerator generator = new AstGenerator();
+            ErrorManager errorManager = new ErrorManager();
+            generator.GenerateAst(tree, ref errorManager);
         }
     }
 }

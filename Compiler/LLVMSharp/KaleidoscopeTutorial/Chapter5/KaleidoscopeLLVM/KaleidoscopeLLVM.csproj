@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{C1147A13-4174-410A-A891-335D858703B7}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>KaleidoscopeLLVM</RootNamespace>
+    <AssemblyName>KaleidoscopeLLVM</AssemblyName>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <FileAlignment>512</FileAlignment>
+    <NuGetPackageImportStamp>b8df454a</NuGetPackageImportStamp>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="LLVMSharp" Version="5.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Kaleidoscope\Kaleidoscope.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties" />
+  </ItemGroup>
+</Project>

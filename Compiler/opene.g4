@@ -1,51 +1,51 @@
 
 grammar opene;
 
-K_VERSION: '.°æ±¾';
+K_VERSION: '.ç‰ˆæœ¬';
 
-K_LIBRARY: '.Ö§³Ö¿â';
+K_LIBRARY: '.æ”¯æŒåº“';
 
-K_PROGRAM_SET: '.³ÌĞò¼¯';
+K_PROGRAM_SET: '.ç¨‹åºé›†';
 
-K_PROGRAM_SET_VARIABLE: '.³ÌĞò¼¯±äÁ¿';
+K_PROGRAM_SET_VARIABLE: '.ç¨‹åºé›†å˜é‡';
 
-K_LOCAL_VARIABLE: '.¾Ö²¿±äÁ¿';
+K_LOCAL_VARIABLE: '.å±€éƒ¨å˜é‡';
 
-K_PARAMETER: '.²ÎÊı';
+K_PARAMETER: '.å‚æ•°';
 
-K_SUB_PROGRAM: '.×Ó³ÌĞò';
+K_SUB_PROGRAM: '.å­ç¨‹åº';
 
-K_IF_TRUE: '.Èç¹ûÕæ';
+K_IF_TRUE: '.å¦‚æœçœŸ';
 
-K_IF_TRUE_END: '.Èç¹ûÕæ½áÊø';
+K_IF_TRUE_END: '.å¦‚æœçœŸç»“æŸ';
 
-K_IF: '.Èç¹û';
+K_IF: '.å¦‚æœ';
 
-K_ELSE: '.·ñÔò';
+K_ELSE: '.å¦åˆ™';
 
-K_END_IF: '.Èç¹û½áÊø';
+K_END_IF: '.å¦‚æœç»“æŸ';
 
-K_WHILE: '.ÅĞ¶ÏÑ­»·Ê×';
+K_WHILE: '.åˆ¤æ–­å¾ªç¯é¦–';
 
-K_WHILE_END: '.ÅĞ¶ÏÑ­»·Î²';
+K_WHILE_END: '.åˆ¤æ–­å¾ªç¯å°¾';
 
-K_FOR: '.¼Æ´ÎÑ­»·Ê×';
+K_FOR: '.è®¡æ¬¡å¾ªç¯é¦–';
 
-K_FOR_END: '.¼Æ´ÎÑ­»·Î²';
+K_FOR_END: '.è®¡æ¬¡å¾ªç¯å°¾';
 
-K_ADD_OPT: '£«';
+K_ADD_OPT: 'ï¼‹';
 
-K_SUB_OPT: '£­';
+K_SUB_OPT: 'ï¼';
 
-K_MUL_OPT: '¡Á';
+K_MUL_OPT: 'Ã—';
 
-K_DIV_OPT: '¡Â';
+K_DIV_OPT: 'Ã·';
 
-K_ASSIGN_OPT: '£½';
+K_ASSIGN_OPT: 'ï¼';
 
-K_NOT_EQUAL_OPT: '¡Ù';
+K_NOT_EQUAL_OPT: 'â‰ ';
 
-K_OR_OPT: '»ò';
+K_OR_OPT: 'æˆ–';
 
 INTEGER_LITERAL: ('0' .. '9')+;
 
@@ -65,14 +65,14 @@ WHITESPACE: (' ' | '\t')+ -> skip;
 
 NEWLINE: '\r' ? '\n' -> skip;
 
-STRING_LITERAL: '¡°'.*?'¡±';
+STRING_LITERAL: 'â€œ'.*?'â€';
 
 CODE_COMMIT: '\''.*? '\r' ? '\n' -> skip;
 
 OTHER_CHAR: .;
 
 opene_src
-    : edition_spec library_list_opt prog_set_name prog_set_variable_decl_opt sub_program_opt
+    : edition_spec library_list_opt prog_set
     ;
 
 edition_spec
@@ -87,8 +87,8 @@ library_spec
     : K_LIBRARY IDENTIFIER
     ;
 
-prog_set_name
-    : K_PROGRAM_SET IDENTIFIER
+prog_set
+    : K_PROGRAM_SET IDENTIFIER prog_set_variable_decl_opt sub_program_opt
     ;
 
 prog_set_variable_decl_opt
@@ -188,15 +188,15 @@ name_component
 expression
     : '(' expression ')'
     | '-' expression
-// ------------------------------------- ËÄÔòÔËËã
+// ------------------------------------- å››åˆ™è¿ç®—
     | expression K_ADD_OPT expression
     | expression K_SUB_OPT expression
     | expression K_MUL_OPT expression
     | expression K_DIV_OPT expression
-// ------------------------------------- ±È½ÏÔËËã
+// ------------------------------------- æ¯”è¾ƒè¿ç®—
     | expression K_ASSIGN_OPT expression
     | expression K_NOT_EQUAL_OPT expression
-// ------------------------------------- Âß¼­ÔËËã
+// ------------------------------------- é€»è¾‘è¿ç®—
     | expression K_OR_OPT expression
 // -------------------------------------
     | number
