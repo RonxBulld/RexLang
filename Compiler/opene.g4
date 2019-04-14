@@ -2,57 +2,47 @@
 grammar opene;
 
 K_VERSION: '.版本';
-
 K_LIBRARY: '.支持库';
-
 K_PROGRAM_SET: '.程序集';
-
 K_PROGRAM_SET_VARIABLE: '.程序集变量';
-
 K_LOCAL_VARIABLE: '.局部变量';
-
 K_PARAMETER: '.参数';
-
 K_SUB_PROGRAM: '.子程序';
 
 K_IF_TRUE: '.如果真';
-
 K_IF_TRUE_END: '.如果真结束';
-
 K_IF: '.如果';
-
 K_ELSE: '.否则';
-
 K_END_IF: '.如果结束';
 
 K_WHILE: '.判断循环首';
-
 K_WHILE_END: '.判断循环尾';
 
 K_FOR: '.计次循环首';
-
 K_FOR_END: '.计次循环尾';
 
 K_TRUE: '真';
-
 K_FALSE: '假';
 
 K_ADD_OPT: '＋';
-
 K_SUB_OPT: '－';
-
 K_MUL_OPT: '×';
-
 K_DIV_OPT: '÷';
+K_ADIV_OPT: '＼';
+K_MOD_OPT: '％';
 
 K_ASSIGN_OPT: '＝';
-
 K_NOT_EQUAL_OPT: '≠';
+K_GREAT_OPT: '＞';
+K_LESS_OPT: '＜';
+K_GREAT_EQU_OPT: '≥';
+K_LESS_EQU_OPT: '≤';
+K_LIKE_EQU_OPT: '≈';
 
 K_OR_OPT: '或';
+K_AND_OPT: '且';
 
 INTEGER_LITERAL: ('0' .. '9')+;
-
 FLOAT_LITERAL
     : INTEGER_LITERAL? '.' INTEGER_LITERAL
     | INTEGER_LITERAL '.' INTEGER_LITERAL?
@@ -60,19 +50,11 @@ FLOAT_LITERAL
 
 fragment
 UNICODE_CHAR: '\u4E00'..'\u9FA5' | '\uF900'..'\uFA2D';
-
-IDENTIFIER
-    : ([a-z] | [A-Z] | ('0' .. '9') | '_' | UNICODE_CHAR)+
-    ;
-
+IDENTIFIER: ([a-z] | [A-Z] | ('0' .. '9') | '_' | UNICODE_CHAR)+;
 WHITESPACE: (' ' | '\t')+ -> skip;
-
 NEWLINE: '\r' ? '\n' -> skip;
-
 STRING_LITERAL: '“'.*?'”';
-
 CODE_COMMIT: '\''.*? '\r' ? '\n' -> skip;
-
 OTHER_CHAR: .;
 
 opene_src
@@ -156,8 +138,12 @@ statement
     : expression
     | condition_statement
     | hierarchy_identifier K_ASSIGN_OPT expression
-    | K_WHILE '(' expression ')' statement_list K_WHILE_END '(' ')'
-    | K_FOR '(' expression ',' expression? ')' statement_list K_FOR_END '(' ')'
+    | loop_statement
+    ;
+
+loop_statement
+    : K_WHILE '(' expression ')' statement_list K_WHILE_END '(' ')'             # While
+    | K_FOR '(' expression ',' IDENTIFIER? ')' statement_list K_FOR_END '(' ')' # For
     ;
 
 condition_statement
@@ -184,25 +170,38 @@ expression
     : '(' expression ')'                                # Bracket
     | opt='-' expression                                # UnaryExpr
 // ------------------------------------- 四则运算
-    | expression opt=K_ADD_OPT expression               # BinaryExpr
-    | expression opt=K_SUB_OPT expression               # BinaryExpr
-    | expression opt=K_MUL_OPT expression               # BinaryExpr
-    | expression opt=K_DIV_OPT expression               # BinaryExpr
+    | expression opt=K_MUL_OPT       expression         # BinaryExpr
+    | expression opt=K_DIV_OPT       expression         # BinaryExpr
+    | expression opt=K_ADIV_OPT      expression         # BinaryExpr
+    | expression opt=K_MOD_OPT       expression         # BinaryExpr
+    | expression opt=K_ADD_OPT       expression         # BinaryExpr
+    | expression opt=K_SUB_OPT       expression         # BinaryExpr
 // ------------------------------------- 比较运算
-    | expression opt=K_ASSIGN_OPT    expression         # BinaryExpr
     | expression opt=K_NOT_EQUAL_OPT expression         # BinaryExpr
+    | expression opt=K_ASSIGN_OPT    expression         # BinaryExpr
+    | expression opt=K_LESS_OPT      expression         # BinaryExpr
+    | expression opt=K_GREAT_OPT     expression         # BinaryExpr
+    | expression opt=K_LESS_EQU_OPT  expression         # BinaryExpr
+    | expression opt=K_GREAT_EQU_OPT expression         # BinaryExpr
+    | expression opt=K_LIKE_EQU_OPT  expression         # BinaryExpr
 // ------------------------------------- 逻辑运算
-    | expression opt=K_OR_OPT expression                # BinaryExpr
+    | expression opt=K_AND_OPT       expression         # BinaryExpr
+    | expression opt=K_OR_OPT        expression         # BinaryExpr
 // -------------------------------------
     | number                                            # OptElement
     | bool_value                                        # OptElement
     | macro_value                                       # OptElement
     | string_value                                      # OptElement
     | hierarchy_identifier                              # OptElement
+    | func_ptr                                          # OptElement
     ;
 
 macro_value
     : '#' IDENTIFIER
+    ;
+
+func_ptr
+    : '&' IDENTIFIER
     ;
 
 bool_value

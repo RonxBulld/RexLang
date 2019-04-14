@@ -152,6 +152,20 @@ public interface IopeneVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitStatement([NotNull] openeParser.StatementContext context);
 	/// <summary>
+	/// Visit a parse tree produced by the <c>While</c>
+	/// labeled alternative in <see cref="openeParser.loop_statement"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitWhile([NotNull] openeParser.WhileContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>For</c>
+	/// labeled alternative in <see cref="openeParser.loop_statement"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitFor([NotNull] openeParser.ForContext context);
+	/// <summary>
 	/// Visit a parse tree produced by the <c>IfStmt</c>
 	/// labeled alternative in <see cref="openeParser.condition_statement"/>.
 	/// </summary>
@@ -239,6 +253,12 @@ public interface IopeneVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitMacro_value([NotNull] openeParser.Macro_valueContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="openeParser.func_ptr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitFunc_ptr([NotNull] openeParser.Func_ptrContext context);
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="openeParser.bool_value"/>.
 	/// </summary>

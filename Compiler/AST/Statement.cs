@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Compiler
+namespace Compiler.AST
 {
     public class PStatement : AstNode
     {
@@ -22,5 +22,17 @@ namespace Compiler
         public PExpression ConditionExpression = null;
         public PStatementList TrueStatementList = null;
         public PStatementList FalseStatementList = null;
+    }
+
+    public class PWhileStatement : PStatement
+    {
+        public PExpression ConditionExpression = null;
+        public PStatementList StatementList = null;
+    }
+
+    public class PForStatement : PStatement
+    {
+        public PExpression LoopCount = null;
+        public string Counter = null;
     }
 }

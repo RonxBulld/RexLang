@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
+using Compiler.AST;
 
 namespace Compiler
 {
@@ -13,7 +15,8 @@ namespace Compiler
     {
         static void Main(string[] args)
         {
-            String input = "";
+            string input = "window_program_set1.txt";
+            input = File.ReadAllText(input);
             ICharStream stream = CharStreams.fromstring(input);
             openeLexer lexer = new openeLexer(stream);
             CommonTokenStream tokens = new CommonTokenStream(lexer);
