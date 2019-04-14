@@ -15,8 +15,8 @@ namespace Compiler
         {
             String input = "";
             ICharStream stream = CharStreams.fromstring(input);
-            ITokenSource lexer = new openeLexer(stream);
-            ITokenStream tokens = new CommonTokenStream(lexer);
+            openeLexer lexer = new openeLexer(stream);
+            CommonTokenStream tokens = new CommonTokenStream(lexer);
             openeParser parser = new openeParser(tokens);
             parser.BuildParseTree = true;
             IParseTree tree = parser.opene_src();

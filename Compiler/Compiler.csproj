@@ -51,12 +51,14 @@
     <Compile Include="AstGenerator.cs" />
     <Compile Include="AstNode.cs" />
     <Compile Include="ErrorManager.cs" />
+    <Compile Include="Expression.cs" />
     <Compile Include="Parser\openeBaseVisitor.cs" />
     <Compile Include="Parser\openeLexer.cs" />
     <Compile Include="Parser\openeParser.cs" />
     <Compile Include="Parser\openeVisitor.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Statement.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

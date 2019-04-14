@@ -6,100 +6,107 @@ using System.Threading.Tasks;
 
 namespace Compiler
 {
-    class AstNode
+    public class AstNode
     {
     }
 
-    class PVersion : AstNode
+    public class PNameComponent : AstNode
     {
-        private int _version = 0;
-
-        public int Version => _version;
-
-        public PVersion(int version)
+        public enum ComponentType
         {
-            this._version = version;
-        }
+            Identifier,
+            FuncCall,
+            ArrayIndex
+        };
+        public string Name = "";
+        public ComponentType Type = ComponentType.Identifier;
+        public List<PExpression> Expressions = new List<PExpression>();
     }
 
-    class PCompileUnit : AstNode
+    public class PCompileUnit : AstNode
     {
-        public PVersion Version;
-
-        public PLibraries Libraries;
-
-        public PProgramSet ProgramSet;
-
+        public int Version = 0;
+        public List<string> Libraries = new List<string>();
+        public string ProgramSetName = "";
+        public List<PVariableDecl> VariableDecls = new List<PVariableDecl>();
+        public List<PFunction> Functions = new List<PFunction>();
     }
 
-    class PLibraries : AstNode
+    public class PLibraries : AstNode
     {
-        private List<string> _libraries;
-
+        private List<string> _libraries = new List<string>();
         public List<string> Libraries => _libraries;
-
         public PLibraries(List<string> libraries)
         {
             this._libraries = libraries;
         }
     }
 
-    class PLibrary : AstNode
+    public class PLibrary : AstNode
     {
-        private string _library;
-
+        private string _library = "";
         public string Library => _library;
-
         public PLibrary(string library)
         {
             this._library = library;
         }
     }
 
-    class PProgramSet : AstNode
+    public class PProgramSet : AstNode
     {
         public string ProgramSetName;
         public List<PVariableDecl> VariableDecls;
+        public List<PFunction> Functions;
     }
 
-    class PVariableDecl : AstNode
+    public class PVariableDecl : AstNode
     {
         public string VariableName;
         public string VariableType;
         public List<int> Dimensions;
     }
 
-    class PVariableName : AstNode
+    public class PVariableName : AstNode
     {
         private string _name;
-
         public string Name => _name;
-
         public PVariableName(string name)
         {
             this._name = name;
         }
     }
 
-    class PVariableTypeName : AstNode
+    public class PVariableTypeName : AstNode
     {
         private string _name;
-
         public string Name => _name;
-
         public PVariableTypeName(string name)
         {
             this._name = name;
         }
     }
 
-    class PDimensionDecl : AstNode
+    public class PDimensionDecl : AstNode
     {
-        public List<int> Dimension;
+        public List<int> Dimension = new List<int>();
     }
 
-    class PVariableDeclList : AstNode
+    public class PVariableDeclList : AstNode
     {
-        public List<PVariableDecl> VariableDecls;
+        public List<PVariableDecl> VariableDecls = new List<PVariableDecl>();
+    }
+
+    public class PFunction : AstNode
+    {
+        public string Name;
+        public string ReturnType;
+        public List<PVariableDecl> ParameterDecls = new List<PVariableDecl>();
+        public List<PVariableDecl> LocalVariableDecls = new List<PVariableDecl>();
+        public List<PStatement> Statements = new List<PStatement>();
+    }
+
+    public class PFunctionList : AstNode
+    {
+        public List<PFunction> Functions = new List<PFunction>();
     }
 }

@@ -33,6 +33,10 @@ K_FOR: '.计次循环首';
 
 K_FOR_END: '.计次循环尾';
 
+K_TRUE: '真';
+
+K_FALSE: '假';
+
 K_ADD_OPT: '＋';
 
 K_SUB_OPT: '－';
@@ -129,7 +133,7 @@ sub_program_opt
     ;
 
 sub_program
-    : K_SUB_PROGRAM IDENTIFIER (',' variable_type)? parameter_decl_list local_variable_decl* statement_list*
+    : K_SUB_PROGRAM IDENTIFIER (',' variable_type)? parameter_decl_list local_variable_decl* statement_list
     ;
 
 parameter_decl_list
@@ -145,7 +149,7 @@ local_variable_decl
     ;
 
 statement_list
-    : statement+
+    : statement*
     ;
 
 statement
@@ -157,17 +161,8 @@ statement
     ;
 
 condition_statement
-    : condition_start_word '(' expression ')' statement_list condition_statement_else? condition_end_word
-    ;
-
-condition_start_word
-    : K_IF
-    | K_IF_TRUE
-    ;
-
-condition_end_word
-    : K_END_IF
-    | K_IF_TRUE_END
+    : K_IF '(' expression ')' statement_list condition_statement_else? K_END_IF     # IfStmt
+    | K_IF_TRUE_END '(' expression ')' statement_list K_IF_TRUE_END                 # IfTrueStmt
     ;
 
 condition_statement_else
@@ -179,34 +174,47 @@ hierarchy_identifier
     ;
 
 name_component
-    : IDENTIFIER
-    | IDENTIFIER '(' ')'
-    | IDENTIFIER '(' expression (',' expression?)* ')'
-    | IDENTIFIER '[' expression ']'
+    : IDENTIFIER                                        # Identifier
+    | IDENTIFIER '(' ')'                                # FuncCallWithoutArgu
+    | IDENTIFIER '(' expression (',' expression?)* ')'  # FuncCallWithArgu
+    | IDENTIFIER '[' expression ']'                     # ArrayIndex
     ;
 
 expression
-    : '(' expression ')'
-    | '-' expression
+    : '(' expression ')'                                # Bracket
+    | opt='-' expression                                # UnaryExpr
 // ------------------------------------- 四则运算
-    | expression K_ADD_OPT expression
-    | expression K_SUB_OPT expression
-    | expression K_MUL_OPT expression
-    | expression K_DIV_OPT expression
+    | expression opt=K_ADD_OPT expression               # BinaryExpr
+    | expression opt=K_SUB_OPT expression               # BinaryExpr
+    | expression opt=K_MUL_OPT expression               # BinaryExpr
+    | expression opt=K_DIV_OPT expression               # BinaryExpr
 // ------------------------------------- 比较运算
-    | expression K_ASSIGN_OPT expression
-    | expression K_NOT_EQUAL_OPT expression
+    | expression opt=K_ASSIGN_OPT    expression         # BinaryExpr
+    | expression opt=K_NOT_EQUAL_OPT expression         # BinaryExpr
 // ------------------------------------- 逻辑运算
-    | expression K_OR_OPT expression
+    | expression opt=K_OR_OPT expression                # BinaryExpr
 // -------------------------------------
-    | number
-    | '#' IDENTIFIER
-    | STRING_LITERAL
-    | name_component
-    | hierarchy_identifier
+    | number                                            # OptElement
+    | bool_value                                        # OptElement
+    | macro_value                                       # OptElement
+    | string_value                                      # OptElement
+    | hierarchy_identifier                              # OptElement
+    ;
+
+macro_value
+    : '#' IDENTIFIER
+    ;
+
+bool_value
+    : bval=K_TRUE
+    | bval=K_FALSE
     ;
 
 number
-    : INTEGER_LITERAL
-    | FLOAT_LITERAL
+    : INTEGER_LITERAL                                   # Int
+    | FLOAT_LITERAL                                     # Float
+    ;
+
+string_value
+    : STRING_LITERAL
     ;

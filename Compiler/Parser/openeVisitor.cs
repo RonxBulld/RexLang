@@ -152,23 +152,19 @@ public interface IopeneVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitStatement([NotNull] openeParser.StatementContext context);
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="openeParser.condition_statement"/>.
+	/// Visit a parse tree produced by the <c>IfStmt</c>
+	/// labeled alternative in <see cref="openeParser.condition_statement"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitCondition_statement([NotNull] openeParser.Condition_statementContext context);
+	Result VisitIfStmt([NotNull] openeParser.IfStmtContext context);
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="openeParser.condition_start_word"/>.
+	/// Visit a parse tree produced by the <c>IfTrueStmt</c>
+	/// labeled alternative in <see cref="openeParser.condition_statement"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitCondition_start_word([NotNull] openeParser.Condition_start_wordContext context);
-	/// <summary>
-	/// Visit a parse tree produced by <see cref="openeParser.condition_end_word"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitCondition_end_word([NotNull] openeParser.Condition_end_wordContext context);
+	Result VisitIfTrueStmt([NotNull] openeParser.IfTrueStmtContext context);
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="openeParser.condition_statement_else"/>.
 	/// </summary>
@@ -182,21 +178,91 @@ public interface IopeneVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitHierarchy_identifier([NotNull] openeParser.Hierarchy_identifierContext context);
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="openeParser.name_component"/>.
+	/// Visit a parse tree produced by the <c>Identifier</c>
+	/// labeled alternative in <see cref="openeParser.name_component"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitName_component([NotNull] openeParser.Name_componentContext context);
+	Result VisitIdentifier([NotNull] openeParser.IdentifierContext context);
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="openeParser.expression"/>.
+	/// Visit a parse tree produced by the <c>FuncCallWithoutArgu</c>
+	/// labeled alternative in <see cref="openeParser.name_component"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitExpression([NotNull] openeParser.ExpressionContext context);
+	Result VisitFuncCallWithoutArgu([NotNull] openeParser.FuncCallWithoutArguContext context);
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="openeParser.number"/>.
+	/// Visit a parse tree produced by the <c>FuncCallWithArgu</c>
+	/// labeled alternative in <see cref="openeParser.name_component"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitNumber([NotNull] openeParser.NumberContext context);
+	Result VisitFuncCallWithArgu([NotNull] openeParser.FuncCallWithArguContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>ArrayIndex</c>
+	/// labeled alternative in <see cref="openeParser.name_component"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitArrayIndex([NotNull] openeParser.ArrayIndexContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>Bracket</c>
+	/// labeled alternative in <see cref="openeParser.expression"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitBracket([NotNull] openeParser.BracketContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>OptElement</c>
+	/// labeled alternative in <see cref="openeParser.expression"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitOptElement([NotNull] openeParser.OptElementContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>BinaryExpr</c>
+	/// labeled alternative in <see cref="openeParser.expression"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitBinaryExpr([NotNull] openeParser.BinaryExprContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>UnaryExpr</c>
+	/// labeled alternative in <see cref="openeParser.expression"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitUnaryExpr([NotNull] openeParser.UnaryExprContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="openeParser.macro_value"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitMacro_value([NotNull] openeParser.Macro_valueContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="openeParser.bool_value"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitBool_value([NotNull] openeParser.Bool_valueContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>Int</c>
+	/// labeled alternative in <see cref="openeParser.number"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitInt([NotNull] openeParser.IntContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>Float</c>
+	/// labeled alternative in <see cref="openeParser.number"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitFloat([NotNull] openeParser.FloatContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="openeParser.string_value"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitString_value([NotNull] openeParser.String_valueContext context);
 }
