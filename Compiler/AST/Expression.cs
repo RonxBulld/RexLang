@@ -19,7 +19,7 @@ namespace Compiler.AST
         UserDefined,
     }
 
-    public class PExpression : AstNode
+    public class PExpression : PStatement
     {
 
     }
@@ -116,16 +116,22 @@ namespace Compiler.AST
         public string Name = "";
     }
 
+    public enum UnaryOpt
+    {
+        Positive,
+        Negative
+    }
+
     public class PUnaryExpr : PExpression
     {
-        public enum UnaryOpt
-        {
-            Positive,
-            Negative
-        }
-
         public UnaryOpt Opt = UnaryOpt.Positive;
         public PExpression Expression = null;
+
+        public static readonly Dictionary<int, UnaryOpt> LexOptMap = new Dictionary<int, UnaryOpt>()
+        {
+            { openeLexer.K_ADD_OPT, UnaryOpt.Positive },
+            { openeLexer.K_SUB_OPT, UnaryOpt.Negative },
+        };
     }
 
     public enum BinaryOpt
@@ -152,7 +158,8 @@ namespace Compiler.AST
             { openeLexer.K_SUB_OPT,       BinaryOpt.Sub },
             // 比较
             { openeLexer.K_NOT_EQUAL_OPT, BinaryOpt.NotEqual },
-            { openeLexer.K_ASSIGN_OPT,    BinaryOpt.Equal },
+            { openeLexer.K_EQUAL_OPT,     BinaryOpt.Equal },
+            { openeLexer.K_AECOM_OPT,     BinaryOpt.Equal },
             { openeLexer.K_LESS_OPT,      BinaryOpt.Less },
             { openeLexer.K_GREAT_OPT,     BinaryOpt.Great },
             { openeLexer.K_LESS_EQU_OPT,  BinaryOpt.LessEqual },

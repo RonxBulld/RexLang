@@ -1,68 +1,28 @@
+parser grammar opene;
 
-grammar opene;
+options { tokenVocab = openeLexer; }
 
-K_VERSION: '.版本';
-K_LIBRARY: '.支持库';
-K_PROGRAM_SET: '.程序集';
-K_PROGRAM_SET_VARIABLE: '.程序集变量';
-K_LOCAL_VARIABLE: '.局部变量';
-K_PARAMETER: '.参数';
-K_SUB_PROGRAM: '.子程序';
-
-K_IF_TRUE: '.如果真';
-K_IF_TRUE_END: '.如果真结束';
-K_IF: '.如果';
-K_ELSE: '.否则';
-K_END_IF: '.如果结束';
-
-K_WHILE: '.判断循环首';
-K_WHILE_END: '.判断循环尾';
-
-K_FOR: '.计次循环首';
-K_FOR_END: '.计次循环尾';
-
-K_TRUE: '真';
-K_FALSE: '假';
-
-K_ADD_OPT: '＋';
-K_SUB_OPT: '－';
-K_MUL_OPT: '×';
-K_DIV_OPT: '÷';
-K_FULL_DIV_OPT: '＼';
-K_MOD_OPT: '％';
-
-K_ASSIGN_OPT: '＝';
-K_NOT_EQUAL_OPT: '≠';
-K_GREAT_OPT: '＞';
-K_LESS_OPT: '＜';
-K_GREAT_EQU_OPT: '≥';
-K_LESS_EQU_OPT: '≤';
-K_LIKE_EQU_OPT: '≈';
-
-K_OR_OPT: '或';
-K_AND_OPT: '且';
-
-INTEGER_LITERAL: ('0' .. '9')+;
-FLOAT_LITERAL
-    : INTEGER_LITERAL? '.' INTEGER_LITERAL
-    | INTEGER_LITERAL '.' INTEGER_LITERAL?
-    ;
-
-fragment
-UNICODE_CHAR: '\u4E00'..'\u9FA5' | '\uF900'..'\uFA2D';
-IDENTIFIER: ([a-z] | [A-Z] | ('0' .. '9') | '_' | UNICODE_CHAR)+;
-WHITESPACE: (' ' | '\t')+ -> skip;
-NEWLINE: '\r' ? '\n' -> skip;
-STRING_LITERAL: '“'.*?'”';
-CODE_COMMIT: '\''.*? '\r' ? '\n' -> skip;
-OTHER_CHAR: .;
-
-opene_src
-    : edition_spec library_list_opt prog_set
+opene
+    : edition_spec NEWLINE
+      library_list_opt
+      prog_set
+    | edition_spec struct_declare*
     ;
 
 edition_spec
     : K_VERSION INTEGER_LITERAL
+    ;
+
+struct_declare
+    : K_STRUCTURE IDENTIFIER (COMMA access_level?)? (COMMA variable_comment)? member_list*
+    ;
+
+access_level
+    : IDENTIFIER
+    ;
+
+member_list
+    : K_MEMBER_VARIABLE variable_decl
     ;
 
 library_list_opt
@@ -70,11 +30,13 @@ library_list_opt
     ;
 
 library_spec
-    : K_LIBRARY IDENTIFIER
+    : K_LIBRARY IDENTIFIER NEWLINE
     ;
 
 prog_set
-    : K_PROGRAM_SET IDENTIFIER prog_set_variable_decl_opt sub_program_opt
+    : K_PROGRAM_SET name=TABLE_ITEM TABLE_END
+      prog_set_variable_decl_opt
+      sub_program_opt
     ;
 
 prog_set_variable_decl_opt
@@ -86,7 +48,7 @@ prog_set_variable_decl
     ;
 
 variable_decl
-    : variable_name ',' variable_type (',' ',' dimension_decl?)? (',' variable_comment)?
+    : name=TABLE_ITEM TABLE_COMMA type=TABLE_ITEM (TABLE_COMMA TABLE_COMMA dimension=TABLE_ITEM?)? (TABLE_COMMA comment=TABLE_ITEM)? TABLE_END
     ;
 
 variable_comment
@@ -96,6 +58,7 @@ variable_comment
 variable_comment_element
     : IDENTIFIER
     | OTHER_CHAR
+    | COMMA
     ;
 
 variable_name
@@ -107,15 +70,17 @@ variable_type
     ;
 
 dimension_decl
-    : '"' INTEGER_LITERAL '"'
+    : DQUOTE INTEGER_LITERAL DQUOTE
     ;
-    
+
 sub_program_opt
-    : sub_program*
+    : (NEWLINE* sub_program NEWLINE*)*
     ;
 
 sub_program
-    : K_SUB_PROGRAM IDENTIFIER (',' variable_type)? parameter_decl_list local_variable_decl* statement_list
+    : K_SUB_PROGRAM name=TABLE_ITEM (TABLE_COMMA type=TABLE_ITEM? (TABLE_COMMA access=TABLE_ITEM? (TABLE_COMMA comment=TABLE_ITEM)?)?)? TABLE_END
+      parameter_decl_list local_variable_decl*
+      statement_list
     ;
 
 parameter_decl_list
@@ -131,24 +96,34 @@ local_variable_decl
     ;
 
 statement_list
-    : statement*
+    : (statement? NEWLINE)*
     ;
 
 statement
-    : expression
-    | condition_statement
-    | hierarchy_identifier K_ASSIGN_OPT expression
-    | loop_statement
+    : condition_statement                                           # ConditionStatement
+    | hierarchy_identifier (K_ASSIGN_OPT | K_AECOM_OPT) expression  # AssignStatement
+    | expression                                                    # ExpressionStatement
+    | loop_statement                                                # LoopStatement
     ;
 
+
 loop_statement
-    : K_WHILE '(' expression ')' statement_list K_WHILE_END '(' ')'             # While
-    | K_FOR '(' expression ',' IDENTIFIER? ')' statement_list K_FOR_END '(' ')' # For
+    : K_WHILE LBRACK expression RBRACK
+      statement_list
+      K_WHILE_END LBRACK RBRACK                             # While
+    | K_FOR LBRACK expression COMMA IDENTIFIER? RBRACK
+      statement_list
+      K_FOR_END LBRACK RBRACK                               # For
     ;
 
 condition_statement
-    : K_IF '(' expression ')' statement_list condition_statement_else? K_END_IF     # IfStmt
-    | K_IF_TRUE_END '(' expression ')' statement_list K_IF_TRUE_END                 # IfTrueStmt
+    : K_IF LBRACK expression RBRACK
+      statement_list
+      condition_statement_else?
+      K_END_IF                              # IfStmt
+    | K_IF_TRUE LBRACK expression RBRACK
+      statement_list
+      K_END_IF_TRUE                         # IfTrueStmt
     ;
 
 condition_statement_else
@@ -156,52 +131,53 @@ condition_statement_else
     ;
 
 hierarchy_identifier
-    : name_component ('.' name_component)*
+    : name_component (DOT name_component)*
     ;
 
 name_component
-    : IDENTIFIER                                        # Identifier
-    | IDENTIFIER '(' ')'                                # FuncCallWithoutArgu
-    | IDENTIFIER '(' expression (',' expression?)* ')'  # FuncCallWithArgu
-    | IDENTIFIER '[' expression ']'                     # ArrayIndex
+    : IDENTIFIER                                                        # Identifier
+    | name_component LBRACK RBRACK                                      # FuncCallWithoutArgu
+    | name_component LBRACK expression (COMMA expression?)* RBRACK      # FuncCallWithArgu
+    | name_component LSQUBRACK expression RSQUBRACK                     # ArrayIndex
     ;
 
 expression
-    : '(' expression ')'                                # Bracket
-    | opt='-' expression                                # UnaryExpr
+    : LBRACK expression RBRACK                                  # Bracket
+    | opt=K_SUB_OPT expression                                  # UnaryExpr
 // ------------------------------------- 四则运算
-    | expression opt=K_MUL_OPT       expression         # BinaryExpr
-    | expression opt=K_DIV_OPT       expression         # BinaryExpr
-    | expression opt=K_FULL_DIV_OPT  expression         # BinaryExpr
-    | expression opt=K_MOD_OPT       expression         # BinaryExpr
-    | expression opt=K_ADD_OPT       expression         # BinaryExpr
-    | expression opt=K_SUB_OPT       expression         # BinaryExpr
+    | lval=expression opt=K_MUL_OPT       rval=expression       # BinaryExpr
+    | lval=expression opt=K_DIV_OPT       rval=expression       # BinaryExpr
+    | lval=expression opt=K_FULL_DIV_OPT  rval=expression       # BinaryExpr
+    | lval=expression opt=K_MOD_OPT       rval=expression       # BinaryExpr
+    | lval=expression opt=K_ADD_OPT       rval=expression       # BinaryExpr
+    | lval=expression opt=K_SUB_OPT       rval=expression       # BinaryExpr
 // ------------------------------------- 比较运算
-    | expression opt=K_NOT_EQUAL_OPT expression         # BinaryExpr
-    | expression opt=K_ASSIGN_OPT    expression         # BinaryExpr
-    | expression opt=K_LESS_OPT      expression         # BinaryExpr
-    | expression opt=K_GREAT_OPT     expression         # BinaryExpr
-    | expression opt=K_LESS_EQU_OPT  expression         # BinaryExpr
-    | expression opt=K_GREAT_EQU_OPT expression         # BinaryExpr
-    | expression opt=K_LIKE_EQU_OPT  expression         # BinaryExpr
+    | lval=expression opt=K_NOT_EQUAL_OPT rval=expression       # BinaryExpr
+    | lval=expression opt=K_EQUAL_OPT     rval=expression       # BinaryExpr
+    | lval=expression opt=K_AECOM_OPT     rval=expression       # BinaryExpr
+    | lval=expression opt=K_LESS_OPT      rval=expression       # BinaryExpr
+    | lval=expression opt=K_GREAT_OPT     rval=expression       # BinaryExpr
+    | lval=expression opt=K_LESS_EQU_OPT  rval=expression       # BinaryExpr
+    | lval=expression opt=K_GREAT_EQU_OPT rval=expression       # BinaryExpr
+    | lval=expression opt=K_LIKE_EQU_OPT  rval=expression       # BinaryExpr
 // ------------------------------------- 逻辑运算
-    | expression opt=K_AND_OPT       expression         # BinaryExpr
-    | expression opt=K_OR_OPT        expression         # BinaryExpr
+    | lval=expression opt=K_AND_OPT       rval=expression       # BinaryExpr
+    | lval=expression opt=K_OR_OPT        rval=expression       # BinaryExpr
 // -------------------------------------
-    | number                                            # OptElement
-    | bool_value                                        # OptElement
-    | macro_value                                       # OptElement
-    | string_value                                      # OptElement
-    | hierarchy_identifier                              # OptElement
-    | func_ptr                                          # OptElement
+    | number                                                    # OptElement
+    | bool_value                                                # OptElement
+    | macro_value                                               # OptElement
+    | string_value                                              # OptElement
+    | hierarchy_identifier                                      # OptElement
+    | func_ptr                                                  # OptElement
     ;
 
 macro_value
-    : '#' IDENTIFIER
+    : SHARP IDENTIFIER
     ;
 
 func_ptr
-    : '&' IDENTIFIER
+    : ADDRESS IDENTIFIER
     ;
 
 bool_value

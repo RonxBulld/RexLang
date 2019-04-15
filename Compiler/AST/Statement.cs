@@ -35,4 +35,10 @@ namespace Compiler.AST
         public PExpression LoopCount = null;
         public string Counter = null;
     }
+
+    public class PAssignStatement : PStatement
+    {
+        public PExpression LExpression = null;
+        public PExpression RExpression = null;
+    }
 }

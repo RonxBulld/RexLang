@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-// Generated from /home/rexfield/OpenELanguage/Compiler/opene.g4 by ANTLR 4.7.2
+// Generated from D:/Project/OpenELanguage/Compiler\opene.g4 by ANTLR 4.7.2
 
 // Unreachable code detected
 #pragma warning disable 0162
@@ -34,7 +34,7 @@ using ParserRuleContext = Antlr4.Runtime.ParserRuleContext;
 [System.CLSCompliant(false)]
 public partial class openeBaseVisitor<Result> : AbstractParseTreeVisitor<Result>, IopeneVisitor<Result> {
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="openeParser.opene_src"/>.
+	/// Visit a parse tree produced by <see cref="opene.opene"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -42,9 +42,9 @@ public partial class openeBaseVisitor<Result> : AbstractParseTreeVisitor<Result>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitOpene_src([NotNull] openeParser.Opene_srcContext context) { return VisitChildren(context); }
+	public virtual Result VisitOpene([NotNull] opene.OpeneContext context) { return VisitChildren(context); }
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="openeParser.edition_spec"/>.
+	/// Visit a parse tree produced by <see cref="opene.edition_spec"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -52,9 +52,9 @@ public partial class openeBaseVisitor<Result> : AbstractParseTreeVisitor<Result>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitEdition_spec([NotNull] openeParser.Edition_specContext context) { return VisitChildren(context); }
+	public virtual Result VisitEdition_spec([NotNull] opene.Edition_specContext context) { return VisitChildren(context); }
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="openeParser.library_list_opt"/>.
+	/// Visit a parse tree produced by <see cref="opene.struct_declare"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -62,9 +62,9 @@ public partial class openeBaseVisitor<Result> : AbstractParseTreeVisitor<Result>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitLibrary_list_opt([NotNull] openeParser.Library_list_optContext context) { return VisitChildren(context); }
+	public virtual Result VisitStruct_declare([NotNull] opene.Struct_declareContext context) { return VisitChildren(context); }
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="openeParser.library_spec"/>.
+	/// Visit a parse tree produced by <see cref="opene.access_level"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -72,9 +72,9 @@ public partial class openeBaseVisitor<Result> : AbstractParseTreeVisitor<Result>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitLibrary_spec([NotNull] openeParser.Library_specContext context) { return VisitChildren(context); }
+	public virtual Result VisitAccess_level([NotNull] opene.Access_levelContext context) { return VisitChildren(context); }
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="openeParser.prog_set"/>.
+	/// Visit a parse tree produced by <see cref="opene.member_list"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -82,9 +82,9 @@ public partial class openeBaseVisitor<Result> : AbstractParseTreeVisitor<Result>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitProg_set([NotNull] openeParser.Prog_setContext context) { return VisitChildren(context); }
+	public virtual Result VisitMember_list([NotNull] opene.Member_listContext context) { return VisitChildren(context); }
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="openeParser.prog_set_variable_decl_opt"/>.
+	/// Visit a parse tree produced by <see cref="opene.library_list_opt"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -92,9 +92,9 @@ public partial class openeBaseVisitor<Result> : AbstractParseTreeVisitor<Result>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitProg_set_variable_decl_opt([NotNull] openeParser.Prog_set_variable_decl_optContext context) { return VisitChildren(context); }
+	public virtual Result VisitLibrary_list_opt([NotNull] opene.Library_list_optContext context) { return VisitChildren(context); }
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="openeParser.prog_set_variable_decl"/>.
+	/// Visit a parse tree produced by <see cref="opene.library_spec"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -102,9 +102,9 @@ public partial class openeBaseVisitor<Result> : AbstractParseTreeVisitor<Result>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitProg_set_variable_decl([NotNull] openeParser.Prog_set_variable_declContext context) { return VisitChildren(context); }
+	public virtual Result VisitLibrary_spec([NotNull] opene.Library_specContext context) { return VisitChildren(context); }
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="openeParser.variable_decl"/>.
+	/// Visit a parse tree produced by <see cref="opene.prog_set"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -112,9 +112,9 @@ public partial class openeBaseVisitor<Result> : AbstractParseTreeVisitor<Result>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitVariable_decl([NotNull] openeParser.Variable_declContext context) { return VisitChildren(context); }
+	public virtual Result VisitProg_set([NotNull] opene.Prog_setContext context) { return VisitChildren(context); }
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="openeParser.variable_comment"/>.
+	/// Visit a parse tree produced by <see cref="opene.prog_set_variable_decl_opt"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -122,9 +122,9 @@ public partial class openeBaseVisitor<Result> : AbstractParseTreeVisitor<Result>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitVariable_comment([NotNull] openeParser.Variable_commentContext context) { return VisitChildren(context); }
+	public virtual Result VisitProg_set_variable_decl_opt([NotNull] opene.Prog_set_variable_decl_optContext context) { return VisitChildren(context); }
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="openeParser.variable_comment_element"/>.
+	/// Visit a parse tree produced by <see cref="opene.prog_set_variable_decl"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -132,9 +132,9 @@ public partial class openeBaseVisitor<Result> : AbstractParseTreeVisitor<Result>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitVariable_comment_element([NotNull] openeParser.Variable_comment_elementContext context) { return VisitChildren(context); }
+	public virtual Result VisitProg_set_variable_decl([NotNull] opene.Prog_set_variable_declContext context) { return VisitChildren(context); }
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="openeParser.variable_name"/>.
+	/// Visit a parse tree produced by <see cref="opene.variable_decl"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -142,9 +142,9 @@ public partial class openeBaseVisitor<Result> : AbstractParseTreeVisitor<Result>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitVariable_name([NotNull] openeParser.Variable_nameContext context) { return VisitChildren(context); }
+	public virtual Result VisitVariable_decl([NotNull] opene.Variable_declContext context) { return VisitChildren(context); }
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="openeParser.variable_type"/>.
+	/// Visit a parse tree produced by <see cref="opene.variable_comment"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -152,9 +152,9 @@ public partial class openeBaseVisitor<Result> : AbstractParseTreeVisitor<Result>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitVariable_type([NotNull] openeParser.Variable_typeContext context) { return VisitChildren(context); }
+	public virtual Result VisitVariable_comment([NotNull] opene.Variable_commentContext context) { return VisitChildren(context); }
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="openeParser.dimension_decl"/>.
+	/// Visit a parse tree produced by <see cref="opene.variable_comment_element"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -162,9 +162,9 @@ public partial class openeBaseVisitor<Result> : AbstractParseTreeVisitor<Result>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitDimension_decl([NotNull] openeParser.Dimension_declContext context) { return VisitChildren(context); }
+	public virtual Result VisitVariable_comment_element([NotNull] opene.Variable_comment_elementContext context) { return VisitChildren(context); }
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="openeParser.sub_program_opt"/>.
+	/// Visit a parse tree produced by <see cref="opene.variable_name"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -172,9 +172,9 @@ public partial class openeBaseVisitor<Result> : AbstractParseTreeVisitor<Result>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitSub_program_opt([NotNull] openeParser.Sub_program_optContext context) { return VisitChildren(context); }
+	public virtual Result VisitVariable_name([NotNull] opene.Variable_nameContext context) { return VisitChildren(context); }
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="openeParser.sub_program"/>.
+	/// Visit a parse tree produced by <see cref="opene.variable_type"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -182,9 +182,9 @@ public partial class openeBaseVisitor<Result> : AbstractParseTreeVisitor<Result>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitSub_program([NotNull] openeParser.Sub_programContext context) { return VisitChildren(context); }
+	public virtual Result VisitVariable_type([NotNull] opene.Variable_typeContext context) { return VisitChildren(context); }
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="openeParser.parameter_decl_list"/>.
+	/// Visit a parse tree produced by <see cref="opene.dimension_decl"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -192,9 +192,9 @@ public partial class openeBaseVisitor<Result> : AbstractParseTreeVisitor<Result>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitParameter_decl_list([NotNull] openeParser.Parameter_decl_listContext context) { return VisitChildren(context); }
+	public virtual Result VisitDimension_decl([NotNull] opene.Dimension_declContext context) { return VisitChildren(context); }
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="openeParser.parameter_decl"/>.
+	/// Visit a parse tree produced by <see cref="opene.sub_program_opt"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -202,9 +202,9 @@ public partial class openeBaseVisitor<Result> : AbstractParseTreeVisitor<Result>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitParameter_decl([NotNull] openeParser.Parameter_declContext context) { return VisitChildren(context); }
+	public virtual Result VisitSub_program_opt([NotNull] opene.Sub_program_optContext context) { return VisitChildren(context); }
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="openeParser.local_variable_decl"/>.
+	/// Visit a parse tree produced by <see cref="opene.sub_program"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -212,9 +212,9 @@ public partial class openeBaseVisitor<Result> : AbstractParseTreeVisitor<Result>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitLocal_variable_decl([NotNull] openeParser.Local_variable_declContext context) { return VisitChildren(context); }
+	public virtual Result VisitSub_program([NotNull] opene.Sub_programContext context) { return VisitChildren(context); }
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="openeParser.statement_list"/>.
+	/// Visit a parse tree produced by <see cref="opene.parameter_decl_list"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -222,9 +222,9 @@ public partial class openeBaseVisitor<Result> : AbstractParseTreeVisitor<Result>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitStatement_list([NotNull] openeParser.Statement_listContext context) { return VisitChildren(context); }
+	public virtual Result VisitParameter_decl_list([NotNull] opene.Parameter_decl_listContext context) { return VisitChildren(context); }
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="openeParser.statement"/>.
+	/// Visit a parse tree produced by <see cref="opene.parameter_decl"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -232,10 +232,74 @@ public partial class openeBaseVisitor<Result> : AbstractParseTreeVisitor<Result>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitStatement([NotNull] openeParser.StatementContext context) { return VisitChildren(context); }
+	public virtual Result VisitParameter_decl([NotNull] opene.Parameter_declContext context) { return VisitChildren(context); }
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="opene.local_variable_decl"/>.
+	/// <para>
+	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
+	/// on <paramref name="context"/>.
+	/// </para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	public virtual Result VisitLocal_variable_decl([NotNull] opene.Local_variable_declContext context) { return VisitChildren(context); }
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="opene.statement_list"/>.
+	/// <para>
+	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
+	/// on <paramref name="context"/>.
+	/// </para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	public virtual Result VisitStatement_list([NotNull] opene.Statement_listContext context) { return VisitChildren(context); }
+	/// <summary>
+	/// Visit a parse tree produced by the <c>ConditionStatement</c>
+	/// labeled alternative in <see cref="opene.statement"/>.
+	/// <para>
+	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
+	/// on <paramref name="context"/>.
+	/// </para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	public virtual Result VisitConditionStatement([NotNull] opene.ConditionStatementContext context) { return VisitChildren(context); }
+	/// <summary>
+	/// Visit a parse tree produced by the <c>AssignStatement</c>
+	/// labeled alternative in <see cref="opene.statement"/>.
+	/// <para>
+	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
+	/// on <paramref name="context"/>.
+	/// </para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	public virtual Result VisitAssignStatement([NotNull] opene.AssignStatementContext context) { return VisitChildren(context); }
+	/// <summary>
+	/// Visit a parse tree produced by the <c>ExpressionStatement</c>
+	/// labeled alternative in <see cref="opene.statement"/>.
+	/// <para>
+	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
+	/// on <paramref name="context"/>.
+	/// </para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	public virtual Result VisitExpressionStatement([NotNull] opene.ExpressionStatementContext context) { return VisitChildren(context); }
+	/// <summary>
+	/// Visit a parse tree produced by the <c>LoopStatement</c>
+	/// labeled alternative in <see cref="opene.statement"/>.
+	/// <para>
+	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
+	/// on <paramref name="context"/>.
+	/// </para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	public virtual Result VisitLoopStatement([NotNull] opene.LoopStatementContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by the <c>While</c>
-	/// labeled alternative in <see cref="openeParser.loop_statement"/>.
+	/// labeled alternative in <see cref="opene.loop_statement"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -243,10 +307,10 @@ public partial class openeBaseVisitor<Result> : AbstractParseTreeVisitor<Result>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitWhile([NotNull] openeParser.WhileContext context) { return VisitChildren(context); }
+	public virtual Result VisitWhile([NotNull] opene.WhileContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by the <c>For</c>
-	/// labeled alternative in <see cref="openeParser.loop_statement"/>.
+	/// labeled alternative in <see cref="opene.loop_statement"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -254,10 +318,10 @@ public partial class openeBaseVisitor<Result> : AbstractParseTreeVisitor<Result>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitFor([NotNull] openeParser.ForContext context) { return VisitChildren(context); }
+	public virtual Result VisitFor([NotNull] opene.ForContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by the <c>IfStmt</c>
-	/// labeled alternative in <see cref="openeParser.condition_statement"/>.
+	/// labeled alternative in <see cref="opene.condition_statement"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -265,10 +329,10 @@ public partial class openeBaseVisitor<Result> : AbstractParseTreeVisitor<Result>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitIfStmt([NotNull] openeParser.IfStmtContext context) { return VisitChildren(context); }
+	public virtual Result VisitIfStmt([NotNull] opene.IfStmtContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by the <c>IfTrueStmt</c>
-	/// labeled alternative in <see cref="openeParser.condition_statement"/>.
+	/// labeled alternative in <see cref="opene.condition_statement"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -276,9 +340,9 @@ public partial class openeBaseVisitor<Result> : AbstractParseTreeVisitor<Result>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitIfTrueStmt([NotNull] openeParser.IfTrueStmtContext context) { return VisitChildren(context); }
+	public virtual Result VisitIfTrueStmt([NotNull] opene.IfTrueStmtContext context) { return VisitChildren(context); }
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="openeParser.condition_statement_else"/>.
+	/// Visit a parse tree produced by <see cref="opene.condition_statement_else"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -286,9 +350,9 @@ public partial class openeBaseVisitor<Result> : AbstractParseTreeVisitor<Result>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitCondition_statement_else([NotNull] openeParser.Condition_statement_elseContext context) { return VisitChildren(context); }
+	public virtual Result VisitCondition_statement_else([NotNull] opene.Condition_statement_elseContext context) { return VisitChildren(context); }
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="openeParser.hierarchy_identifier"/>.
+	/// Visit a parse tree produced by <see cref="opene.hierarchy_identifier"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -296,10 +360,10 @@ public partial class openeBaseVisitor<Result> : AbstractParseTreeVisitor<Result>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitHierarchy_identifier([NotNull] openeParser.Hierarchy_identifierContext context) { return VisitChildren(context); }
+	public virtual Result VisitHierarchy_identifier([NotNull] opene.Hierarchy_identifierContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by the <c>Identifier</c>
-	/// labeled alternative in <see cref="openeParser.name_component"/>.
+	/// labeled alternative in <see cref="opene.name_component"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -307,21 +371,10 @@ public partial class openeBaseVisitor<Result> : AbstractParseTreeVisitor<Result>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitIdentifier([NotNull] openeParser.IdentifierContext context) { return VisitChildren(context); }
-	/// <summary>
-	/// Visit a parse tree produced by the <c>FuncCallWithoutArgu</c>
-	/// labeled alternative in <see cref="openeParser.name_component"/>.
-	/// <para>
-	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
-	/// on <paramref name="context"/>.
-	/// </para>
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	public virtual Result VisitFuncCallWithoutArgu([NotNull] openeParser.FuncCallWithoutArguContext context) { return VisitChildren(context); }
+	public virtual Result VisitIdentifier([NotNull] opene.IdentifierContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by the <c>FuncCallWithArgu</c>
-	/// labeled alternative in <see cref="openeParser.name_component"/>.
+	/// labeled alternative in <see cref="opene.name_component"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -329,10 +382,21 @@ public partial class openeBaseVisitor<Result> : AbstractParseTreeVisitor<Result>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitFuncCallWithArgu([NotNull] openeParser.FuncCallWithArguContext context) { return VisitChildren(context); }
+	public virtual Result VisitFuncCallWithArgu([NotNull] opene.FuncCallWithArguContext context) { return VisitChildren(context); }
+	/// <summary>
+	/// Visit a parse tree produced by the <c>FuncCallWithoutArgu</c>
+	/// labeled alternative in <see cref="opene.name_component"/>.
+	/// <para>
+	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
+	/// on <paramref name="context"/>.
+	/// </para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	public virtual Result VisitFuncCallWithoutArgu([NotNull] opene.FuncCallWithoutArguContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by the <c>ArrayIndex</c>
-	/// labeled alternative in <see cref="openeParser.name_component"/>.
+	/// labeled alternative in <see cref="opene.name_component"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -340,10 +404,10 @@ public partial class openeBaseVisitor<Result> : AbstractParseTreeVisitor<Result>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitArrayIndex([NotNull] openeParser.ArrayIndexContext context) { return VisitChildren(context); }
+	public virtual Result VisitArrayIndex([NotNull] opene.ArrayIndexContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by the <c>Bracket</c>
-	/// labeled alternative in <see cref="openeParser.expression"/>.
+	/// labeled alternative in <see cref="opene.expression"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -351,10 +415,10 @@ public partial class openeBaseVisitor<Result> : AbstractParseTreeVisitor<Result>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitBracket([NotNull] openeParser.BracketContext context) { return VisitChildren(context); }
+	public virtual Result VisitBracket([NotNull] opene.BracketContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by the <c>OptElement</c>
-	/// labeled alternative in <see cref="openeParser.expression"/>.
+	/// labeled alternative in <see cref="opene.expression"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -362,10 +426,10 @@ public partial class openeBaseVisitor<Result> : AbstractParseTreeVisitor<Result>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitOptElement([NotNull] openeParser.OptElementContext context) { return VisitChildren(context); }
+	public virtual Result VisitOptElement([NotNull] opene.OptElementContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by the <c>BinaryExpr</c>
-	/// labeled alternative in <see cref="openeParser.expression"/>.
+	/// labeled alternative in <see cref="opene.expression"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -373,10 +437,10 @@ public partial class openeBaseVisitor<Result> : AbstractParseTreeVisitor<Result>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitBinaryExpr([NotNull] openeParser.BinaryExprContext context) { return VisitChildren(context); }
+	public virtual Result VisitBinaryExpr([NotNull] opene.BinaryExprContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by the <c>UnaryExpr</c>
-	/// labeled alternative in <see cref="openeParser.expression"/>.
+	/// labeled alternative in <see cref="opene.expression"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -384,9 +448,9 @@ public partial class openeBaseVisitor<Result> : AbstractParseTreeVisitor<Result>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitUnaryExpr([NotNull] openeParser.UnaryExprContext context) { return VisitChildren(context); }
+	public virtual Result VisitUnaryExpr([NotNull] opene.UnaryExprContext context) { return VisitChildren(context); }
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="openeParser.macro_value"/>.
+	/// Visit a parse tree produced by <see cref="opene.macro_value"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -394,9 +458,9 @@ public partial class openeBaseVisitor<Result> : AbstractParseTreeVisitor<Result>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitMacro_value([NotNull] openeParser.Macro_valueContext context) { return VisitChildren(context); }
+	public virtual Result VisitMacro_value([NotNull] opene.Macro_valueContext context) { return VisitChildren(context); }
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="openeParser.func_ptr"/>.
+	/// Visit a parse tree produced by <see cref="opene.func_ptr"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -404,9 +468,9 @@ public partial class openeBaseVisitor<Result> : AbstractParseTreeVisitor<Result>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitFunc_ptr([NotNull] openeParser.Func_ptrContext context) { return VisitChildren(context); }
+	public virtual Result VisitFunc_ptr([NotNull] opene.Func_ptrContext context) { return VisitChildren(context); }
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="openeParser.bool_value"/>.
+	/// Visit a parse tree produced by <see cref="opene.bool_value"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -414,10 +478,10 @@ public partial class openeBaseVisitor<Result> : AbstractParseTreeVisitor<Result>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitBool_value([NotNull] openeParser.Bool_valueContext context) { return VisitChildren(context); }
+	public virtual Result VisitBool_value([NotNull] opene.Bool_valueContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by the <c>Int</c>
-	/// labeled alternative in <see cref="openeParser.number"/>.
+	/// labeled alternative in <see cref="opene.number"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -425,10 +489,10 @@ public partial class openeBaseVisitor<Result> : AbstractParseTreeVisitor<Result>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitInt([NotNull] openeParser.IntContext context) { return VisitChildren(context); }
+	public virtual Result VisitInt([NotNull] opene.IntContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by the <c>Float</c>
-	/// labeled alternative in <see cref="openeParser.number"/>.
+	/// labeled alternative in <see cref="opene.number"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -436,9 +500,9 @@ public partial class openeBaseVisitor<Result> : AbstractParseTreeVisitor<Result>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitFloat([NotNull] openeParser.FloatContext context) { return VisitChildren(context); }
+	public virtual Result VisitFloat([NotNull] opene.FloatContext context) { return VisitChildren(context); }
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="openeParser.string_value"/>.
+	/// Visit a parse tree produced by <see cref="opene.string_value"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -446,5 +510,5 @@ public partial class openeBaseVisitor<Result> : AbstractParseTreeVisitor<Result>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitString_value([NotNull] openeParser.String_valueContext context) { return VisitChildren(context); }
+	public virtual Result VisitString_value([NotNull] opene.String_valueContext context) { return VisitChildren(context); }
 }

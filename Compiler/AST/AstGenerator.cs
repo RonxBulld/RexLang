@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using Antlr4.Runtime.Tree;
 
 namespace Compiler.AST
@@ -7,6 +8,12 @@ namespace Compiler.AST
     class OpenEAstVisitor : openeBaseVisitor<AstNode>
     {
         private ErrorManager errorManager = null;
+
+        public AstNode Error()
+        {
+            throw new Exception("Parse error.");
+            return null;
+        }
 
         public OpenEAstVisitor(ref ErrorManager errorManager)
         {
@@ -17,13 +24,13 @@ namespace Compiler.AST
         {
             PCompileUnit compile_unit = new PCompileUnit();
             // Version
-            if (Visit(context.edition_spec()) is PValue version)
+            if (Visit(context.edition_spec()) is PNumber version)
             {
-                compile_unit.Version = version.IntegerValue;
+                compile_unit.Version = version.Value;
             }
             else
             {
-                return null;
+                return Error();
             }
 
             // Library list
@@ -33,7 +40,7 @@ namespace Compiler.AST
             }
             else
             {
-                return null;
+                return Error();
             }
 
             if (Visit(context.prog_set()) is PProgramSet program_set)
@@ -47,7 +54,7 @@ namespace Compiler.AST
             }
             else
             {
-                return null;
+                return Error();
             }
 
             return compile_unit;
@@ -59,7 +66,7 @@ namespace Compiler.AST
             if (ver != 2)
             {
                 this.errorManager.VersionFailed(2, ver);
-                return null;
+                return Error();
             }
 
             PNumber version_node = new PNumber();
@@ -75,7 +82,7 @@ namespace Compiler.AST
                 PLibrary library = Visit(lib) as PLibrary;
                 if (library == null)
                 {
-                    return null;
+                    return Error();
                 }
 
                 library_list.Add(library.Library);
@@ -102,7 +109,7 @@ namespace Compiler.AST
             }
             else
             {
-                return null;
+                return Error();
             }
 
             // Program set function list
@@ -138,19 +145,19 @@ namespace Compiler.AST
             if (Visit(context.variable_name()) is PVariableName variable_name)
                 variable_decl.VariableName = variable_name.Name;
             else
-                return null;
+                return Error();
             // Variable type.
             if (Visit(context.variable_type()) is PVariableTypeName variable_type_name)
                 variable_decl.VariableType = variable_type_name.Name;
             else
-                return null;
+                return Error();
             // Variable dimension.
             if (context.dimension_decl() != null && context.dimension_decl().IsEmpty == false)
             {
                 if (Visit(context.dimension_decl()) is PDimensionDecl dimension_decl)
                     variable_decl.Dimensions = dimension_decl.Dimension;
                 else
-                    return null;
+                    return Error();
             }
 
             return variable_decl;
@@ -185,7 +192,7 @@ namespace Compiler.AST
                 if (this.errorManager.DimensionMustMoreThanZero(dimension))
                     dimension = 0;
                 else
-                    return null;
+                    return Error();
             }
 
             dimension_decl.Dimension.Add(dimension);
@@ -224,7 +231,7 @@ namespace Compiler.AST
                 }
                 else
                 {
-                    return null;
+                    return Error();
                 }
             }
 
@@ -235,7 +242,7 @@ namespace Compiler.AST
             }
             else
             {
-                return null;
+                return Error();
             }
 
             // local variable list
@@ -248,7 +255,7 @@ namespace Compiler.AST
                 }
                 else
                 {
-                    return null;
+                    return Error();
                 }
             }
 
@@ -259,7 +266,7 @@ namespace Compiler.AST
             }
             else
             {
-                return null;
+                return Error();
             }
 
             return function;
@@ -276,7 +283,7 @@ namespace Compiler.AST
                 }
                 else
                 {
-                    return null;
+                    return Error();
                 }
             }
 
@@ -298,17 +305,42 @@ namespace Compiler.AST
             PStatementList statement_list = new PStatementList();
             foreach (var statement_context in context.statement())
             {
-                if (Visit(statement_context) is PStatement statement)
+                AstNode node = Visit(statement_context);
+                if (node is PStatement statement)
                 {
                     statement_list.Statements.Add(statement);
                 }
                 else
                 {
-                    return null;
+                    return Error();
                 }
             }
 
             return statement_list;
+        }
+
+        public override AstNode VisitAssignStatement(openeParser.AssignStatementContext context)
+        {
+            PAssignStatement assign_statement = new PAssignStatement();
+            if (Visit(context.hierarchy_identifier()) is PExpression lexpression)
+            {
+                assign_statement.LExpression = lexpression;
+            }
+            else
+            {
+                return Error();
+            }
+
+            if (Visit(context.expression()) is PExpression rexpression)
+            {
+                assign_statement.RExpression = rexpression;
+            }
+            else
+            {
+                return Error();
+            }
+
+            return assign_statement;
         }
 
         public override AstNode VisitWhile(openeParser.WhileContext context)
@@ -321,7 +353,7 @@ namespace Compiler.AST
             }
             else
             {
-                return null;
+                return Error();
             }
             // Loop body.
             if (Visit(context.statement_list()) is PStatementList statement_list)
@@ -330,7 +362,7 @@ namespace Compiler.AST
             }
             else
             {
-                return null;
+                return Error();
             }
 
             return while_statement;
@@ -346,7 +378,7 @@ namespace Compiler.AST
             }
             else
             {
-                return null;
+                return Error();
             }
             // For loop counter.
             if (context.IDENTIFIER() != null)
@@ -363,17 +395,17 @@ namespace Compiler.AST
             // Condition expression
             if_statement.ConditionExpression = Visit(context.expression()) as PExpression;
             if (if_statement.ConditionExpression == null)
-                return null;
+                return Error();
             // True statement list
             if_statement.TrueStatementList = Visit(context.statement_list()) as PStatementList;
             if (if_statement.TrueStatementList == null)
-                return null;
+                return Error();
             // Else statement list
             if (context.condition_statement_else() != null && context.condition_statement_else().IsEmpty == false)
             {
                 if_statement.FalseStatementList = Visit(context.condition_statement_else()) as PStatementList;
                 if (if_statement.FalseStatementList == null)
-                    return null;
+                    return Error();
             }
 
             return if_statement;
@@ -385,11 +417,11 @@ namespace Compiler.AST
             // Condition expression
             if_statement.ConditionExpression = Visit(context.expression()) as PExpression;
             if (if_statement.ConditionExpression == null)
-                return null;
+                return Error();
             // True statement list
             if_statement.TrueStatementList = Visit(context.statement_list()) as PStatementList;
             if (if_statement.TrueStatementList == null)
-                return null;
+                return Error();
             if_statement.FalseStatementList = null;
             return if_statement;
         }
@@ -410,7 +442,7 @@ namespace Compiler.AST
                 }
                 else
                 {
-                    return null;
+                    return Error();
                 }
             }
 
@@ -446,7 +478,7 @@ namespace Compiler.AST
                 }
                 else
                 {
-                    return null;
+                    return Error();
                 }
             }
 
@@ -464,7 +496,7 @@ namespace Compiler.AST
             }
             else
             {
-                return null;
+                return Error();
             }
 
             return component;
@@ -479,17 +511,18 @@ namespace Compiler.AST
         {
             PBinaryExpr binary_expr = new PBinaryExpr();
             // Binary expression operate code.
-            bool typeValid = PBinaryExpr.LexOptMap.ContainsKey(context.opt.Type);
-            if (typeValid == false)
+            bool type_valid = PBinaryExpr.LexOptMap.ContainsKey(context.opt.Type);
+            if (type_valid == false)
             {
-                throw new Exception("Type is avalid - " + context.opt.Text);
+                this.errorManager.OperatorIsInvalid(context.opt.Text);
+                return Error();
             }
 
             binary_expr.Opt = PBinaryExpr.LexOptMap[context.opt.Type];
             // Check if 2 expression.
             if (context.expression().Length != 2)
             {
-                return null;
+                return Error();
             }
             // Left value expression.
             if (Visit(context.expression(0)) is PExpression lexpression)
@@ -498,7 +531,7 @@ namespace Compiler.AST
             }
             else
             {
-                return null;
+                return Error();
             }
             // Right value expression.
             if (Visit(context.expression(1)) is PExpression rexpression)
@@ -507,7 +540,7 @@ namespace Compiler.AST
             }
             else
             {
-                return null;
+                return Error();
             }
 
             return binary_expr;
@@ -517,21 +550,22 @@ namespace Compiler.AST
         {
             PUnaryExpr unary_expr = new PUnaryExpr();
             // Unary expression operate code.
-            switch (context.opt.Type)
+            bool type_valid = PUnaryExpr.LexOptMap.ContainsKey(context.opt.Type);
+            if (type_valid == false)
             {
-                case '-':
-                    break;
-                default:
-                    throw new Exception("no such unary opt=" + context.opt.Type);
+                this.errorManager.OperatorIsInvalid(context.opt.Text);
+                return Error();
             }
 
+            unary_expr.Opt = PUnaryExpr.LexOptMap[context.opt.Type];
+            // Unary expression.
             if (Visit(context.expression()) is PExpression expression)
             {
                 unary_expr.Expression = expression;
             }
             else
             {
-                return null;
+                return Error();
             }
 
             return unary_expr;
