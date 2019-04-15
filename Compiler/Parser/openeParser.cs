@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-// Generated from D:/Project/OpenELanguage/Compiler\opene.g4 by ANTLR 4.7.2
+// Generated from /home/rexfield/OpenELanguage/Compiler/opene.g4 by ANTLR 4.7.2
 
 // Unreachable code detected
 #pragma warning disable 0162
@@ -41,7 +41,7 @@ public partial class openeParser : Parser {
 		K_LOCAL_VARIABLE=15, K_PARAMETER=16, K_SUB_PROGRAM=17, K_IF_TRUE=18, K_IF_TRUE_END=19, 
 		K_IF=20, K_ELSE=21, K_END_IF=22, K_WHILE=23, K_WHILE_END=24, K_FOR=25, 
 		K_FOR_END=26, K_TRUE=27, K_FALSE=28, K_ADD_OPT=29, K_SUB_OPT=30, K_MUL_OPT=31, 
-		K_DIV_OPT=32, K_ADIV_OPT=33, K_MOD_OPT=34, K_ASSIGN_OPT=35, K_NOT_EQUAL_OPT=36, 
+		K_DIV_OPT=32, K_FULL_DIV_OPT=33, K_MOD_OPT=34, K_ASSIGN_OPT=35, K_NOT_EQUAL_OPT=36, 
 		K_GREAT_OPT=37, K_LESS_OPT=38, K_GREAT_EQU_OPT=39, K_LESS_EQU_OPT=40, 
 		K_LIKE_EQU_OPT=41, K_OR_OPT=42, K_AND_OPT=43, INTEGER_LITERAL=44, FLOAT_LITERAL=45, 
 		IDENTIFIER=46, WHITESPACE=47, NEWLINE=48, STRING_LITERAL=49, CODE_COMMIT=50, 
@@ -86,7 +86,7 @@ public partial class openeParser : Parser {
 		"K_PARAMETER", "K_SUB_PROGRAM", "K_IF_TRUE", "K_IF_TRUE_END", "K_IF", 
 		"K_ELSE", "K_END_IF", "K_WHILE", "K_WHILE_END", "K_FOR", "K_FOR_END", 
 		"K_TRUE", "K_FALSE", "K_ADD_OPT", "K_SUB_OPT", "K_MUL_OPT", "K_DIV_OPT", 
-		"K_ADIV_OPT", "K_MOD_OPT", "K_ASSIGN_OPT", "K_NOT_EQUAL_OPT", "K_GREAT_OPT", 
+		"K_FULL_DIV_OPT", "K_MOD_OPT", "K_ASSIGN_OPT", "K_NOT_EQUAL_OPT", "K_GREAT_OPT", 
 		"K_LESS_OPT", "K_GREAT_EQU_OPT", "K_LESS_EQU_OPT", "K_LIKE_EQU_OPT", "K_OR_OPT", 
 		"K_AND_OPT", "INTEGER_LITERAL", "FLOAT_LITERAL", "IDENTIFIER", "WHITESPACE", 
 		"NEWLINE", "STRING_LITERAL", "CODE_COMMIT", "OTHER_CHAR"
@@ -1615,7 +1615,7 @@ public partial class openeParser : Parser {
 		}
 		public ITerminalNode K_MUL_OPT() { return GetToken(openeParser.K_MUL_OPT, 0); }
 		public ITerminalNode K_DIV_OPT() { return GetToken(openeParser.K_DIV_OPT, 0); }
-		public ITerminalNode K_ADIV_OPT() { return GetToken(openeParser.K_ADIV_OPT, 0); }
+		public ITerminalNode K_FULL_DIV_OPT() { return GetToken(openeParser.K_FULL_DIV_OPT, 0); }
 		public ITerminalNode K_MOD_OPT() { return GetToken(openeParser.K_MOD_OPT, 0); }
 		public ITerminalNode K_ADD_OPT() { return GetToken(openeParser.K_ADD_OPT, 0); }
 		public ITerminalNode K_SUB_OPT() { return GetToken(openeParser.K_SUB_OPT, 0); }
@@ -1779,7 +1779,7 @@ public partial class openeParser : Parser {
 						PushNewRecursionContext(_localctx, _startState, RULE_expression);
 						State = 270;
 						if (!(Precpred(Context, 19))) throw new FailedPredicateException(this, "Precpred(Context, 19)");
-						State = 271; ((BinaryExprContext)_localctx).opt = Match(K_ADIV_OPT);
+						State = 271; ((BinaryExprContext)_localctx).opt = Match(K_FULL_DIV_OPT);
 						State = 272; expression(20);
 						}
 						break;

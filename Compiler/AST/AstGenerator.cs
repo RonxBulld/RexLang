@@ -479,23 +479,13 @@ namespace Compiler.AST
         {
             PBinaryExpr binary_expr = new PBinaryExpr();
             // Binary expression operate code.
-            switch (context.opt.Type)
+            bool typeValid = PBinaryExpr.LexOptMap.ContainsKey(context.opt.Type);
+            if (typeValid == false)
             {
-                case openeLexer.K_ADD_OPT:
-                    binary_expr.Opt = PBinaryExpr.BinaryOpt.Add;
-                    break;
-                case openeLexer.K_SUB_OPT:
-                    binary_expr.Opt = PBinaryExpr.BinaryOpt.Sub;
-                    break;
-                case openeLexer.K_MUL_OPT:
-                    binary_expr.Opt = PBinaryExpr.BinaryOpt.Mul;
-                    break;
-                case openeLexer.K_DIV_OPT:
-                    binary_expr.Opt = PBinaryExpr.BinaryOpt.Div;
-                    break;
-                default:
-                    throw new Exception("no such binary opt=" + context.opt.Type);
+                throw new Exception("Type is avalid - " + context.opt.Text);
             }
+
+            binary_expr.Opt = PBinaryExpr.LexOptMap[context.opt.Type];
             // Check if 2 expression.
             if (context.expression().Length != 2)
             {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -15,6 +16,7 @@ namespace Compiler
     {
         static void Main(string[] args)
         {
+            Console.WriteLine("Start compile...");
             string input = "window_program_set1.txt";
             input = File.ReadAllText(input);
             ICharStream stream = CharStreams.fromstring(input);

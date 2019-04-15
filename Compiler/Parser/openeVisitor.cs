@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-// Generated from D:/Project/OpenELanguage/Compiler\opene.g4 by ANTLR 4.7.2
+// Generated from /home/rexfield/OpenELanguage/Compiler/opene.g4 by ANTLR 4.7.2
 
 // Unreachable code detected
 #pragma warning disable 0162

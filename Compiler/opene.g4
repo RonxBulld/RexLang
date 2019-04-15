@@ -28,7 +28,7 @@ K_ADD_OPT: '＋';
 K_SUB_OPT: '－';
 K_MUL_OPT: '×';
 K_DIV_OPT: '÷';
-K_ADIV_OPT: '＼';
+K_FULL_DIV_OPT: '＼';
 K_MOD_OPT: '％';
 
 K_ASSIGN_OPT: '＝';
@@ -172,7 +172,7 @@ expression
 // ------------------------------------- 四则运算
     | expression opt=K_MUL_OPT       expression         # BinaryExpr
     | expression opt=K_DIV_OPT       expression         # BinaryExpr
-    | expression opt=K_ADIV_OPT      expression         # BinaryExpr
+    | expression opt=K_FULL_DIV_OPT  expression         # BinaryExpr
     | expression opt=K_MOD_OPT       expression         # BinaryExpr
     | expression opt=K_ADD_OPT       expression         # BinaryExpr
     | expression opt=K_SUB_OPT       expression         # BinaryExpr

@@ -128,16 +128,40 @@ namespace Compiler.AST
         public PExpression Expression = null;
     }
 
+    public enum BinaryOpt
+    {
+        Add, Sub, Mul, Div, FullDiv, Mod,
+        NotEqual, Equal, Less, Great, LessEqual, GreatEqual, LikeEqual,
+        LogicAnd, LogicOr,
+    }
+
     public class PBinaryExpr : PExpression
     {
-        public enum BinaryOpt
-        {
-            Add, Sub, Mul, Div, Mod
-        }
-
         public BinaryOpt Opt = BinaryOpt.Add;
         public PExpression LExpression = null;
         public PExpression RExpression = null;
+
+        public static readonly Dictionary<int, BinaryOpt> LexOptMap = new Dictionary<int, BinaryOpt>()
+        {
+            // 四则
+            { openeLexer.K_MUL_OPT,       BinaryOpt.Mul },
+            { openeLexer.K_DIV_OPT,       BinaryOpt.Div },
+            { openeLexer.K_FULL_DIV_OPT,  BinaryOpt.FullDiv },
+            { openeLexer.K_MOD_OPT,       BinaryOpt.Mod },
+            { openeLexer.K_ADD_OPT,       BinaryOpt.Add },
+            { openeLexer.K_SUB_OPT,       BinaryOpt.Sub },
+            // 比较
+            { openeLexer.K_NOT_EQUAL_OPT, BinaryOpt.NotEqual },
+            { openeLexer.K_ASSIGN_OPT,    BinaryOpt.Equal },
+            { openeLexer.K_LESS_OPT,      BinaryOpt.Less },
+            { openeLexer.K_GREAT_OPT,     BinaryOpt.Great },
+            { openeLexer.K_LESS_EQU_OPT,  BinaryOpt.LessEqual },
+            { openeLexer.K_GREAT_EQU_OPT, BinaryOpt.GreatEqual },
+            { openeLexer.K_LIKE_EQU_OPT,  BinaryOpt.LikeEqual },
+            // 逻辑
+            { openeLexer.K_AND_OPT,       BinaryOpt.LogicAnd },
+            { openeLexer.K_OR_OPT,        BinaryOpt.LogicOr },
+        };
     }
 
 }
