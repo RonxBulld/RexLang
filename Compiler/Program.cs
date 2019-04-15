@@ -17,7 +17,7 @@ namespace Compiler
         static void Main(string[] args)
         {
             Console.WriteLine("Start compile...");
-            string input = "window_program_set1.txt";
+            string input = "../../oe_src/window_program_set1.txt";
             input = File.ReadAllText(input);
             ICharStream stream = CharStreams.fromstring(input);
             openeLexer lexer = new openeLexer(stream);

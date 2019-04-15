@@ -37,7 +37,7 @@
       <HintPath>..\packages\Antlr4.Runtime.Standard.4.7.2\lib\net35\Antlr4.Runtime.Standard.dll</HintPath>
     </Reference>
     <Reference Include="LLVMSharp">
-      <HintPath>LLVMSharp\src\bin\Debug\netstandard1.1\LLVMSharp.dll</HintPath>
+      <HintPath>LLVMSharp.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
