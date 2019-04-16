@@ -38,6 +38,54 @@ public interface IopeneVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitOpene([NotNull] opene.OpeneContext context);
 	/// <summary>
+	/// Visit a parse tree produced by <see cref="opene.src_content"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitSrc_content([NotNull] opene.Src_contentContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="opene.program_set_file"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitProgram_set_file([NotNull] opene.Program_set_fileContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="opene.data_structure_file"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitData_structure_file([NotNull] opene.Data_structure_fileContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="opene.global_variable_file"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitGlobal_variable_file([NotNull] opene.Global_variable_fileContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="opene.dll_define_file"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitDll_define_file([NotNull] opene.Dll_define_fileContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="opene.dll_command"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitDll_command([NotNull] opene.Dll_commandContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="opene.global_variable_list"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitGlobal_variable_list([NotNull] opene.Global_variable_listContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="opene.global_variable_item"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitGlobal_variable_item([NotNull] opene.Global_variable_itemContext context);
+	/// <summary>
 	/// Visit a parse tree produced by <see cref="opene.edition_spec"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
@@ -50,17 +98,23 @@ public interface IopeneVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitStruct_declare([NotNull] opene.Struct_declareContext context);
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="opene.access_level"/>.
+	/// Visit a parse tree produced by <see cref="opene.table_comment"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitAccess_level([NotNull] opene.Access_levelContext context);
+	Result VisitTable_comment([NotNull] opene.Table_commentContext context);
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="opene.member_list"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitMember_list([NotNull] opene.Member_listContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="opene.member_item"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitMember_item([NotNull] opene.Member_itemContext context);
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="opene.library_list_opt"/>.
 	/// </summary>

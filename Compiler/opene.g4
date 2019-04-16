@@ -4,9 +4,46 @@ options { tokenVocab = openeLexer; }
 
 opene
     : edition_spec NEWLINE
-      library_list_opt
+      src_content
+      EOF
+    ;
+
+src_content
+    : program_set_file
+    | data_structure_file
+    | global_variable_file
+    | dll_define_file
+    ;
+
+program_set_file
+    : library_list_opt
       prog_set
-    | edition_spec struct_declare*
+    ;
+
+data_structure_file
+    : struct_declare*
+    ;
+
+global_variable_file
+    : global_variable_list
+    ;
+
+dll_define_file
+    : dll_command*
+    ;
+
+dll_command
+    : K_DLL_DEFINE name=TABLE_ITEM TABLE_COMMA type=TABLE_ITEM? TABLE_COMMA file=TABLE_ITEM? TABLE_COMMA cmd=TABLE_ITEM (TABLE_COMMA table_comment)? TABLE_END
+      parameter_decl*
+      NEWLINE*
+    ;
+
+global_variable_list
+    : global_variable_item*
+    ;
+
+global_variable_item
+    : K_GLOBAL_VARIABLE name=TABLE_ITEM (TABLE_COMMA type=TABLE_ITEM? (TABLE_COMMA access=TABLE_ITEM? (TABLE_COMMA dimension=TABLE_ITEM? (TABLE_COMMA table_comment)?)?)?)? TABLE_END
     ;
 
 edition_spec
@@ -14,14 +51,20 @@ edition_spec
     ;
 
 struct_declare
-    : K_STRUCTURE IDENTIFIER (COMMA access_level?)? (COMMA variable_comment)? member_list*
+    : K_STRUCTURE name=TABLE_ITEM (TABLE_COMMA access=TABLE_ITEM? (TABLE_COMMA table_comment)?)? TABLE_END
+      member_list
+      NEWLINE*
     ;
 
-access_level
-    : IDENTIFIER
+table_comment
+    : (TABLE_COMMA|TABLE_ITEM)*
     ;
 
 member_list
+    : member_item*
+    ;
+
+member_item
     : K_MEMBER_VARIABLE variable_decl
     ;
 
@@ -34,7 +77,7 @@ library_spec
     ;
 
 prog_set
-    : K_PROGRAM_SET name=TABLE_ITEM TABLE_END
+    : K_PROGRAM_SET name=TABLE_ITEM (TABLE_COMMA base=TABLE_ITEM? (TABLE_COMMA access=TABLE_ITEM? (TABLE_COMMA table_comment?)?)?)? TABLE_END
       prog_set_variable_decl_opt
       sub_program_opt
     ;
@@ -48,7 +91,7 @@ prog_set_variable_decl
     ;
 
 variable_decl
-    : name=TABLE_ITEM TABLE_COMMA type=TABLE_ITEM (TABLE_COMMA TABLE_COMMA dimension=TABLE_ITEM?)? (TABLE_COMMA comment=TABLE_ITEM)? TABLE_END
+    : name=TABLE_ITEM (TABLE_COMMA type=TABLE_ITEM? (TABLE_COMMA TABLE_COMMA dimension=TABLE_ITEM? (TABLE_COMMA table_comment)?)?)? TABLE_END
     ;
 
 variable_comment
@@ -78,8 +121,9 @@ sub_program_opt
     ;
 
 sub_program
-    : K_SUB_PROGRAM name=TABLE_ITEM (TABLE_COMMA type=TABLE_ITEM? (TABLE_COMMA access=TABLE_ITEM? (TABLE_COMMA comment=TABLE_ITEM)?)?)? TABLE_END
-      parameter_decl_list local_variable_decl*
+    : K_SUB_PROGRAM name=TABLE_ITEM (TABLE_COMMA type=TABLE_ITEM? (TABLE_COMMA access=TABLE_ITEM? (TABLE_COMMA table_comment)?)?)? TABLE_END
+      parameter_decl_list
+      local_variable_decl*
       statement_list
     ;
 
@@ -88,7 +132,7 @@ parameter_decl_list
     ;
 
 parameter_decl
-    : K_PARAMETER variable_decl
+    : K_PARAMETER name=TABLE_ITEM TABLE_COMMA type=TABLE_ITEM (TABLE_COMMA attributes=TABLE_ITEM* (TABLE_COMMA table_comment)?)? TABLE_END
     ;
 
 local_variable_decl

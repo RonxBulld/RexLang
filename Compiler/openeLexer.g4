@@ -1,25 +1,27 @@
 lexer grammar openeLexer;
 
-K_VERSION: '.\u7248\u672c';                               // 版本
-K_LIBRARY: '.\u652f\u6301\u5e93';                              // 支持库
-K_PROGRAM_SET: '.\u7a0b\u5e8f\u96c6' -> mode(TABLE_MODE);   // 程序集
-K_PROGRAM_SET_VARIABLE: '.\u7a0b\u5e8f\u96c6\u53d8\u91cf' -> mode(TABLE_MODE);   // 程序集变量
-K_LOCAL_VARIABLE: '.\u5c40\u90e8\u53d8\u91cf' -> mode(TABLE_MODE);      // 局部变量
-K_MEMBER_VARIABLE: '.\u6210\u5458' -> mode(TABLE_MODE);       // 成员
-K_PARAMETER: '.\u53c2\u6570' -> mode(TABLE_MODE);     // 参数
-K_SUB_PROGRAM: '.\u5b50\u7a0b\u5e8f' -> mode(TABLE_MODE);      // 子程序
-K_STRUCTURE: '.\u6570\u636e\u7c7b\u578b';                     // 数据类型
-K_IF_TRUE: '.\u5982\u679c\u771f';                         // 如果真
-K_END_IF_TRUE: '.\u5982\u679c\u771f\u7ed3\u675f';                 // 如果真结束
-K_IF: '.\u5982\u679c';                               // 如果
-K_ELSE: '.\u5426\u5219';                             // 否则
-K_END_IF: '.\u5982\u679c\u7ed3\u675f';                       // 如果结束
-K_WHILE: '.\u5224\u65ad\u5faa\u73af\u9996';                       // 判断循环首
-K_WHILE_END: '.\u5224\u65ad\u5faa\u73af\u5c3e';                   // 判断循环尾
-K_FOR: '.\u8ba1\u6b21\u5faa\u73af\u9996';                         // 计次循环首
-K_FOR_END: '.\u8ba1\u6b21\u5faa\u73af\u5c3e';                     // 计次循环尾
-K_TRUE: '\u771f';                        // 真
-K_FALSE: '\u5047';                       // 假
+K_VERSION: '.\u7248\u672c';                                                     // 版本
+K_LIBRARY: '.\u652f\u6301\u5e93';                                               // 支持库
+K_PROGRAM_SET: '.\u7a0b\u5e8f\u96c6' -> mode(TABLE_MODE);                       // 程序集
+K_PROGRAM_SET_VARIABLE: '.\u7a0b\u5e8f\u96c6\u53d8\u91cf' -> mode(TABLE_MODE);  // 程序集变量
+K_LOCAL_VARIABLE: '.\u5c40\u90e8\u53d8\u91cf' -> mode(TABLE_MODE);              // 局部变量
+K_GLOBAL_VARIABLE: '.\u5168\u5c40\u53d8\u91cf' -> mode(TABLE_MODE);             // 全局变量
+K_DLL_DEFINE: '.\u0044\u004c\u004c\u547d\u4ee4' -> mode(TABLE_MODE);            // DLL命令定义表
+K_MEMBER_VARIABLE: '.\u6210\u5458' -> mode(TABLE_MODE);                         // 成员
+K_PARAMETER: '.\u53c2\u6570' -> mode(TABLE_MODE);                               // 参数
+K_SUB_PROGRAM: '.\u5b50\u7a0b\u5e8f' -> mode(TABLE_MODE);                       // 子程序
+K_STRUCTURE: '.\u6570\u636e\u7c7b\u578b' -> mode(TABLE_MODE);                   // 数据类型
+K_IF_TRUE: '.\u5982\u679c\u771f';                                               // 如果真
+K_END_IF_TRUE: '.\u5982\u679c\u771f\u7ed3\u675f';                               // 如果真结束
+K_IF: '.\u5982\u679c';                                                          // 如果
+K_ELSE: '.\u5426\u5219';                                                        // 否则
+K_END_IF: '.\u5982\u679c\u7ed3\u675f';                                          // 如果结束
+K_WHILE: '.\u5224\u65ad\u5faa\u73af\u9996';                                     // 判断循环首
+K_WHILE_END: '.\u5224\u65ad\u5faa\u73af\u5c3e';                                 // 判断循环尾
+K_FOR: '.\u8ba1\u6b21\u5faa\u73af\u9996';                                       // 计次循环首
+K_FOR_END: '.\u8ba1\u6b21\u5faa\u73af\u5c3e';                                   // 计次循环尾
+K_TRUE: '\u771f';                                                               // 真
+K_FALSE: '\u5047';                                                              // 假
 
 K_ADD_OPT
     : '\uff0b'  // ＋
