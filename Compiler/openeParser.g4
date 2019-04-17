@@ -1,8 +1,8 @@
-parser grammar opene;
+parser grammar openeParser;
 
 options { tokenVocab = openeLexer; }
 
-opene
+opene_src
     : edition_spec NEWLINE
       src_content
       EOF
@@ -77,7 +77,7 @@ library_spec
     ;
 
 prog_set
-    : K_PROGRAM_SET name=TABLE_ITEM (TABLE_COMMA base=TABLE_ITEM? (TABLE_COMMA access=TABLE_ITEM? (TABLE_COMMA table_comment?)?)?)? TABLE_END
+    : K_PROGRAM_SET name=TABLE_ITEM (TABLE_COMMA base=TABLE_ITEM? (TABLE_COMMA access=TABLE_ITEM? (TABLE_COMMA table_comment)?)?)? TABLE_END
       prog_set_variable_decl_opt
       sub_program_opt
     ;

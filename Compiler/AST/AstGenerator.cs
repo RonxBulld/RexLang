@@ -1,13 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Security.Cryptography;
 using Antlr4.Runtime.Tree;
 
 namespace Compiler.AST
 {
-    class OpenEAstVisitor : openeBaseVisitor<AstNode>
+    internal class OpenEAstVisitor : openeBaseVisitor<AstNode>
     {
-        private ErrorManager errorManager = null;
+        private readonly ErrorManager errorManager;
+
+        public OpenEAstVisitor(ref ErrorManager errorManager)
+        {
+            this.errorManager = errorManager;
+        }
 
         public AstNode Error()
         {
@@ -15,33 +19,20 @@ namespace Compiler.AST
             return null;
         }
 
-        public OpenEAstVisitor(ref ErrorManager errorManager)
-        {
-            this.errorManager = errorManager;
-        }
-
         public override AstNode VisitOpene_src(openeParser.Opene_srcContext context)
         {
-            PCompileUnit compile_unit = new PCompileUnit();
+            var compile_unit = new PCompileUnit();
             // Version
             if (Visit(context.edition_spec()) is PNumber version)
-            {
                 compile_unit.Version = version.Value;
-            }
             else
-            {
                 return Error();
-            }
 
             // Library list
             if (Visit(context.library_list_opt()) is PLibraries libraries)
-            {
                 compile_unit.Libraries = libraries.Libraries;
-            }
             else
-            {
                 return Error();
-            }
 
             if (Visit(context.prog_set()) is PProgramSet program_set)
             {
@@ -62,28 +53,25 @@ namespace Compiler.AST
 
         public override AstNode VisitEdition_spec(openeParser.Edition_specContext context)
         {
-            int ver = Convert.ToInt32(context.INTEGER_LITERAL().GetText());
+            var ver = Convert.ToInt32(context.INTEGER_LITERAL().GetText());
             if (ver != 2)
             {
-                this.errorManager.VersionFailed(2, ver);
+                errorManager.VersionFailed(2, ver);
                 return Error();
             }
 
-            PNumber version_node = new PNumber();
+            var version_node = new PNumber();
             version_node.Value = ver;
             return version_node;
         }
 
         public override AstNode VisitLibrary_list_opt(openeParser.Library_list_optContext context)
         {
-            List<string> library_list = new List<string>();
+            var library_list = new List<string>();
             foreach (var lib in context.library_spec())
             {
-                PLibrary library = Visit(lib) as PLibrary;
-                if (library == null)
-                {
-                    return Error();
-                }
+                var library = Visit(lib) as PLibrary;
+                if (library == null) return Error();
 
                 library_list.Add(library.Library);
             }
@@ -99,34 +87,27 @@ namespace Compiler.AST
 
         public override AstNode VisitProg_set(openeParser.Prog_setContext context)
         {
-            PProgramSet program_set = new PProgramSet();
+            var program_set = new PProgramSet();
             // Program set name
             program_set.ProgramSetName = context.IDENTIFIER().GetText();
             // Program set local variable declare list
             if (Visit(context.prog_set_variable_decl_opt()) is PVariableDeclList variable_decl_list)
-            {
                 program_set.VariableDecls = variable_decl_list.VariableDecls;
-            }
             else
-            {
                 return Error();
-            }
 
             // Program set function list
-            if (Visit(context.sub_program_opt()) is PFunctionList function_list)
-            {
-                program_set.Functions = function_list.Functions;
-            }
+            if (Visit(context.sub_program_opt()) is PFunctionList function_list) program_set.Functions = function_list.Functions;
 
             return program_set;
         }
 
         public override AstNode VisitProg_set_variable_decl_opt(openeParser.Prog_set_variable_decl_optContext context)
         {
-            PVariableDeclList variable_decl_list = new PVariableDeclList();
+            var variable_decl_list = new PVariableDeclList();
             foreach (var decl_context in context.prog_set_variable_decl())
             {
-                PVariableDecl decl = Visit(decl_context) as PVariableDecl;
+                var decl = Visit(decl_context) as PVariableDecl;
                 variable_decl_list.VariableDecls.Add(decl);
             }
 
@@ -140,7 +121,7 @@ namespace Compiler.AST
 
         public override AstNode VisitVariable_decl(openeParser.Variable_declContext context)
         {
-            PVariableDecl variable_decl = new PVariableDecl();
+            var variable_decl = new PVariableDecl();
             // Variable name.
             if (Visit(context.variable_name()) is PVariableName variable_name)
                 variable_decl.VariableName = variable_name.Name;
@@ -185,11 +166,11 @@ namespace Compiler.AST
 
         public override AstNode VisitDimension_decl(openeParser.Dimension_declContext context)
         {
-            PDimensionDecl dimension_decl = new PDimensionDecl();
-            int dimension = Convert.ToInt32(context.INTEGER_LITERAL().GetText());
+            var dimension_decl = new PDimensionDecl();
+            var dimension = Convert.ToInt32(context.INTEGER_LITERAL().GetText());
             if (dimension < 0)
             {
-                if (this.errorManager.DimensionMustMoreThanZero(dimension))
+                if (errorManager.DimensionMustMoreThanZero(dimension))
                     dimension = 0;
                 else
                     return Error();
@@ -201,21 +182,17 @@ namespace Compiler.AST
 
         public override AstNode VisitSub_program_opt(openeParser.Sub_program_optContext context)
         {
-            PFunctionList function_list = new PFunctionList();
+            var function_list = new PFunctionList();
             foreach (var func_node in context.sub_program())
-            {
                 if (Visit(func_node) is PFunction func)
-                {
                     function_list.Functions.Add(func);
-                }
-            }
 
             return function_list;
         }
 
         public override AstNode VisitSub_program(openeParser.Sub_programContext context)
         {
-            PFunction function = new PFunction();
+            var function = new PFunction();
             // name
             function.Name = context.IDENTIFIER().GetText();
             // return type
@@ -226,66 +203,42 @@ namespace Compiler.AST
             else
             {
                 if (Visit(context.variable_type()) is PVariableTypeName variable_type_name)
-                {
                     function.ReturnType = variable_type_name.Name;
-                }
                 else
-                {
                     return Error();
-                }
             }
 
             // parameter list
             if (Visit(context.parameter_decl_list()) is PVariableDeclList parameter_decl_list)
-            {
                 function.ParameterDecls = parameter_decl_list.VariableDecls;
-            }
             else
-            {
                 return Error();
-            }
 
             // local variable list
             function.LocalVariableDecls = new List<PVariableDecl>();
             foreach (var local_variable_decl_context in context.local_variable_decl())
-            {
                 if (Visit(local_variable_decl_context) is PVariableDecl local_variable_decl)
-                {
                     function.LocalVariableDecls.Add(local_variable_decl);
-                }
                 else
-                {
                     return Error();
-                }
-            }
 
             // statement list
             if (Visit(context.statement_list()) is PStatementList statement_list)
-            {
                 function.Statements = statement_list.Statements;
-            }
             else
-            {
                 return Error();
-            }
 
             return function;
         }
 
         public override AstNode VisitParameter_decl_list(openeParser.Parameter_decl_listContext context)
         {
-            PVariableDeclList variable_decl_list = new PVariableDeclList();
+            var variable_decl_list = new PVariableDeclList();
             foreach (var parameter_decl_context in context.parameter_decl())
-            {
                 if (Visit(parameter_decl_context) is PVariableDecl variable_decl)
-                {
                     variable_decl_list.VariableDecls.Add(variable_decl);
-                }
                 else
-                {
                     return Error();
-                }
-            }
 
             return variable_decl_list;
         }
@@ -302,18 +255,14 @@ namespace Compiler.AST
 
         public override AstNode VisitStatement_list(openeParser.Statement_listContext context)
         {
-            PStatementList statement_list = new PStatementList();
+            var statement_list = new PStatementList();
             foreach (var statement_context in context.statement())
             {
                 AstNode node = Visit(statement_context);
                 if (node is PStatement statement)
-                {
                     statement_list.Statements.Add(statement);
-                }
                 else
-                {
                     return Error();
-                }
             }
 
             return statement_list;
@@ -321,24 +270,16 @@ namespace Compiler.AST
 
         public override AstNode VisitAssignStatement(openeParser.AssignStatementContext context)
         {
-            PAssignStatement assign_statement = new PAssignStatement();
+            var assign_statement = new PAssignStatement();
             if (Visit(context.hierarchy_identifier()) is PExpression lexpression)
-            {
                 assign_statement.LExpression = lexpression;
-            }
             else
-            {
                 return Error();
-            }
 
             if (Visit(context.expression()) is PExpression rexpression)
-            {
                 assign_statement.RExpression = rexpression;
-            }
             else
-            {
                 return Error();
-            }
 
             return assign_statement;
         }
@@ -346,52 +287,37 @@ namespace Compiler.AST
         public override AstNode VisitWhile(openeParser.WhileContext context)
         {
             // Loop condition.
-            PWhileStatement while_statement = new PWhileStatement();
+            var while_statement = new PWhileStatement();
             if (Visit(context.expression()) is PExpression expression)
-            {
                 while_statement.ConditionExpression = expression;
-            }
             else
-            {
                 return Error();
-            }
             // Loop body.
             if (Visit(context.statement_list()) is PStatementList statement_list)
-            {
                 while_statement.StatementList = statement_list;
-            }
             else
-            {
                 return Error();
-            }
 
             return while_statement;
         }
 
         public override AstNode VisitFor(openeParser.ForContext context)
         {
-            PForStatement for_statement = new PForStatement();
+            var for_statement = new PForStatement();
             // For loop count.
             if (Visit(context.expression()) is PExpression expression)
-            {
                 for_statement.LoopCount = expression;
-            }
             else
-            {
                 return Error();
-            }
             // For loop counter.
-            if (context.IDENTIFIER() != null)
-            {
-                for_statement.Counter = context.IDENTIFIER().GetText();
-            }
+            if (context.IDENTIFIER() != null) for_statement.Counter = context.IDENTIFIER().GetText();
 
             return for_statement;
         }
 
         public override AstNode VisitIfStmt(openeParser.IfStmtContext context)
         {
-            PIfStatement if_statement = new PIfStatement();
+            var if_statement = new PIfStatement();
             // Condition expression
             if_statement.ConditionExpression = Visit(context.expression()) as PExpression;
             if (if_statement.ConditionExpression == null)
@@ -413,7 +339,7 @@ namespace Compiler.AST
 
         public override AstNode VisitIfTrueStmt(openeParser.IfTrueStmtContext context)
         {
-            PIfStatement if_statement = new PIfStatement();
+            var if_statement = new PIfStatement();
             // Condition expression
             if_statement.ConditionExpression = Visit(context.expression()) as PExpression;
             if (if_statement.ConditionExpression == null)
@@ -433,25 +359,19 @@ namespace Compiler.AST
 
         public override AstNode VisitHierarchy_identifier(openeParser.Hierarchy_identifierContext context)
         {
-            PNameComponentList component_list = new PNameComponentList();
+            var component_list = new PNameComponentList();
             foreach (var name_component_context in context.name_component())
-            {
                 if (Visit(name_component_context) is PNameComponent component)
-                {
                     component_list.Components.Add(component);
-                }
                 else
-                {
                     return Error();
-                }
-            }
 
             return component_list;
         }
 
         public override AstNode VisitIdentifier(openeParser.IdentifierContext context)
         {
-            PNameComponent component = new PNameComponent();
+            var component = new PNameComponent();
             component.Type = PNameComponent.ComponentType.Identifier;
             component.Name = context.IDENTIFIER().GetText();
             return component;
@@ -459,7 +379,7 @@ namespace Compiler.AST
 
         public override AstNode VisitFuncCallWithoutArgu(openeParser.FuncCallWithoutArguContext context)
         {
-            PNameComponent component = new PNameComponent();
+            var component = new PNameComponent();
             component.Type = PNameComponent.ComponentType.FuncCall;
             component.Name = context.IDENTIFIER().GetText();
             return component;
@@ -467,37 +387,27 @@ namespace Compiler.AST
 
         public override AstNode VisitFuncCallWithArgu(openeParser.FuncCallWithArguContext context)
         {
-            PNameComponent component = new PNameComponent();
+            var component = new PNameComponent();
             component.Type = PNameComponent.ComponentType.FuncCall;
             component.Name = context.IDENTIFIER().GetText();
             foreach (var expression_context in context.expression())
-            {
                 if (Visit(expression_context) is PExpression expression)
-                {
                     component.Expressions.Add(expression);
-                }
                 else
-                {
                     return Error();
-                }
-            }
 
             return component;
         }
 
         public override AstNode VisitArrayIndex(openeParser.ArrayIndexContext context)
         {
-            PNameComponent component = new PNameComponent();
+            var component = new PNameComponent();
             component.Type = PNameComponent.ComponentType.ArrayIndex;
             component.Name = context.IDENTIFIER().GetText();
             if (Visit(context.expression()) is PExpression expression)
-            {
                 component.Expressions.Add(expression);
-            }
             else
-            {
                 return Error();
-            }
 
             return component;
         }
@@ -509,118 +419,96 @@ namespace Compiler.AST
 
         public override AstNode VisitBinaryExpr(openeParser.BinaryExprContext context)
         {
-            PBinaryExpr binary_expr = new PBinaryExpr();
+            var binary_expr = new PBinaryExpr();
             // Binary expression operate code.
-            bool type_valid = PBinaryExpr.LexOptMap.ContainsKey(context.opt.Type);
+            var type_valid = PBinaryExpr.LexOptMap.ContainsKey(context.opt.Type);
             if (type_valid == false)
             {
-                this.errorManager.OperatorIsInvalid(context.opt.Text);
+                errorManager.OperatorIsInvalid(context.opt.Text);
                 return Error();
             }
 
             binary_expr.Opt = PBinaryExpr.LexOptMap[context.opt.Type];
             // Check if 2 expression.
-            if (context.expression().Length != 2)
-            {
-                return Error();
-            }
+            if (context.expression().Length != 2) return Error();
             // Left value expression.
             if (Visit(context.expression(0)) is PExpression lexpression)
-            {
                 binary_expr.LExpression = lexpression;
-            }
             else
-            {
                 return Error();
-            }
             // Right value expression.
             if (Visit(context.expression(1)) is PExpression rexpression)
-            {
                 binary_expr.RExpression = rexpression;
-            }
             else
-            {
                 return Error();
-            }
 
             return binary_expr;
         }
 
         public override AstNode VisitUnaryExpr(openeParser.UnaryExprContext context)
         {
-            PUnaryExpr unary_expr = new PUnaryExpr();
+            var unary_expr = new PUnaryExpr();
             // Unary expression operate code.
-            bool type_valid = PUnaryExpr.LexOptMap.ContainsKey(context.opt.Type);
+            var type_valid = PUnaryExpr.LexOptMap.ContainsKey(context.opt.Type);
             if (type_valid == false)
             {
-                this.errorManager.OperatorIsInvalid(context.opt.Text);
+                errorManager.OperatorIsInvalid(context.opt.Text);
                 return Error();
             }
 
             unary_expr.Opt = PUnaryExpr.LexOptMap[context.opt.Type];
             // Unary expression.
             if (Visit(context.expression()) is PExpression expression)
-            {
                 unary_expr.Expression = expression;
-            }
             else
-            {
                 return Error();
-            }
 
             return unary_expr;
         }
 
         public override AstNode VisitMacro_value(openeParser.Macro_valueContext context)
         {
-            PMacroValue macro_value = new PMacroValue();
+            var macro_value = new PMacroValue();
             macro_value.Name = context.IDENTIFIER().GetText();
             return macro_value;
         }
 
         public override AstNode VisitString_value(openeParser.String_valueContext context)
         {
-            PString string_value = new PString();
+            var string_value = new PString();
             string_value.Value = context.STRING_LITERAL().GetText();
             return string_value;
         }
 
         public override AstNode VisitBool_value(openeParser.Bool_valueContext context)
         {
-            PBool bool_value = new PBool();
+            var bool_value = new PBool();
             if (context.bval.Type == openeLexer.K_TRUE)
-            {
                 bool_value.Value = true;
-            }
             else if (context.bval.Type == openeLexer.K_FALSE)
-            {
                 bool_value.Value = false;
-            }
             else
-            {
                 throw new Exception("no such bool value=" + context.bval);
-            }
 
             return bool_value;
         }
 
         public override AstNode VisitInt(openeParser.IntContext context)
         {
-            PNumber value_value = new PNumber();
+            var value_value = new PNumber();
             value_value.Value = Convert.ToInt32(context.INTEGER_LITERAL().GetText());
             return value_value;
         }
 
         public override AstNode VisitFloat(openeParser.FloatContext context)
         {
-            PFloatNumber value_value = new PFloatNumber();
+            var value_value = new PFloatNumber();
             value_value.Value = Convert.ToSingle(context.FLOAT_LITERAL().GetText());
             return value_value;
         }
-
     }
 
-    class AstGenerator
+    internal class AstGenerator
     {
         public AstNode GenerateAst(IParseTree parseTree, ref ErrorManager errorManager)
         {

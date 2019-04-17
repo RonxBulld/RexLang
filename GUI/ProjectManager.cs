@@ -1,18 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace GUI
+﻿namespace GUI
 {
-    class ProjectManager
+    internal class ProjectManager
     {
-        private bool dirty_ = false;
+        private readonly bool dirty_ = false;
 
         public bool isDirty()
         {
-            return this.dirty_; 
+            return dirty_;
         }
 
         public bool closeCurrentProject()

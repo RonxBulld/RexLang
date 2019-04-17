@@ -13,73 +13,74 @@ namespace Compiler.AST
             Identifier,
             FuncCall,
             ArrayIndex
-        };
+        }
+
+        public List<PExpression> Expressions = new List<PExpression>();
         public string Name = "";
         public ComponentType Type = ComponentType.Identifier;
-        public List<PExpression> Expressions = new List<PExpression>();
     }
 
     public class PCompileUnit : AstNode
     {
-        public int Version = 0;
+        public List<PFunction> Functions = new List<PFunction>();
         public List<string> Libraries = new List<string>();
         public string ProgramSetName = "";
         public List<PVariableDecl> VariableDecls = new List<PVariableDecl>();
-        public List<PFunction> Functions = new List<PFunction>();
+        public int Version = 0;
     }
 
     public class PLibraries : AstNode
     {
-        private List<string> _libraries = new List<string>();
-        public List<string> Libraries => _libraries;
         public PLibraries(List<string> libraries)
         {
-            this._libraries = libraries;
+            Libraries = libraries;
         }
+
+        public List<string> Libraries { get; } = new List<string>();
     }
 
     public class PLibrary : AstNode
     {
-        private string _library = "";
-        public string Library => _library;
         public PLibrary(string library)
         {
-            this._library = library;
+            Library = library;
         }
+
+        public string Library { get; } = "";
     }
 
     public class PProgramSet : AstNode
     {
+        public List<PFunction> Functions;
         public string ProgramSetName;
         public List<PVariableDecl> VariableDecls;
-        public List<PFunction> Functions;
     }
 
     public class PVariableDecl : AstNode
     {
+        public List<int> Dimensions;
         public string VariableName;
         public string VariableType;
-        public List<int> Dimensions;
     }
 
     public class PVariableName : AstNode
     {
-        private string _name;
-        public string Name => _name;
         public PVariableName(string name)
         {
-            this._name = name;
+            Name = name;
         }
+
+        public string Name { get; }
     }
 
     public class PVariableTypeName : AstNode
     {
-        private string _name;
-        public string Name => _name;
         public PVariableTypeName(string name)
         {
-            this._name = name;
+            Name = name;
         }
+
+        public string Name { get; }
     }
 
     public class PDimensionDecl : AstNode
@@ -94,10 +95,10 @@ namespace Compiler.AST
 
     public class PFunction : AstNode
     {
-        public string Name;
-        public string ReturnType;
-        public List<PVariableDecl> ParameterDecls = new List<PVariableDecl>();
         public List<PVariableDecl> LocalVariableDecls = new List<PVariableDecl>();
+        public string Name;
+        public List<PVariableDecl> ParameterDecls = new List<PVariableDecl>();
+        public string ReturnType;
         public List<PStatement> Statements = new List<PStatement>();
     }
 

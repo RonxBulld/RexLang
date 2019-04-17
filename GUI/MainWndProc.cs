@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿using System.Windows.Forms;
 
 namespace GUI
 {
@@ -11,36 +6,33 @@ namespace GUI
     {
         private void NewProject()
         {
-            if (this.CloseProject())
+            if (CloseProject())
             {
-                this.proj_manager_ = new ProjectManager();
-                TabPage new_tp = new TabPage("程序集1");
+                proj_manager_ = new ProjectManager();
+                var new_tp = new TabPage("程序集1");
                 Control code_editor = new CodeEditorControl();
                 new_tp.BorderStyle = BorderStyle.FixedSingle;
                 code_editor.Dock = DockStyle.Fill;
                 new_tp.Controls.Add(code_editor);
-                this.srcTabControl.TabPages.Add(new_tp);
+                srcTabControl.TabPages.Add(new_tp);
             }
         }
 
         private bool CloseProject()
         {
-            if (this.proj_manager_ != null)
+            if (proj_manager_ != null)
             {
-                if (this.proj_manager_.isDirty())
-                {
-                    if (this.proj_manager_.closeCurrentProject())
+                if (proj_manager_.isDirty())
+                    if (proj_manager_.closeCurrentProject())
                     {
-                        this.srcTabControl.TabPages.Clear();
+                        srcTabControl.TabPages.Clear();
                         return true;
                     }
-                }
+
                 return false;
             }
-            else
-            {
-                return true;
-            }
+
+            return true;
         }
     }
 }

@@ -16,32 +16,31 @@ namespace Compiler.AST
         String,
         CharSet,
         FuncPtr,
-        UserDefined,
+        UserDefined
     }
 
     public class PExpression : PStatement
     {
-
     }
 
     public class PValue : PExpression
     {
+        public bool BoolValue;
+        public char CharacterValue = '\0';
+        public List<PExpression> CharSetValue;
+        public DateTime DateTimeValue;
+        public double DoubleValue = 0.0;
+        public float FloatValue;
+        public uint FuncPtrValue = 0;
+        public int IntegerValue;
+        public long LongValue = 0;
+        public short ShortValue = 0;
+        public string StringValue;
 
         public ValueType Type = ValueType.Integer;
-        public char CharacterValue = '\0';
-        public short ShortValue = 0;
-        public int IntegerValue = 0;
-        public long LongValue = 0;
-        public float FloatValue = 0.0f;
-        public double DoubleValue = 0.0;
-        public bool BoolValue = false;
-        public DateTime DateTimeValue;
-        public string StringValue = null;
-        public List<PExpression> CharSetValue;
-        public UInt32 FuncPtrValue = 0;
         public string UserDefinedName = null;
 
-        dynamic GetValue()
+        private dynamic GetValue()
         {
             switch (Type)
             {
@@ -64,7 +63,7 @@ namespace Compiler.AST
 
     public class PNumber : PExpression
     {
-        private PValue _value = new PValue() { Type = ValueType.Integer };
+        private readonly PValue _value = new PValue {Type = ValueType.Integer};
 
         public int Value
         {
@@ -75,7 +74,7 @@ namespace Compiler.AST
 
     public class PString : PExpression
     {
-        private PValue _value = new PValue() { Type = ValueType.String };
+        private readonly PValue _value = new PValue {Type = ValueType.String};
 
         public string Value
         {
@@ -86,7 +85,7 @@ namespace Compiler.AST
 
     public class PBool : PExpression
     {
-        private PValue _value = new PValue() { Type = ValueType.Bool };
+        private readonly PValue _value = new PValue {Type = ValueType.Bool};
 
         public bool Value
         {
@@ -97,7 +96,7 @@ namespace Compiler.AST
 
     public class PFloatNumber : PExpression
     {
-        private PValue _value = new PValue() {Type = ValueType.Float};
+        private readonly PValue _value = new PValue {Type = ValueType.Float};
 
         public float Value
         {
@@ -124,51 +123,62 @@ namespace Compiler.AST
 
     public class PUnaryExpr : PExpression
     {
-        public UnaryOpt Opt = UnaryOpt.Positive;
-        public PExpression Expression = null;
-
-        public static readonly Dictionary<int, UnaryOpt> LexOptMap = new Dictionary<int, UnaryOpt>()
+        public static readonly Dictionary<int, UnaryOpt> LexOptMap = new Dictionary<int, UnaryOpt>
         {
-            { openeLexer.K_ADD_OPT, UnaryOpt.Positive },
-            { openeLexer.K_SUB_OPT, UnaryOpt.Negative },
+            {openeLexer.K_ADD_OPT, UnaryOpt.Positive},
+            {openeLexer.K_SUB_OPT, UnaryOpt.Negative}
         };
+
+        public PExpression Expression = null;
+        public UnaryOpt Opt = UnaryOpt.Positive;
     }
 
     public enum BinaryOpt
     {
-        Add, Sub, Mul, Div, FullDiv, Mod,
-        NotEqual, Equal, Less, Great, LessEqual, GreatEqual, LikeEqual,
-        LogicAnd, LogicOr,
+        Add,
+        Sub,
+        Mul,
+        Div,
+        FullDiv,
+        Mod,
+        NotEqual,
+        Equal,
+        Less,
+        Great,
+        LessEqual,
+        GreatEqual,
+        LikeEqual,
+        LogicAnd,
+        LogicOr
     }
 
     public class PBinaryExpr : PExpression
     {
-        public BinaryOpt Opt = BinaryOpt.Add;
-        public PExpression LExpression = null;
-        public PExpression RExpression = null;
-
-        public static readonly Dictionary<int, BinaryOpt> LexOptMap = new Dictionary<int, BinaryOpt>()
+        public static readonly Dictionary<int, BinaryOpt> LexOptMap = new Dictionary<int, BinaryOpt>
         {
             // 四则
-            { openeLexer.K_MUL_OPT,       BinaryOpt.Mul },
-            { openeLexer.K_DIV_OPT,       BinaryOpt.Div },
-            { openeLexer.K_FULL_DIV_OPT,  BinaryOpt.FullDiv },
-            { openeLexer.K_MOD_OPT,       BinaryOpt.Mod },
-            { openeLexer.K_ADD_OPT,       BinaryOpt.Add },
-            { openeLexer.K_SUB_OPT,       BinaryOpt.Sub },
+            {openeLexer.K_MUL_OPT, BinaryOpt.Mul},
+            {openeLexer.K_DIV_OPT, BinaryOpt.Div},
+            {openeLexer.K_FULL_DIV_OPT, BinaryOpt.FullDiv},
+            {openeLexer.K_MOD_OPT, BinaryOpt.Mod},
+            {openeLexer.K_ADD_OPT, BinaryOpt.Add},
+            {openeLexer.K_SUB_OPT, BinaryOpt.Sub},
             // 比较
-            { openeLexer.K_NOT_EQUAL_OPT, BinaryOpt.NotEqual },
-            { openeLexer.K_EQUAL_OPT,     BinaryOpt.Equal },
-            { openeLexer.K_AECOM_OPT,     BinaryOpt.Equal },
-            { openeLexer.K_LESS_OPT,      BinaryOpt.Less },
-            { openeLexer.K_GREAT_OPT,     BinaryOpt.Great },
-            { openeLexer.K_LESS_EQU_OPT,  BinaryOpt.LessEqual },
-            { openeLexer.K_GREAT_EQU_OPT, BinaryOpt.GreatEqual },
-            { openeLexer.K_LIKE_EQU_OPT,  BinaryOpt.LikeEqual },
+            {openeLexer.K_NOT_EQUAL_OPT, BinaryOpt.NotEqual},
+            {openeLexer.K_EQUAL_OPT, BinaryOpt.Equal},
+            {openeLexer.K_AECOM_OPT, BinaryOpt.Equal},
+            {openeLexer.K_LESS_OPT, BinaryOpt.Less},
+            {openeLexer.K_GREAT_OPT, BinaryOpt.Great},
+            {openeLexer.K_LESS_EQU_OPT, BinaryOpt.LessEqual},
+            {openeLexer.K_GREAT_EQU_OPT, BinaryOpt.GreatEqual},
+            {openeLexer.K_LIKE_EQU_OPT, BinaryOpt.LikeEqual},
             // 逻辑
-            { openeLexer.K_AND_OPT,       BinaryOpt.LogicAnd },
-            { openeLexer.K_OR_OPT,        BinaryOpt.LogicOr },
+            {openeLexer.K_AND_OPT, BinaryOpt.LogicAnd},
+            {openeLexer.K_OR_OPT, BinaryOpt.LogicOr}
         };
-    }
 
+        public PExpression LExpression = null;
+        public BinaryOpt Opt = BinaryOpt.Add;
+        public PExpression RExpression = null;
+    }
 }
