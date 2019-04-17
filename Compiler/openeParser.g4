@@ -16,7 +16,7 @@ src_content
     ;
 
 program_set_file
-    : library_list_opt
+    : library_spec*
       prog_set
     ;
 
@@ -52,24 +52,16 @@ edition_spec
 
 struct_declare
     : K_STRUCTURE name=TABLE_ITEM (TABLE_COMMA access=TABLE_ITEM? (TABLE_COMMA table_comment)?)? TABLE_END
-      member_list
+      member_item*
       NEWLINE*
     ;
 
 table_comment
-    : (TABLE_COMMA|TABLE_ITEM)*
-    ;
-
-member_list
-    : member_item*
+    : (TABLE_COMMA | TABLE_ITEM | TABLE_DIMENSION)*
     ;
 
 member_item
     : K_MEMBER_VARIABLE variable_decl
-    ;
-
-library_list_opt
-    : library_spec*
     ;
 
 library_spec
@@ -100,13 +92,9 @@ sub_program_opt
 
 sub_program
     : K_SUB_PROGRAM name=TABLE_ITEM (TABLE_COMMA type=TABLE_ITEM? (TABLE_COMMA access=TABLE_ITEM? (TABLE_COMMA table_comment)?)?)? TABLE_END
-      parameter_decl_list
+      parameter_decl*
       local_variable_decl*
       statement_list
-    ;
-
-parameter_decl_list
-    : parameter_decl*
     ;
 
 parameter_decl
@@ -130,42 +118,43 @@ statement
     ;
 
 switch_statement
-    : K_SWITCH_START LBRACK expression RBRACK NEWLINE statement_list
-      (K_SWITCH_CASE LBRACK expression RBRACK statement_list)*
-      K_SWITCH_DEFAULT statement_list
+    : K_SWITCH_START LBRACK condition_expr=expression RBRACK NEWLINE
+      cond_body=statement_list
+      (
+        K_SWITCH_CASE LBRACK condition_expr=expression RBRACK NEWLINE
+        cond_body=statement_list
+      )*
+      K_SWITCH_DEFAULT NEWLINE
+      default_body=statement_list
       K_SWITCH_END
     ;
 
 loop_statement
-    : K_WHILE LBRACK expression RBRACK NEWLINE
-      statement_list
+    : K_WHILE LBRACK condition_expr=expression RBRACK NEWLINE
+      loop_body=statement_list
       K_WHILE_END LBRACK RBRACK                             # While
 
-    | K_RANGE_FOR LBRACK expression COMMA IDENTIFIER? RBRACK NEWLINE
-      statement_list
+    | K_RANGE_FOR LBRACK condition_expr=expression COMMA loop_variable=IDENTIFIER? RBRACK NEWLINE
+      loop_body=statement_list
       K_RANGE_FOR_END LBRACK RBRACK                         # RangeFor
 
-    | K_FOR LBRACK expression COMMA expression COMMA expression (COMMA expression)? RBRACK NEWLINE
-      statement_list
+    | K_FOR LBRACK loop_start=expression COMMA loop_end=expression COMMA loop_step=expression (COMMA loop_variable=expression)? RBRACK NEWLINE
+      loop_body=statement_list
       K_FOR_END LBRACK RBRACK                               # For
 
     | K_DO_WHILE LBRACK RBRACK NEWLINE
-      statement_list
-      K_DO_WHILE_END LBRACK expression RBRACK               # DoWhile
+      loop_body=statement_list
+      K_DO_WHILE_END LBRACK condition_expr=expression RBRACK               # DoWhile
     ;
 
 condition_statement
-    : K_IF LBRACK expression RBRACK
-      statement_list
-      condition_statement_else?
+    : K_IF LBRACK condition_expr=expression RBRACK
+      true_stmt_list=statement_list
+      (K_ELSE false_stmt_list=statement_list)?
       K_END_IF                              # IfStmt
-    | K_IF_TRUE LBRACK expression RBRACK
-      statement_list
+    | K_IF_TRUE LBRACK condition_expr=expression RBRACK
+      true_stmt_list=statement_list
       K_END_IF_TRUE                         # IfTrueStmt
-    ;
-
-condition_statement_else
-    : K_ELSE statement_list
     ;
 
 hierarchy_identifier
@@ -174,8 +163,7 @@ hierarchy_identifier
 
 name_component
     : IDENTIFIER                                                        # Identifier
-    | name_component LBRACK RBRACK                                      # FuncCallWithoutArgu
-    | name_component LBRACK expression? (COMMA expression?)* RBRACK      # FuncCallWithArgu
+    | name_component LBRACK expression? (COMMA expression?)* RBRACK     # FuncCall
     | name_component LSQUBRACK expression RSQUBRACK                     # ArrayIndex
     ;
 
