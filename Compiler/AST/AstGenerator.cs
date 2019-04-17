@@ -4,7 +4,7 @@ using Antlr4.Runtime.Tree;
 
 namespace Compiler.AST
 {
-    internal class OpenEAstVisitor : openeParserBaseVisitor<AstNode>
+    internal class OpenEAstVisitor : openeLangBaseVisitor<AstNode>
     {
         private readonly ErrorManager errorManager;
 
@@ -19,7 +19,7 @@ namespace Compiler.AST
             return null;
         }
 
-        public override AstNode VisitOpene_src(openeParser.Opene_srcContext context)
+        public override AstNode VisitOpene_src(openeLangParser.Opene_srcContext context)
         {
             // Version
             if (Visit(context.edition_spec()) is PNumber version)
@@ -35,7 +35,7 @@ namespace Compiler.AST
             return Error();
         }
 
-        public override AstNode VisitProgram_set_file(openeParser.Program_set_fileContext context)
+        public override AstNode VisitProgram_set_file(openeLangParser.Program_set_fileContext context)
         {
             var compile_unit = new PCompileUnit();
             // Library list
@@ -61,7 +61,7 @@ namespace Compiler.AST
             return compile_unit;
         }
 
-        public override AstNode VisitEdition_spec(openeParser.Edition_specContext context)
+        public override AstNode VisitEdition_spec(openeLangParser.Edition_specContext context)
         {
             var ver = Convert.ToInt32(context.INTEGER_LITERAL().GetText());
             if (ver != 2)
@@ -75,7 +75,7 @@ namespace Compiler.AST
             return version_node;
         }
 
-        public override AstNode VisitLibrary_list_opt(openeParser.Library_list_optContext context)
+        public override AstNode VisitLibrary_list_opt(openeLangParser.Library_list_optContext context)
         {
             var library_list = new List<string>();
             foreach (var lib in context.library_spec())
@@ -89,13 +89,13 @@ namespace Compiler.AST
             return new PLibraries(library_list);
         }
 
-        public override AstNode VisitLibrary_spec(openeParser.Library_specContext context)
+        public override AstNode VisitLibrary_spec(openeLangParser.Library_specContext context)
         {
             string library = context.IDENTIFIER().GetText();
             return new PLibrary(library);
         }
 
-        public override AstNode VisitProg_set(openeParser.Prog_setContext context)
+        public override AstNode VisitProg_set(openeLangParser.Prog_setContext context)
         {
             var program_set = new PProgramSet();
             // Program set name
@@ -112,7 +112,7 @@ namespace Compiler.AST
             return program_set;
         }
 
-        public override AstNode VisitProg_set_variable_decl_opt(openeParser.Prog_set_variable_decl_optContext context)
+        public override AstNode VisitProg_set_variable_decl_opt(openeLangParser.Prog_set_variable_decl_optContext context)
         {
             var variable_decl_list = new PVariableDeclList();
             foreach (var decl_context in context.prog_set_variable_decl())
@@ -124,12 +124,12 @@ namespace Compiler.AST
             return variable_decl_list;
         }
 
-        public override AstNode VisitProg_set_variable_decl(openeParser.Prog_set_variable_declContext context)
+        public override AstNode VisitProg_set_variable_decl(openeLangParser.Prog_set_variable_declContext context)
         {
             return Visit(context.variable_decl());
         }
 
-        public override AstNode VisitVariable_decl(openeParser.Variable_declContext context)
+        public override AstNode VisitVariable_decl(openeLangParser.Variable_declContext context)
         {
             var variable_decl = new PVariableDecl();
             // Variable name.
@@ -154,27 +154,27 @@ namespace Compiler.AST
             return variable_decl;
         }
 
-        public override AstNode VisitVariable_comment(openeParser.Variable_commentContext context)
+        public override AstNode VisitVariable_comment(openeLangParser.Variable_commentContext context)
         {
             throw new NotImplementedException();
         }
 
-        public override AstNode VisitVariable_comment_element(openeParser.Variable_comment_elementContext context)
+        public override AstNode VisitVariable_comment_element(openeLangParser.Variable_comment_elementContext context)
         {
             throw new NotImplementedException();
         }
 
-        public override AstNode VisitVariable_name(openeParser.Variable_nameContext context)
+        public override AstNode VisitVariable_name(openeLangParser.Variable_nameContext context)
         {
             return new PVariableName(context.IDENTIFIER().GetText());
         }
 
-        public override AstNode VisitVariable_type(openeParser.Variable_typeContext context)
+        public override AstNode VisitVariable_type(openeLangParser.Variable_typeContext context)
         {
             return new PVariableTypeName(context.IDENTIFIER().GetText());
         }
 
-        public override AstNode VisitDimension_decl(openeParser.Dimension_declContext context)
+        public override AstNode VisitDimension_decl(openeLangParser.Dimension_declContext context)
         {
             var dimension_decl = new PDimensionDecl();
             var dimension = Convert.ToInt32(context.INTEGER_LITERAL().GetText());
@@ -190,7 +190,7 @@ namespace Compiler.AST
             return dimension_decl;
         }
 
-        public override AstNode VisitSub_program_opt(openeParser.Sub_program_optContext context)
+        public override AstNode VisitSub_program_opt(openeLangParser.Sub_program_optContext context)
         {
             var function_list = new PFunctionList();
             foreach (var func_node in context.sub_program())
@@ -200,7 +200,7 @@ namespace Compiler.AST
             return function_list;
         }
 
-        public override AstNode VisitSub_program(openeParser.Sub_programContext context)
+        public override AstNode VisitSub_program(openeLangParser.Sub_programContext context)
         {
             var function = new PFunction();
             // name
@@ -241,7 +241,7 @@ namespace Compiler.AST
             return function;
         }
 
-        public override AstNode VisitParameter_decl_list(openeParser.Parameter_decl_listContext context)
+        public override AstNode VisitParameter_decl_list(openeLangParser.Parameter_decl_listContext context)
         {
             var variable_decl_list = new PVariableDeclList();
             foreach (var parameter_decl_context in context.parameter_decl())
@@ -253,17 +253,17 @@ namespace Compiler.AST
             return variable_decl_list;
         }
 
-        public override AstNode VisitParameter_decl(openeParser.Parameter_declContext context)
+        public override AstNode VisitParameter_decl(openeLangParser.Parameter_declContext context)
         {
             return Visit(context.variable_decl());
         }
 
-        public override AstNode VisitLocal_variable_decl(openeParser.Local_variable_declContext context)
+        public override AstNode VisitLocal_variable_decl(openeLangParser.Local_variable_declContext context)
         {
             return Visit(context.variable_decl());
         }
 
-        public override AstNode VisitStatement_list(openeParser.Statement_listContext context)
+        public override AstNode VisitStatement_list(openeLangParser.Statement_listContext context)
         {
             var statement_list = new PStatementList();
             foreach (var statement_context in context.statement())
@@ -278,7 +278,7 @@ namespace Compiler.AST
             return statement_list;
         }
 
-        public override AstNode VisitAssignStatement(openeParser.AssignStatementContext context)
+        public override AstNode VisitAssignStatement(openeLangParser.AssignStatementContext context)
         {
             var assign_statement = new PAssignStatement();
             if (Visit(context.hierarchy_identifier()) is PExpression lexpression)
@@ -294,7 +294,7 @@ namespace Compiler.AST
             return assign_statement;
         }
 
-        public override AstNode VisitWhile(openeParser.WhileContext context)
+        public override AstNode VisitWhile(openeLangParser.WhileContext context)
         {
             // Loop condition.
             var while_statement = new PWhileStatement();
@@ -311,7 +311,7 @@ namespace Compiler.AST
             return while_statement;
         }
 
-        public override AstNode VisitFor(openeParser.ForContext context)
+        public override AstNode VisitFor(openeLangParser.ForContext context)
         {
             var for_statement = new PForStatement();
             // For loop count.
@@ -325,7 +325,7 @@ namespace Compiler.AST
             return for_statement;
         }
 
-        public override AstNode VisitIfStmt(openeParser.IfStmtContext context)
+        public override AstNode VisitIfStmt(openeLangParser.IfStmtContext context)
         {
             var if_statement = new PIfStatement();
             // Condition expression
@@ -347,7 +347,7 @@ namespace Compiler.AST
             return if_statement;
         }
 
-        public override AstNode VisitIfTrueStmt(openeParser.IfTrueStmtContext context)
+        public override AstNode VisitIfTrueStmt(openeLangParser.IfTrueStmtContext context)
         {
             var if_statement = new PIfStatement();
             // Condition expression
@@ -362,12 +362,12 @@ namespace Compiler.AST
             return if_statement;
         }
 
-        public override AstNode VisitCondition_statement_else(openeParser.Condition_statement_elseContext context)
+        public override AstNode VisitCondition_statement_else(openeLangParser.Condition_statement_elseContext context)
         {
             return Visit(context.statement_list());
         }
 
-        public override AstNode VisitHierarchy_identifier(openeParser.Hierarchy_identifierContext context)
+        public override AstNode VisitHierarchy_identifier(openeLangParser.Hierarchy_identifierContext context)
         {
             var component_list = new PNameComponentList();
             foreach (var name_component_context in context.name_component())
@@ -379,7 +379,7 @@ namespace Compiler.AST
             return component_list;
         }
 
-        public override AstNode VisitIdentifier(openeParser.IdentifierContext context)
+        public override AstNode VisitIdentifier(openeLangParser.IdentifierContext context)
         {
             var component = new PNameComponent();
             component.Type = PNameComponent.ComponentType.Identifier;
@@ -387,7 +387,7 @@ namespace Compiler.AST
             return component;
         }
 
-        public override AstNode VisitFuncCallWithoutArgu(openeParser.FuncCallWithoutArguContext context)
+        public override AstNode VisitFuncCallWithoutArgu(openeLangParser.FuncCallWithoutArguContext context)
         {
             var component = new PNameComponent();
             component.Type = PNameComponent.ComponentType.FuncCall;
@@ -395,7 +395,7 @@ namespace Compiler.AST
             return component;
         }
 
-        public override AstNode VisitFuncCallWithArgu(openeParser.FuncCallWithArguContext context)
+        public override AstNode VisitFuncCallWithArgu(openeLangParser.FuncCallWithArguContext context)
         {
             var component = new PNameComponent();
             component.Type = PNameComponent.ComponentType.FuncCall;
@@ -409,7 +409,7 @@ namespace Compiler.AST
             return component;
         }
 
-        public override AstNode VisitArrayIndex(openeParser.ArrayIndexContext context)
+        public override AstNode VisitArrayIndex(openeLangParser.ArrayIndexContext context)
         {
             var component = new PNameComponent();
             component.Type = PNameComponent.ComponentType.ArrayIndex;
@@ -422,12 +422,12 @@ namespace Compiler.AST
             return component;
         }
 
-        public override AstNode VisitBracket(openeParser.BracketContext context)
+        public override AstNode VisitBracket(openeLangParser.BracketContext context)
         {
             return Visit(context.expression());
         }
 
-        public override AstNode VisitBinaryExpr(openeParser.BinaryExprContext context)
+        public override AstNode VisitBinaryExpr(openeLangParser.BinaryExprContext context)
         {
             var binary_expr = new PBinaryExpr();
             // Binary expression operate code.
@@ -455,7 +455,7 @@ namespace Compiler.AST
             return binary_expr;
         }
 
-        public override AstNode VisitUnaryExpr(openeParser.UnaryExprContext context)
+        public override AstNode VisitUnaryExpr(openeLangParser.UnaryExprContext context)
         {
             var unary_expr = new PUnaryExpr();
             // Unary expression operate code.
@@ -476,21 +476,21 @@ namespace Compiler.AST
             return unary_expr;
         }
 
-        public override AstNode VisitMacro_value(openeParser.Macro_valueContext context)
+        public override AstNode VisitMacro_value(openeLangParser.Macro_valueContext context)
         {
             var macro_value = new PMacroValue();
             macro_value.Name = context.IDENTIFIER().GetText();
             return macro_value;
         }
 
-        public override AstNode VisitString_value(openeParser.String_valueContext context)
+        public override AstNode VisitString_value(openeLangParser.String_valueContext context)
         {
             var string_value = new PString();
             string_value.Value = context.STRING_LITERAL().GetText();
             return string_value;
         }
 
-        public override AstNode VisitBool_value(openeParser.Bool_valueContext context)
+        public override AstNode VisitBool_value(openeLangParser.Bool_valueContext context)
         {
             var bool_value = new PBool();
             if (context.bval.Type == openeLexer.K_TRUE)
@@ -503,14 +503,14 @@ namespace Compiler.AST
             return bool_value;
         }
 
-        public override AstNode VisitInt(openeParser.IntContext context)
+        public override AstNode VisitInt(openeLangParser.IntContext context)
         {
             var value_value = new PNumber();
             value_value.Value = Convert.ToInt32(context.INTEGER_LITERAL().GetText());
             return value_value;
         }
 
-        public override AstNode VisitFloat(openeParser.FloatContext context)
+        public override AstNode VisitFloat(openeLangParser.FloatContext context)
         {
             var value_value = new PFloatNumber();
             value_value.Value = Convert.ToSingle(context.FLOAT_LITERAL().GetText());

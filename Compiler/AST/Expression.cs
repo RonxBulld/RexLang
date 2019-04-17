@@ -125,8 +125,8 @@ namespace Compiler.AST
     {
         public static readonly Dictionary<int, UnaryOpt> LexOptMap = new Dictionary<int, UnaryOpt>
         {
-            {openeLexer.K_ADD_OPT, UnaryOpt.Positive},
-            {openeLexer.K_SUB_OPT, UnaryOpt.Negative}
+            {openeLangLexer.K_ADD_OPT, UnaryOpt.Positive},
+            {openeLangLexer.K_SUB_OPT, UnaryOpt.Negative}
         };
 
         public PExpression Expression = null;
@@ -157,24 +157,24 @@ namespace Compiler.AST
         public static readonly Dictionary<int, BinaryOpt> LexOptMap = new Dictionary<int, BinaryOpt>
         {
             // 四则
-            {openeLexer.K_MUL_OPT, BinaryOpt.Mul},
-            {openeLexer.K_DIV_OPT, BinaryOpt.Div},
-            {openeLexer.K_FULL_DIV_OPT, BinaryOpt.FullDiv},
-            {openeLexer.K_MOD_OPT, BinaryOpt.Mod},
-            {openeLexer.K_ADD_OPT, BinaryOpt.Add},
-            {openeLexer.K_SUB_OPT, BinaryOpt.Sub},
+            {openeLangLexer.K_MUL_OPT, BinaryOpt.Mul},
+            {openeLangLexer.K_DIV_OPT, BinaryOpt.Div},
+            {openeLangLexer.K_FULL_DIV_OPT, BinaryOpt.FullDiv},
+            {openeLangLexer.K_MOD_OPT, BinaryOpt.Mod},
+            {openeLangLexer.K_ADD_OPT, BinaryOpt.Add},
+            {openeLangLexer.K_SUB_OPT, BinaryOpt.Sub},
             // 比较
-            {openeLexer.K_NOT_EQUAL_OPT, BinaryOpt.NotEqual},
-            {openeLexer.K_EQUAL_OPT, BinaryOpt.Equal},
-            {openeLexer.K_AECOM_OPT, BinaryOpt.Equal},
-            {openeLexer.K_LESS_OPT, BinaryOpt.Less},
-            {openeLexer.K_GREAT_OPT, BinaryOpt.Great},
-            {openeLexer.K_LESS_EQU_OPT, BinaryOpt.LessEqual},
-            {openeLexer.K_GREAT_EQU_OPT, BinaryOpt.GreatEqual},
-            {openeLexer.K_LIKE_EQU_OPT, BinaryOpt.LikeEqual},
+            {openeLangLexer.K_NOT_EQUAL_OPT, BinaryOpt.NotEqual},
+            {openeLangLexer.K_EQUAL_OPT, BinaryOpt.Equal},
+            {openeLangLexer.K_AECOM_OPT, BinaryOpt.Equal},
+            {openeLangLexer.K_LESS_OPT, BinaryOpt.Less},
+            {openeLangLexer.K_GREAT_OPT, BinaryOpt.Great},
+            {openeLangLexer.K_LESS_EQU_OPT, BinaryOpt.LessEqual},
+            {openeLangLexer.K_GREAT_EQU_OPT, BinaryOpt.GreatEqual},
+            {openeLangLexer.K_LIKE_EQU_OPT, BinaryOpt.LikeEqual},
             // 逻辑
-            {openeLexer.K_AND_OPT, BinaryOpt.LogicAnd},
-            {openeLexer.K_OR_OPT, BinaryOpt.LogicOr}
+            {openeLangLexer.K_AND_OPT, BinaryOpt.LogicAnd},
+            {openeLangLexer.K_OR_OPT, BinaryOpt.LogicOr}
         };
 
         public PExpression LExpression = null;

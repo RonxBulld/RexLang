@@ -5,7 +5,7 @@ K_LIBRARY: '.\u652f\u6301\u5e93';                                               
 K_PROGRAM_SET: '.\u7a0b\u5e8f\u96c6' -> mode(TABLE_MODE);                       // 程序集
 K_PROGRAM_SET_VARIABLE: '.\u7a0b\u5e8f\u96c6\u53d8\u91cf' -> mode(TABLE_MODE);  // 程序集变量
 K_LOCAL_VARIABLE: '.\u5c40\u90e8\u53d8\u91cf' -> mode(TABLE_MODE);              // 局部变量
-K_GLOBAL_VARIABLE: '.\u5168\u5c40\u53d8\u91cf' -> mode(TABLE_MODE);             // 全局变量
+K_GLOBAL_VARIABLE: '.\u5168\u5c40\u53d8\u91cf'/* -> mode(TABLE_MODE)*/;             // 全局变量
 K_DLL_DEFINE: '.\u0044\u004c\u004c\u547d\u4ee4' -> mode(TABLE_MODE);            // DLL命令定义表
 K_MEMBER_VARIABLE: '.\u6210\u5458' -> mode(TABLE_MODE);                         // 成员
 K_PARAMETER: '.\u53c2\u6570' -> mode(TABLE_MODE);                               // 参数
@@ -141,13 +141,16 @@ fragment
 WS: (' ' | '\t')+;
 WHITESPACE: WS -> skip;
 NEWLINE: ('\r' ? '\n')+;
-STRING_LITERAL: '\u201c'.*?'\u201d';    // “...”
+STRING_LITERAL
+    : '\u201c'.*?'\u201d'    // “...”
+    | '"' ~["\r\n]*? '"'
+    ;
 CODE_COMMENT: '\''.*? '\r' ? '\n' -> type(NEWLINE);
 OTHER_CHAR: .;
 
 mode TABLE_MODE;
 TABLE_END: '\r' ? '\n' -> mode(DEFAULT_MODE);
-TABLE_DIMENSION: '"' INTEGER_LITERAL (',' INTEGER_LITERAL)+ '"';
+TABLE_DIMENSION: '"' INTEGER_LITERAL (',' INTEGER_LITERAL)* '"';
 TABLE_ITEM: (~[ ,\r\n]+);
 TABLE_WS: WS -> skip;
 TABLE_COMMA: ',';

@@ -54,16 +54,16 @@
     <Compile Include="AST\Expression.cs" />
     <Compile Include="AST\Statement.cs" />
     <Compile Include="ErrorManager.cs" />
-    <Compile Include="Parser\openeLexer.cs" />
-    <Compile Include="Parser\openeParser.cs" />
-    <Compile Include="Parser\openeParserBaseVisitor.cs" />
-    <Compile Include="Parser\openeParserVisitor.cs" />
+    <Compile Include="Parser\openeLangBaseVisitor.cs" />
+    <Compile Include="Parser\openeLangLexer.cs" />
+    <Compile Include="Parser\openeLangParser.cs" />
+    <Compile Include="Parser\openeLangVisitor.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <CustomBuild Include="openeParser.g4">
+    <CustomBuild Include="openeLang.g4">
       <Message>Run ANTLR...</Message>
       <Command>antlr opene.g4 -visitor -no-listener -Dlanguage="CSharp"</Command>
       <Outputs>openeBaseVisitor.cs;openeLexer.cs;openeLexer.interp;openeLexer.tokens;openeParser.cs;openeVisitor.cs</Outputs>
