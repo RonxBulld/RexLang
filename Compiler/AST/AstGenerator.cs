@@ -4,7 +4,7 @@ using Antlr4.Runtime.Tree;
 
 namespace Compiler.AST
 {
-    internal class OpenEAstVisitor : openeBaseVisitor<AstNode>
+    internal class OpenEAstVisitor : openeParserBaseVisitor<AstNode>
     {
         private readonly ErrorManager errorManager;
 
@@ -21,13 +21,23 @@ namespace Compiler.AST
 
         public override AstNode VisitOpene_src(openeParser.Opene_srcContext context)
         {
-            var compile_unit = new PCompileUnit();
             // Version
             if (Visit(context.edition_spec()) is PNumber version)
-                compile_unit.Version = version.Value;
-            else
-                return Error();
+            {
+                // Content
+                if (Visit(context.src_content()) is PCompileUnit compile_unit)
+                {
+                    compile_unit.Version = version.Value;
+                    return compile_unit;
+                }
+            }
 
+            return Error();
+        }
+
+        public override AstNode VisitProgram_set_file(openeParser.Program_set_fileContext context)
+        {
+            var compile_unit = new PCompileUnit();
             // Library list
             if (Visit(context.library_list_opt()) is PLibraries libraries)
                 compile_unit.Libraries = libraries.Libraries;

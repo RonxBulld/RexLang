@@ -18,10 +18,24 @@ K_ELSE: '.\u5426\u5219';                                                        
 K_END_IF: '.\u5982\u679c\u7ed3\u675f';                                          // 如果结束
 K_WHILE: '.\u5224\u65ad\u5faa\u73af\u9996';                                     // 判断循环首
 K_WHILE_END: '.\u5224\u65ad\u5faa\u73af\u5c3e';                                 // 判断循环尾
-K_FOR: '.\u8ba1\u6b21\u5faa\u73af\u9996';                                       // 计次循环首
-K_FOR_END: '.\u8ba1\u6b21\u5faa\u73af\u5c3e';                                   // 计次循环尾
+K_DO_WHILE: '.\u5faa\u73af\u5224\u65ad\u9996';                                  // 循环判断首
+K_DO_WHILE_END: '.\u5faa\u73af\u5224\u65ad\u5c3e';                              // 循环判断尾
+K_RANGE_FOR: '.\u8ba1\u6b21\u5faa\u73af\u9996';                                 // 计次循环首
+K_RANGE_FOR_END: '.\u8ba1\u6b21\u5faa\u73af\u5c3e';                             // 计次循环尾
+K_FOR: '.\u53d8\u91cf\u5faa\u73af\u9996';                                       // 变量循环首
+K_FOR_END: '.\u53d8\u91cf\u5faa\u73af\u5c3e';                                   // 变量循环尾
+K_SWITCH_START: '.\u5224\u65ad\u5f00\u59cb';                                    // 判断开始
+K_SWITCH_CASE: '.\u5224\u65ad';                                                 // 判断
+K_SWITCH_DEFAULT: '.\u9ed8\u8ba4';                                              // 默认
+K_SWITCH_END: '.\u5224\u65ad\u7ed3\u675f';                                      // 判断结束
 K_TRUE: '\u771f';                                                               // 真
 K_FALSE: '\u5047';                                                              // 假
+K_YEAR: '\u5e74';                                                               // 年
+K_MONTH: '\u6708';                                                              // 月
+K_DAY: '\u65e5';                                                                // 日
+K_HOUR: '\u65f6';                                                               // 时
+K_MINUTE: '\u5206';                                                             // 分
+K_SECOND: '\u79d2';                                                             // 秒
 
 K_ADD_OPT
     : '\uff0b'  // ＋
@@ -94,15 +108,30 @@ LBRACK: '(';
 RBRACK: ')';
 LSQUBRACK: '[';
 RSQUBRACK: ']';
+LCURLYBRACE: '{';
+RCURLYBRACE: '}';
 SHARP: '#';
 ADDRESS: '&';
 DQUOTE: '"';
 DOT: '.';
 
-INTEGER_LITERAL: ('0' .. '9')+;
+INTEGER_LITERAL: ('-'|'+')? ('0' .. '9')+;
 FLOAT_LITERAL
     : INTEGER_LITERAL? '.' INTEGER_LITERAL
     | INTEGER_LITERAL '.' INTEGER_LITERAL?
+    ;
+DATETIME_LITERAL
+    : INTEGER_LITERAL
+    | INTEGER_LITERAL K_YEAR INTEGER_LITERAL K_MONTH INTEGER_LITERAL K_DAY
+      (INTEGER_LITERAL K_HOUR INTEGER_LITERAL K_MINUTE INTEGER_LITERAL K_SECOND)?
+    | INTEGER_LITERAL '/' INTEGER_LITERAL '/' INTEGER_LITERAL
+      ('/' INTEGER_LITERAL '/' INTEGER_LITERAL '/' INTEGER_LITERAL)?
+    | INTEGER_LITERAL '/' INTEGER_LITERAL '/' INTEGER_LITERAL
+      ('/' INTEGER_LITERAL ':' INTEGER_LITERAL ':' INTEGER_LITERAL)?
+    | INTEGER_LITERAL '-' INTEGER_LITERAL '-' INTEGER_LITERAL
+      ('-' INTEGER_LITERAL '-' INTEGER_LITERAL '-' INTEGER_LITERAL)?
+    | INTEGER_LITERAL '-' INTEGER_LITERAL '-' INTEGER_LITERAL
+      ('-' INTEGER_LITERAL ':' INTEGER_LITERAL ':' INTEGER_LITERAL)?
     ;
 
 fragment
@@ -118,6 +147,7 @@ OTHER_CHAR: .;
 
 mode TABLE_MODE;
 TABLE_END: '\r' ? '\n' -> mode(DEFAULT_MODE);
-TABLE_ITEM: ~[ ,\r\n]+;
+TABLE_DIMENSION: '"' INTEGER_LITERAL (',' INTEGER_LITERAL)+ '"';
+TABLE_ITEM: (~[ ,\r\n]+);
 TABLE_WS: WS -> skip;
 TABLE_COMMA: ',';

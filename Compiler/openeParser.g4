@@ -43,7 +43,7 @@ global_variable_list
     ;
 
 global_variable_item
-    : K_GLOBAL_VARIABLE name=TABLE_ITEM (TABLE_COMMA type=TABLE_ITEM? (TABLE_COMMA access=TABLE_ITEM? (TABLE_COMMA dimension=TABLE_ITEM? (TABLE_COMMA table_comment)?)?)?)? TABLE_END
+    : K_GLOBAL_VARIABLE name=TABLE_ITEM (TABLE_COMMA type=TABLE_ITEM? (TABLE_COMMA access=TABLE_ITEM? (TABLE_COMMA dimension=TABLE_DIMENSION? (TABLE_COMMA table_comment)?)?)?)? TABLE_END
     ;
 
 edition_spec
@@ -91,29 +91,7 @@ prog_set_variable_decl
     ;
 
 variable_decl
-    : name=TABLE_ITEM (TABLE_COMMA type=TABLE_ITEM? (TABLE_COMMA TABLE_COMMA dimension=TABLE_ITEM? (TABLE_COMMA table_comment)?)?)? TABLE_END
-    ;
-
-variable_comment
-    : variable_comment_element*
-    ;
-
-variable_comment_element
-    : IDENTIFIER
-    | OTHER_CHAR
-    | COMMA
-    ;
-
-variable_name
-    : IDENTIFIER
-    ;
-
-variable_type
-    : IDENTIFIER
-    ;
-
-dimension_decl
-    : DQUOTE INTEGER_LITERAL DQUOTE
+    : name=TABLE_ITEM (TABLE_COMMA type=TABLE_ITEM? (TABLE_COMMA TABLE_COMMA dimension=TABLE_DIMENSION? (TABLE_COMMA table_comment)?)?)? TABLE_END
     ;
 
 sub_program_opt
@@ -148,16 +126,32 @@ statement
     | hierarchy_identifier (K_ASSIGN_OPT | K_AECOM_OPT) expression  # AssignStatement
     | expression                                                    # ExpressionStatement
     | loop_statement                                                # LoopStatement
+    | switch_statement                                              # SwitchStatement
     ;
 
+switch_statement
+    : K_SWITCH_START LBRACK expression RBRACK NEWLINE statement_list
+      (K_SWITCH_CASE LBRACK expression RBRACK statement_list)*
+      K_SWITCH_DEFAULT statement_list
+      K_SWITCH_END
+    ;
 
 loop_statement
-    : K_WHILE LBRACK expression RBRACK
+    : K_WHILE LBRACK expression RBRACK NEWLINE
       statement_list
       K_WHILE_END LBRACK RBRACK                             # While
-    | K_FOR LBRACK expression COMMA IDENTIFIER? RBRACK
+
+    | K_RANGE_FOR LBRACK expression COMMA IDENTIFIER? RBRACK NEWLINE
+      statement_list
+      K_RANGE_FOR_END LBRACK RBRACK                         # RangeFor
+
+    | K_FOR LBRACK expression COMMA expression COMMA expression (COMMA expression)? RBRACK NEWLINE
       statement_list
       K_FOR_END LBRACK RBRACK                               # For
+
+    | K_DO_WHILE LBRACK RBRACK NEWLINE
+      statement_list
+      K_DO_WHILE_END LBRACK expression RBRACK               # DoWhile
     ;
 
 condition_statement
@@ -181,7 +175,7 @@ hierarchy_identifier
 name_component
     : IDENTIFIER                                                        # Identifier
     | name_component LBRACK RBRACK                                      # FuncCallWithoutArgu
-    | name_component LBRACK expression (COMMA expression?)* RBRACK      # FuncCallWithArgu
+    | name_component LBRACK expression? (COMMA expression?)* RBRACK      # FuncCallWithArgu
     | name_component LSQUBRACK expression RSQUBRACK                     # ArrayIndex
     ;
 
@@ -214,6 +208,16 @@ expression
     | string_value                                              # OptElement
     | hierarchy_identifier                                      # OptElement
     | func_ptr                                                  # OptElement
+    | datetime_value                                            # OptElement
+    | data_set_value                                            # OptElement
+    ;
+
+data_set_value
+    : LCURLYBRACE expression RCURLYBRACE
+    ;
+
+datetime_value
+    : LSQUBRACK DATETIME_LITERAL RSQUBRACK
     ;
 
 macro_value
