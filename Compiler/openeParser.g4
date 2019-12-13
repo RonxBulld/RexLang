@@ -1,3 +1,7 @@
+/*
+ * antlr4 -o opene_parse -lib opene_parse -encoding utf-8 -long-messages -listener -visitor -package opene -Dlanguage=Cpp openeParser.g4
+ */
+
 parser grammar openeParser;
 
 options { tokenVocab = openeLexer; }

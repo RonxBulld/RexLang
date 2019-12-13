@@ -1,5 +1,9 @@
 lexer grammar openeLexer;
 
+ /*
+  * antlr4 -o opene_parse -lib opene_parse -encoding utf-8 -long-messages -listener -visitor -package opene -Dlanguage=Cpp openeLexer.g4
+  */
+
 K_VERSION: '.\u7248\u672c';                                                     // 版本
 K_LIBRARY: '.\u652f\u6301\u5e93';                                               // 支持库
 K_PROGRAM_SET: '.\u7a0b\u5e8f\u96c6' -> mode(TABLE_MODE);                       // 程序集

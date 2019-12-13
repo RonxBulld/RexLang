@@ -1,1 +1,0 @@
-antlr4 opene.g4 -o Parser -visitor -no-listener -Dlanguage="CSharp"
