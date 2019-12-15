@@ -1,40 +1,36 @@
 
-// Generated from openeLexer.g4 by ANTLR 4.7.1
+// Generated from /mnt/d/Project/OpenELanguage/Compiler/opene_parse/openeLang.g4 by ANTLR 4.7.2
 
 #pragma once
 
 
-#include "antlr4-runtime/antlr4-runtime.h"
+#include "antlr4-runtime.h"
 
 
 namespace opene {
 
 
-class  openeLexer : public antlr4::Lexer {
+class  openeLangLexer : public antlr4::Lexer {
 public:
   enum {
-    K_VERSION = 1, K_LIBRARY = 2, K_PROGRAM_SET = 3, K_PROGRAM_SET_VARIABLE = 4, 
-    K_LOCAL_VARIABLE = 5, K_GLOBAL_VARIABLE = 6, K_DLL_DEFINE = 7, K_MEMBER_VARIABLE = 8, 
-    K_PARAMETER = 9, K_SUB_PROGRAM = 10, K_STRUCTURE = 11, K_IF_TRUE = 12, 
-    K_END_IF_TRUE = 13, K_IF = 14, K_ELSE = 15, K_END_IF = 16, K_WHILE = 17, 
-    K_WHILE_END = 18, K_FOR = 19, K_FOR_END = 20, K_TRUE = 21, K_FALSE = 22, 
-    K_ADD_OPT = 23, K_SUB_OPT = 24, K_MUL_OPT = 25, K_DIV_OPT = 26, K_FULL_DIV_OPT = 27, 
-    K_MOD_OPT = 28, K_AECOM_OPT = 29, K_ASSIGN_OPT = 30, K_EQUAL_OPT = 31, 
-    K_NOT_EQUAL_OPT = 32, K_GREAT_OPT = 33, K_LESS_OPT = 34, K_GREAT_EQU_OPT = 35, 
-    K_LESS_EQU_OPT = 36, K_LIKE_EQU_OPT = 37, K_OR_OPT = 38, K_AND_OPT = 39, 
-    COMMA = 40, LBRACK = 41, RBRACK = 42, LSQUBRACK = 43, RSQUBRACK = 44, 
-    SHARP = 45, ADDRESS = 46, DQUOTE = 47, DOT = 48, INTEGER_LITERAL = 49, 
-    FLOAT_LITERAL = 50, IDENTIFIER = 51, WHITESPACE = 52, NEWLINE = 53, 
-    STRING_LITERAL = 54, OTHER_CHAR = 55, TABLE_END = 56, TABLE_ITEM = 57, 
-    TABLE_WS = 58, TABLE_COMMA = 59
+    T__0 = 1, T__1 = 2, T__2 = 3, T__3 = 4, T__4 = 5, T__5 = 6, T__6 = 7, 
+    T__7 = 8, T__8 = 9, T__9 = 10, T__10 = 11, T__11 = 12, T__12 = 13, T__13 = 14, 
+    T__14 = 15, T__15 = 16, T__16 = 17, T__17 = 18, T__18 = 19, T__19 = 20, 
+    T__20 = 21, T__21 = 22, T__22 = 23, T__23 = 24, T__24 = 25, T__25 = 26, 
+    T__26 = 27, T__27 = 28, T__28 = 29, T__29 = 30, T__30 = 31, T__31 = 32, 
+    T__32 = 33, T__33 = 34, T__34 = 35, T__35 = 36, T__36 = 37, T__37 = 38, 
+    T__38 = 39, T__39 = 40, T__40 = 41, T__41 = 42, T__42 = 43, T__43 = 44, 
+    T__44 = 45, T__45 = 46, T__46 = 47, T__47 = 48, T__48 = 49, K_ADD_OPT = 50, 
+    K_SUB_OPT = 51, K_MUL_OPT = 52, K_DIV_OPT = 53, K_FULL_DIV_OPT = 54, 
+    K_MOD_OPT = 55, K_AECOM_OPT = 56, K_ASSIGN_OPT = 57, K_EQUAL_OPT = 58, 
+    K_NOT_EQUAL_OPT = 59, K_GREAT_OPT = 60, K_LESS_OPT = 61, K_GREAT_EQU_OPT = 62, 
+    K_LESS_EQU_OPT = 63, K_LIKE_EQU_OPT = 64, K_OR_OPT = 65, K_AND_OPT = 66, 
+    INTEGER_LITERAL = 67, FLOAT_LITERAL = 68, IDENTIFIER = 69, WHITESPACE = 70, 
+    NEWLINE = 71, STRING_LITERAL = 72, OTHER_CHAR = 73
   };
 
-  enum {
-    TABLE_MODE = 1
-  };
-
-  openeLexer(antlr4::CharStream *input);
-  ~openeLexer();
+  openeLangLexer(antlr4::CharStream *input);
+  ~openeLangLexer();
 
   virtual std::string getGrammarFileName() const override;
   virtual const std::vector<std::string>& getRuleNames() const override;
