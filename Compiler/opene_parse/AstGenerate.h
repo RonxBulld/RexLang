@@ -17,12 +17,6 @@ namespace opene {
         int BuildASTFromCodeWithArgs(const std::string &code, const std::vector<std::string> &args, const std::string &filename, const std::string &toolname);
     };
 
-    namespace tooling {
-        int BuildASTFromCode(const std::string &code, const std::string &filename, const std::string &toolname);
-
-        int BuildASTFromCodeWithArgs(const std::string &code, const std::vector<std::string> &args, const std::string &filename, const std::string &toolname);
-    }
-
 }
 
 #endif //OPENELANGUAGE_ASTGENERATE_H
