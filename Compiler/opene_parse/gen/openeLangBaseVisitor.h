@@ -101,10 +101,6 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitLocal_variable_decl(openeLangParser::Local_variable_declContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
   virtual antlrcpp::Any visitStatement_list(openeLangParser::Statement_listContext *ctx) override {
     return visitChildren(ctx);
   }

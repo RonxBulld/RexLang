@@ -62,8 +62,6 @@ public:
 
     virtual antlrcpp::Any visitParameter_decl(openeLangParser::Parameter_declContext *context) = 0;
 
-    virtual antlrcpp::Any visitLocal_variable_decl(openeLangParser::Local_variable_declContext *context) = 0;
-
     virtual antlrcpp::Any visitStatement_list(openeLangParser::Statement_listContext *context) = 0;
 
     virtual antlrcpp::Any visitConditionStatement(openeLangParser::ConditionStatementContext *context) = 0;

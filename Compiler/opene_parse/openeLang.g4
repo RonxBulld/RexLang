@@ -41,7 +41,8 @@ OTHER_CHAR: .;
 
 
 opene_src
-    : edition_spec NEWLINE
+    : edition_spec
+      NEWLINE
       src_content
       EOF
     ;
@@ -54,7 +55,7 @@ src_content
     ;
 
 program_set_file
-    : library_spec*
+    : ('.支持库' libraries+=IDENTIFIER NEWLINE)*
       prog_set
     ;
 
@@ -90,7 +91,7 @@ edition_spec
 
 struct_declare
     : '.数据类型' name=IDENTIFIER (',' access=IDENTIFIER? (',' table_comment)?)? NEWLINE
-      member_item*
+      ('.成员' struct_mems+=variable_decl)*
       NEWLINE*
     ;
 
@@ -98,49 +99,25 @@ table_comment
     : .*?
     ;
 
-member_item
-    : '.成员' variable_decl
-    ;
-
-library_spec
-    : '.支持库' IDENTIFIER NEWLINE
-    ;
-
 prog_set
     : '.程序集' name=IDENTIFIER (',' base=IDENTIFIER? (',' access=IDENTIFIER? (',' table_comment)?)?)? NEWLINE
-      prog_set_variable_decl_opt
-      sub_program_opt
-    ;
-
-prog_set_variable_decl_opt
-    : prog_set_variable_decl*
-    ;
-
-prog_set_variable_decl
-    : '.程序集变量' variable_decl
+      ('.程序集变量' prog_set_varis+=variable_decl)*
+      (NEWLINE* sub_program NEWLINE*)*
     ;
 
 variable_decl
     : name=IDENTIFIER (',' type=IDENTIFIER? (',' ',' dimension=STRING_LITERAL? (',' table_comment)?)?)? NEWLINE
     ;
 
-sub_program_opt
-    : (NEWLINE* sub_program NEWLINE*)*
-    ;
-
 sub_program
     : '.子程序' name=IDENTIFIER (',' type=IDENTIFIER? (',' access=IDENTIFIER? (',' table_comment)?)?)? NEWLINE
       parameter_decl*
-      local_variable_decl*
+      ('.局部变量' local_vari+=variable_decl)*
       statement_list
     ;
 
 parameter_decl
     : '.参数' name=IDENTIFIER ',' type=IDENTIFIER (',' attributes=IDENTIFIER* (',' table_comment)?)? NEWLINE
-    ;
-
-local_variable_decl
-    : '.局部变量' variable_decl
     ;
 
 statement_list

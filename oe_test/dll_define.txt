@@ -1,0 +1,54 @@
+.版本 2
+
+.DLL命令 进程伪句柄_, 整数型, , "GetCurrentProcess", 公开, 获取当前进程的一个伪句柄  一般是-1
+
+.DLL命令 置线程优先级_, 整数型, , "SetThreadPriority", , SetThreadPriority_
+    .参数 线程句柄, 整数型, , hThread
+    .参数 优先权, 整数型, , nPriority
+
+.DLL命令 启动线程, 整数型, "kernel32", "CreateThread", , 启动线程 CreateThread
+    .参数 lpThreadAttributes, 整数型, , 线程的安全属性，缺省为0
+    .参数 dwStackSize, 整数型, , 线程的堆栈大小，为0时与进程相同
+    .参数 lpStartAddress, 子程序指针, , 线程函数的起始地址
+    .参数 lpParameter, 整数型, , 传递线程的上下文,可以传递一个整数型参数。
+    .参数 dwCreationFlags, 整数型, , 0：创建线程后立即启动，相反的是标志位CREATE_SUSPENDED 4，这样您需要稍后显示地让该线程运行（可设为－1）
+    .参数 lpThreadId, 整数型, 传址, 内核给新生成的线程分配的线程ID
+
+.DLL命令 关闭句柄_, 整数型, "kernel32", "CloseHandle", 公开, 关闭句柄
+    .参数 hObject, 整数型, , 句柄
+
+.DLL命令 退出许可区, , "kernel32", "LeaveCriticalSection", , 退出许可区 LeaveCriticalSection
+    .参数 lpCriticalSection, 关键路段, 传址, lpCriticalSection
+
+.DLL命令 删除许可证, , "kernel32", "DeleteCriticalSection", , 删除许可证 DeleteCriticalSection
+    .参数 lpCriticalSection, 关键路段, 传址, lpCriticalSection
+
+.DLL命令 创建许可证, , "kernel32", "InitializeCriticalSection", , 创建许可证 InitializeCriticalSection
+    .参数 lpCriticalSection, 关键路段, 传址, lpCriticalSection
+
+.DLL命令 进入许可区, , "kernel32", "EnterCriticalSection", , 进入许可区 EnterCriticalSection
+    .参数 lpCriticalSection, 关键路段, 传址, lpCriticalSection
+
+.DLL命令 获取令牌特权, 逻辑型, "advapi32.dll", "AdjustTokenPrivileges"
+    .参数 TokenHandle, 整数型
+    .参数 DisableAllPrivileges, 整数型
+    .参数 NewState, 令牌特权, 传址
+    .参数 BufferLength, 整数型
+    .参数 PreviousState, 令牌特权, 传址
+    .参数 ReturnLength, 整数型, 传址
+
+.DLL命令 恢复权限, 逻辑型, "advapi32.dll", "LookupPrivilegeValueA"
+    .参数 lpSystemName, 文本型
+    .参数 lpName, 文本型
+    .参数 lpLuid, ID, 传址
+
+.DLL命令 打开令牌, 整数型, "advapi32.dll", "OpenProcessToken"
+    .参数 ProcessHandle, 整数型
+    .参数 DesiredAccess, 整数型
+    .参数 TokenHandle, 整数型, 传址
+
+.DLL命令 线程伪句柄_, 整数型, , "GetCurrentThread", 公开, 获取当前线程的一个伪句柄  一般是-2
+
+.DLL命令 置进程优先级_, 逻辑型, , "SetPriorityClass", , 设置进程优先级别SetPriorityClass
+    .参数 进程句柄, 整数型, , 进程句柄hProcess
+    .参数 级别, 整数型, , 级别dwPriorityClass

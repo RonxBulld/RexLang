@@ -7,12 +7,18 @@
 
 #include <string>
 #include <vector>
+#include "opene_parse/AstGenerate.h"
 
 namespace opene {
 
     class SourceManager {};
 
     class OECompilerInstance {
+    private:
+        AstGenerate ast_generate_;
+        std::string instance_name_;
+        std::string parse_code_;
+
     public:
         int setInstanceName(const std::string &name);
 
@@ -20,10 +26,12 @@ namespace opene {
 
         SourceManager &getSourceManager();
 
-        int Run();
+        int run();
     };
 
     namespace tooling {
+        int BuildASTFromFile(const std::string &filename, const std::string &toolname);
+
         int BuildASTFromCode(const std::string &code, const std::string &filename, const std::string &toolname);
 
         int BuildASTFromCodeWithArgs(const std::string &code, const std::vector<std::string> &args, const std::string &filename, const std::string &toolname);

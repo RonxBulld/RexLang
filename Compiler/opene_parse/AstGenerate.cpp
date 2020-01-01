@@ -10,6 +10,15 @@
 #include "gen/openeLangLexer.h"
 #include "gen/openeLangParser.h"
 
+#include "gen/openeLangListener.h"
+#include "gen/openeLangVisitor.h"
+
+namespace opene {
+    class ASTBuilder : public openeLangListener {
+    public:
+    };
+}
+
 namespace opene {
     int AstGenerate::BuildASTFromCode(const std::string &code,
                                       const std::string &filename,
@@ -20,6 +29,10 @@ namespace opene {
         antlr4::CommonTokenStream __token_stream(&__lexer);
         openeLangParser __parser(&__token_stream);
         antlr4::tree::ParseTree* __tree = __parser.opene_src();
+
+        antlr4::tree::ParseTreeWalker parse_tree_walker;
+        ASTBuilder ast_builder;
+        parse_tree_walker.walk(&ast_builder, __tree);
 
         std::cout << __tree->toStringTree(&__parser) << std::endl;
 
