@@ -10,12 +10,26 @@
 #include "gen/openeLangLexer.h"
 #include "gen/openeLangParser.h"
 
-#include "gen/openeLangListener.h"
 #include "gen/openeLangVisitor.h"
 
 namespace opene {
-    class ASTBuilder : public openeLangListener {
+    struct TranslateUnit {
+        unsigned int edition_;
+    };
+}
+
+namespace opene {
+    class ASTBuilder : public openeLangVisitor {
     public:
+        antlrcpp::Any visitOpene_src(openeLangParser::Opene_srcContext *context) override {
+            TranslateUnit translate_unit{0};
+            auto edition_spec_ret = visit(context->edition_spec());
+            if (edition_spec_ret.is<unsigned int>()) {
+                unsigned int edition_number = edition_spec_ret.as<unsigned int>();
+                translate_unit.edition_ = edition_number;
+            }
+            return translate_unit;
+        }
     };
 }
 

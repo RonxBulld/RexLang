@@ -38,7 +38,7 @@ SET(OECompilerParse-Source
         AstGenerate.cpp
         AstGenerate.h
         ${antlr4-demo-GENERATED_SRC}
-        )
+        Diagnostic.cpp Diagnostic.h)
 
 if(NOT CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
     set (flags_1 "-Wno-overloaded-virtual")
