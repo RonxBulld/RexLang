@@ -5,6 +5,6 @@
 #include "oe_driver.h"
 
 int main(int argc, char *argv[]) {
-    opene::tooling::BuildASTFromFile("oe_test/class.txt", "demo");
+    opene::tooling::BuildASTFromFile("oe_test/global_variable.txt", "demo");
     return 0;
 }

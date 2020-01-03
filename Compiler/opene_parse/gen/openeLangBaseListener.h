@@ -54,26 +54,11 @@ public:
   virtual void enterTable_comment(openeLangParser::Table_commentContext * /*ctx*/) override { }
   virtual void exitTable_comment(openeLangParser::Table_commentContext * /*ctx*/) override { }
 
-  virtual void enterMember_item(openeLangParser::Member_itemContext * /*ctx*/) override { }
-  virtual void exitMember_item(openeLangParser::Member_itemContext * /*ctx*/) override { }
-
-  virtual void enterLibrary_spec(openeLangParser::Library_specContext * /*ctx*/) override { }
-  virtual void exitLibrary_spec(openeLangParser::Library_specContext * /*ctx*/) override { }
-
   virtual void enterProg_set(openeLangParser::Prog_setContext * /*ctx*/) override { }
   virtual void exitProg_set(openeLangParser::Prog_setContext * /*ctx*/) override { }
 
-  virtual void enterProg_set_variable_decl_opt(openeLangParser::Prog_set_variable_decl_optContext * /*ctx*/) override { }
-  virtual void exitProg_set_variable_decl_opt(openeLangParser::Prog_set_variable_decl_optContext * /*ctx*/) override { }
-
-  virtual void enterProg_set_variable_decl(openeLangParser::Prog_set_variable_declContext * /*ctx*/) override { }
-  virtual void exitProg_set_variable_decl(openeLangParser::Prog_set_variable_declContext * /*ctx*/) override { }
-
   virtual void enterVariable_decl(openeLangParser::Variable_declContext * /*ctx*/) override { }
   virtual void exitVariable_decl(openeLangParser::Variable_declContext * /*ctx*/) override { }
-
-  virtual void enterSub_program_opt(openeLangParser::Sub_program_optContext * /*ctx*/) override { }
-  virtual void exitSub_program_opt(openeLangParser::Sub_program_optContext * /*ctx*/) override { }
 
   virtual void enterSub_program(openeLangParser::Sub_programContext * /*ctx*/) override { }
   virtual void exitSub_program(openeLangParser::Sub_programContext * /*ctx*/) override { }

@@ -44,19 +44,9 @@ public:
 
     virtual antlrcpp::Any visitTable_comment(openeLangParser::Table_commentContext *context) = 0;
 
-    virtual antlrcpp::Any visitMember_item(openeLangParser::Member_itemContext *context) = 0;
-
-    virtual antlrcpp::Any visitLibrary_spec(openeLangParser::Library_specContext *context) = 0;
-
     virtual antlrcpp::Any visitProg_set(openeLangParser::Prog_setContext *context) = 0;
 
-    virtual antlrcpp::Any visitProg_set_variable_decl_opt(openeLangParser::Prog_set_variable_decl_optContext *context) = 0;
-
-    virtual antlrcpp::Any visitProg_set_variable_decl(openeLangParser::Prog_set_variable_declContext *context) = 0;
-
     virtual antlrcpp::Any visitVariable_decl(openeLangParser::Variable_declContext *context) = 0;
-
-    virtual antlrcpp::Any visitSub_program_opt(openeLangParser::Sub_program_optContext *context) = 0;
 
     virtual antlrcpp::Any visitSub_program(openeLangParser::Sub_programContext *context) = 0;
 

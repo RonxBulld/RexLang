@@ -12,6 +12,9 @@ namespace opene {
     using antlr4::Recognizer;
     using antlr4::Token;
 
+    Diagnostic::Diagnostic() : antlr4::BaseErrorListener() {
+    }
+
     void Diagnostic::syntaxError(Recognizer *recognizer, Token *offendingSymbol, size_t line, size_t charPositionInLine, const std::string &msg, std::exception_ptr e) {
 //        std::vector<std::string> stack = dynamic_cast<openeLangParser*>(recognizer)->getRuleInvocationStack();
 //        std::reverse(stack.begin(), stack.end());

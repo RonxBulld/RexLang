@@ -8,9 +8,12 @@
 #include "BaseErrorListener.h"
 
 namespace opene {
-    class Diagnostic : antlr4::BaseErrorListener {
+    class Diagnostic : public antlr4::BaseErrorListener {
     private:
         void ReportToStdError(const std::vector<std::string> &stack, size_t line, size_t charPositionInLine, const std::string &msg);
+
+    public:
+        Diagnostic();
 
     public:
         void syntaxError(antlr4::Recognizer *recognizer, antlr4::Token *offendingSymbol, size_t line, size_t charPositionInLine, const std::string &msg, std::exception_ptr e) override;

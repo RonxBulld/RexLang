@@ -52,26 +52,11 @@ public:
   virtual void enterTable_comment(openeLangParser::Table_commentContext *ctx) = 0;
   virtual void exitTable_comment(openeLangParser::Table_commentContext *ctx) = 0;
 
-  virtual void enterMember_item(openeLangParser::Member_itemContext *ctx) = 0;
-  virtual void exitMember_item(openeLangParser::Member_itemContext *ctx) = 0;
-
-  virtual void enterLibrary_spec(openeLangParser::Library_specContext *ctx) = 0;
-  virtual void exitLibrary_spec(openeLangParser::Library_specContext *ctx) = 0;
-
   virtual void enterProg_set(openeLangParser::Prog_setContext *ctx) = 0;
   virtual void exitProg_set(openeLangParser::Prog_setContext *ctx) = 0;
 
-  virtual void enterProg_set_variable_decl_opt(openeLangParser::Prog_set_variable_decl_optContext *ctx) = 0;
-  virtual void exitProg_set_variable_decl_opt(openeLangParser::Prog_set_variable_decl_optContext *ctx) = 0;
-
-  virtual void enterProg_set_variable_decl(openeLangParser::Prog_set_variable_declContext *ctx) = 0;
-  virtual void exitProg_set_variable_decl(openeLangParser::Prog_set_variable_declContext *ctx) = 0;
-
   virtual void enterVariable_decl(openeLangParser::Variable_declContext *ctx) = 0;
   virtual void exitVariable_decl(openeLangParser::Variable_declContext *ctx) = 0;
-
-  virtual void enterSub_program_opt(openeLangParser::Sub_program_optContext *ctx) = 0;
-  virtual void exitSub_program_opt(openeLangParser::Sub_program_optContext *ctx) = 0;
 
   virtual void enterSub_program(openeLangParser::Sub_programContext *ctx) = 0;
   virtual void exitSub_program(openeLangParser::Sub_programContext *ctx) = 0;

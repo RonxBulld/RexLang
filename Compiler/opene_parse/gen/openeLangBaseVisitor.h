@@ -65,31 +65,11 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitMember_item(openeLangParser::Member_itemContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitLibrary_spec(openeLangParser::Library_specContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
   virtual antlrcpp::Any visitProg_set(openeLangParser::Prog_setContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitProg_set_variable_decl_opt(openeLangParser::Prog_set_variable_decl_optContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitProg_set_variable_decl(openeLangParser::Prog_set_variable_declContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
   virtual antlrcpp::Any visitVariable_decl(openeLangParser::Variable_declContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitSub_program_opt(openeLangParser::Sub_program_optContext *ctx) override {
     return visitChildren(ctx);
   }
 
