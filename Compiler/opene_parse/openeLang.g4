@@ -96,7 +96,7 @@ struct_declare
     ;
 
 table_comment
-    : .*?
+    : comment=.*?
     ;
 
 prog_set

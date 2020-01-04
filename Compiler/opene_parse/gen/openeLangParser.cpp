@@ -1087,7 +1087,7 @@ openeLangParser::Table_commentContext* openeLangParser::table_comment() {
     while (alt != 1 && alt != atn::ATN::INVALID_ALT_NUMBER) {
       if (alt == 1 + 1) {
         setState(189);
-        matchWildcard(); 
+        dynamic_cast<Table_commentContext *>(_localctx)->comment = matchWildcard(); 
       }
       setState(194);
       _errHandler->sync(this);

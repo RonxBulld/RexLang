@@ -13,19 +13,26 @@ namespace opene {
         unsigned int edition_;
     };
 
-    struct DllCommandDecl {
-        std::string api_name_;
-        std::string type_;
-        std::string file_;
-        std::string dll_api_name_;
-        std::string comment_;
-    };
-
     struct GlobalVariableDecl {
         std::string name_;
         std::string type_;
         std::string access_;
         std::string dimension_;
+        std::string comment_;
+    };
+
+    struct StructureDecl {
+        std::string name_;
+        std::string access_;
+        std::string comment_;
+        // TODO: 成员定义
+    };
+
+    struct DllCommandDecl {
+        std::string api_name_;
+        std::string type_;
+        std::string file_;
+        std::string dll_api_name_;
         std::string comment_;
     };
 

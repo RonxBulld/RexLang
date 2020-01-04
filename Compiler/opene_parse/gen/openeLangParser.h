@@ -297,6 +297,7 @@ public:
 
   class  Table_commentContext : public antlr4::ParserRuleContext {
   public:
+    antlr4::Token *comment = nullptr;;
     Table_commentContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
 

@@ -16,17 +16,31 @@
 
 namespace opene {
     class ASTBuilder : public openeLangVisitor {
+    private:
+        std::string GetTextIfExist(const antlr4::Token *token, const std::string &hint = "") const {
+            if (token) {
+                return token->getText();
+            } else {
+                return hint;
+            }
+        }
+
+        template<typename T>
+        T GetFromCtxIfExist(antlr4::ParserRuleContext *ctx, const T &hint = T()) {
+            if (ctx) {
+                auto ret = visit(ctx);
+                if (ret.is<T>()) {
+                    return ret.as<T>();
+                }
+            }
+            return hint;
+        }
+
     public:
         antlrcpp::Any visitOpene_src(openeLangParser::Opene_srcContext *context) override {
             TranslateUnit translate_unit{0};
             // 分析版本号
-            if (context->edition_spec()) {
-                auto edition_spec_ret = visit(context->edition_spec());
-                unsigned int edition_number = edition_spec_ret.as<unsigned int>();
-                translate_unit.edition_ = edition_number;
-            } else {
-                // TODO: ERROR.
-            }
+            translate_unit.edition_ = GetFromCtxIfExist<unsigned int>(context->edition_spec(), 0);
             // 分析文件具体内容
             auto content_ret = visit(context->src_content());
             // TODO: 将文件内容加入翻译单元
@@ -52,7 +66,7 @@ namespace opene {
             std::vector<antlr4::Token *> support_libraries = context->libraries;
             ProgramUnit program_unit;
             for (antlr4::Token *token : support_libraries) {
-                program_unit.libraries_.push_back(token->getText());
+                program_unit.libraries_.push_back(GetTextIfExist(token));
             }
             auto progs = visit(context->prog_set());
             // TODO: 设置程序定义
@@ -87,10 +101,10 @@ namespace opene {
 
         antlrcpp::Any visitDll_command(openeLangParser::Dll_commandContext *context) override {
             DllCommandDecl dll_command_decl;
-            dll_command_decl.api_name_ = context->name->getText();
-            dll_command_decl.type_ = context->type->getText();
-            dll_command_decl.file_ = context->file->getText();
-            dll_command_decl.dll_api_name_ = context->cmd->getText();
+            dll_command_decl.api_name_ = GetTextIfExist(context->name);
+            dll_command_decl.type_ = GetTextIfExist(context->type);
+            dll_command_decl.file_ = GetTextIfExist(context->file);
+            dll_command_decl.dll_api_name_ = GetTextIfExist(context->cmd);
             if (context->table_comment()) {
                 auto comment_ret = visit(context->table_comment());
                 // TODO: 设置注释内容
@@ -113,19 +127,11 @@ namespace opene {
 
         antlrcpp::Any visitGlobal_variable_item(openeLangParser::Global_variable_itemContext *context) override {
             GlobalVariableDecl global_variable_decl;
-            global_variable_decl.name_ = context->name->getText();
-            if (context->type) {
-                global_variable_decl.type_ = context->type->getText();
-            }
-            if (context->dimension) {
-                global_variable_decl.dimension_ = context->dimension->getText();
-            }
-            if (context->access) {
-                global_variable_decl.access_ = context->access->getText();
-            }
-            if (context->table_comment()) {
-                global_variable_decl.comment_ = context->table_comment()->getText();
-            }
+            global_variable_decl.name_ = GetTextIfExist(context->name);
+            global_variable_decl.type_ = GetTextIfExist(context->type);
+            global_variable_decl.dimension_ = GetTextIfExist(context->dimension);
+            global_variable_decl.access_ = GetTextIfExist(context->access);
+            global_variable_decl.comment_ = GetFromCtxIfExist<std::string>(context->table_comment());
             return global_variable_decl;
         }
 
@@ -134,13 +140,18 @@ namespace opene {
         }
 
         antlrcpp::Any visitStruct_declare(openeLangParser::Struct_declareContext *context) override {
-            // TODO: 需要实现
-            return antlrcpp::Any();
+            StructureDecl structure_decl;
+            structure_decl.name_ = GetTextIfExist(context->name);
+            structure_decl.access_ = GetTextIfExist(context->access);
+            structure_decl.comment_ = GetFromCtxIfExist<std::string>(context->table_comment());
+            for (auto *mem_ctx : context->struct_mems) {
+                // TODO: 需要添加成员实现
+            }
+            return structure_decl;
         }
 
         antlrcpp::Any visitTable_comment(openeLangParser::Table_commentContext *context) override {
-            // TODO: 需要实现
-            return antlrcpp::Any();
+            return GetTextIfExist(context->comment);
         }
 
         antlrcpp::Any visitProg_set(openeLangParser::Prog_setContext *context) override {
