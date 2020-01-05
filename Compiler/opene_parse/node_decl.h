@@ -8,6 +8,7 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <ctime>
 
 namespace opene {
     typedef struct TranslateUnit* TranslateUnitPtr;
@@ -30,6 +31,16 @@ namespace opene {
     typedef struct HierarchyIdentifier* HierarchyIdentifierPtr;
     typedef struct NameComponent* NameComponentPtr;
     typedef struct FunctionCall* FunctionCallPtr;
+    typedef struct UnaryExpression* UnaryExpressionPtr;
+    typedef struct BinaryExpression* BinaryExpressionPtr;
+    typedef struct _OperatorExpression* _OperatorExpressionPtr;
+    typedef struct ValueOfDataSet* ValueOfDataSetPtr;
+    typedef struct ValueOfDatetime* ValueOfDatetimePtr;
+    typedef struct FuncAddrExpression* FuncAddrExpressionPtr;
+    typedef struct ResourceRefExpression* ResourceRefExpressionPtr;
+    typedef struct ValueOfBool* ValueOfBoolPtr;
+    typedef struct ValueOfDecimal* ValueOfDecimalPtr;
+    typedef struct ValueOfString* ValueOfStringPtr;
 
     struct TranslateUnit {
         unsigned int edition_ = 0;
@@ -115,6 +126,51 @@ namespace opene {
     struct FunctionCall : public Expression {
         NameComponentPtr function_name_ = nullptr;
         std::vector<ExpressionPtr> arguments_;
+    };
+
+    struct _OperatorExpression : public Expression {
+        std::string operator_;
+    };
+
+    struct UnaryExpression : public _OperatorExpression {
+        ExpressionPtr op_value_ = nullptr;
+    };
+
+    struct BinaryExpression : public _OperatorExpression {
+        ExpressionPtr lhs_ = nullptr;
+        ExpressionPtr rhs_ = nullptr;
+    };
+
+    struct ValueOfDataSet : public Expression {
+        std::vector<ExpressionPtr> elements_;
+    };
+
+    struct ValueOfDatetime : public Expression {
+        time_t time_ = 0;
+    };
+
+    struct ResourceRefExpression : public Expression {
+        std::string resource_name_;
+    };
+
+    struct FuncAddrExpression : public Expression {
+        std::string function_name_;
+    };
+
+    struct ValueOfBool : public Expression {
+        bool value_ = false;
+    };
+
+    struct ValueOfDecimal : public Expression {
+        union {
+            int int_val_ = 0;
+            float float_val_;
+        };
+        enum type { kInt, kFloat } type_ = type::kInt;
+    };
+
+    struct ValueOfString : public Expression {
+        std::string string_literal_;
     };
 
     struct SubProgDecl {

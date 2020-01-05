@@ -822,9 +822,12 @@ public:
   ExpressionContext* expression(int precedence);
   class  Data_set_valueContext : public antlr4::ParserRuleContext {
   public:
+    openeLangParser::ExpressionContext *expressionContext = nullptr;;
+    std::vector<ExpressionContext *> elems;;
     Data_set_valueContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    ExpressionContext *expression();
+    std::vector<ExpressionContext *> expression();
+    ExpressionContext* expression(size_t i);
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -951,6 +954,8 @@ public:
     DatetimeSeparateByChineseContext(Datetime_value_coreContext *ctx);
 
     antlr4::Token *year = nullptr;
+    antlr4::Token *month = nullptr;
+    antlr4::Token *day = nullptr;
     antlr4::Token *hour = nullptr;
     antlr4::Token *minute = nullptr;
     antlr4::Token *second = nullptr;
@@ -996,15 +1001,37 @@ public:
 
   class  Bool_valueContext : public antlr4::ParserRuleContext {
   public:
-    antlr4::Token *bval = nullptr;;
     Bool_valueContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+   
+    Bool_valueContext() = default;
+    void copyFrom(Bool_valueContext *context);
+    using antlr4::ParserRuleContext::copyFrom;
+
     virtual size_t getRuleIndex() const override;
 
+   
+  };
+
+  class  BoolValueTrueContext : public Bool_valueContext {
+  public:
+    BoolValueTrueContext(Bool_valueContext *ctx);
+
+    antlr4::Token *bval = nullptr;
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
-   
+  };
+
+  class  BoolValueFalseContext : public Bool_valueContext {
+  public:
+    BoolValueFalseContext(Bool_valueContext *ctx);
+
+    antlr4::Token *bval = nullptr;
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
   };
 
   Bool_valueContext* bool_value();

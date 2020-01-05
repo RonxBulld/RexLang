@@ -222,7 +222,7 @@ expression
     ;
 
 data_set_value
-    : '{' expression '}'
+    : '{' (elems+=expression (',' elems+=expression)*)? '}'
     ;
 
 datetime_value
@@ -232,7 +232,7 @@ datetime_value
 datetime_value_core
     : INTEGER_LITERAL
                                                                         # DatetimePureNumber
-    | year=INTEGER_LITERAL '年' INTEGER_LITERAL '月' INTEGER_LITERAL '日'
+    | year=INTEGER_LITERAL '年' month=INTEGER_LITERAL '月' day=INTEGER_LITERAL '日'
       (hour=INTEGER_LITERAL '时' minute=INTEGER_LITERAL '分' second=INTEGER_LITERAL '秒')?
                                                                         # DatetimeSeparateByChinese
     | year=INTEGER_LITERAL '/' month=INTEGER_LITERAL '/' day=INTEGER_LITERAL
@@ -258,8 +258,8 @@ func_ptr
     ;
 
 bool_value
-    : bval='真'
-    | bval='假'
+    : bval='真'      # BoolValueTrue
+    | bval='假'      # BoolValueFalse
     ;
 
 number

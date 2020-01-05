@@ -157,8 +157,11 @@ public:
   virtual void enterFunc_ptr(openeLangParser::Func_ptrContext *ctx) = 0;
   virtual void exitFunc_ptr(openeLangParser::Func_ptrContext *ctx) = 0;
 
-  virtual void enterBool_value(openeLangParser::Bool_valueContext *ctx) = 0;
-  virtual void exitBool_value(openeLangParser::Bool_valueContext *ctx) = 0;
+  virtual void enterBoolValueTrue(openeLangParser::BoolValueTrueContext *ctx) = 0;
+  virtual void exitBoolValueTrue(openeLangParser::BoolValueTrueContext *ctx) = 0;
+
+  virtual void enterBoolValueFalse(openeLangParser::BoolValueFalseContext *ctx) = 0;
+  virtual void exitBoolValueFalse(openeLangParser::BoolValueFalseContext *ctx) = 0;
 
   virtual void enterInt(openeLangParser::IntContext *ctx) = 0;
   virtual void exitInt(openeLangParser::IntContext *ctx) = 0;

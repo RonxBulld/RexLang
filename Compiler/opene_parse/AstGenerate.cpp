@@ -2,6 +2,7 @@
 // Created by Administrator on 2019/12/13.
 //
 
+#include <cstring>
 #include <ANTLRFileStream.h>
 #include <CommonTokenStream.h>
 #include <tree/ParseTree.h>
@@ -20,6 +21,24 @@ namespace opene {
         std::string GetTextIfExist(const antlr4::Token *token, const std::string &hint = "") const {
             if (token) {
                 return token->getText();
+            } else {
+                return hint;
+            }
+        }
+
+        long GetLongIfExist(const antlr4::Token *token, int hint = 0) const {
+            if (token) {
+                std::string __v = token->getText();
+                return strtol(__v.c_str(), nullptr, 10);
+            } else {
+                return hint;
+            }
+        }
+
+        float GetFloatIfExist(const antlr4::Token *token, float hint = 0.0f) const {
+            if (token) {
+                std::string __v = token->getText();
+                return strtof(__v.c_str(), nullptr);
             } else {
                 return hint;
             }
@@ -312,8 +331,13 @@ namespace opene {
         }
 
         antlrcpp::Any visitFuncCall(openeLangParser::FuncCallContext *context) override {
-            // TODO: 需要实现
-            return antlrcpp::Any();
+            FunctionCallPtr function_call = new FunctionCall;
+            function_call->function_name_ = GetFromCtxIfExist<NameComponentPtr>(context->name_component());
+            for (auto *arg_ctx : context->arguments) {
+                ExpressionPtr arg_expr = GetFromCtxIfExist<ExpressionPtr>(arg_ctx);
+                function_call->arguments_.push_back(arg_expr);
+            }
+            return function_call;
         }
 
         antlrcpp::Any visitIdentifier(openeLangParser::IdentifierContext *context) override {
@@ -330,28 +354,34 @@ namespace opene {
         }
 
         antlrcpp::Any visitBracket(openeLangParser::BracketContext *context) override {
-            // TODO: 需要实现
-            return antlrcpp::Any();
+            return GetFromCtxIfExist<ExpressionPtr>(context->expression());
         }
 
         antlrcpp::Any visitOptElement(openeLangParser::OptElementContext *context) override {
-            // TODO: 需要实现
-            return antlrcpp::Any();
+            return GetFromCtxIfExist<ExpressionPtr>(context->getRuleContext<antlr4::ParserRuleContext>(0));
         }
 
         antlrcpp::Any visitBinaryExpr(openeLangParser::BinaryExprContext *context) override {
-            // TODO: 需要实现
-            return antlrcpp::Any();
+            BinaryExpressionPtr binary_expression = new BinaryExpression;
+            binary_expression->operator_ = GetTextIfExist(context->opt);
+            binary_expression->lhs_ = GetFromCtxIfExist<ExpressionPtr>(context->lval);
+            binary_expression->rhs_ = GetFromCtxIfExist<ExpressionPtr>(context->rval);
+            return binary_expression;
         }
 
         antlrcpp::Any visitUnaryExpr(openeLangParser::UnaryExprContext *context) override {
-            // TODO: 需要实现
-            return antlrcpp::Any();
+            UnaryExpressionPtr unary_expression = new UnaryExpression;
+            unary_expression->operator_ = GetTextIfExist(context->opt);
+            unary_expression->op_value_ = GetFromCtxIfExist<ExpressionPtr>(context->expression());
+            return unary_expression;
         }
 
         antlrcpp::Any visitData_set_value(openeLangParser::Data_set_valueContext *context) override {
-            // TODO: 需要实现
-            return antlrcpp::Any();
+            ValueOfDataSetPtr value_of_data_set = new ValueOfDataSet;
+            for (auto *elem_ctx : context->elems) {
+                value_of_data_set->elements_.push_back(GetFromCtxIfExist<ExpressionPtr>(elem_ctx));
+            }
+            return value_of_data_set;
         }
 
         antlrcpp::Any visitDatetime_value(openeLangParser::Datetime_valueContext *context) override {
@@ -359,66 +389,136 @@ namespace opene {
             return antlrcpp::Any();
         }
 
+        ValueOfDatetimePtr TimeNodeBuilder(time_t time) {
+            ValueOfDatetimePtr value_of_datetime = new ValueOfDatetime;
+            value_of_datetime->time_ = time;
+            return value_of_datetime;
+        }
+
         antlrcpp::Any visitDatetimePureNumber(openeLangParser::DatetimePureNumberContext *context) override {
-            // TODO: 需要实现
-            return antlrcpp::Any();
+            std::string time_str = GetTextIfExist(context->INTEGER_LITERAL()->getSymbol());
+            return TimeNodeBuilder(strtoul(time_str.c_str(), nullptr, 10));
+        }
+
+        tm TimeBuilder(unsigned year, unsigned month, unsigned day, unsigned hour, unsigned minute, unsigned second) {
+            tm new_time;
+            memset(&new_time, '\0', sizeof(tm));
+            new_time.tm_year = year;
+            new_time.tm_mon = month;
+            new_time.tm_mday = day;
+            new_time.tm_hour = hour;
+            new_time.tm_min = minute;
+            new_time.tm_sec = second;
+            return new_time;
+        }
+
+        ValueOfDatetimePtr TimeNodeBuilder(tm && stm) {
+            return TimeNodeBuilder(mktime(&stm));
         }
 
         antlrcpp::Any visitDatetimeSeparateByChinese(openeLangParser::DatetimeSeparateByChineseContext *context) override {
-            // TODO: 需要实现
-            return antlrcpp::Any();
+            ValueOfDatetimePtr new_time = TimeNodeBuilder(TimeBuilder(
+                    GetLongIfExist(context->year),
+                    GetLongIfExist(context->month),
+                    GetLongIfExist(context->day),
+                    GetLongIfExist(context->hour),
+                    GetLongIfExist(context->minute),
+                    GetLongIfExist(context->second)
+            ));
+            return new_time;
         }
 
         antlrcpp::Any visitDatetimeSeparateBySlash(openeLangParser::DatetimeSeparateBySlashContext *context) override {
-            // TODO: 需要实现
-            return antlrcpp::Any();
+            ValueOfDatetimePtr new_time = TimeNodeBuilder(TimeBuilder(
+                    GetLongIfExist(context->year),
+                    GetLongIfExist(context->month),
+                    GetLongIfExist(context->day),
+                    GetLongIfExist(context->hour),
+                    GetLongIfExist(context->minute),
+                    GetLongIfExist(context->second)
+            ));
+            return new_time;
         }
 
         antlrcpp::Any visitDatetimeSeparateBySlashColon(openeLangParser::DatetimeSeparateBySlashColonContext *context) override {
-            // TODO: 需要实现
-            return antlrcpp::Any();
+            ValueOfDatetimePtr new_time = TimeNodeBuilder(TimeBuilder(
+                    GetLongIfExist(context->year),
+                    GetLongIfExist(context->month),
+                    GetLongIfExist(context->day),
+                    GetLongIfExist(context->hour),
+                    GetLongIfExist(context->minute),
+                    GetLongIfExist(context->second)
+            ));
+            return new_time;
         }
 
         antlrcpp::Any visitDatetimeSeparateByBar(openeLangParser::DatetimeSeparateByBarContext *context) override {
-            // TODO: 需要实现
-            return antlrcpp::Any();
+            ValueOfDatetimePtr new_time = TimeNodeBuilder(TimeBuilder(
+                    GetLongIfExist(context->year),
+                    GetLongIfExist(context->month),
+                    GetLongIfExist(context->day),
+                    GetLongIfExist(context->hour),
+                    GetLongIfExist(context->minute),
+                    GetLongIfExist(context->second)
+            ));
+            return new_time;
         }
 
         antlrcpp::Any visitDatetimeSeparateByBarColon(openeLangParser::DatetimeSeparateByBarColonContext *context) override {
-            // TODO: 需要实现
-            return antlrcpp::Any();
+            ValueOfDatetimePtr new_time = TimeNodeBuilder(TimeBuilder(
+                    GetLongIfExist(context->year),
+                    GetLongIfExist(context->month),
+                    GetLongIfExist(context->day),
+                    GetLongIfExist(context->hour),
+                    GetLongIfExist(context->minute),
+                    GetLongIfExist(context->second)
+            ));
+            return new_time;
         }
 
         antlrcpp::Any visitMacro_value(openeLangParser::Macro_valueContext *context) override {
-            // TODO: 需要实现
-            return antlrcpp::Any();
+            ResourceRefExpressionPtr resource_ref_expression = new ResourceRefExpression;
+            resource_ref_expression->resource_name_ = GetTextIfExist(context->IDENTIFIER()->getSymbol());
+            return resource_ref_expression;
         }
 
         antlrcpp::Any visitFunc_ptr(openeLangParser::Func_ptrContext *context) override {
-            // TODO: 需要实现
-            return antlrcpp::Any();
+            FuncAddrExpressionPtr func_addr_expression = new FuncAddrExpression;
+            func_addr_expression->function_name_ = GetTextIfExist(context->IDENTIFIER()->getSymbol());
+            return func_addr_expression;
         }
 
-        antlrcpp::Any visitBool_value(openeLangParser::Bool_valueContext *context) override {
-            // TODO: 需要实现
-            return antlrcpp::Any();
+        antlrcpp::Any visitBoolValueTrue(openeLangParser::BoolValueTrueContext *context) override {
+            ValueOfBoolPtr value_of_bool = new ValueOfBool;
+            value_of_bool->value_ = true;
+            return value_of_bool;
+        }
+
+        antlrcpp::Any visitBoolValueFalse(openeLangParser::BoolValueFalseContext *context) override {
+            ValueOfBoolPtr value_of_bool = new ValueOfBool;
+            value_of_bool->value_ = false;
+            return value_of_bool;
         }
 
         antlrcpp::Any visitInt(openeLangParser::IntContext *context) override {
-            // TODO: 需要实现
-            return antlrcpp::Any();
+            ValueOfDecimalPtr value_of_decimal = new ValueOfDecimal;
+            value_of_decimal->int_val_ = GetLongIfExist(context->INTEGER_LITERAL()->getSymbol());
+            value_of_decimal->type_ = ValueOfDecimal::type::kInt;
+            return value_of_decimal;
         }
 
         antlrcpp::Any visitFloat(openeLangParser::FloatContext *context) override {
-            // TODO: 需要实现
-            return antlrcpp::Any();
+            ValueOfDecimalPtr value_of_decimal = new ValueOfDecimal;
+            value_of_decimal->float_val_ = GetFloatIfExist(context->FLOAT_LITERAL()->getSymbol());
+            value_of_decimal->type_ = ValueOfDecimal::type::kFloat;
+            return value_of_decimal;
         }
 
         antlrcpp::Any visitString_value(openeLangParser::String_valueContext *context) override {
-            // TODO: 需要实现
-            return antlrcpp::Any();
+            ValueOfStringPtr value_of_string = new ValueOfString;
+            value_of_string->string_literal_ = GetTextIfExist(context->STRING_LITERAL()->getSymbol());
+            return value_of_string;
         }
-
 
     };
 }

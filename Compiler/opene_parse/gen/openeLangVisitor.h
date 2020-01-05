@@ -114,7 +114,9 @@ public:
 
     virtual antlrcpp::Any visitFunc_ptr(openeLangParser::Func_ptrContext *context) = 0;
 
-    virtual antlrcpp::Any visitBool_value(openeLangParser::Bool_valueContext *context) = 0;
+    virtual antlrcpp::Any visitBoolValueTrue(openeLangParser::BoolValueTrueContext *context) = 0;
+
+    virtual antlrcpp::Any visitBoolValueFalse(openeLangParser::BoolValueFalseContext *context) = 0;
 
     virtual antlrcpp::Any visitInt(openeLangParser::IntContext *context) = 0;
 

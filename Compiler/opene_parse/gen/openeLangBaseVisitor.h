@@ -205,7 +205,11 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitBool_value(openeLangParser::Bool_valueContext *ctx) override {
+  virtual antlrcpp::Any visitBoolValueTrue(openeLangParser::BoolValueTrueContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitBoolValueFalse(openeLangParser::BoolValueFalseContext *ctx) override {
     return visitChildren(ctx);
   }
 
