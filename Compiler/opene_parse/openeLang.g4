@@ -102,7 +102,7 @@ table_comment
 prog_set
     : '.程序集' name=IDENTIFIER (',' base=IDENTIFIER? (',' access=IDENTIFIER? (',' table_comment)?)?)? NEWLINE
       ('.程序集变量' prog_set_varis+=variable_decl)*
-      (NEWLINE* sub_program NEWLINE*)*
+      (NEWLINE* functions+=sub_program NEWLINE*)*
     ;
 
 variable_decl
@@ -111,17 +111,17 @@ variable_decl
 
 sub_program
     : '.子程序' name=IDENTIFIER (',' type=IDENTIFIER? (',' access=IDENTIFIER? (',' table_comment)?)?)? NEWLINE
-      parameter_decl*
+      (params+=parameter_decl)*
       ('.局部变量' local_vari+=variable_decl)*
       statement_list
     ;
 
 parameter_decl
-    : '.参数' name=IDENTIFIER ',' type=IDENTIFIER (',' attributes=IDENTIFIER* (',' table_comment)?)? NEWLINE
+    : '.参数' name=IDENTIFIER ',' type=IDENTIFIER (',' (attributes+=IDENTIFIER)* (',' table_comment)?)? NEWLINE
     ;
 
 statement_list
-    : (statement? NEWLINE)*
+    : (stmts+=statement? NEWLINE)*
     ;
 
 statement
@@ -133,11 +133,11 @@ statement
     ;
 
 switch_statement
-    : '.判断开始' '(' condition_expr=expression ')' NEWLINE
-      cond_body=statement_list
+    : '.判断开始' '(' major_condition_expr=expression ')' NEWLINE
+      major_cond_body=statement_list
       (
-        '.判断' '(' condition_expr=expression ')' NEWLINE
-        cond_body=statement_list
+        '.判断' '(' minor_condition_expr+=expression ')' NEWLINE
+        minor_cond_body+=statement_list
       )*
       '.默认' NEWLINE
       default_body=statement_list
@@ -150,12 +150,12 @@ loop_statement
       '.判断循环尾' '(' ')'
                                                                                         # While
 
-    | '.计次循环首' '(' condition_expr=expression ',' loop_variable=IDENTIFIER? ')' NEWLINE
+    | '.计次循环首' '(' times_expr=expression ',' loop_variable=IDENTIFIER? ')' NEWLINE
       loop_body=statement_list
       '.计次循环尾' '(' ')'
                                                                                         # RangeFor
 
-    | '.变量循环首' '(' loop_start=expression ',' loop_end=expression ',' loop_step=expression (',' loop_variable=expression)? ')' NEWLINE
+    | '.变量循环首' '(' loop_start=expression ',' loop_end=expression ',' loop_step=expression (',' loop_variable=hierarchy_identifier)? ')' NEWLINE
       loop_body=statement_list
       '.变量循环尾' '(' ')'
                                                                                         # For
@@ -179,13 +179,13 @@ condition_statement
     ;
 
 hierarchy_identifier
-    : name_component ('.' name_component)*
+    : components+=name_component ('.' components+=name_component)*
     ;
 
 name_component
-    : IDENTIFIER                                                # Identifier
-    | name_component '(' expression? (',' expression?)* ')'     # FuncCall
-    | name_component '[' expression ']'                         # ArrayIndex
+    : IDENTIFIER                                                                    # Identifier
+    | name_component '(' arguments+=expression? (',' arguments+=expression?)* ')'   # FuncCall
+    | name_component '[' expression ']'                                             # ArrayIndex
     ;
 
 expression

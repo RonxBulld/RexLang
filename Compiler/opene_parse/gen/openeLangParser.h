@@ -317,16 +317,18 @@ public:
     antlr4::Token *access = nullptr;;
     openeLangParser::Variable_declContext *variable_declContext = nullptr;;
     std::vector<Variable_declContext *> prog_set_varis;;
+    openeLangParser::Sub_programContext *sub_programContext = nullptr;;
+    std::vector<Sub_programContext *> functions;;
     Prog_setContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     std::vector<antlr4::tree::TerminalNode *> NEWLINE();
     antlr4::tree::TerminalNode* NEWLINE(size_t i);
     std::vector<antlr4::tree::TerminalNode *> IDENTIFIER();
     antlr4::tree::TerminalNode* IDENTIFIER(size_t i);
-    std::vector<Sub_programContext *> sub_program();
-    Sub_programContext* sub_program(size_t i);
     std::vector<Variable_declContext *> variable_decl();
     Variable_declContext* variable_decl(size_t i);
+    std::vector<Sub_programContext *> sub_program();
+    Sub_programContext* sub_program(size_t i);
     Table_commentContext *table_comment();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -365,6 +367,8 @@ public:
     antlr4::Token *name = nullptr;;
     antlr4::Token *type = nullptr;;
     antlr4::Token *access = nullptr;;
+    openeLangParser::Parameter_declContext *parameter_declContext = nullptr;;
+    std::vector<Parameter_declContext *> params;;
     openeLangParser::Variable_declContext *variable_declContext = nullptr;;
     std::vector<Variable_declContext *> local_vari;;
     Sub_programContext(antlr4::ParserRuleContext *parent, size_t invokingState);
@@ -392,7 +396,8 @@ public:
   public:
     antlr4::Token *name = nullptr;;
     antlr4::Token *type = nullptr;;
-    antlr4::Token *attributes = nullptr;;
+    antlr4::Token *identifierToken = nullptr;;
+    std::vector<antlr4::Token *> attributes;;
     Parameter_declContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *NEWLINE();
@@ -411,6 +416,8 @@ public:
 
   class  Statement_listContext : public antlr4::ParserRuleContext {
   public:
+    openeLangParser::StatementContext *statementContext = nullptr;;
+    std::vector<StatementContext *> stmts;;
     Statement_listContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     std::vector<antlr4::tree::TerminalNode *> NEWLINE();
@@ -502,8 +509,12 @@ public:
 
   class  Switch_statementContext : public antlr4::ParserRuleContext {
   public:
-    openeLangParser::ExpressionContext *condition_expr = nullptr;;
-    openeLangParser::Statement_listContext *cond_body = nullptr;;
+    openeLangParser::ExpressionContext *major_condition_expr = nullptr;;
+    openeLangParser::Statement_listContext *major_cond_body = nullptr;;
+    openeLangParser::ExpressionContext *expressionContext = nullptr;;
+    std::vector<ExpressionContext *> minor_condition_expr;;
+    openeLangParser::Statement_listContext *statement_listContext = nullptr;;
+    std::vector<Statement_listContext *> minor_cond_body;;
     openeLangParser::Statement_listContext *default_body = nullptr;;
     Switch_statementContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
@@ -540,7 +551,7 @@ public:
   public:
     RangeForContext(Loop_statementContext *ctx);
 
-    openeLangParser::ExpressionContext *condition_expr = nullptr;
+    openeLangParser::ExpressionContext *times_expr = nullptr;
     antlr4::Token *loop_variable = nullptr;
     openeLangParser::Statement_listContext *loop_body = nullptr;
     antlr4::tree::TerminalNode *NEWLINE();
@@ -560,12 +571,13 @@ public:
     openeLangParser::ExpressionContext *loop_start = nullptr;
     openeLangParser::ExpressionContext *loop_end = nullptr;
     openeLangParser::ExpressionContext *loop_step = nullptr;
-    openeLangParser::ExpressionContext *loop_variable = nullptr;
+    openeLangParser::Hierarchy_identifierContext *loop_variable = nullptr;
     openeLangParser::Statement_listContext *loop_body = nullptr;
     antlr4::tree::TerminalNode *NEWLINE();
     std::vector<ExpressionContext *> expression();
     ExpressionContext* expression(size_t i);
     Statement_listContext *statement_list();
+    Hierarchy_identifierContext *hierarchy_identifier();
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
 
@@ -651,6 +663,8 @@ public:
 
   class  Hierarchy_identifierContext : public antlr4::ParserRuleContext {
   public:
+    openeLangParser::Name_componentContext *name_componentContext = nullptr;;
+    std::vector<Name_componentContext *> components;;
     Hierarchy_identifierContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     std::vector<Name_componentContext *> name_component();
@@ -682,6 +696,8 @@ public:
   public:
     FuncCallContext(Name_componentContext *ctx);
 
+    openeLangParser::ExpressionContext *expressionContext = nullptr;
+    std::vector<ExpressionContext *> arguments;
     Name_componentContext *name_component();
     std::vector<ExpressionContext *> expression();
     ExpressionContext* expression(size_t i);

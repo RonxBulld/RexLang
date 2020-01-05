@@ -1126,20 +1126,20 @@ tree::TerminalNode* openeLangParser::Prog_setContext::IDENTIFIER(size_t i) {
   return getToken(openeLangParser::IDENTIFIER, i);
 }
 
-std::vector<openeLangParser::Sub_programContext *> openeLangParser::Prog_setContext::sub_program() {
-  return getRuleContexts<openeLangParser::Sub_programContext>();
-}
-
-openeLangParser::Sub_programContext* openeLangParser::Prog_setContext::sub_program(size_t i) {
-  return getRuleContext<openeLangParser::Sub_programContext>(i);
-}
-
 std::vector<openeLangParser::Variable_declContext *> openeLangParser::Prog_setContext::variable_decl() {
   return getRuleContexts<openeLangParser::Variable_declContext>();
 }
 
 openeLangParser::Variable_declContext* openeLangParser::Prog_setContext::variable_decl(size_t i) {
   return getRuleContext<openeLangParser::Variable_declContext>(i);
+}
+
+std::vector<openeLangParser::Sub_programContext *> openeLangParser::Prog_setContext::sub_program() {
+  return getRuleContexts<openeLangParser::Sub_programContext>();
+}
+
+openeLangParser::Sub_programContext* openeLangParser::Prog_setContext::sub_program(size_t i) {
+  return getRuleContext<openeLangParser::Sub_programContext>(i);
 }
 
 openeLangParser::Table_commentContext* openeLangParser::Prog_setContext::table_comment() {
@@ -1260,7 +1260,8 @@ openeLangParser::Prog_setContext* openeLangParser::prog_set() {
         _la = _input->LA(1);
       }
       setState(227);
-      sub_program();
+      dynamic_cast<Prog_setContext *>(_localctx)->sub_programContext = sub_program();
+      dynamic_cast<Prog_setContext *>(_localctx)->functions.push_back(dynamic_cast<Prog_setContext *>(_localctx)->sub_programContext);
       setState(231);
       _errHandler->sync(this);
       alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 30, _ctx);
@@ -1538,7 +1539,8 @@ openeLangParser::Sub_programContext* openeLangParser::sub_program() {
     _la = _input->LA(1);
     while (_la == openeLangParser::T__11) {
       setState(278);
-      parameter_decl();
+      dynamic_cast<Sub_programContext *>(_localctx)->parameter_declContext = parameter_decl();
+      dynamic_cast<Sub_programContext *>(_localctx)->params.push_back(dynamic_cast<Sub_programContext *>(_localctx)->parameter_declContext);
       setState(283);
       _errHandler->sync(this);
       _la = _input->LA(1);
@@ -1646,7 +1648,8 @@ openeLangParser::Parameter_declContext* openeLangParser::parameter_decl() {
       _la = _input->LA(1);
       while (_la == openeLangParser::IDENTIFIER) {
         setState(298);
-        dynamic_cast<Parameter_declContext *>(_localctx)->attributes = match(openeLangParser::IDENTIFIER);
+        dynamic_cast<Parameter_declContext *>(_localctx)->identifierToken = match(openeLangParser::IDENTIFIER);
+        dynamic_cast<Parameter_declContext *>(_localctx)->attributes.push_back(dynamic_cast<Parameter_declContext *>(_localctx)->identifierToken);
         setState(303);
         _errHandler->sync(this);
         _la = _input->LA(1);
@@ -1763,7 +1766,8 @@ openeLangParser::Statement_listContext* openeLangParser::statement_list() {
           | (1ULL << (openeLangParser::IDENTIFIER - 13))
           | (1ULL << (openeLangParser::STRING_LITERAL - 13)))) != 0)) {
           setState(312);
-          statement();
+          dynamic_cast<Statement_listContext *>(_localctx)->statementContext = statement();
+          dynamic_cast<Statement_listContext *>(_localctx)->stmts.push_back(dynamic_cast<Statement_listContext *>(_localctx)->statementContext);
         }
         setState(315);
         match(openeLangParser::NEWLINE); 
@@ -2082,13 +2086,13 @@ openeLangParser::Switch_statementContext* openeLangParser::switch_statement() {
     setState(332);
     match(openeLangParser::T__13);
     setState(333);
-    dynamic_cast<Switch_statementContext *>(_localctx)->condition_expr = expression(0);
+    dynamic_cast<Switch_statementContext *>(_localctx)->major_condition_expr = expression(0);
     setState(334);
     match(openeLangParser::T__14);
     setState(335);
     match(openeLangParser::NEWLINE);
     setState(336);
-    dynamic_cast<Switch_statementContext *>(_localctx)->cond_body = statement_list();
+    dynamic_cast<Switch_statementContext *>(_localctx)->major_cond_body = statement_list();
     setState(346);
     _errHandler->sync(this);
     _la = _input->LA(1);
@@ -2098,13 +2102,15 @@ openeLangParser::Switch_statementContext* openeLangParser::switch_statement() {
       setState(338);
       match(openeLangParser::T__13);
       setState(339);
-      dynamic_cast<Switch_statementContext *>(_localctx)->condition_expr = expression(0);
+      dynamic_cast<Switch_statementContext *>(_localctx)->expressionContext = expression(0);
+      dynamic_cast<Switch_statementContext *>(_localctx)->minor_condition_expr.push_back(dynamic_cast<Switch_statementContext *>(_localctx)->expressionContext);
       setState(340);
       match(openeLangParser::T__14);
       setState(341);
       match(openeLangParser::NEWLINE);
       setState(342);
-      dynamic_cast<Switch_statementContext *>(_localctx)->cond_body = statement_list();
+      dynamic_cast<Switch_statementContext *>(_localctx)->statement_listContext = statement_list();
+      dynamic_cast<Switch_statementContext *>(_localctx)->minor_cond_body.push_back(dynamic_cast<Switch_statementContext *>(_localctx)->statement_listContext);
       setState(348);
       _errHandler->sync(this);
       _la = _input->LA(1);
@@ -2196,6 +2202,10 @@ openeLangParser::ExpressionContext* openeLangParser::ForContext::expression(size
 
 openeLangParser::Statement_listContext* openeLangParser::ForContext::statement_list() {
   return getRuleContext<openeLangParser::Statement_listContext>(0);
+}
+
+openeLangParser::Hierarchy_identifierContext* openeLangParser::ForContext::hierarchy_identifier() {
+  return getRuleContext<openeLangParser::Hierarchy_identifierContext>(0);
 }
 
 openeLangParser::ForContext::ForContext(Loop_statementContext *ctx) { copyFrom(ctx); }
@@ -2327,7 +2337,7 @@ openeLangParser::Loop_statementContext* openeLangParser::loop_statement() {
         setState(365);
         match(openeLangParser::T__13);
         setState(366);
-        dynamic_cast<RangeForContext *>(_localctx)->condition_expr = expression(0);
+        dynamic_cast<RangeForContext *>(_localctx)->times_expr = expression(0);
         setState(367);
         match(openeLangParser::T__2);
         setState(369);
@@ -2378,7 +2388,7 @@ openeLangParser::Loop_statementContext* openeLangParser::loop_statement() {
           setState(385);
           match(openeLangParser::T__2);
           setState(386);
-          dynamic_cast<ForContext *>(_localctx)->loop_variable = expression(0);
+          dynamic_cast<ForContext *>(_localctx)->loop_variable = hierarchy_identifier();
         }
         setState(389);
         match(openeLangParser::T__14);
@@ -2632,7 +2642,8 @@ openeLangParser::Hierarchy_identifierContext* openeLangParser::hierarchy_identif
     size_t alt;
     enterOuterAlt(_localctx, 1);
     setState(428);
-    name_component(0);
+    dynamic_cast<Hierarchy_identifierContext *>(_localctx)->name_componentContext = name_component(0);
+    dynamic_cast<Hierarchy_identifierContext *>(_localctx)->components.push_back(dynamic_cast<Hierarchy_identifierContext *>(_localctx)->name_componentContext);
     setState(433);
     _errHandler->sync(this);
     alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 56, _ctx);
@@ -2641,7 +2652,8 @@ openeLangParser::Hierarchy_identifierContext* openeLangParser::hierarchy_identif
         setState(429);
         match(openeLangParser::T__31);
         setState(430);
-        name_component(0); 
+        dynamic_cast<Hierarchy_identifierContext *>(_localctx)->name_componentContext = name_component(0);
+        dynamic_cast<Hierarchy_identifierContext *>(_localctx)->components.push_back(dynamic_cast<Hierarchy_identifierContext *>(_localctx)->name_componentContext); 
       }
       setState(435);
       _errHandler->sync(this);
@@ -2827,7 +2839,8 @@ openeLangParser::Name_componentContext* openeLangParser::name_component(int prec
             | (1ULL << (openeLangParser::IDENTIFIER - 14))
             | (1ULL << (openeLangParser::STRING_LITERAL - 14)))) != 0)) {
             setState(441);
-            expression(0);
+            dynamic_cast<FuncCallContext *>(_localctx)->expressionContext = expression(0);
+            dynamic_cast<FuncCallContext *>(_localctx)->arguments.push_back(dynamic_cast<FuncCallContext *>(_localctx)->expressionContext);
           }
           setState(450);
           _errHandler->sync(this);
@@ -2853,7 +2866,8 @@ openeLangParser::Name_componentContext* openeLangParser::name_component(int prec
               | (1ULL << (openeLangParser::IDENTIFIER - 14))
               | (1ULL << (openeLangParser::STRING_LITERAL - 14)))) != 0)) {
               setState(445);
-              expression(0);
+              dynamic_cast<FuncCallContext *>(_localctx)->expressionContext = expression(0);
+              dynamic_cast<FuncCallContext *>(_localctx)->arguments.push_back(dynamic_cast<FuncCallContext *>(_localctx)->expressionContext);
             }
             setState(452);
             _errHandler->sync(this);
@@ -4780,7 +4794,7 @@ openeLangParser::Initializer::Initializer() {
     0x17d, 0x17e, 0x7, 0x10, 0x2, 0x2, 0x17e, 0x17f, 0x5, 0x30, 0x19, 0x2, 
     0x17f, 0x180, 0x7, 0x5, 0x2, 0x2, 0x180, 0x181, 0x5, 0x30, 0x19, 0x2, 
     0x181, 0x182, 0x7, 0x5, 0x2, 0x2, 0x182, 0x185, 0x5, 0x30, 0x19, 0x2, 
-    0x183, 0x184, 0x7, 0x5, 0x2, 0x2, 0x184, 0x186, 0x5, 0x30, 0x19, 0x2, 
+    0x183, 0x184, 0x7, 0x5, 0x2, 0x2, 0x184, 0x186, 0x5, 0x2c, 0x17, 0x2, 
     0x185, 0x183, 0x3, 0x2, 0x2, 0x2, 0x185, 0x186, 0x3, 0x2, 0x2, 0x2, 
     0x186, 0x187, 0x3, 0x2, 0x2, 0x2, 0x187, 0x188, 0x7, 0x11, 0x2, 0x2, 
     0x188, 0x189, 0x7, 0x49, 0x2, 0x2, 0x189, 0x18a, 0x5, 0x22, 0x12, 0x2, 
