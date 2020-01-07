@@ -3878,7 +3878,7 @@ openeLangParser::Datetime_value_coreContext* openeLangParser::datetime_value_cor
       _localctx = dynamic_cast<Datetime_value_coreContext *>(_tracker.createInstance<openeLangParser::DatetimePureNumberContext>(_localctx));
       enterOuterAlt(_localctx, 1);
       setState(551);
-      match(openeLangParser::INTEGER_LITERAL);
+      dynamic_cast<DatetimePureNumberContext *>(_localctx)->time = match(openeLangParser::INTEGER_LITERAL);
       break;
     }
 

@@ -230,7 +230,7 @@ datetime_value
     ;
 
 datetime_value_core
-    : INTEGER_LITERAL
+    : time=INTEGER_LITERAL
                                                                         # DatetimePureNumber
     | year=INTEGER_LITERAL '年' month=INTEGER_LITERAL '月' day=INTEGER_LITERAL '日'
       (hour=INTEGER_LITERAL '时' minute=INTEGER_LITERAL '分' second=INTEGER_LITERAL '秒')?
