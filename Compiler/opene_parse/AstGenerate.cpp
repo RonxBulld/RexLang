@@ -52,14 +52,16 @@ namespace opene {
             return tokens_str_vec;
         }
 
-        template<typename T>
+        template<typename T, bool must_valid = false>
         T GetFromCtxIfExist(antlr4::ParserRuleContext *ctx, const T &hint = T()) {
             if (ctx) {
                 auto ret = visit(ctx);
                 if (ret.is<T>()) {
                     return ret.as<T>();
                 }
+                assert(!must_valid);
             }
+            assert(!must_valid);
             return hint;
         }
 
@@ -67,21 +69,21 @@ namespace opene {
         antlrcpp::Any visitOpene_src(openeLangParser::Opene_srcContext *context) override {
             TranslateUnitPtr translate_unit = new TranslateUnit;
             // 分析版本号
-            translate_unit->edition_ = GetFromCtxIfExist<unsigned int>(context->edition_spec(), 2);
+            translate_unit->edition_ = GetFromCtxIfExist<unsigned int, true>(context->edition_spec(), 2);
             // 分析文件具体内容
-            translate_unit->source_file_ = GetFromCtxIfExist<SourceFilePtr>(context->src_content());
+            translate_unit->source_file_ = GetFromCtxIfExist<SourceFilePtr, true>(context->src_content());
             return translate_unit;
         }
 
         antlrcpp::Any visitSrc_content(openeLangParser::Src_contentContext *context) override {
             if (openeLangParser::Program_set_fileContext* program_set_file_ctx = context->program_set_file()) {
-                return GetFromCtxIfExist<ProgramSetFilePtr>(program_set_file_ctx);
+                return GetFromCtxIfExist<ProgramSetFilePtr, true>(program_set_file_ctx);
             } else if (openeLangParser::Data_structure_fileContext *data_structure_file_ctx = context->data_structure_file()) {
-                return GetFromCtxIfExist<DataStructureFilePtr>(data_structure_file_ctx);
+                return GetFromCtxIfExist<DataStructureFilePtr, true>(data_structure_file_ctx);
             } else if (openeLangParser::Global_variable_fileContext *global_variable_file_ctx = context->global_variable_file()) {
-                return GetFromCtxIfExist<GlobalVariableFilePtr >(global_variable_file_ctx);
+                return GetFromCtxIfExist<GlobalVariableFilePtr, true>(global_variable_file_ctx);
             } else if (openeLangParser::Dll_define_fileContext *dll_define_file_ctx = context->dll_define_file()) {
-                return GetFromCtxIfExist<DllDefineFilePtr>(dll_define_file_ctx);
+                return GetFromCtxIfExist<DllDefineFilePtr, true>(dll_define_file_ctx);
             } else {
                 // TODO: ERROR.
                 return antlrcpp::Any();
@@ -94,6 +96,7 @@ namespace opene {
                 program_set_file->libraries_.push_back(GetTextIfExist(token));
             }
             program_set_file->program_set_declares_ = GetFromCtxIfExist<ProgSetDeclPtr>(context->prog_set());
+            program_set_file->file_type_ = SourceFile::FileType::kProgramSetFile;
             return program_set_file;
         }
 
@@ -103,12 +106,14 @@ namespace opene {
                  StructureDeclPtr structure_decl = GetFromCtxIfExist<StructureDeclPtr>(struct_decl_ctx);
                  data_structure_file->structure_decl_map_[structure_decl->name_] = structure_decl;
             }
+            data_structure_file->file_type_ = SourceFile::FileType::kDataStructureFile;
             return data_structure_file;
         }
 
         antlrcpp::Any visitGlobal_variable_file(openeLangParser::Global_variable_fileContext *context) override {
             GlobalVariableFilePtr global_variable_file = new GlobalVariableFile;
             global_variable_file->global_variable_map_ = GetFromCtxIfExist<decltype(GlobalVariableFile::global_variable_map_)>(context->global_variable_list());
+            global_variable_file->file_type_ = SourceFile::FileType::kGlobalVariableFile;
             return global_variable_file;
         }
 
@@ -118,6 +123,7 @@ namespace opene {
                 DllCommandDeclPtr dll_command_decl = GetFromCtxIfExist<DllCommandDeclPtr>(dll_cmd_decl_ctx);
                 dll_define_file->dll_declares_[dll_command_decl->name_] = dll_command_decl;
             }
+            dll_define_file->file_type_ = SourceFile::FileType::kDllDefineFile;
             return dll_define_file;
         }
 
@@ -145,7 +151,7 @@ namespace opene {
         }
 
         antlrcpp::Any visitGlobal_variable_item(openeLangParser::Global_variable_itemContext *context) override {
-            GlobalVariableDeclPtr global_variable_decl;
+            GlobalVariableDeclPtr global_variable_decl = new GlobalVariableDecl;
             global_variable_decl->name_ = GetTextIfExist(context->name);
             global_variable_decl->type_ = GetTextIfExist(context->type);
             global_variable_decl->dimension_ = GetTextIfExist(context->dimension);
