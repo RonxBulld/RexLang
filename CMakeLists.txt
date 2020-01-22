@@ -5,4 +5,6 @@ set(CMAKE_CXX_STANDARD 20)
 
 PROJECT(OpenELanguage)
 
+set(CMAKE_CXX_FLAGS "-ggdb -g -O0")
+
 ADD_SUBDIRECTORY(Compiler)

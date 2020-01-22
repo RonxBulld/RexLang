@@ -35,10 +35,13 @@ add_custom_command(OUTPUT ${antlr4-demo-GENERATED_SRC}
         )
 
 SET(OECompilerParse-Source
+        ${antlr4-demo-GENERATED_SRC}
         AstGenerate.cpp
         AstGenerate.h
-        ${antlr4-demo-GENERATED_SRC}
-        Diagnostic.cpp Diagnostic.h node_decl.h)
+        Diagnostic.cpp
+        Diagnostic.h
+        NodeDecl.h
+        ASTContext.cpp ASTContext.h Location.cpp Location.h StringRef.cpp StringRef.h TString.cpp TString.h dump/Dump.cpp dump/Dump.h)
 
 if(NOT CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
     set (flags_1 "-Wno-overloaded-virtual")
