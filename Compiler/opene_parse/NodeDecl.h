@@ -28,9 +28,12 @@ namespace opene {
     // Declare
     typedef struct Decl* DeclPtr;
     typedef struct TagDecl* TagDeclPtr;
+    typedef struct TypeDecl* TypeDeclPtr;
     typedef struct GlobalVariableDecl* GlobalVariableDeclPtr;
     typedef struct VariableDecl* VariableDeclPtr;
+    typedef struct BaseVariDecl* BaseVariDeclPtr;
     typedef struct ParameterDecl* ParameterDeclPtr;
+    typedef struct BuiltInTypeDecl* BuiltInTypeDeclPtr;
     typedef struct StructureDecl* StructureDeclPtr;
     typedef struct SubProgDecl* SubProgDeclPtr;
     typedef struct ProgSetDecl* ProgSetDeclPtr;
@@ -74,7 +77,10 @@ namespace opene {
         kNTyTagDecl,
         kNTyGlobalVariableDecl,
         kNTyVariableDecl,
+        kNTyBaseVariDecl,
         kNTyParameterDecl,
+        kNTyTypeDecl,
+        kNTyBuiltInTypeDecl,
         kNTyStructureDecl,
         kNTySubProgDecl,
         kNTyProgSetDecl,
@@ -119,6 +125,11 @@ namespace opene {
             return dynamic_cast<Ty *>(this);
         }
 
+        template<typename Ty, typename = typename std::enable_if_t<std::is_base_of_v<Node, Ty>>>
+        bool is() const {
+            return dynamic_cast<Ty *>(this) != nullptr;
+        }
+
         virtual ~Node() {
         }
     };
@@ -159,26 +170,77 @@ namespace opene {
         TString name_;
     };
 
-    struct VariableDecl : public TagDecl {
-        static const NodeType node_type = NodeType::kNTyVariableDecl;
+    /*
+     * 描述成员变量、全局变量、局部变量、参数等带有类型和注释的基本结构
+     */
+    struct BaseVariDecl : public TagDecl {
+        static const NodeType node_type = NodeType::kNTyBaseVariDecl;
         TString type_;
-        TString dimension_;
+        TypeDeclPtr type_decl_ptr_ = nullptr;
         TString comment_;
     };
 
+    /*
+     * 描述成员变量、全局变量、局部变量
+     */
+    struct VariableDecl : public BaseVariDecl {
+        static const NodeType node_type = NodeType::kNTyVariableDecl;
+        TString dimension_;
+
+        // === 下面是经过语义分析后的数据 ===
+
+        // 数组维度定义，如果不是数组，则为空
+        std::vector<size_t> dimensions_;
+    };
+
+    /*
+     * 描述全局变量
+     */
     struct GlobalVariableDecl : public VariableDecl {
         static const NodeType node_type = NodeType::kNTyGlobalVariableDecl;
         TString access_;
     };
 
-    struct ParameterDecl : public TagDecl  {
+    /*
+     * 描述参数
+     */
+    struct ParameterDecl : public BaseVariDecl  {
         static const NodeType node_type = NodeType::kNTyParameterDecl;
-        TString type_;
         std::vector<TString> attributes_;
-        TString comment_;
     };
 
-    struct StructureDecl : public TagDecl {
+    /*
+     * 类型定义分支
+     */
+    struct TypeDecl : public TagDecl {
+        static const NodeType node_type = NodeType::kNTyTypeDecl;
+    };
+
+    /*
+     * 内置类型定义
+     */
+    struct BuiltInTypeDecl : public TypeDecl {
+        static const NodeType node_type = NodeType::kNTyBuiltInTypeDecl;
+        // 内置类型枚举
+        enum class EnumOfBuiltInType {
+            kBTypeChar,     // 字节型
+            kBTypeInteger,  // 整数型
+            kBTFloat,       // 小数型
+            kBTBool,        // 逻辑型
+            kBTString,      // 文本型
+            kBTDataSet,     // 字节集
+            kBTShort,       // 短整型
+            kBTLong,        // 长整型
+            kBTDatatime,    // 日期时间型
+            kBTFuncPtr,     // 子程序指针
+            kBTDouble,      // 双精度小数型
+        } built_in_type_ = EnumOfBuiltInType::kBTypeInteger;
+    };
+
+    /*
+     * 数据结构定义
+     */
+    struct StructureDecl : public TypeDecl {
         static const NodeType node_type = NodeType::kNTyStructureDecl;
         TString access_;
         TString comment_;
@@ -344,10 +406,15 @@ namespace opene {
 
     struct TranslateUnit : public Node {
         static const NodeType node_type = NodeType::kNTyTranslateUnit;
+        // 语法版本号
         unsigned int edition_ = 0;
-        SourceFilePtr source_file_ = nullptr;
-        // 下面是经过语义分析后的数据
-        std::map<TString, type::TypeDescription*> global_type_;
+        // 资源文件列表（包括全局变量定义、数据结构定义、类模块定义、DLL接口定义、子程序集合）
+        std::vector<SourceFilePtr> source_file_;
+
+        // === 下面是经过语义分析后的数据 ===
+
+        // 全局类型索引表
+        std::map<TString, TypeDeclPtr> global_type_;
     };
 
     struct NodeWarp {

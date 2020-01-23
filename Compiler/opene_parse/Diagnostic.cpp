@@ -48,4 +48,12 @@ namespace opene {
         std::cerr << std::endl;
     }
 
+    bool Diagnostic::InternalError(size_t error_id) {
+        return false;
+    }
+
+    bool Diagnostic::EditionWrong(size_t current_edition) {
+        return false;
+    }
+
 }

@@ -150,6 +150,7 @@ namespace opene {
 
         antlrcpp::Any visitString_value(openeLangParser::String_valueContext *context) override;
 
+    public:
         ASTBuilder(Diagnostic *diagnostic);
     };
 }

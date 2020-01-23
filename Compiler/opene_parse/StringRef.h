@@ -35,16 +35,24 @@ namespace opene {
         char operator[](size_t index) const;
 
         StringRef operator+(const StringRef &rhs) const;
+        StringRef operator+(const std::string &rhs) const;
 
         StringRef &operator+=(const StringRef &rhs);
+        StringRef &operator+=(const std::string &rhs);
 
         bool operator==(const StringRef &rhs) const;
+        bool operator==(const std::string &rhs) const;
+        bool operator==(const unsigned char *rhs) const;
+        // bool operator==(const char8_t *rhs) const;
 
         bool operator!=(const StringRef &rhs) const;
+        bool operator!=(const std::string &rhs) const;
 
         bool operator>(const StringRef &rhs) const;
+        bool operator>(const std::string &rhs) const;
 
         bool operator<(const StringRef &rhs) const;
+        bool operator<(const std::string &rhs) const;
     };
 
     class StringPool {

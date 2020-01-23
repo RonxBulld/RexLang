@@ -3,6 +3,7 @@
 //
 
 #include <cassert>
+#include <cstring>
 #include "StringRef.h"
 
 namespace opene {
@@ -49,11 +50,7 @@ namespace opene {
     }
 
     StringRef &StringRef::operator+=(const StringRef &rhs) {
-        const std::string &lhs_v = *this->string_;
-        const std::string &rhs_v = *rhs.string_;
-        std::string comp = lhs_v + rhs_v;
-        *this = this->pool_->Create(comp);
-        return *this;
+        return this->operator+=(*rhs.string_);
     }
 
     bool StringRef::operator==(const StringRef &rhs) const {
@@ -79,6 +76,36 @@ namespace opene {
 
     const char *StringRef::c_str() const {
         return this->string_->c_str();
+    }
+
+    StringRef StringRef::operator+(const std::string &rhs) const {
+        return this->operator+(this->pool_->Create(rhs));
+    }
+
+    StringRef &StringRef::operator+=(const std::string &rhs) {
+        *this = this->pool_->Create(*this->string_ + rhs);
+        return *this;
+    }
+
+    bool StringRef::operator==(const std::string &rhs) const {
+        return *this->string_ == rhs;
+    }
+
+    bool StringRef::operator!=(const std::string &rhs) const {
+        return *this->string_ != rhs;
+    }
+
+    bool StringRef::operator>(const std::string &rhs) const {
+        return *this->string_ > rhs;
+    }
+
+    bool StringRef::operator<(const std::string &rhs) const {
+        return *this->string_ < rhs;
+    }
+
+    bool StringRef::operator==(const unsigned char *rhs) const {
+        if (rhs == nullptr) { return false; }
+        return strncmp(this->string_->c_str(), (const char *)rhs, this->string_->length()) == 0;
     }
 
     StringRef StringPool::Create(const std::string &str) {

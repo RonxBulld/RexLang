@@ -5,44 +5,31 @@
 #include "SematicAnalysis.h"
 
 #include "NodeDecl.h"
+#include "Str2Attr.h"
 
 namespace opene {
     bool SematicAnalysis::Run(TranslateUnit * translateUnitPtr) {
-        return this->SATranslateUnit(translateUnitPtr);
-    }
 
-    bool SematicAnalysis::SATranslateUnit(TranslateUnit * node) {
-        if (node->edition_ != 2) {
-            node->ast_context_->GetDiagnostic()->EditionWrong(node->edition_);
+        if (translateUnitPtr->edition_ != 2) {
+            translateUnitPtr->ast_context_->GetDiagnostic()->EditionWrong(translateUnitPtr->edition_);
             return false;
         }
-        if (ProgramSetFile * program_set_file = node->as<ProgramSetFile>()) {
-            return this->SAProgramSetFile(program_set_file);
-        } else if (GlobalVariableFile * global_variable_file = node->as<GlobalVariableFile>()) {
-            return this->SAGlobalVariableFile(global_variable_file);
-        } else if (DataStructureFile * data_structure_file = node->as<DataStructureFile>()) {
-            return this->SADataStructureFile(data_structure_file);
-        } else if (DllDefineFile * dll_define_file = node->as<DllDefineFile>()) {
-            return this->SADllDefineFile(dll_define_file);
-        } else {
-            node->ast_context_->GetDiagnostic()->InternalError();
-            return false;
-        }
-        return true;
-    }
-
-    bool SematicAnalysis::SADataStructureFile(struct DataStructureFile *node) {
-        for (auto & item : node->structure_decl_map_) {
-            bool suc = this->SAStructureDecl(item.second);
-            if (suc == false) {
-                return false;
+        this->translate_unit_ = translateUnitPtr;
+        // 1. 创建内置数据类型并写入索引表
+        // 2. 针对所有的数据结构定义和类模块定义
+        // 2.1. 抽取至全局
+        for (SourceFilePtr sfptr : translateUnitPtr->source_file_) {
+            if (DataStructureFile *data_structure_file_ptr = sfptr->as<DataStructureFile>()) {
             }
         }
-        return true;
+        // 2.2. 明确每一个变量或成员的类型指针
+        // 3. 针对所有的程序集和DLL声明列表将定义抽取至全局
+        // 4. 针对每一个程序集中的每一个函数开始遍历
+        // 4.1. 明确每一个参数和局部变量的类型指针
+        // 4.2. 明确每一条语句构造是否合法
+        // 4.3. 明确每一个表达式运算是否合法
+        // 4.4. 明确每一个名称引用的定义
+
     }
 
-    int SematicAnalysis::SAStructureDecl(struct StructureDecl *node) {
-        type::DataStructDescription *data_struct_description = new type::DataStructDescription;
-        return 0;
-    }
 }

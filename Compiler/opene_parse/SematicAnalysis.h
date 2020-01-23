@@ -5,20 +5,27 @@
 #ifndef OPENELANGUAGE_SEMATICANALYSIS_H
 #define OPENELANGUAGE_SEMATICANALYSIS_H
 
+#include "TypeDescription.h"
+#include "ErrOr.h"
+
 namespace opene {
+
+    struct TranslateUnit;
+    struct ProgramSetFile;
+    struct GlobalVariableFile;
+    struct DllDefineFile;
+    struct StructureDecl;
+    struct VariableDecl;
+    struct SourceFile;
 
     class SematicAnalysis {
     private:
-        bool SATranslateUnit(struct TranslateUnit * node);
+        TranslateUnit * translate_unit_;
 
-        bool SAProgramSetFile(struct ProgramSetFile * node);
-        bool SAGlobalVariableFile(struct GlobalVariableFile * node);
-        bool SADataStructureFile(struct DataStructureFile * node);
-        bool SADllDefineFile(struct DllDefineFile * node);
+    private:
 
-        int SAStructureDecl(struct StructureDecl * node);
     public:
-        bool Run(struct TranslateUnit * translateUnitPtr);
+        bool Run(TranslateUnit * translateUnitPtr);
     };
 
 }

@@ -1,0 +1,115 @@
+//
+// Created by rex on 2020/1/23.
+//
+
+#include <cassert>
+#include <regex>
+#include <string>
+#include "Str2Attr.h"
+
+namespace opene {
+    static const std::map<std::string, BuiltInTypeDecl::EnumOfBuiltInType> builtin_type_map{
+            {std::string(u8"字节型"),      BuiltInTypeDecl::EnumOfBuiltInType::kBTypeChar},
+            {std::string(u8"整数型"),      BuiltInTypeDecl::EnumOfBuiltInType::kBTypeInteger},
+            {std::string(u8"小数型"),      BuiltInTypeDecl::EnumOfBuiltInType::kBTFloat},
+            {std::string(u8"逻辑型"),      BuiltInTypeDecl::EnumOfBuiltInType::kBTBool},
+            {std::string(u8"文本型"),      BuiltInTypeDecl::EnumOfBuiltInType::kBTString},
+            {std::string(u8"字节集"),      BuiltInTypeDecl::EnumOfBuiltInType::kBTDataSet},
+            {std::string(u8"短整型"),      BuiltInTypeDecl::EnumOfBuiltInType::kBTShort},
+            {std::string(u8"长整型"),      BuiltInTypeDecl::EnumOfBuiltInType::kBTLong},
+            {std::string(u8"日期时间型"),   BuiltInTypeDecl::EnumOfBuiltInType::kBTDatatime},
+            {std::string(u8"子程序指针"),   BuiltInTypeDecl::EnumOfBuiltInType::kBTFuncPtr},
+            {std::string(u8"双精度小数型"), BuiltInTypeDecl::EnumOfBuiltInType::kBTDouble},
+    };
+
+    ErrOr<BuiltInTypeDecl::EnumOfBuiltInType> Str2Attr::Name2BuiltInType(const StringRef &name) {
+        auto found = builtin_type_map.find(name.str());
+        if (found != builtin_type_map.end()) {
+            return MakeNoErrVal(found->second);
+        } else {
+            return ErrOr<BuiltInTypeDecl::EnumOfBuiltInType>::CreateError(1);
+        }
+    }
+
+    ErrOr<type::AccessLevel> Str2Attr::Name2AccessLevel(const StringRef &name) {
+        if (name == u8"公开") {
+            return ErrOr<type::AccessLevel>(type::AccessLevel::kALPublic);
+        } else if (name == u8"") {
+            return ErrOr<type::AccessLevel>(type::AccessLevel::kALPrivate);
+        } else {
+            assert(false);
+            return ErrOr<type::AccessLevel>::CreateError(1);
+        }
+    }
+
+    ErrOr<type::ValueTransferMode> Str2Attr::Name2ValueTransferMode(const StringRef &name) {
+        if (name == u8"传址") {
+            return ErrOr<type::ValueTransferMode>(type::ValueTransferMode::kVTMReference);
+        } else if (name == u8"") {
+            return ErrOr<type::ValueTransferMode>(type::ValueTransferMode::kVTMValue);
+        } else {
+            assert(false);
+            return ErrOr<type::ValueTransferMode>::CreateError(1);
+        }
+    }
+
+    ErrOr<std::vector<size_t>> Str2Attr::Str2Dimension(const StringRef &str) {
+        std::string s = str.str();
+        std::vector<size_t> dims;
+        size_t n = 0;
+        int status = 0;
+        for (char c : s) {
+            if (status == 0) {
+                if (c == '"') {
+                    status = 1;
+                } else {
+                    break;
+                }
+            } else if (status == 1) {
+                if (isdigit(c)) {
+                    n = c - '0';    // 设置首位值
+                    status = 2;
+                } else if (c == '\"') {
+                    status = 4;     // 终止
+                } else {
+                    break;
+                }
+            } else if (status == 2) {
+                if (isdigit(c)) {
+                    n = n * 10 + (c - '0'); // 移入
+                    status = 2;
+                } else if (c == ',') {
+                    dims.push_back(n);      // 规约
+                    n = 0;
+                    status = 3;
+                } else if (c == '"') {
+                    dims.push_back(n);  // 规约
+                    n = 0;
+                    status = 4;         // 终结
+                } else {
+                    break;
+                }
+            } else if (status == 3) {
+                if (isdigit(c)) {
+                    n = c - '0';    // 设置首位值
+                    status = 2;
+                } else if (c == '"') {
+                    status = 4;     // 终结
+                } else {
+                    break;
+                }
+            } else if (status == 4) {
+                return ErrOr<decltype(dims)>(dims);
+            } else {
+                assert(false);
+                break;
+            }
+        }
+        if (status == 0) {
+            return MakeNoErrVal(dims);
+        } else {
+            return ErrOr<decltype(dims)>::CreateError(1);
+        }
+    }
+
+}

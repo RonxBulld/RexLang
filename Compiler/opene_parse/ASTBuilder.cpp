@@ -97,7 +97,7 @@ namespace opene {
         translate_unit->edition_ = GetFromCtxIfExist<unsigned int, true>(context->edition_spec(), 2);
         // 分析文件具体内容
         auto *src_ctx = context->src_content();
-        translate_unit->source_file_ = GetFromCtxIfExist<SourceFilePtr, true>(src_ctx);
+        translate_unit->source_file_ = { GetFromCtxIfExist<SourceFilePtr, true>(src_ctx) };
         return NodeWarp(translate_unit);
     }
 
