@@ -12,6 +12,7 @@
 
 #include "ASTContext.h"
 #include "TString.h"
+#include "TypeDescription.h"
 
 namespace opene {
     // Base
@@ -106,6 +107,18 @@ namespace opene {
     struct Node {
         ASTContext *ast_context_ = nullptr;
         NodeType node_type_ = NodeType::kNTyBadType;
+        size_t location_start_ = 0, location_end_ = 0;
+
+        template<typename Ty, typename = typename std::enable_if_t<std::is_base_of_v<Node, Ty>>>
+        const Ty *as() const {
+            return dynamic_cast<const Ty *>(this);
+        }
+
+        template<typename Ty, typename = typename std::enable_if_t<std::is_base_of_v<Node, Ty>>>
+        Ty *as() {
+            return dynamic_cast<Ty *>(this);
+        }
+
         virtual ~Node() {
         }
     };
@@ -127,8 +140,9 @@ namespace opene {
     };
 
     struct DataStructureFile : public SourceFile {
+        typedef std::map<TString, StructureDeclPtr> ClassureDeclContainerType;
         static const NodeType node_type = NodeType::kNTyDataStructureFile;
-        std::map<TString, StructureDeclPtr> structure_decl_map_;
+        ClassureDeclContainerType structure_decl_map_;
     };
 
     struct DllDefineFile : public SourceFile {
@@ -332,12 +346,19 @@ namespace opene {
         static const NodeType node_type = NodeType::kNTyTranslateUnit;
         unsigned int edition_ = 0;
         SourceFilePtr source_file_ = nullptr;
+        // 下面是经过语义分析后的数据
+        std::map<TString, type::TypeDescription*> global_type_;
     };
 
     struct NodeWarp {
         NodePtr node_;
         explicit NodeWarp(NodePtr node) {
             node_ = node;
+        }
+
+        template <typename T, typename = std::enable_if_t<std::is_base_of_v<Node, T>>>
+        operator T *() {
+            return dynamic_cast<T *>(this->node_);
         }
     };
 }

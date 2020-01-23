@@ -7,6 +7,7 @@
 
 #include "StringRef.h"
 #include "Location.h"
+#include "Diagnostic.h"
 
 namespace opene {
 
@@ -14,12 +15,17 @@ namespace opene {
     private:
         StringPool string_pool_;
         LocationPool location_pool_;
+        Diagnostic *diagnostic_ = nullptr;
     public:
         StringRef CreateString(const std::string &str);
 
         size_t CreateLocation(const std::string &filename, size_t line, size_t column);
 
         size_t CreateLocation(const StringRef &filename, size_t line, size_t column);
+
+        void SetDiagnostic(Diagnostic *diagnostic);
+
+        Diagnostic *GetDiagnostic();
     };
 
 }

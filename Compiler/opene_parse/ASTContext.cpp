@@ -18,4 +18,12 @@ namespace opene {
         return this->location_pool_.CreateLocation(filename, line, column);
     }
 
+    void ASTContext::SetDiagnostic(Diagnostic *diagnostic) {
+        this->diagnostic_ = diagnostic;
+    }
+
+    Diagnostic *ASTContext::GetDiagnostic() {
+        return this->diagnostic_;
+    }
+
 }

@@ -17,6 +17,12 @@ namespace opene {
 
     public:
         void syntaxError(antlr4::Recognizer *recognizer, antlr4::Token *offendingSymbol, size_t line, size_t charPositionInLine, const std::string &msg, std::exception_ptr e) override;
+
+        // 内部错误
+        bool InternalError(size_t error_id = 0);
+
+        // 版本号错误
+        bool EditionWrong(size_t current_edition);
     };
 }
 
