@@ -14,7 +14,9 @@ namespace opene {
 
     class Str2Attr {
     public:
-        static ErrOr<BuiltInTypeDecl::EnumOfBuiltInType> Name2BuiltInType(const StringRef &name);
+        static ErrOr<BuiltinTypeDecl::EnumOfBuiltinType> Name2BuiltinType(const StringRef &name);
+
+        static ErrOr<std::string> BuiltinType2Name(BuiltinTypeDecl::EnumOfBuiltinType type);
 
         static ErrOr<type::AccessLevel> Name2AccessLevel(const StringRef &name);
 

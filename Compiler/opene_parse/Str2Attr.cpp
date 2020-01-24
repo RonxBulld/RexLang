@@ -8,27 +8,36 @@
 #include "Str2Attr.h"
 
 namespace opene {
-    static const std::map<std::string, BuiltInTypeDecl::EnumOfBuiltInType> builtin_type_map{
-            {std::string(u8"字节型"),      BuiltInTypeDecl::EnumOfBuiltInType::kBTypeChar},
-            {std::string(u8"整数型"),      BuiltInTypeDecl::EnumOfBuiltInType::kBTypeInteger},
-            {std::string(u8"小数型"),      BuiltInTypeDecl::EnumOfBuiltInType::kBTFloat},
-            {std::string(u8"逻辑型"),      BuiltInTypeDecl::EnumOfBuiltInType::kBTBool},
-            {std::string(u8"文本型"),      BuiltInTypeDecl::EnumOfBuiltInType::kBTString},
-            {std::string(u8"字节集"),      BuiltInTypeDecl::EnumOfBuiltInType::kBTDataSet},
-            {std::string(u8"短整型"),      BuiltInTypeDecl::EnumOfBuiltInType::kBTShort},
-            {std::string(u8"长整型"),      BuiltInTypeDecl::EnumOfBuiltInType::kBTLong},
-            {std::string(u8"日期时间型"),   BuiltInTypeDecl::EnumOfBuiltInType::kBTDatatime},
-            {std::string(u8"子程序指针"),   BuiltInTypeDecl::EnumOfBuiltInType::kBTFuncPtr},
-            {std::string(u8"双精度小数型"), BuiltInTypeDecl::EnumOfBuiltInType::kBTDouble},
+    static const std::map<std::string, BuiltinTypeDecl::EnumOfBuiltinType> builtin_type_map{
+            {std::string(u8"字节型"),    BuiltinTypeDecl::EnumOfBuiltinType::kBTypeChar},
+            {std::string(u8"整数型"),    BuiltinTypeDecl::EnumOfBuiltinType::kBTypeInteger},
+            {std::string(u8"小数型"),    BuiltinTypeDecl::EnumOfBuiltinType::kBTFloat},
+            {std::string(u8"逻辑型"),    BuiltinTypeDecl::EnumOfBuiltinType::kBTBool},
+            {std::string(u8"文本型"),    BuiltinTypeDecl::EnumOfBuiltinType::kBTString},
+            {std::string(u8"字节集"),    BuiltinTypeDecl::EnumOfBuiltinType::kBTDataSet},
+            {std::string(u8"短整型"),    BuiltinTypeDecl::EnumOfBuiltinType::kBTShort},
+            {std::string(u8"长整型"),    BuiltinTypeDecl::EnumOfBuiltinType::kBTLong},
+            {std::string(u8"日期时间型"),  BuiltinTypeDecl::EnumOfBuiltinType::kBTDatatime},
+            {std::string(u8"子程序指针"),  BuiltinTypeDecl::EnumOfBuiltinType::kBTFuncPtr},
+            {std::string(u8"双精度小数型"), BuiltinTypeDecl::EnumOfBuiltinType::kBTDouble},
     };
 
-    ErrOr<BuiltInTypeDecl::EnumOfBuiltInType> Str2Attr::Name2BuiltInType(const StringRef &name) {
+    ErrOr<BuiltinTypeDecl::EnumOfBuiltinType> Str2Attr::Name2BuiltinType(const StringRef &name) {
         auto found = builtin_type_map.find(name.str());
         if (found != builtin_type_map.end()) {
             return MakeNoErrVal(found->second);
         } else {
-            return ErrOr<BuiltInTypeDecl::EnumOfBuiltInType>::CreateError(1);
+            return CreateError<BuiltinTypeDecl::EnumOfBuiltinType>(1);
         }
+    }
+
+    ErrOr<std::string> Str2Attr::BuiltinType2Name(BuiltinTypeDecl::EnumOfBuiltinType type) {
+        for (const auto & item : builtin_type_map) {
+            if (item.second == type) {
+                return MakeNoErrVal(item.first);
+            }
+        }
+        return CreateError<std::string>(1);
     }
 
     ErrOr<type::AccessLevel> Str2Attr::Name2AccessLevel(const StringRef &name) {

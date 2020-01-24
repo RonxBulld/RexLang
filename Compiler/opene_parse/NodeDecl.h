@@ -33,7 +33,7 @@ namespace opene {
     typedef struct VariableDecl* VariableDeclPtr;
     typedef struct BaseVariDecl* BaseVariDeclPtr;
     typedef struct ParameterDecl* ParameterDeclPtr;
-    typedef struct BuiltInTypeDecl* BuiltInTypeDeclPtr;
+    typedef struct BuiltinTypeDecl* BuiltinTypeDeclPtr;
     typedef struct StructureDecl* StructureDeclPtr;
     typedef struct SubProgDecl* SubProgDeclPtr;
     typedef struct ProgSetDecl* ProgSetDeclPtr;
@@ -65,6 +65,9 @@ namespace opene {
     typedef struct ValueOfDecimal* ValueOfDecimalPtr;
     typedef struct ValueOfString* ValueOfStringPtr;
 
+    /**
+     * @brief 节点类型枚举
+     */
     typedef enum class NodeType {
         kNTyBadType,
         kNTyTranslateUnit,
@@ -110,6 +113,9 @@ namespace opene {
         kNTyValueOfString,
     } NodeType;
 
+    /**
+     * @brief 节点基类
+     */
     struct Node {
         ASTContext *ast_context_ = nullptr;
         NodeType node_type_ = NodeType::kNTyBadType;
@@ -134,33 +140,51 @@ namespace opene {
         }
     };
 
+    /**
+     * @brief 资源文件基类
+     */
     struct SourceFile : public Node {
         static const NodeType node_type = NodeType::kNTySourceFile;
         enum FileType {kProgramSetFile, kGlobalVariableFile, kDataStructureFile, kDllDefineFile} file_type_;
     };
 
+    /**
+     * @brief 函数声明文件
+     */
     struct ProgramSetFile : public SourceFile {
         static const NodeType node_type = NodeType::kNTyProgramSetFile;
         std::vector<TString> libraries_;
         ProgSetDeclPtr program_set_declares_ = nullptr;
     };
 
+    /**
+     * @brief 全局变量声明文件
+     */
     struct GlobalVariableFile : public SourceFile {
         static const NodeType node_type = NodeType::kNTyGlobalVariableFile;
-        std::map<TString, GlobalVariableDeclPtr> global_variable_map_;
+        std::map<StringRef, GlobalVariableDeclPtr> global_variable_map_;
     };
 
+    /**
+     * @brief 数据结构定义文件
+     */
     struct DataStructureFile : public SourceFile {
-        typedef std::map<TString, StructureDeclPtr> ClassureDeclContainerType;
+        typedef std::map<StringRef, StructureDeclPtr> ClassureDeclContainerType;
         static const NodeType node_type = NodeType::kNTyDataStructureFile;
         ClassureDeclContainerType structure_decl_map_;
     };
 
+    /**
+     * @brief DLL函数接口声明文件
+     */
     struct DllDefineFile : public SourceFile {
         static const NodeType node_type = NodeType::kNTyDllDefineFile;
-        std::map<TString, DllCommandDeclPtr> dll_declares_;
+        std::map<StringRef, DllCommandDeclPtr> dll_declares_;
     };
 
+    /**
+     * @brief 定义基类
+     */
     struct Decl : public Node {
         static const NodeType node_type = NodeType::kNTyDecl;
     };
@@ -168,6 +192,7 @@ namespace opene {
     struct TagDecl : public Decl {
         static const NodeType node_type = NodeType::kNTyTagDecl;
         TString name_;
+        TString comment_;
     };
 
     /*
@@ -177,7 +202,6 @@ namespace opene {
         static const NodeType node_type = NodeType::kNTyBaseVariDecl;
         TString type_;
         TypeDeclPtr type_decl_ptr_ = nullptr;
-        TString comment_;
     };
 
     /*
@@ -219,10 +243,10 @@ namespace opene {
     /*
      * 内置类型定义
      */
-    struct BuiltInTypeDecl : public TypeDecl {
+    struct BuiltinTypeDecl : public TypeDecl {
         static const NodeType node_type = NodeType::kNTyBuiltInTypeDecl;
         // 内置类型枚举
-        enum class EnumOfBuiltInType {
+        enum class EnumOfBuiltinType {
             kBTypeChar,     // 字节型
             kBTypeInteger,  // 整数型
             kBTFloat,       // 小数型
@@ -234,7 +258,7 @@ namespace opene {
             kBTDatatime,    // 日期时间型
             kBTFuncPtr,     // 子程序指针
             kBTDouble,      // 双精度小数型
-        } built_in_type_ = EnumOfBuiltInType::kBTypeInteger;
+        } built_in_type_ = EnumOfBuiltinType::kBTypeInteger;
     };
 
     /*
@@ -243,27 +267,29 @@ namespace opene {
     struct StructureDecl : public TypeDecl {
         static const NodeType node_type = NodeType::kNTyStructureDecl;
         TString access_;
-        TString comment_;
-        std::map<TString, VariableDeclPtr> members_;
+        std::map<StringRef, VariableDeclPtr> members_;
     };
 
     struct SubProgDecl : public TagDecl {
         static const NodeType node_type = NodeType::kNTySubProgDecl;
         TString type_;
         TString access_;
-        TString comment_;
         std::vector<ParameterDeclPtr> parameters_;
-        std::map<TString, VariableDeclPtr> local_vari_;
+        std::map<StringRef, VariableDeclPtr> local_vari_;
         StatementListPtr statement_list_ = nullptr;
+
+        // === 下面是经过语义分析后的数据 ===
+
+        // 所属程序集
+        ProgSetDeclPtr super_set_ = nullptr;
     };
 
     struct ProgSetDecl : public TagDecl {
         static const NodeType node_type = NodeType::kNTyProgSetDecl;
         TString base_;
         TString access_;
-        TString comment_;
-        std::map<TString, VariableDeclPtr> file_static_variables_;
-        std::map<TString, SubProgDeclPtr> function_decls_;
+        std::map<StringRef, VariableDeclPtr> file_static_variables_;
+        std::map<StringRef, SubProgDeclPtr> function_decls_;
     };
 
     struct DllCommandDecl : public TagDecl {
@@ -271,10 +297,12 @@ namespace opene {
         TString type_;
         TString file_;
         TString api_name_;
-        std::map<TString, ParameterDeclPtr> parameters_;
-        TString comment_;
+        std::map<StringRef, ParameterDeclPtr> parameters_;
     };
 
+    /**
+     * @brief 语句基类
+     */
     struct Statement : public Node {
         static const NodeType node_type = NodeType::kNTyStatement;
     };
@@ -323,6 +351,10 @@ namespace opene {
         std::vector<StatementPtr> statements_;
     };
 
+    /**
+     * @brief 表达式基类
+     * 在这里，表达式被视作一种特殊的语句。
+     */
     struct Expression : public Statement {
         static const NodeType node_type = NodeType::kNTyExpression;
     };
@@ -361,6 +393,10 @@ namespace opene {
         ExpressionPtr rhs_ = nullptr;
     };
 
+    /**
+     * @brief 值基类
+     * 值基类可以表示所有的常量
+     */
     struct Value : public Expression {
         static const NodeType node_type = NodeType::kNTyValue;
     };
@@ -404,6 +440,10 @@ namespace opene {
         TString string_literal_;
     };
 
+    /**
+     * @brief 翻译单元
+     * 翻译单元结构将所有可编译数据打包，提供一致的索引方式，同时应对可能的名称冲突。
+     */
     struct TranslateUnit : public Node {
         static const NodeType node_type = NodeType::kNTyTranslateUnit;
         // 语法版本号
@@ -414,7 +454,15 @@ namespace opene {
         // === 下面是经过语义分析后的数据 ===
 
         // 全局类型索引表
-        std::map<TString, TypeDeclPtr> global_type_;
+        std::map<StringRef, TypeDeclPtr> global_type_;
+        // 全局变量索引表
+        std::map<StringRef, GlobalVariableDeclPtr> global_variables_;
+        // 支持库引用列表
+        std::set<StringRef> libraries_list_;
+        // 函数定义表
+        std::map<StringRef, SubProgDeclPtr> function_decls_;
+        // DLL函数声明表
+        std::map<StringRef, DllCommandDeclPtr> dll_declares_;
     };
 
     struct NodeWarp {
@@ -428,6 +476,15 @@ namespace opene {
             return dynamic_cast<T *>(this->node_);
         }
     };
+
+    template<typename NodeTy, typename ... Args, typename = typename std::enable_if<std::is_base_of<Node, NodeTy>::value>::type>
+    NodeTy *CreateNode(ASTContext *ast_context, Args ... args) {
+        NodeTy *node = new NodeTy(args...);
+        Node *base_node = node;
+        base_node->node_type_ = NodeTy::node_type;
+        base_node->ast_context_ = ast_context;
+        return node;
+    }
 }
 
 #endif //OPENELANGUAGE_NODEDECL_H

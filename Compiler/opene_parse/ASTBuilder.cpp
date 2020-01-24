@@ -80,10 +80,8 @@ namespace opene {
 
     template<typename NodeTy, typename ... Args, typename>
     NodeTy *ASTBuilder::CreateNode(antlr4::Token *start_token, antlr4::Token *end_token, Args ... args) {
-        NodeTy *node = new NodeTy(args...);
+        NodeTy *node = opene::CreateNode<NodeTy>(this->ast_context_, args...);
         Node *base_node = node;
-        base_node->node_type_ = NodeTy::node_type;
-        base_node->ast_context_ = this->ast_context_;
         antlr4::TokenSource *sts = start_token->getTokenSource();
         base_node->location_start_ = this->ast_context_->CreateLocation(sts->getSourceName(), sts->getLine(), sts->getCharPositionInLine());
         antlr4::TokenSource *ets = end_token->getTokenSource();
@@ -129,7 +127,7 @@ namespace opene {
         DataStructureFilePtr data_structure_file = CreateNode<DataStructureFile>(context->getStart(), context->getStop());
         for (auto *struct_decl_ctx : context->struct_declare()) {
             StructureDeclPtr structure_decl = GetFromCtxIfExist<StructureDeclPtr>(struct_decl_ctx);
-            data_structure_file->structure_decl_map_[structure_decl->name_] = structure_decl;
+            data_structure_file->structure_decl_map_[structure_decl->name_.string_] = structure_decl;
         }
         data_structure_file->file_type_ = SourceFile::FileType::kDataStructureFile;
         return NodeWarp(data_structure_file);
@@ -146,7 +144,7 @@ namespace opene {
         DllDefineFilePtr dll_define_file = CreateNode<DllDefineFile>(context->getStart(), context->getStop());
         for (auto *dll_cmd_decl_ctx : context->dll_command()) {
             DllCommandDeclPtr dll_command_decl = GetFromCtxIfExist<DllCommandDeclPtr>(dll_cmd_decl_ctx);
-            dll_define_file->dll_declares_[dll_command_decl->name_] = dll_command_decl;
+            dll_define_file->dll_declares_[dll_command_decl->name_.string_] = dll_command_decl;
         }
         dll_define_file->file_type_ = SourceFile::FileType::kDllDefineFile;
         return NodeWarp(dll_define_file);
@@ -161,7 +159,7 @@ namespace opene {
         dll_command_decl->comment_ = GetFromCtxIfExist<TString>(context->table_comment());
         for (openeLangParser::Parameter_declContext *param : context->parameter_decl()) {
             ParameterDeclPtr parameter_decl = GetFromCtxIfExist<ParameterDeclPtr>(param);
-            dll_command_decl->parameters_[parameter_decl->name_] = parameter_decl;
+            dll_command_decl->parameters_[parameter_decl->name_.string_] = parameter_decl;
         }
         return NodeWarp(dll_command_decl);
     }
@@ -170,7 +168,7 @@ namespace opene {
         decltype(GlobalVariableFile::global_variable_map_) global_variable_decl_map;
         for (auto *global_vari_decl_ctx : context->global_variable_item()) {
             GlobalVariableDeclPtr global_variable_decl = GetFromCtxIfExist<GlobalVariableDeclPtr>(global_vari_decl_ctx);
-            global_variable_decl_map[global_variable_decl->name_] = global_variable_decl;
+            global_variable_decl_map[global_variable_decl->name_.string_] = global_variable_decl;
         }
         return global_variable_decl_map;
     }
@@ -196,7 +194,7 @@ namespace opene {
         structure_decl->comment_ = GetFromCtxIfExist<TString>(context->table_comment());
         for (auto *mem_ctx : context->struct_mems) {
             VariableDeclPtr member = GetFromCtxIfExist<VariableDeclPtr>(mem_ctx);
-            structure_decl->members_[member->name_] = member;
+            structure_decl->members_[member->name_.string_] = member;
         }
         return NodeWarp(structure_decl);
     }
@@ -213,11 +211,11 @@ namespace opene {
         prog_set_decl->comment_ = GetFromCtxIfExist<TString>(context->table_comment());
         for (auto *vari_ctx : context->prog_set_varis) {
             VariableDeclPtr vari_decl = GetFromCtxIfExist<VariableDeclPtr>(vari_ctx);
-            prog_set_decl->file_static_variables_[vari_decl->name_] = vari_decl;
+            prog_set_decl->file_static_variables_[vari_decl->name_.string_] = vari_decl;
         }
         for (auto *func_ctx : context->functions) {
             SubProgDeclPtr sub_prog_decl = GetFromCtxIfExist<SubProgDeclPtr>(func_ctx);
-            prog_set_decl->function_decls_[sub_prog_decl->name_] = sub_prog_decl;
+            prog_set_decl->function_decls_[sub_prog_decl->name_.string_] = sub_prog_decl;
         }
         return NodeWarp(prog_set_decl);
     }
@@ -243,7 +241,7 @@ namespace opene {
         }
         for (auto *local_vari_ctx : context->local_vari) {
             VariableDeclPtr local_vari = GetFromCtxIfExist<VariableDeclPtr>(local_vari_ctx);
-            sub_prog_decl->local_vari_[local_vari->name_] = local_vari;
+            sub_prog_decl->local_vari_[local_vari->name_.string_] = local_vari;
         }
         sub_prog_decl->statement_list_ = GetFromCtxIfExist<StatementListPtr>(context->statement_list());
         return NodeWarp(sub_prog_decl);

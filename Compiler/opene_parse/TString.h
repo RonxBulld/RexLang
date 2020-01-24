@@ -16,6 +16,8 @@ namespace opene {
         size_t location_;
     public:
         bool operator<(const TString &rhs) const;
+
+        bool operator<(const StringRef &rhs) const;
     };
 
 }

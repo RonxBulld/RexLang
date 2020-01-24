@@ -7,7 +7,7 @@
 namespace opene {
     size_t LocationPool::CreateLocation(const StringRef &filename, size_t line, size_t column) {
         Location location{filename, line, column};
-        size_t id = this->location_map_.size();
+        size_t id = this->location_map_.size() + 1;
         this->location_map_[id] = location;
         return id;
     }

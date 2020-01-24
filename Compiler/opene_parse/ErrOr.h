@@ -42,6 +42,11 @@ namespace opene {
         return ErrOr<T>(value);
     }
 
+    template <typename T>
+    ErrOr<T> CreateError(int error_id) {
+        return ErrOr<T>::CreateError(error_id);
+    }
+
 }
 
 #endif //OPENELANGUAGE_ERROR_H
