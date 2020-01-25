@@ -41,7 +41,7 @@ namespace opene {
     // Statement
     typedef struct Statement* StatementPtr;
     typedef struct IfStmt* IfStmtPtr;
-    typedef struct StatementList* StatementListPtr;
+    typedef struct StatementBlock* StatementListPtr;
     typedef struct WhileStmt* WhileStmtPtr;
     typedef struct RangeForStmt* RangeForStmtPtr;
     typedef struct ForStmt* ForStmtPtr;
@@ -90,7 +90,7 @@ namespace opene {
         kNTyDllCommandDecl,
         kNTyStatement,
         kNTyIfStmt,
-        kNTyStatementList,
+        kNTyStatementBlock,
         kNTyWhileStmt,
         kNTyRangeForStmt,
         kNTyForStmt,
@@ -247,17 +247,17 @@ namespace opene {
         static const NodeType node_type = NodeType::kNTyBuiltInTypeDecl;
         // 内置类型枚举
         enum class EnumOfBuiltinType {
-            kBTypeChar,     // 字节型
-            kBTypeInteger,  // 整数型
-            kBTFloat,       // 小数型
-            kBTBool,        // 逻辑型
-            kBTString,      // 文本型
-            kBTDataSet,     // 字节集
-            kBTShort,       // 短整型
-            kBTLong,        // 长整型
-            kBTDatatime,    // 日期时间型
-            kBTFuncPtr,     // 子程序指针
-            kBTDouble,      // 双精度小数型
+            kBTypeChar,        // 字节型
+            kBTypeInteger,     // 整数型
+            kBTypeFloat,       // 小数型
+            kBTypeBool,        // 逻辑型
+            kBTypeString,      // 文本型
+            kBTypeDataSet,     // 字节集
+            kBTypeShort,       // 短整型
+            kBTypeLong,        // 长整型
+            kBTypeDatatime,    // 日期时间型
+            kBTypeFuncPtr,     // 子程序指针
+            kBTypeDouble,      // 双精度小数型
         } built_in_type_ = EnumOfBuiltinType::kBTypeInteger;
     };
 
@@ -272,16 +272,23 @@ namespace opene {
 
     struct SubProgDecl : public TagDecl {
         static const NodeType node_type = NodeType::kNTySubProgDecl;
+        // 返回值类型名
         TString type_;
+        // 访问级别
         TString access_;
+        // 参数列表
         std::vector<ParameterDeclPtr> parameters_;
+        // 局部变量列表
         std::map<StringRef, VariableDeclPtr> local_vari_;
+        // 语句列表
         StatementListPtr statement_list_ = nullptr;
 
         // === 下面是经过语义分析后的数据 ===
 
         // 所属程序集
         ProgSetDeclPtr super_set_ = nullptr;
+        // 返回值类型
+        TypeDeclPtr return_type_ = nullptr;
     };
 
     struct ProgSetDecl : public TagDecl {
@@ -315,7 +322,9 @@ namespace opene {
 
     struct IfStmt : public Statement {
         static const NodeType node_type = NodeType::kNTyIfStmt;
+        // 选择分支，每个pair第一个元素为测试表达式，第二个元素为相应的语句块
         std::vector<std::pair<ExpressionPtr, StatementPtr>> switches_;
+        // 默认分支
         StatementPtr default_statement_ = nullptr;
     };
 
@@ -346,8 +355,11 @@ namespace opene {
         StatementPtr loop_body_ = nullptr;
     };
 
-    struct StatementList : public Statement {
-        static const NodeType node_type = NodeType::kNTyStatementList;
+    /**
+     * @brief 语句块
+     */
+    struct StatementBlock : public Statement {
+        static const NodeType node_type = NodeType::kNTyStatementBlock;
         std::vector<StatementPtr> statements_;
     };
 
@@ -459,6 +471,8 @@ namespace opene {
         std::map<StringRef, GlobalVariableDeclPtr> global_variables_;
         // 支持库引用列表
         std::set<StringRef> libraries_list_;
+        // 程序集索引表
+        std::map<StringRef, ProgSetDeclPtr> program_sets_;
         // 函数定义表
         std::map<StringRef, SubProgDeclPtr> function_decls_;
         // DLL函数声明表

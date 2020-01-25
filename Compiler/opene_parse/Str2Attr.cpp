@@ -11,15 +11,15 @@ namespace opene {
     static const std::map<std::string, BuiltinTypeDecl::EnumOfBuiltinType> builtin_type_map{
             {std::string(u8"字节型"),    BuiltinTypeDecl::EnumOfBuiltinType::kBTypeChar},
             {std::string(u8"整数型"),    BuiltinTypeDecl::EnumOfBuiltinType::kBTypeInteger},
-            {std::string(u8"小数型"),    BuiltinTypeDecl::EnumOfBuiltinType::kBTFloat},
-            {std::string(u8"逻辑型"),    BuiltinTypeDecl::EnumOfBuiltinType::kBTBool},
-            {std::string(u8"文本型"),    BuiltinTypeDecl::EnumOfBuiltinType::kBTString},
-            {std::string(u8"字节集"),    BuiltinTypeDecl::EnumOfBuiltinType::kBTDataSet},
-            {std::string(u8"短整型"),    BuiltinTypeDecl::EnumOfBuiltinType::kBTShort},
-            {std::string(u8"长整型"),    BuiltinTypeDecl::EnumOfBuiltinType::kBTLong},
-            {std::string(u8"日期时间型"),  BuiltinTypeDecl::EnumOfBuiltinType::kBTDatatime},
-            {std::string(u8"子程序指针"),  BuiltinTypeDecl::EnumOfBuiltinType::kBTFuncPtr},
-            {std::string(u8"双精度小数型"), BuiltinTypeDecl::EnumOfBuiltinType::kBTDouble},
+            {std::string(u8"小数型"),    BuiltinTypeDecl::EnumOfBuiltinType::kBTypeFloat},
+            {std::string(u8"逻辑型"),    BuiltinTypeDecl::EnumOfBuiltinType::kBTypeBool},
+            {std::string(u8"文本型"),    BuiltinTypeDecl::EnumOfBuiltinType::kBTypeString},
+            {std::string(u8"字节集"),    BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDataSet},
+            {std::string(u8"短整型"),    BuiltinTypeDecl::EnumOfBuiltinType::kBTypeShort},
+            {std::string(u8"长整型"),    BuiltinTypeDecl::EnumOfBuiltinType::kBTypeLong},
+            {std::string(u8"日期时间型"),  BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDatatime},
+            {std::string(u8"子程序指针"),  BuiltinTypeDecl::EnumOfBuiltinType::kBTypeFuncPtr},
+            {std::string(u8"双精度小数型"), BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDouble},
     };
 
     ErrOr<BuiltinTypeDecl::EnumOfBuiltinType> Str2Attr::Name2BuiltinType(const StringRef &name) {

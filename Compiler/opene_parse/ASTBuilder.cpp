@@ -257,7 +257,7 @@ namespace opene {
     }
 
     antlrcpp::Any ASTBuilder::visitStatement_list(openeLangParser::Statement_listContext *context) {
-        StatementListPtr statement_list = CreateNode<StatementList>(context->getStart(), context->getStop());
+        StatementListPtr statement_list = CreateNode<StatementBlock>(context->getStart(), context->getStop());
         for (auto *stmt_ctx : context->stmts) {
             statement_list->statements_.push_back(GetFromCtxIfExist<StatementPtr>(stmt_ctx));
         }

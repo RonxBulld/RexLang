@@ -41,7 +41,7 @@ SET(OECompilerParse-Source
         Diagnostic.cpp
         Diagnostic.h
         NodeDecl.h
-        ASTContext.cpp ASTContext.h Location.cpp Location.h StringRef.cpp StringRef.h TString.cpp TString.h dump/Dump.cpp dump/Dump.h ASTBuilder.cpp ASTBuilder.h SematicAnalysis.cpp SematicAnalysis.h TypeDescription.cpp TypeDescription.h ErrOr.cpp ErrOr.h Str2Attr.cpp Str2Attr.h)
+        ASTContext.cpp ASTContext.h Location.cpp Location.h StringRef.cpp StringRef.h TString.cpp TString.h dump/Dump.cpp dump/Dump.h ASTBuilder.cpp ASTBuilder.h SematicAnalysis.cpp SematicAnalysis.h TypeDescription.cpp TypeDescription.h ErrOr.cpp ErrOr.h Str2Attr.cpp Str2Attr.h TypeAssert.cpp TypeAssert.h)
 
 if(NOT CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
     set (flags_1 "-Wno-overloaded-virtual")
