@@ -103,4 +103,17 @@ namespace opene {
             return false;
         }
     }
+
+    bool TypeAssert::IsAssignable(const TypeDeclPtr lhs_type, const TypeDeclPtr rhs_type) {
+        // 1. 至少有一个是数组
+        // 1.1. 两者都是数组则递归判定基础类型
+        // 1.2. 其中一个是数组则不可赋值
+        // 2. 其中之一是内置类型
+        // 2.1. 两者都是内置类型
+        // 2.1.1. 一致则可赋值
+        // 2.1.2. 左值类型兼容右值类型则可赋值
+        // 2.2. 其它情况皆不可赋值
+        // 3. 两者类型一致则可赋值
+        // 4. 其余情况皆不可赋值
+    }
 }

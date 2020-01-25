@@ -237,8 +237,8 @@ namespace opene {
             return true;
         } else if (WhileStmtPtr while_stmt = statement->as<WhileStmt>()) {
             // 检查循环条件语句的条件表达式是否为扩展布尔类型
-            std::shared_ptr<TypeDecl> while_expr_type = this->CheckExpression(while_stmt->condition_);
-            if (TypeAssert::IsExternBooleanType(while_expr_type.get()) == false) {
+            TypeDeclPtr while_expr_type = this->CheckExpression(while_stmt->condition_);
+            if (TypeAssert::IsExternBooleanType(while_expr_type) == false) {
                 assert(false);
                 return false;
             }
@@ -253,6 +253,10 @@ namespace opene {
         } else if (ForStmtPtr for_stmt = statement->as<ForStmt>()) {
         } else if (DoWhileStmtPtr do_while_stmt = statement->as<DoWhileStmt>()) {
         } else if (AssignStmtPtr assign_stmt = statement->as<AssignStmt>()) {
+            // 检查赋值语句左右子式类型是否匹配或兼容
+            TypeDeclPtr lhs_type = this->CheckExpression(assign_stmt->lhs_);
+            TypeDeclPtr rhs_type = this->CheckExpression(assign_stmt->rhs_);
+            return TypeAssert::IsAssignable(lhs_type, rhs_type);
         } else {
             assert(false);
             return false;

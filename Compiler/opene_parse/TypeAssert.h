@@ -101,6 +101,16 @@ namespace opene {
          * @return 检查指定类型是否为字节、整数、小数、双精度、逻辑、短整、长整类型
          */
         static bool IsExternBooleanType(const TypeDeclPtr typeDecl);
+
+        // === 高阶类型断言 ===
+
+        /**
+         * @brief 判断两个类型是否可赋值
+         * @param lhs_type
+         * @param rhs_type
+         * @return
+         */
+        static bool IsAssignable(const TypeDeclPtr lhs_type, const TypeDeclPtr rhs_type);
     };
 
 }

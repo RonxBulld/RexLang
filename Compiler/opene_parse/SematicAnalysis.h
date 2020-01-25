@@ -69,7 +69,7 @@ namespace opene {
         /*
          * 检查表达式，并返回表达式的结果类型
          */
-        std::shared_ptr<TypeDecl> CheckExpression(Expression *expression);
+        TypeDecl *CheckExpression(Expression *expression);
 
     public:
         bool Run(TranslateUnit * translateUnitPtr);

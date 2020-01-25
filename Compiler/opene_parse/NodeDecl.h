@@ -314,12 +314,19 @@ namespace opene {
         static const NodeType node_type = NodeType::kNTyStatement;
     };
 
+    /**
+     * @brief 赋值语句
+     */
     struct AssignStmt : public Statement {
         static const NodeType node_type = NodeType::kNTyAssignStmt;
         HierarchyIdentifierPtr lhs_ = nullptr;
         ExpressionPtr rhs_ = nullptr;
     };
 
+    /**
+     * @brief 包含多种条件分支表达式
+     * 如果、如果真、判断
+     */
     struct IfStmt : public Statement {
         static const NodeType node_type = NodeType::kNTyIfStmt;
         // 选择分支，每个pair第一个元素为测试表达式，第二个元素为相应的语句块
@@ -328,12 +335,18 @@ namespace opene {
         StatementPtr default_statement_ = nullptr;
     };
 
+    /**
+     * @brief 描述先判断后执行的While-Loop结构
+     */
     struct WhileStmt : public Statement {
         static const NodeType node_type = NodeType::kNTyWhileStmt;
         ExpressionPtr condition_ = nullptr;
         StatementPtr loop_body_ = nullptr;
     };
 
+    /**
+     * @brief 描述计次循环的范围迭代循环结构
+     */
     struct RangeForStmt : public Statement {
         static const NodeType node_type = NodeType::kNTyRangeForStmt;
         ExpressionPtr range_size_ = nullptr;
@@ -341,6 +354,9 @@ namespace opene {
         StatementPtr loop_body_ = nullptr;
     };
 
+    /**
+     * @brief 描述计步循环的范围迭代循环结构
+     */
     struct ForStmt : public Statement {
         static const NodeType node_type = NodeType::kNTyForStmt;
         ExpressionPtr start_value_ = nullptr;
@@ -349,6 +365,9 @@ namespace opene {
         HierarchyIdentifierPtr loop_vari_ = nullptr;
     };
 
+    /**
+     * @brief 描述先执行后判断的Do-While循环结构
+     */
     struct DoWhileStmt : public Statement {
         static const NodeType node_type = NodeType::kNTyDoWhileStmt;
         ExpressionPtr conditon_ = nullptr;
