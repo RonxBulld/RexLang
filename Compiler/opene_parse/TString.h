@@ -18,6 +18,7 @@ namespace opene {
         bool operator<(const TString &rhs) const;
 
         bool operator<(const StringRef &rhs) const;
+
     };
 
 }

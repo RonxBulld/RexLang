@@ -34,12 +34,13 @@ public:
     RuleGlobal_variable_file = 4, RuleDll_define_file = 5, RuleDll_command = 6, 
     RuleGlobal_variable_list = 7, RuleGlobal_variable_item = 8, RuleEdition_spec = 9, 
     RuleStruct_declare = 10, RuleTable_comment = 11, RuleProg_set = 12, 
-    RuleVariable_decl = 13, RuleSub_program = 14, RuleParameter_decl = 15, 
-    RuleStatement_list = 16, RuleStatement = 17, RuleSwitch_statement = 18, 
-    RuleLoop_statement = 19, RuleCondition_statement = 20, RuleHierarchy_identifier = 21, 
-    RuleName_component = 22, RuleExpression = 23, RuleData_set_value = 24, 
-    RuleDatetime_value = 25, RuleDatetime_value_core = 26, RuleMacro_value = 27, 
-    RuleFunc_ptr = 28, RuleBool_value = 29, RuleNumber = 30, RuleString_value = 31
+    RuleVariable_decl = 13, RuleMember_vari_decl = 14, RuleFile_vari_decl = 15, 
+    RuleSub_program = 16, RuleLocal_variable_decl = 17, RuleParameter_decl = 18, 
+    RuleStatement_list = 19, RuleStatement = 20, RuleSwitch_statement = 21, 
+    RuleLoop_statement = 22, RuleCondition_statement = 23, RuleHierarchy_identifier = 24, 
+    RuleName_component = 25, RuleExpression = 26, RuleData_set_value = 27, 
+    RuleDatetime_value = 28, RuleDatetime_value_core = 29, RuleMacro_value = 30, 
+    RuleFunc_ptr = 31, RuleBool_value = 32, RuleNumber = 33, RuleString_value = 34
   };
 
   openeLangParser(antlr4::TokenStream *input);
@@ -66,7 +67,10 @@ public:
   class Table_commentContext;
   class Prog_setContext;
   class Variable_declContext;
+  class Member_vari_declContext;
+  class File_vari_declContext;
   class Sub_programContext;
+  class Local_variable_declContext;
   class Parameter_declContext;
   class Statement_listContext;
   class StatementContext;
@@ -362,6 +366,36 @@ public:
 
   Variable_declContext* variable_decl();
 
+  class  Member_vari_declContext : public antlr4::ParserRuleContext {
+  public:
+    Member_vari_declContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    Variable_declContext *variable_decl();
+
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  Member_vari_declContext* member_vari_decl();
+
+  class  File_vari_declContext : public antlr4::ParserRuleContext {
+  public:
+    File_vari_declContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    Variable_declContext *variable_decl();
+
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  File_vari_declContext* file_vari_decl();
+
   class  Sub_programContext : public antlr4::ParserRuleContext {
   public:
     antlr4::Token *name = nullptr;;
@@ -369,8 +403,8 @@ public:
     antlr4::Token *access = nullptr;;
     openeLangParser::Parameter_declContext *parameter_declContext = nullptr;;
     std::vector<Parameter_declContext *> params;;
-    openeLangParser::Variable_declContext *variable_declContext = nullptr;;
-    std::vector<Variable_declContext *> local_vari;;
+    openeLangParser::Local_variable_declContext *local_variable_declContext = nullptr;;
+    std::vector<Local_variable_declContext *> local_vari;;
     Sub_programContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *NEWLINE();
@@ -379,8 +413,8 @@ public:
     antlr4::tree::TerminalNode* IDENTIFIER(size_t i);
     std::vector<Parameter_declContext *> parameter_decl();
     Parameter_declContext* parameter_decl(size_t i);
-    std::vector<Variable_declContext *> variable_decl();
-    Variable_declContext* variable_decl(size_t i);
+    std::vector<Local_variable_declContext *> local_variable_decl();
+    Local_variable_declContext* local_variable_decl(size_t i);
     Table_commentContext *table_comment();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -391,6 +425,29 @@ public:
   };
 
   Sub_programContext* sub_program();
+
+  class  Local_variable_declContext : public antlr4::ParserRuleContext {
+  public:
+    antlr4::Token *name = nullptr;;
+    antlr4::Token *type = nullptr;;
+    antlr4::Token *attribute = nullptr;;
+    antlr4::Token *dimension = nullptr;;
+    Local_variable_declContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *NEWLINE();
+    std::vector<antlr4::tree::TerminalNode *> IDENTIFIER();
+    antlr4::tree::TerminalNode* IDENTIFIER(size_t i);
+    Table_commentContext *table_comment();
+    antlr4::tree::TerminalNode *STRING_LITERAL();
+
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  Local_variable_declContext* local_variable_decl();
 
   class  Parameter_declContext : public antlr4::ParserRuleContext {
   public:

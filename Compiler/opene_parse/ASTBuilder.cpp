@@ -240,11 +240,20 @@ namespace opene {
             sub_prog_decl->parameters_.emplace_back(parameter_decl);
         }
         for (auto *local_vari_ctx : context->local_vari) {
-            VariableDeclPtr local_vari = GetFromCtxIfExist<VariableDeclPtr>(local_vari_ctx);
+            LocalVariableDeclPtr local_vari = GetFromCtxIfExist<LocalVariableDeclPtr>(local_vari_ctx);
             sub_prog_decl->local_vari_[local_vari->name_.string_] = local_vari;
         }
         sub_prog_decl->statement_list_ = GetFromCtxIfExist<StatementListPtr>(context->statement_list());
         return NodeWarp(sub_prog_decl);
+    }
+
+    antlrcpp::Any ASTBuilder::visitLocal_variable_decl(openeLangParser::Local_variable_declContext *context) {
+        LocalVariableDeclPtr local_variable_decl = CreateNode<LocalVariableDecl>(context->getStart(), context->getStop());
+        local_variable_decl->name_ = GetTextIfExist(context->name);
+        local_variable_decl->type_ = GetTextIfExist(context->type);
+        local_variable_decl->dimension_ = GetTextIfExist(context->dimension);
+        local_variable_decl->comment_ = GetFromCtxIfExist<TString>(context->table_comment());
+        return NodeWarp(local_variable_decl);
     }
 
     antlrcpp::Any ASTBuilder::visitParameter_decl(openeLangParser::Parameter_declContext *context) {
@@ -254,6 +263,14 @@ namespace opene {
         parameter_decl->attributes_ = GetTextVecIfExist(context->attributes);
         parameter_decl->comment_ = GetFromCtxIfExist<TString>(context->table_comment());
         return NodeWarp(parameter_decl);
+    }
+
+    antlrcpp::Any ASTBuilder::visitMember_vari_decl(openeLangParser::Member_vari_declContext *context) {
+        return NodeWarp(static_cast<MemberVariableDeclPtr>(GetFromCtxIfExist<VariableDeclPtr>(context)));
+    }
+
+    antlrcpp::Any ASTBuilder::visitFile_vari_decl(openeLangParser::File_vari_declContext *context) {
+        return NodeWarp(static_cast<FileVariableDeclPtr>(GetFromCtxIfExist<VariableDeclPtr>(context)));
     }
 
     antlrcpp::Any ASTBuilder::visitStatement_list(openeLangParser::Statement_listContext *context) {

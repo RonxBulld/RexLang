@@ -12,33 +12,50 @@
 
 #include "ASTContext.h"
 #include "TString.h"
-#include "TypeDescription.h"
 
 namespace opene {
     // Base
+
     typedef struct Node* NodePtr;
+
     // Project
+
     typedef struct TranslateUnit* TranslateUnitPtr;
+
     // File
+
     typedef struct SourceFile* SourceFilePtr;
     typedef struct ProgramSetFile* ProgramSetFilePtr;
     typedef struct GlobalVariableFile* GlobalVariableFilePtr;
     typedef struct DataStructureFile* DataStructureFilePtr;
     typedef struct DllDefineFile* DllDefineFilePtr;
+
     // Declare
+
+    // Type declare
+
     typedef struct Decl* DeclPtr;
     typedef struct TagDecl* TagDeclPtr;
     typedef struct TypeDecl* TypeDeclPtr;
-    typedef struct GlobalVariableDecl* GlobalVariableDeclPtr;
-    typedef struct VariableDecl* VariableDeclPtr;
-    typedef struct BaseVariDecl* BaseVariDeclPtr;
-    typedef struct ParameterDecl* ParameterDeclPtr;
-    typedef struct BuiltinTypeDecl* BuiltinTypeDeclPtr;
     typedef struct StructureDecl* StructureDeclPtr;
+    typedef struct BuiltinTypeDecl* BuiltinTypeDeclPtr;
+    typedef struct ArrayDecl* ArrayDeclPtr;
+
+    // Entity declare
+
+    typedef struct BaseVariDecl* BaseVariDeclPtr;
+    typedef struct VariableDecl* VariableDeclPtr;
+    typedef struct GlobalVariableDecl* GlobalVariableDeclPtr;
+    typedef struct LocalVariableDecl* LocalVariableDeclPtr;
+    typedef struct ParameterDecl* ParameterDeclPtr;
+    typedef struct MemberVariableDecl* MemberVariableDeclPtr;
+    typedef struct FileVariableDecl* FileVariableDeclPtr;
     typedef struct SubProgDecl* SubProgDeclPtr;
     typedef struct ProgSetDecl* ProgSetDeclPtr;
     typedef struct DllCommandDecl* DllCommandDeclPtr;
+
     // Statement
+
     typedef struct Statement* StatementPtr;
     typedef struct IfStmt* IfStmtPtr;
     typedef struct StatementBlock* StatementListPtr;
@@ -47,7 +64,9 @@ namespace opene {
     typedef struct ForStmt* ForStmtPtr;
     typedef struct DoWhileStmt* DoWhileStmtPtr;
     typedef struct AssignStmt* AssignStmtPtr;
+
     // Expression
+
     typedef struct Expression* ExpressionPtr;
     typedef struct HierarchyIdentifier* HierarchyIdentifierPtr;
     typedef struct NameComponent* NameComponentPtr;
@@ -55,7 +74,9 @@ namespace opene {
     typedef struct UnaryExpression* UnaryExpressionPtr;
     typedef struct BinaryExpression* BinaryExpressionPtr;
     typedef struct _OperatorExpression* _OperatorExpressionPtr;
+
     // Value
+
     typedef struct Value* ValuePtr;
     typedef struct ValueOfDataSet* ValueOfDataSetPtr;
     typedef struct ValueOfDatetime* ValueOfDatetimePtr;
@@ -78,12 +99,16 @@ namespace opene {
         kNTyDllDefineFile,
         kNTyDecl,
         kNTyTagDecl,
-        kNTyGlobalVariableDecl,
         kNTyVariableDecl,
         kNTyBaseVariDecl,
+        kNTyGlobalVariableDecl,
         kNTyParameterDecl,
+        kNTyMemberVariableDecl,
+        kNTyFileVariableDecl,
+        kNTyLocalVariableDecl,
         kNTyTypeDecl,
         kNTyBuiltInTypeDecl,
+        kNTyArrayDecl,
         kNTyStructureDecl,
         kNTySubProgDecl,
         kNTyProgSetDecl,
@@ -112,6 +137,34 @@ namespace opene {
         kNTyValueOfDecimal,
         kNTyValueOfString,
     } NodeType;
+
+    /*
+     * 访问级别
+     */
+    enum class AccessLevel {
+        /*
+         * 公开
+         */
+        kALPublic,
+        /*
+         * 私有
+         */
+        kALPrivate,
+    };
+
+    /*
+     * 传值方式
+     */
+    enum class ValueTransferMode {
+        /*
+         * 传值
+         */
+        kVTMValue,
+        /*
+         * 传址
+         */
+        kVTMReference,
+    };
 
     /**
      * @brief 节点基类
@@ -189,6 +242,9 @@ namespace opene {
         static const NodeType node_type = NodeType::kNTyDecl;
     };
 
+    /*
+     * 带有名称和注释的命名定义基本结构
+     */
     struct TagDecl : public Decl {
         static const NodeType node_type = NodeType::kNTyTagDecl;
         TString name_;
@@ -196,7 +252,7 @@ namespace opene {
     };
 
     /*
-     * 描述成员变量、全局变量、局部变量、参数等带有类型和注释的基本结构
+     * 描述成员变量、全局变量、局部变量、参数等带有类型的基本结构
      */
     struct BaseVariDecl : public TagDecl {
         static const NodeType node_type = NodeType::kNTyBaseVariDecl;
@@ -205,15 +261,44 @@ namespace opene {
     };
 
     /*
-     * 描述成员变量、全局变量、局部变量
+     * 描述参数
+     */
+    struct ParameterDecl : public BaseVariDecl  {
+        static const NodeType node_type = NodeType::kNTyParameterDecl;
+        // 可选参数为：参考、可空、数组
+        std::vector<TString> attributes_;
+
+        // === 下面是经过语义分析后的数据 ===
+
+        /*
+         * 是否引用类型
+         */
+        bool is_reference = false;
+
+        /*
+         * 是否可空
+         */
+        bool is_nullable = false;
+
+        /*
+         * 是否数组
+         */
+        bool is_array = false;
+    };
+
+    /*
+     * 描述成员变量、全局变量、局部变量、文件变量
      */
     struct VariableDecl : public BaseVariDecl {
         static const NodeType node_type = NodeType::kNTyVariableDecl;
+        // 维度的文本描述
         TString dimension_;
 
         // === 下面是经过语义分析后的数据 ===
 
-        // 数组维度定义，如果不是数组，则为空
+        /*
+         * 数组维度信息
+         */
         std::vector<size_t> dimensions_;
     };
 
@@ -222,15 +307,41 @@ namespace opene {
      */
     struct GlobalVariableDecl : public VariableDecl {
         static const NodeType node_type = NodeType::kNTyGlobalVariableDecl;
+        // 访问级别的文本描述
         TString access_;
+
+        // === 下面是经过语义分析后的数据 ===
+
+        /*
+         * 访问级别
+         */
+        AccessLevel access_level_ = AccessLevel::kALPublic;
     };
 
     /*
-     * 描述参数
+     * 描述成员变量
      */
-    struct ParameterDecl : public BaseVariDecl  {
-        static const NodeType node_type = NodeType::kNTyParameterDecl;
-        std::vector<TString> attributes_;
+    struct MemberVariableDecl : public VariableDecl {
+        static const NodeType node_type = NodeType::kNTyMemberVariableDecl;
+    };
+
+    /*
+     * 描述文件变量
+     */
+    struct FileVariableDecl : public VariableDecl {
+        static const NodeType node_type = NodeType::kNTyFileVariableDecl;
+    };
+
+    /*
+     * 描述局部变量
+     */
+    struct LocalVariableDecl : public VariableDecl {
+        static const NodeType node_type = NodeType::kNTyLocalVariableDecl;
+        TString attributes_;
+
+        // === 下面是经过语义分析后的数据 ===
+
+        bool is_static_ = false;
     };
 
     /*
@@ -270,6 +381,20 @@ namespace opene {
         std::map<StringRef, VariableDeclPtr> members_;
     };
 
+    /*
+     * 数组类型
+     */
+    struct ArrayDecl : public TypeDecl {
+        static const NodeType node_type = NodeType::kNTyArrayDecl;
+        TString base_type_str;
+
+        // === 下面是经过语义分析后的数据 ===
+
+        TypeDeclPtr base_type = nullptr;
+        // 数组维度定义，如果不是数组，则为空
+        std::vector<size_t> dimensions_;
+    };
+
     struct SubProgDecl : public TagDecl {
         static const NodeType node_type = NodeType::kNTySubProgDecl;
         // 返回值类型名
@@ -279,7 +404,7 @@ namespace opene {
         // 参数列表
         std::vector<ParameterDeclPtr> parameters_;
         // 局部变量列表
-        std::map<StringRef, VariableDeclPtr> local_vari_;
+        std::map<StringRef, LocalVariableDeclPtr> local_vari_;
         // 语句列表
         StatementListPtr statement_list_ = nullptr;
 

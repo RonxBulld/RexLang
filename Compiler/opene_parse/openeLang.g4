@@ -91,7 +91,7 @@ edition_spec
 
 struct_declare
     : '.数据类型' name=IDENTIFIER (',' access=IDENTIFIER? (',' table_comment)?)? NEWLINE
-      ('.成员' struct_mems+=variable_decl)*
+      ('.成员' struct_mems+=member_vari_decl)*
       NEWLINE*
     ;
 
@@ -101,7 +101,7 @@ table_comment
 
 prog_set
     : '.程序集' name=IDENTIFIER (',' base=IDENTIFIER? (',' access=IDENTIFIER? (',' table_comment)?)?)? NEWLINE
-      ('.程序集变量' prog_set_varis+=variable_decl)*
+      ('.程序集变量' prog_set_varis+=file_vari_decl)*
       (NEWLINE* functions+=sub_program NEWLINE*)*
     ;
 
@@ -109,11 +109,23 @@ variable_decl
     : name=IDENTIFIER (',' type=IDENTIFIER? (',' ',' dimension=STRING_LITERAL? (',' table_comment)?)?)? NEWLINE
     ;
 
+member_vari_decl
+    : variable_decl
+    ;
+
+file_vari_decl
+    : variable_decl
+    ;
+
 sub_program
     : '.子程序' name=IDENTIFIER (',' type=IDENTIFIER? (',' access=IDENTIFIER? (',' table_comment)?)?)? NEWLINE
       (params+=parameter_decl)*
-      ('.局部变量' local_vari+=variable_decl)*
+      (local_vari+=local_variable_decl)*
       statement_list
+    ;
+
+local_variable_decl
+    : '.局部变量' name=IDENTIFIER (',' type=IDENTIFIER? (',' attribute=IDENTIFIER? (',' dimension=STRING_LITERAL? (',' table_comment)?)?)?)? NEWLINE
     ;
 
 parameter_decl

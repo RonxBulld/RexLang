@@ -60,8 +60,17 @@ public:
   virtual void enterVariable_decl(openeLangParser::Variable_declContext * /*ctx*/) override { }
   virtual void exitVariable_decl(openeLangParser::Variable_declContext * /*ctx*/) override { }
 
+  virtual void enterMember_vari_decl(openeLangParser::Member_vari_declContext * /*ctx*/) override { }
+  virtual void exitMember_vari_decl(openeLangParser::Member_vari_declContext * /*ctx*/) override { }
+
+  virtual void enterFile_vari_decl(openeLangParser::File_vari_declContext * /*ctx*/) override { }
+  virtual void exitFile_vari_decl(openeLangParser::File_vari_declContext * /*ctx*/) override { }
+
   virtual void enterSub_program(openeLangParser::Sub_programContext * /*ctx*/) override { }
   virtual void exitSub_program(openeLangParser::Sub_programContext * /*ctx*/) override { }
+
+  virtual void enterLocal_variable_decl(openeLangParser::Local_variable_declContext * /*ctx*/) override { }
+  virtual void exitLocal_variable_decl(openeLangParser::Local_variable_declContext * /*ctx*/) override { }
 
   virtual void enterParameter_decl(openeLangParser::Parameter_declContext * /*ctx*/) override { }
   virtual void exitParameter_decl(openeLangParser::Parameter_declContext * /*ctx*/) override { }

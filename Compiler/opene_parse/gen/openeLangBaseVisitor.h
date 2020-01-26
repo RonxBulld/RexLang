@@ -73,7 +73,19 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual antlrcpp::Any visitMember_vari_decl(openeLangParser::Member_vari_declContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitFile_vari_decl(openeLangParser::File_vari_declContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual antlrcpp::Any visitSub_program(openeLangParser::Sub_programContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitLocal_variable_decl(openeLangParser::Local_variable_declContext *ctx) override {
     return visitChildren(ctx);
   }
 

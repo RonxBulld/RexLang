@@ -40,25 +40,25 @@ namespace opene {
         return CreateError<std::string>(1);
     }
 
-    ErrOr<type::AccessLevel> Str2Attr::Name2AccessLevel(const StringRef &name) {
+    ErrOr<AccessLevel> Str2Attr::Name2AccessLevel(const StringRef &name) {
         if (name == u8"公开") {
-            return ErrOr<type::AccessLevel>(type::AccessLevel::kALPublic);
+            return ErrOr<AccessLevel>(AccessLevel::kALPublic);
         } else if (name == u8"") {
-            return ErrOr<type::AccessLevel>(type::AccessLevel::kALPrivate);
+            return ErrOr<AccessLevel>(AccessLevel::kALPrivate);
         } else {
             assert(false);
-            return ErrOr<type::AccessLevel>::CreateError(1);
+            return ErrOr<AccessLevel>::CreateError(1);
         }
     }
 
-    ErrOr<type::ValueTransferMode> Str2Attr::Name2ValueTransferMode(const StringRef &name) {
+    ErrOr<ValueTransferMode> Str2Attr::Name2ValueTransferMode(const StringRef &name) {
         if (name == u8"传址") {
-            return ErrOr<type::ValueTransferMode>(type::ValueTransferMode::kVTMReference);
+            return ErrOr<ValueTransferMode>(ValueTransferMode::kVTMReference);
         } else if (name == u8"") {
-            return ErrOr<type::ValueTransferMode>(type::ValueTransferMode::kVTMValue);
+            return ErrOr<ValueTransferMode>(ValueTransferMode::kVTMValue);
         } else {
             assert(false);
-            return ErrOr<type::ValueTransferMode>::CreateError(1);
+            return ErrOr<ValueTransferMode>::CreateError(1);
         }
     }
 

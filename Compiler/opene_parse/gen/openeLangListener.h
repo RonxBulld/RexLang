@@ -58,8 +58,17 @@ public:
   virtual void enterVariable_decl(openeLangParser::Variable_declContext *ctx) = 0;
   virtual void exitVariable_decl(openeLangParser::Variable_declContext *ctx) = 0;
 
+  virtual void enterMember_vari_decl(openeLangParser::Member_vari_declContext *ctx) = 0;
+  virtual void exitMember_vari_decl(openeLangParser::Member_vari_declContext *ctx) = 0;
+
+  virtual void enterFile_vari_decl(openeLangParser::File_vari_declContext *ctx) = 0;
+  virtual void exitFile_vari_decl(openeLangParser::File_vari_declContext *ctx) = 0;
+
   virtual void enterSub_program(openeLangParser::Sub_programContext *ctx) = 0;
   virtual void exitSub_program(openeLangParser::Sub_programContext *ctx) = 0;
+
+  virtual void enterLocal_variable_decl(openeLangParser::Local_variable_declContext *ctx) = 0;
+  virtual void exitLocal_variable_decl(openeLangParser::Local_variable_declContext *ctx) = 0;
 
   virtual void enterParameter_decl(openeLangParser::Parameter_declContext *ctx) = 0;
   virtual void exitParameter_decl(openeLangParser::Parameter_declContext *ctx) = 0;

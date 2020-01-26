@@ -7,7 +7,6 @@
 
 #include "ErrOr.h"
 #include "StringRef.h"
-#include "TypeDescription.h"
 #include "NodeDecl.h"
 
 namespace opene {
@@ -18,9 +17,9 @@ namespace opene {
 
         static ErrOr<std::string> BuiltinType2Name(BuiltinTypeDecl::EnumOfBuiltinType type);
 
-        static ErrOr<type::AccessLevel> Name2AccessLevel(const StringRef &name);
+        static ErrOr<AccessLevel> Name2AccessLevel(const StringRef &name);
 
-        static ErrOr<type::ValueTransferMode> Name2ValueTransferMode(const StringRef &name);
+        static ErrOr<ValueTransferMode> Name2ValueTransferMode(const StringRef &name);
 
         static ErrOr<std::vector<size_t>> Str2Dimension(const StringRef &str);
     };

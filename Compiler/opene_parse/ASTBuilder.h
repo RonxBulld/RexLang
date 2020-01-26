@@ -152,6 +152,12 @@ namespace opene {
 
     public:
         ASTBuilder(Diagnostic *diagnostic);
+
+        antlrcpp::Any visitLocal_variable_decl(openeLangParser::Local_variable_declContext *context) override;
+
+        antlrcpp::Any visitMember_vari_decl(openeLangParser::Member_vari_declContext *context) override;
+
+        antlrcpp::Any visitFile_vari_decl(openeLangParser::File_vari_declContext *context) override;
     };
 }
 

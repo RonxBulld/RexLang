@@ -46,7 +46,7 @@ namespace opene {
         // 2.1. 明确成员的类型指针
         this->SetupAllStructMemberType();
         // 2.2. 明确全局变量、程序集变量类型指针
-        this->SetupAllVariableType();
+        this->SetupGlobalAndFileStaticVariableType();
         // 3. 针对每一个程序集中的每一个函数开始遍历
         for (auto & func_item : this->translate_unit_->function_decls_) {
             // 3.1. 明确每一个参数、返回值和局部变量的类型指针
@@ -95,21 +95,6 @@ namespace opene {
         return true;
     }
 
-    bool SematicAnalysis::SetupAllStructMemberType() {
-        for (auto & item: this->translate_unit_->global_type_) {
-            if (StructureDeclPtr structure_decl = item.second->as<StructureDecl>()) {
-                for (auto & member_item : structure_decl->members_) {
-                    member_item.second->type_decl_ptr_ = this->QueryTypeDeclWithName(member_item.second->type_.string_);
-                    if (member_item.second->type_decl_ptr_ == nullptr) {
-                        assert(false);
-                        return false;
-                    }
-                }
-            }
-        }
-        return true;
-    }
-
     TypeDecl *SematicAnalysis::QueryTypeDeclWithName(const StringRef &name) {
         auto found = this->translate_unit_->global_type_.find(name);
         if (found != this->translate_unit_->global_type_.end()) {
@@ -120,10 +105,25 @@ namespace opene {
         }
     }
 
-    bool SematicAnalysis::SetupAllVariableType() {
+    bool SematicAnalysis::SetupAllStructMemberType() {
+        for (auto & item: this->translate_unit_->global_type_) {
+            if (StructureDeclPtr structure_decl = item.second->as<StructureDecl>()) {
+                for (auto & member_item : structure_decl->members_) {
+                    this->SetupBaseVariableType(member_item.second);
+                    if (member_item.second->type_decl_ptr_ == nullptr) {
+                        assert(false);
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    bool SematicAnalysis::SetupGlobalAndFileStaticVariableType() {
         // 1. 全局变量
         for (auto & item : this->translate_unit_->global_variables_) {
-            item.second->type_decl_ptr_ = this->QueryTypeDeclWithName(item.second->type_.string_);
+            this->SetupBaseVariableType(item.second);
             if (item.second->type_decl_ptr_ == nullptr) {
                 return false;
             }
@@ -131,7 +131,7 @@ namespace opene {
         // 2. 程序集变量
         for (auto & prog_set_item : this->translate_unit_->program_sets_) {
             for (auto & prog_set_vari_item : prog_set_item.second->file_static_variables_) {
-                prog_set_vari_item.second->type_decl_ptr_ = this->QueryTypeDeclWithName(prog_set_vari_item.second->type_.string_);
+                this->SetupBaseVariableType(prog_set_vari_item.second);
                 if (prog_set_vari_item.second->type_decl_ptr_ == nullptr) {
                     return false;
                 }
@@ -185,6 +185,7 @@ namespace opene {
         // 3.1.2. 明确参数类型
         for (ParameterDeclPtr parameter_decl : function->parameters_) {
             parameter_decl->type_decl_ptr_ = this->QueryTypeDeclWithName(parameter_decl->type_.string_);
+            this->SetupParameterType(parameter_decl);
             if (parameter_decl->type_decl_ptr_ == nullptr) {
                 assert(false);
                 return false;
@@ -193,7 +194,7 @@ namespace opene {
         // 3.1.3. 明确局部变量类型
         for (auto & item : function->local_vari_) {
             VariableDeclPtr local_vari = item.second;
-            local_vari->type_decl_ptr_ = this->QueryTypeDeclWithName(local_vari->type_.string_);
+            this->SetupBaseVariableType(local_vari);
             if (local_vari->type_decl_ptr_ == nullptr) {
                 assert(false);
                 return false;
@@ -214,8 +215,8 @@ namespace opene {
             }
             // 检查条件语句的条件表达式是否为扩展布尔类型
             for (auto & branch : if_stmt->switches_) {
-                std::shared_ptr<TypeDecl> switch_expr_type = this->CheckExpression(branch.first);
-                if (TypeAssert::IsExternBooleanType(switch_expr_type.get()) == false) {
+                TypeDeclPtr switch_expr_type = this->CheckExpression(branch.first);
+                if (TypeAssert::IsExternBooleanType(switch_expr_type) == false) {
                     assert(false);
                     return false;
                 }
@@ -260,6 +261,22 @@ namespace opene {
         } else {
             assert(false);
             return false;
+        }
+        return true;
+    }
+
+    bool SematicAnalysis::SetupParameterType(ParameterDecl *parameter) {
+        for (const TString &attr : parameter->attributes_) {
+            if (attr.string_ == u8"参考") {
+                parameter->is_reference = true;
+            } else if (attr.string_ == u8"可空") {
+                parameter->is_nullable = true;
+            } else if (attr.string_ == u8"数组") {
+                parameter->is_array = true;
+            } else {
+                assert(false);
+                return false;
+            }
         }
         return true;
     }
