@@ -256,7 +256,10 @@ namespace opene {
      */
     struct BaseVariDecl : public TagDecl {
         static const NodeType node_type = NodeType::kNTyBaseVariDecl;
-        TString type_;
+        TString type_name_;
+
+        // === 下面是经过语义分析后的数据 ===
+
         TypeDeclPtr type_decl_ptr_ = nullptr;
     };
 
@@ -366,7 +369,7 @@ namespace opene {
             kBTypeDataSet,     // 字节集
             kBTypeShort,       // 短整型
             kBTypeLong,        // 长整型
-            kBTypeDatatime,    // 日期时间型
+            kBTypeDatetime,    // 日期时间型
             kBTypeFuncPtr,     // 子程序指针
             kBTypeDouble,      // 双精度小数型
         } built_in_type_ = EnumOfBuiltinType::kBTypeInteger;
@@ -378,7 +381,7 @@ namespace opene {
     struct StructureDecl : public TypeDecl {
         static const NodeType node_type = NodeType::kNTyStructureDecl;
         TString access_;
-        std::map<StringRef, VariableDeclPtr> members_;
+        std::map<StringRef, MemberVariableDeclPtr> members_;
     };
 
     /*
@@ -420,7 +423,7 @@ namespace opene {
         static const NodeType node_type = NodeType::kNTyProgSetDecl;
         TString base_;
         TString access_;
-        std::map<StringRef, VariableDeclPtr> file_static_variables_;
+        std::map<StringRef, FileVariableDeclPtr> file_static_variables_;
         std::map<StringRef, SubProgDeclPtr> function_decls_;
     };
 
@@ -515,15 +518,31 @@ namespace opene {
         static const NodeType node_type = NodeType::kNTyExpression;
     };
 
+    /**
+     * @brief 多层名称序列
+     * 该节点用于表示通过英文句点`.'连接的多层引用语法结构
+     */
     struct HierarchyIdentifier : public Expression {
         static const NodeType node_type = NodeType::kNTyHierarchyIdentifier;
         std::vector<NameComponentPtr> name_components_;
     };
 
+    /**
+     * @brief 单个命名组件
+     */
     struct NameComponent : public Expression {
         static const NodeType node_type = NodeType::kNTyNameComponent;
+
+        // === 普通名称组件 ===
+
+        // 引用名
         TString name_;
+
+        // === 数组组件 ===
+
+        // 索引对象
         NameComponentPtr base_ = nullptr;
+        // 索引表达式
         ExpressionPtr index_ = nullptr;
     };
 

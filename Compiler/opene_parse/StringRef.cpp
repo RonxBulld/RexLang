@@ -108,6 +108,10 @@ namespace opene {
         return strncmp(this->string_->c_str(), (const char *)rhs, this->string_->length()) == 0;
     }
 
+    bool StringRef::empty() const {
+        return (this->string_ == nullptr || this->string_->empty());
+    }
+
     StringRef StringPool::Create(const std::string &str) {
         auto found = this->string_pool_.find(str);
         if (found == this->string_pool_.end()) {

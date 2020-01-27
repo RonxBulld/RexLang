@@ -927,12 +927,12 @@ tree::TerminalNode* openeLangParser::Struct_declareContext::IDENTIFIER(size_t i)
   return getToken(openeLangParser::IDENTIFIER, i);
 }
 
-std::vector<openeLangParser::Variable_declContext *> openeLangParser::Struct_declareContext::variable_decl() {
-  return getRuleContexts<openeLangParser::Variable_declContext>();
+std::vector<openeLangParser::Member_vari_declContext *> openeLangParser::Struct_declareContext::member_vari_decl() {
+  return getRuleContexts<openeLangParser::Member_vari_declContext>();
 }
 
-openeLangParser::Variable_declContext* openeLangParser::Struct_declareContext::variable_decl(size_t i) {
-  return getRuleContext<openeLangParser::Variable_declContext>(i);
+openeLangParser::Member_vari_declContext* openeLangParser::Struct_declareContext::member_vari_decl(size_t i) {
+  return getRuleContext<openeLangParser::Member_vari_declContext>(i);
 }
 
 openeLangParser::Table_commentContext* openeLangParser::Struct_declareContext::table_comment() {
@@ -1013,8 +1013,8 @@ openeLangParser::Struct_declareContext* openeLangParser::struct_declare() {
       setState(182);
       match(openeLangParser::T__6);
       setState(183);
-      dynamic_cast<Struct_declareContext *>(_localctx)->variable_declContext = variable_decl();
-      dynamic_cast<Struct_declareContext *>(_localctx)->struct_mems.push_back(dynamic_cast<Struct_declareContext *>(_localctx)->variable_declContext);
+      dynamic_cast<Struct_declareContext *>(_localctx)->member_vari_declContext = member_vari_decl();
+      dynamic_cast<Struct_declareContext *>(_localctx)->struct_mems.push_back(dynamic_cast<Struct_declareContext *>(_localctx)->member_vari_declContext);
       setState(188);
       _errHandler->sync(this);
       _la = _input->LA(1);
@@ -1126,12 +1126,12 @@ tree::TerminalNode* openeLangParser::Prog_setContext::IDENTIFIER(size_t i) {
   return getToken(openeLangParser::IDENTIFIER, i);
 }
 
-std::vector<openeLangParser::Variable_declContext *> openeLangParser::Prog_setContext::variable_decl() {
-  return getRuleContexts<openeLangParser::Variable_declContext>();
+std::vector<openeLangParser::File_vari_declContext *> openeLangParser::Prog_setContext::file_vari_decl() {
+  return getRuleContexts<openeLangParser::File_vari_declContext>();
 }
 
-openeLangParser::Variable_declContext* openeLangParser::Prog_setContext::variable_decl(size_t i) {
-  return getRuleContext<openeLangParser::Variable_declContext>(i);
+openeLangParser::File_vari_declContext* openeLangParser::Prog_setContext::file_vari_decl(size_t i) {
+  return getRuleContext<openeLangParser::File_vari_declContext>(i);
 }
 
 std::vector<openeLangParser::Sub_programContext *> openeLangParser::Prog_setContext::sub_program() {
@@ -1237,8 +1237,8 @@ openeLangParser::Prog_setContext* openeLangParser::prog_set() {
       setState(220);
       match(openeLangParser::T__8);
       setState(221);
-      dynamic_cast<Prog_setContext *>(_localctx)->variable_declContext = variable_decl();
-      dynamic_cast<Prog_setContext *>(_localctx)->prog_set_varis.push_back(dynamic_cast<Prog_setContext *>(_localctx)->variable_declContext);
+      dynamic_cast<Prog_setContext *>(_localctx)->file_vari_declContext = file_vari_decl();
+      dynamic_cast<Prog_setContext *>(_localctx)->prog_set_varis.push_back(dynamic_cast<Prog_setContext *>(_localctx)->file_vari_declContext);
       setState(226);
       _errHandler->sync(this);
       _la = _input->LA(1);
@@ -4999,7 +4999,7 @@ openeLangParser::Initializer::Initializer() {
     0x2, 0xb4, 0xb6, 0x3, 0x2, 0x2, 0x2, 0xb5, 0xad, 0x3, 0x2, 0x2, 0x2, 
     0xb5, 0xb6, 0x3, 0x2, 0x2, 0x2, 0xb6, 0xb7, 0x3, 0x2, 0x2, 0x2, 0xb7, 
     0xbc, 0x7, 0x49, 0x2, 0x2, 0xb8, 0xb9, 0x7, 0x9, 0x2, 0x2, 0xb9, 0xbb, 
-    0x5, 0x1c, 0xf, 0x2, 0xba, 0xb8, 0x3, 0x2, 0x2, 0x2, 0xbb, 0xbe, 0x3, 
+    0x5, 0x1e, 0x10, 0x2, 0xba, 0xb8, 0x3, 0x2, 0x2, 0x2, 0xbb, 0xbe, 0x3, 
     0x2, 0x2, 0x2, 0xbc, 0xba, 0x3, 0x2, 0x2, 0x2, 0xbc, 0xbd, 0x3, 0x2, 
     0x2, 0x2, 0xbd, 0xc2, 0x3, 0x2, 0x2, 0x2, 0xbe, 0xbc, 0x3, 0x2, 0x2, 
     0x2, 0xbf, 0xc1, 0x7, 0x49, 0x2, 0x2, 0xc0, 0xbf, 0x3, 0x2, 0x2, 0x2, 
@@ -5020,7 +5020,7 @@ openeLangParser::Initializer::Initializer() {
     0x3, 0x2, 0x2, 0x2, 0xda, 0xdc, 0x3, 0x2, 0x2, 0x2, 0xdb, 0xcd, 0x3, 
     0x2, 0x2, 0x2, 0xdb, 0xdc, 0x3, 0x2, 0x2, 0x2, 0xdc, 0xdd, 0x3, 0x2, 
     0x2, 0x2, 0xdd, 0xe2, 0x7, 0x49, 0x2, 0x2, 0xde, 0xdf, 0x7, 0xb, 0x2, 
-    0x2, 0xdf, 0xe1, 0x5, 0x1c, 0xf, 0x2, 0xe0, 0xde, 0x3, 0x2, 0x2, 0x2, 
+    0x2, 0xdf, 0xe1, 0x5, 0x20, 0x11, 0x2, 0xe0, 0xde, 0x3, 0x2, 0x2, 0x2, 
     0xe1, 0xe4, 0x3, 0x2, 0x2, 0x2, 0xe2, 0xe0, 0x3, 0x2, 0x2, 0x2, 0xe2, 
     0xe3, 0x3, 0x2, 0x2, 0x2, 0xe3, 0xf4, 0x3, 0x2, 0x2, 0x2, 0xe4, 0xe2, 
     0x3, 0x2, 0x2, 0x2, 0xe5, 0xe7, 0x7, 0x49, 0x2, 0x2, 0xe6, 0xe5, 0x3, 

@@ -278,16 +278,16 @@ public:
   public:
     antlr4::Token *name = nullptr;;
     antlr4::Token *access = nullptr;;
-    openeLangParser::Variable_declContext *variable_declContext = nullptr;;
-    std::vector<Variable_declContext *> struct_mems;;
+    openeLangParser::Member_vari_declContext *member_vari_declContext = nullptr;;
+    std::vector<Member_vari_declContext *> struct_mems;;
     Struct_declareContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     std::vector<antlr4::tree::TerminalNode *> NEWLINE();
     antlr4::tree::TerminalNode* NEWLINE(size_t i);
     std::vector<antlr4::tree::TerminalNode *> IDENTIFIER();
     antlr4::tree::TerminalNode* IDENTIFIER(size_t i);
-    std::vector<Variable_declContext *> variable_decl();
-    Variable_declContext* variable_decl(size_t i);
+    std::vector<Member_vari_declContext *> member_vari_decl();
+    Member_vari_declContext* member_vari_decl(size_t i);
     Table_commentContext *table_comment();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -319,8 +319,8 @@ public:
     antlr4::Token *name = nullptr;;
     antlr4::Token *base = nullptr;;
     antlr4::Token *access = nullptr;;
-    openeLangParser::Variable_declContext *variable_declContext = nullptr;;
-    std::vector<Variable_declContext *> prog_set_varis;;
+    openeLangParser::File_vari_declContext *file_vari_declContext = nullptr;;
+    std::vector<File_vari_declContext *> prog_set_varis;;
     openeLangParser::Sub_programContext *sub_programContext = nullptr;;
     std::vector<Sub_programContext *> functions;;
     Prog_setContext(antlr4::ParserRuleContext *parent, size_t invokingState);
@@ -329,8 +329,8 @@ public:
     antlr4::tree::TerminalNode* NEWLINE(size_t i);
     std::vector<antlr4::tree::TerminalNode *> IDENTIFIER();
     antlr4::tree::TerminalNode* IDENTIFIER(size_t i);
-    std::vector<Variable_declContext *> variable_decl();
-    Variable_declContext* variable_decl(size_t i);
+    std::vector<File_vari_declContext *> file_vari_decl();
+    File_vari_declContext* file_vari_decl(size_t i);
     std::vector<Sub_programContext *> sub_program();
     Sub_programContext* sub_program(size_t i);
     Table_commentContext *table_comment();

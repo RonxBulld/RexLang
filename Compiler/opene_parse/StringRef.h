@@ -32,6 +32,8 @@ namespace opene {
 
         size_t size() const;
 
+        bool empty() const;
+
         char operator[](size_t index) const;
 
         StringRef operator+(const StringRef &rhs) const;

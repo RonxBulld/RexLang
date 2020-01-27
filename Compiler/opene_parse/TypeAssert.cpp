@@ -63,7 +63,7 @@ namespace opene {
 
     bool TypeAssert::IsDatatimeType(const TypeDeclPtr typeDecl) {
         if (const BuiltinTypeDeclPtr builtin_type_decl = typeDecl->as<BuiltinTypeDecl>()) {
-            return builtin_type_decl->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDatatime;
+            return builtin_type_decl->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDatetime;
         }
         return false;
     }

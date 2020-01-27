@@ -176,7 +176,7 @@ namespace opene {
     antlrcpp::Any ASTBuilder::visitGlobal_variable_item(openeLangParser::Global_variable_itemContext *context) {
         GlobalVariableDeclPtr global_variable_decl = CreateNode<GlobalVariableDecl>(context->getStart(), context->getStop());
         global_variable_decl->name_ = GetTextIfExist(context->name);
-        global_variable_decl->type_ = GetTextIfExist(context->type);
+        global_variable_decl->type_name_ = GetTextIfExist(context->type);
         global_variable_decl->dimension_ = GetTextIfExist(context->dimension);
         global_variable_decl->access_ = GetTextIfExist(context->access);
         global_variable_decl->comment_ = GetFromCtxIfExist<TString>(context->table_comment());
@@ -193,7 +193,7 @@ namespace opene {
         structure_decl->access_ = GetTextIfExist(context->access);
         structure_decl->comment_ = GetFromCtxIfExist<TString>(context->table_comment());
         for (auto *mem_ctx : context->struct_mems) {
-            VariableDeclPtr member = GetFromCtxIfExist<VariableDeclPtr>(mem_ctx);
+            MemberVariableDeclPtr member = GetFromCtxIfExist<MemberVariableDeclPtr>(mem_ctx);
             structure_decl->members_[member->name_.string_] = member;
         }
         return NodeWarp(structure_decl);
@@ -210,7 +210,7 @@ namespace opene {
         prog_set_decl->access_ = GetTextIfExist(context->access);
         prog_set_decl->comment_ = GetFromCtxIfExist<TString>(context->table_comment());
         for (auto *vari_ctx : context->prog_set_varis) {
-            VariableDeclPtr vari_decl = GetFromCtxIfExist<VariableDeclPtr>(vari_ctx);
+            FileVariableDeclPtr vari_decl = GetFromCtxIfExist<FileVariableDeclPtr>(vari_ctx);
             prog_set_decl->file_static_variables_[vari_decl->name_.string_] = vari_decl;
         }
         for (auto *func_ctx : context->functions) {
@@ -223,7 +223,7 @@ namespace opene {
     antlrcpp::Any ASTBuilder::visitVariable_decl(openeLangParser::Variable_declContext *context) {
         VariableDeclPtr variable_decl = CreateNode<VariableDecl>(context->getStart(), context->getStop());
         variable_decl->name_ = GetTextIfExist(context->name);
-        variable_decl->type_ = GetTextIfExist(context->type);
+        variable_decl->type_name_ = GetTextIfExist(context->type);
         variable_decl->dimension_ = GetTextIfExist(context->dimension);
         variable_decl->comment_ = GetFromCtxIfExist<TString>(context->table_comment());
         return NodeWarp(variable_decl);
@@ -250,7 +250,7 @@ namespace opene {
     antlrcpp::Any ASTBuilder::visitLocal_variable_decl(openeLangParser::Local_variable_declContext *context) {
         LocalVariableDeclPtr local_variable_decl = CreateNode<LocalVariableDecl>(context->getStart(), context->getStop());
         local_variable_decl->name_ = GetTextIfExist(context->name);
-        local_variable_decl->type_ = GetTextIfExist(context->type);
+        local_variable_decl->type_name_ = GetTextIfExist(context->type);
         local_variable_decl->dimension_ = GetTextIfExist(context->dimension);
         local_variable_decl->comment_ = GetFromCtxIfExist<TString>(context->table_comment());
         return NodeWarp(local_variable_decl);
@@ -259,7 +259,7 @@ namespace opene {
     antlrcpp::Any ASTBuilder::visitParameter_decl(openeLangParser::Parameter_declContext *context) {
         ParameterDeclPtr parameter_decl = CreateNode<ParameterDecl>(context->getStart(), context->getStop());
         parameter_decl->name_ = GetTextIfExist(context->name);
-        parameter_decl->type_ = GetTextIfExist(context->type);
+        parameter_decl->type_name_ = GetTextIfExist(context->type);
         parameter_decl->attributes_ = GetTextVecIfExist(context->attributes);
         parameter_decl->comment_ = GetFromCtxIfExist<TString>(context->table_comment());
         return NodeWarp(parameter_decl);

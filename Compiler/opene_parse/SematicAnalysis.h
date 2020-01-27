@@ -31,7 +31,9 @@ namespace opene {
 
     class SematicAnalysis {
     private:
-        TranslateUnit * translate_unit_;
+        TranslateUnit * translate_unit_ = nullptr;
+        ProgSetDecl * current_program_file_ = nullptr;
+        SubProgDecl * current_function_ = nullptr;
 
     private:
         /*
@@ -49,6 +51,8 @@ namespace opene {
          * 若找不到则返回空指针
          */
         TypeDecl *QueryTypeDeclWithName(const StringRef &name);
+
+        TypeDecl *QueryBuiltinTypeWithEnum(BuiltinTypeDecl::EnumOfBuiltinType type_enum);
 
         // =============== 类型和属性的绑定和处理 ===============
         //<editor-fold desc="类型和属性的绑定和处理">
@@ -115,6 +119,31 @@ namespace opene {
          * 检查表达式，并返回表达式的结果类型
          */
         TypeDecl *CheckExpression(Expression *expression);
+
+        /*
+         * 获取完整可靠的类型描述符
+         */
+        TypeDecl *GetQualifiedType(BaseVariDecl *baseVariDecl);
+
+        /*
+         * 获取名称组件的确切来源
+         */
+        NameComponent *GetNameComponentQualifiedBase(NameComponent *nameComponent);
+
+        /*
+         * 获取名称组件的确切名字
+         */
+        ErrOr<StringRef> GetNameComponentQualifiedName(NameComponent *nameComponent);
+
+        /*
+         * 通过名称在各个层级中查找变量
+         */
+        BaseVariDecl *FindVariableWithNameInHierarchy(const StringRef &variable_name);
+
+        /*
+         * 在指定的结构类型中查找变量
+         */
+        BaseVariDecl *FindVariableWithNameInStructureType(TypeDecl *typeDecl, const StringRef &variable_name);
 
     public:
         bool Run(TranslateUnit * translateUnitPtr);

@@ -10,6 +10,10 @@ namespace opene {
         return this->string_pool_.Create(str);
     }
 
+    StringRef ASTContext::CreateString(const char *pstr) {
+        return this->string_pool_.Create(pstr);
+    }
+
     size_t ASTContext::CreateLocation(const std::string &filename, size_t line, size_t column) {
         return this->location_pool_.CreateLocation(this->string_pool_.Create(filename), line, column);
     }

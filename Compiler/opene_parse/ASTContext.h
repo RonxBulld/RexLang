@@ -19,6 +19,8 @@ namespace opene {
     public:
         StringRef CreateString(const std::string &str);
 
+        StringRef CreateString(const char *pstr);
+
         size_t CreateLocation(const std::string &filename, size_t line, size_t column);
 
         size_t CreateLocation(const StringRef &filename, size_t line, size_t column);
