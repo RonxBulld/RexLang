@@ -59,6 +59,7 @@ namespace opene {
     typedef struct Statement* StatementPtr;
     typedef struct IfStmt* IfStmtPtr;
     typedef struct StatementBlock* StatementListPtr;
+    typedef struct LoopStatement* LoopStatementPtr;
     typedef struct WhileStmt* WhileStmtPtr;
     typedef struct RangeForStmt* RangeForStmtPtr;
     typedef struct ForStmt* ForStmtPtr;
@@ -107,7 +108,7 @@ namespace opene {
         kNTyFileVariableDecl,
         kNTyLocalVariableDecl,
         kNTyTypeDecl,
-        kNTyBuiltInTypeDecl,
+        kNTyBuiltinTypeDecl,
         kNTyArrayDecl,
         kNTyStructureDecl,
         kNTySubProgDecl,
@@ -116,6 +117,7 @@ namespace opene {
         kNTyStatement,
         kNTyIfStmt,
         kNTyStatementBlock,
+        kNTyLoopStatement,
         kNTyWhileStmt,
         kNTyRangeForStmt,
         kNTyForStmt,
@@ -171,6 +173,7 @@ namespace opene {
      */
     struct Node {
         ASTContext *ast_context_ = nullptr;
+        Node *parent_node_ = nullptr;
         NodeType node_type_ = NodeType::kNTyBadType;
         size_t location_start_ = 0, location_end_ = 0;
 
@@ -222,9 +225,8 @@ namespace opene {
      * @brief 数据结构定义文件
      */
     struct DataStructureFile : public SourceFile {
-        typedef std::map<StringRef, StructureDeclPtr> ClassureDeclContainerType;
         static const NodeType node_type = NodeType::kNTyDataStructureFile;
-        ClassureDeclContainerType structure_decl_map_;
+        std::map<StringRef, StructureDeclPtr> structure_decl_map_;
     };
 
     /**
@@ -247,7 +249,9 @@ namespace opene {
      */
     struct TagDecl : public Decl {
         static const NodeType node_type = NodeType::kNTyTagDecl;
+        // 定义名称
         TString name_;
+        // 注释
         TString comment_;
     };
 
@@ -256,17 +260,19 @@ namespace opene {
      */
     struct BaseVariDecl : public TagDecl {
         static const NodeType node_type = NodeType::kNTyBaseVariDecl;
+        // 类型名称
         TString type_name_;
 
         // === 下面是经过语义分析后的数据 ===
 
+        // 类型指针
         TypeDeclPtr type_decl_ptr_ = nullptr;
     };
 
     /*
      * 描述参数
      */
-    struct ParameterDecl : public BaseVariDecl  {
+    struct ParameterDecl : public BaseVariDecl {
         static const NodeType node_type = NodeType::kNTyParameterDecl;
         // 可选参数为：参考、可空、数组
         std::vector<TString> attributes_;
@@ -340,10 +346,17 @@ namespace opene {
      */
     struct LocalVariableDecl : public VariableDecl {
         static const NodeType node_type = NodeType::kNTyLocalVariableDecl;
+        /*
+         * 局部变量属性
+         * 目前只支持“静态”属性
+         */
         TString attributes_;
 
         // === 下面是经过语义分析后的数据 ===
 
+        /*
+         * 是否为静态
+         */
         bool is_static_ = false;
     };
 
@@ -358,7 +371,7 @@ namespace opene {
      * 内置类型定义
      */
     struct BuiltinTypeDecl : public TypeDecl {
-        static const NodeType node_type = NodeType::kNTyBuiltInTypeDecl;
+        static const NodeType node_type = NodeType::kNTyBuiltinTypeDecl;
         // 内置类型枚举
         enum class EnumOfBuiltinType {
             kBTypeChar,        // 字节型
@@ -398,6 +411,9 @@ namespace opene {
         std::vector<size_t> dimensions_;
     };
 
+    /**
+     * @brief 子程序/函数定义
+     */
     struct SubProgDecl : public TagDecl {
         static const NodeType node_type = NodeType::kNTySubProgDecl;
         // 返回值类型名
@@ -419,6 +435,9 @@ namespace opene {
         TypeDeclPtr return_type_ = nullptr;
     };
 
+    /**
+     * @brief 程序集定义
+     */
     struct ProgSetDecl : public TagDecl {
         static const NodeType node_type = NodeType::kNTyProgSetDecl;
         TString base_;
@@ -427,6 +446,9 @@ namespace opene {
         std::map<StringRef, SubProgDeclPtr> function_decls_;
     };
 
+    /**
+     * @brief DLL函数声明
+     */
     struct DllCommandDecl : public TagDecl {
         static const NodeType node_type = NodeType::kNTyDllCommandDecl;
         TString type_;
@@ -464,28 +486,33 @@ namespace opene {
     };
 
     /**
+     * @brief 循环语句基本结构
+     */
+    struct LoopStatement : public Statement {
+        StatementPtr loop_body_ = nullptr;
+    };
+
+    /**
      * @brief 描述先判断后执行的While-Loop结构
      */
-    struct WhileStmt : public Statement {
+    struct WhileStmt : public LoopStatement {
         static const NodeType node_type = NodeType::kNTyWhileStmt;
         ExpressionPtr condition_ = nullptr;
-        StatementPtr loop_body_ = nullptr;
     };
 
     /**
      * @brief 描述计次循环的范围迭代循环结构
      */
-    struct RangeForStmt : public Statement {
+    struct RangeForStmt : public LoopStatement {
         static const NodeType node_type = NodeType::kNTyRangeForStmt;
         ExpressionPtr range_size_ = nullptr;
         TString loop_vari_;
-        StatementPtr loop_body_ = nullptr;
     };
 
     /**
      * @brief 描述计步循环的范围迭代循环结构
      */
-    struct ForStmt : public Statement {
+    struct ForStmt : public LoopStatement {
         static const NodeType node_type = NodeType::kNTyForStmt;
         ExpressionPtr start_value_ = nullptr;
         ExpressionPtr stop_value_ = nullptr;
@@ -496,10 +523,9 @@ namespace opene {
     /**
      * @brief 描述先执行后判断的Do-While循环结构
      */
-    struct DoWhileStmt : public Statement {
+    struct DoWhileStmt : public LoopStatement {
         static const NodeType node_type = NodeType::kNTyDoWhileStmt;
         ExpressionPtr conditon_ = nullptr;
-        StatementPtr loop_body_ = nullptr;
     };
 
     /**

@@ -340,6 +340,7 @@ namespace opene {
         for_stmt->stop_value_ = GetFromCtxIfExist<ExpressionPtr>(context->loop_end);
         for_stmt->step_value_ = GetFromCtxIfExist<ExpressionPtr>(context->loop_step);
         for_stmt->loop_vari_ = GetFromCtxIfExist<HierarchyIdentifierPtr>(context->loop_variable);
+        for_stmt->loop_body_ = GetFromCtxIfExist<StatementPtr>(context->loop_body);
         return NodeWarp(for_stmt);
     }
 

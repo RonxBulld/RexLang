@@ -36,7 +36,7 @@ namespace opene {
         template<typename T, bool must_valid = false, typename = typename std::enable_if_t<!std::is_pointer_v<T>>>
         T GetFromCtxIfExist(antlr4::ParserRuleContext *ctx, const T &hint = T());
 
-        template<typename NodeTy, typename ... Args, typename = typename std::enable_if<std::is_base_of<Node, NodeTy>::value>::type>
+        template<typename NodeTy, typename ... Args, typename = typename std::enable_if_t<std::is_base_of_v<Node, NodeTy>>>
         NodeTy *CreateNode(antlr4::Token *start_token, antlr4::Token *end_token, Args ... args);
 
     public:
