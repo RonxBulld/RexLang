@@ -23,6 +23,8 @@ namespace opene {
     public:
         bool NoError() const { return this->error_id_ == 0; }
 
+        bool HadError() const { return this->error_id_ != 0; }
+
         int GetErrorID() const { return this->error_id_; }
 
         const T & Value() const { return this->value_; }

@@ -7,6 +7,7 @@
 #include "NodeDecl.h"
 #include "Str2Attr.h"
 #include "TypeAssert.h"
+#include "ASTUtility.h"
 
 namespace opene {
     template <typename SrcMapContainer, typename TgtMapContainer, typename Pred>
@@ -38,6 +39,7 @@ namespace opene {
         }
         this->translate_unit_ = translateUnitPtr;
         // 1. 初始化动作
+        ASTUtility::FixNodeParent(translateUnitPtr);
         // 1.1. 创建内置数据类型并写入索引表
         this->CreateBuiltinType();
         // 1.2. 合并全局变量、数据结构、外部库引用、函数定义、DLL声明索引表
@@ -345,23 +347,9 @@ namespace opene {
         TranslateUnitPtr translateUnit = this->translate_unit_;
         ASTContext * astContext = translateUnit->ast_context_;
         if (HierarchyIdentifierPtr hierarchy_identifier = expression->as<HierarchyIdentifier>()) {
-            // 判断是否有效
-            assert(hierarchy_identifier->name_components_.size() > 0);
-            BaseVariDecl *vari_decl = nullptr;
-            // 找起点
-            NameComponentPtr base_component = hierarchy_identifier->name_components_.front();
-            ErrOr<StringRef> base_name = this->GetNameComponentQualifiedName(base_component);
-            if (base_name.NoError() == false) { return nullptr; }
-            BaseVariDecl *base_vari_decl = this->FindVariableWithNameInHierarchy(base_name.Value());
-            if (base_vari_decl == nullptr) { return nullptr; }
-            // 找递进
-            for (size_t idx = 1; idx < hierarchy_identifier->name_components_.size(); idx++) {
-                base_name = this->GetNameComponentQualifiedName(hierarchy_identifier->name_components_[idx]);
-                if (base_name.NoError() == false) { return nullptr; }
-                base_vari_decl = this->FindVariableWithNameInStructureType(base_vari_decl->type_decl_ptr_, base_name.Value());
-                assert(base_vari_decl);
-            }
-            return base_vari_decl->type_decl_ptr_;
+            TypeDecl *vari_decl = ASTUtility::FindVariableDeclareInASTWithHierarchyName(hierarchy_identifier);
+            if (vari_decl == nullptr) { return nullptr; }
+
 
         } else if (NameComponentPtr name_component = expression->as<NameComponent>()) {
             // 不应当单独判断NameComponent，因为缺失上下文语境会导致大部分情况无法进行判定

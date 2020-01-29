@@ -9,8 +9,8 @@
 #include <string>
 #include <map>
 #include <ctime>
+#include <set>
 
-#include "ASTContext.h"
 #include "TString.h"
 
 namespace opene {
@@ -172,7 +172,7 @@ namespace opene {
      * @brief 节点基类
      */
     struct Node {
-        ASTContext *ast_context_ = nullptr;
+        class ASTContext *ast_context_ = nullptr;
         Node *parent_node_ = nullptr;
         NodeType node_type_ = NodeType::kNTyBadType;
         size_t location_start_ = 0, location_end_ = 0;
