@@ -7,8 +7,11 @@
 #include "ASTUtility.h"
 #include "ASTFetchSubnode.h"
 #include "ASTAssert.h"
+#include "ASTContext.h"
+#include "Str2Attr.h"
 
 namespace opene {
+
     void ASTUtility::FixNodeParent(Node *root) {
         std::queue<std::pair<const Node*, ASTFetchSubnode::ASTFetchResult>> workqueue;
         workqueue.push(std::pair(root, ASTFetchSubnode::ASTFetchResult()));
@@ -25,7 +28,7 @@ namespace opene {
         }
     }
 
-    const BaseVariDecl *ASTUtility::FindVariableDeclareInASTWithHierarchyName(const HierarchyIdentifier *hierarchyIdentifier) {
+    BaseVariDecl * ASTUtility::FindVariableDeclareInASTWithHierarchyName(HierarchyIdentifier *hierarchyIdentifier) {
         // 判断是否有效
         assert(hierarchyIdentifier->name_components_.size() > 0);
         BaseVariDecl *vari_decl = nullptr;
@@ -54,34 +57,32 @@ namespace opene {
         return base_vari_decl;
     }
 
-    TypeDecl *ASTUtility::GetVariableQualifiedTypeWithHierarchyName(const HierarchyIdentifier *hierarchyIdentifier) {
+    TypeDecl *ASTUtility::GetVariableQualifiedTypeWithHierarchyName(HierarchyIdentifier *hierarchyIdentifier) {
+        // 首先查找引用目标变量定义
         const BaseVariDecl *vari_decl = ASTUtility::FindVariableDeclareInASTWithHierarchyName(hierarchyIdentifier);
         if (vari_decl == nullptr) { return nullptr; }
         // 判断数组定义和引用情况
-        ErrOr<std::vector<size_t>> type_indexes = ASTUtility::GetTypeIndexList(vari_decl);
+        ErrOr<std::vector<size_t>> type_indexes = ASTUtility::GetTypeIndexList(vari_decl->type_decl_ptr_);
         if (type_indexes.NoError() == false) { return nullptr; }
         ErrOr<std::vector<Expression *>> ref_indexes = ASTUtility::GetNameComponentIndexList(hierarchyIdentifier->name_components_.back());
         if (ref_indexes.NoError() == false) { return nullptr; }
-        if (type_indexes.Value().empty()) {   // 类型不可索引
-            if (ref_indexes.Value().empty()) {  // 实际未索引
-                return vari_decl->type_decl_ptr_;
-            } else {    // 实际索引
+        if (ref_indexes.Value().empty()) {      // 实际未索引，定义即引用
+            return vari_decl->type_decl_ptr_;
+        } else {    // 索引引用
+            if (type_indexes.Value().empty()) {    // 类型不可索引
                 assert(false);
                 return nullptr;
+            } else { // 类型可索引
+                if (ASTAssert::IsFixedDimArray(vari_decl->type_decl_ptr_)) {    // 判断维度约束
+                    if (type_indexes.Value().size() < ref_indexes.Value().size()) {
+                        assert(false);
+                        return nullptr;
+                    }
+                }
+                // 有索引则认为是元素索引而非片选
+                return ASTUtility::GetIndexableTypeElement(vari_decl->type_decl_ptr_);
             }
         }
-        // 判断维度约束
-        if (ASTAssert::IsFixedDimArray(vari_decl)) {
-            if (type_indexes.Value().size() != ref_indexes.Value().size()) {
-                assert(false);
-                return nullptr;
-            }
-        }
-        // 对于数组，利用ArrayDecl构建新的类型描述符号
-        // TODO: 是的，这里会发生内存泄露，但是我不在乎！
-        ArrayDecl *array_decl = CreateNode<ArrayDecl>(vari_decl->ast_context_);
-        
-        return array_decl;
     }
 
     ErrOr<StringRef> ASTUtility::GetNameComponentQualifiedName(NameComponent *nameComponent) {
@@ -105,9 +106,9 @@ namespace opene {
         }
     }
 
-    const Node *ASTUtility::FindNearstScope(const Node *base) {
+    Node * ASTUtility::FindNearstScope(Node *base) {
         while (base) {
-            if (base->node_type_ == NodeType::kNTySubProgDecl) {
+            if (base->node_type_ == NodeType::kNTyFunctionDecl) {
                 return base;
             } else if (base->node_type_ == NodeType::kNTyProgSetDecl) {
                 return base;
@@ -122,8 +123,8 @@ namespace opene {
         return nullptr;
     }
 
-    const BaseVariDecl *ASTUtility::FindVariableDeclInScopeWithName(const Node *scope, const StringRef &name) {
-        if (const SubProgDecl *sub_prog_decl = scope->as<SubProgDecl>()) {
+    BaseVariDecl * ASTUtility::FindVariableDeclInScopeWithName(Node *scope, const StringRef &name) {
+        if (const FunctionDecl *sub_prog_decl = scope->as<FunctionDecl>()) {
             // 1. 查找局部变量
             for (auto & item : sub_prog_decl->local_vari_) {
                 if (item.first == name) {
@@ -131,20 +132,20 @@ namespace opene {
                 }
             }
             // 2. 查找全局变量
-            for (const ParameterDecl *parameter_decl : sub_prog_decl->parameters_) {
+            for (ParameterDecl *parameter_decl : sub_prog_decl->parameters_) {
                 if (parameter_decl->name_.string_ == name) {
                     return parameter_decl;
                 }
             }
-        } else if (const ProgSetDecl *prog_set_decl = scope->as<ProgSetDecl>()) {
+        } else if (ProgSetDecl *prog_set_decl = scope->as<ProgSetDecl>()) {
             // 1. 查找文件变量
             for (auto & item : prog_set_decl->file_static_variables_) {
                 if (item.first == name) {
                     return item.second;
                 }
             }
-        } else if (const SourceFile *source_file = scope->as<SourceFile>()) {
-        } else if (const TranslateUnit *translate_unit = scope->as<TranslateUnit>()) {
+        } else if (SourceFile *source_file = scope->as<SourceFile>()) {
+        } else if (TranslateUnit *translate_unit = scope->as<TranslateUnit>()) {
             // 1. 全局变量索引表
             for (auto & item : translate_unit->global_variables_) {
                 if (item.first == name) {
@@ -155,19 +156,6 @@ namespace opene {
             assert(false);
         }
         return nullptr;
-    }
-
-    const BaseVariDecl *ASTUtility::FindVariableWithNameInStructureType(const TypeDecl *typeDecl, const StringRef &variable_name) {
-        if (const StructureDecl *structure_decl = typeDecl->as<StructureDecl>()) {
-            for (auto & item : structure_decl->members_) {
-                if (item.first == variable_name) {
-                    return item.second;
-                }
-            }
-            return nullptr;
-        } else {
-            return nullptr;
-        }
     }
 
     BaseVariDecl *ASTUtility::FindVariableWithNameInStructureType(TypeDecl *typeDecl, const StringRef &variable_name) {
@@ -183,7 +171,7 @@ namespace opene {
         }
     }
 
-    ErrOr<std::vector<Expression *>> ASTUtility::GetNameComponentIndexList(const NameComponent *nameComponent) {
+    ErrOr<std::vector<Expression *>> ASTUtility::GetNameComponentIndexList(NameComponent *nameComponent) {
         std::vector<Expression *> indexes;
         while (nameComponent && nameComponent->index_ != nullptr) {
             indexes.push_back(nameComponent->index_);
@@ -192,20 +180,90 @@ namespace opene {
         return MakeNoErrVal(indexes);
     }
 
-    ErrOr<std::vector<size_t>> ASTUtility::GetTypeIndexList(const TagDecl *tagDecl) {
-        if (ASTAssert::TypeCanIndexable(tagDecl) == false) {
+    ErrOr<std::vector<size_t>> ASTUtility::GetTypeIndexList(TypeDecl *typeDecl) {
+        if (ASTAssert::TypeCanIndexable(typeDecl) == false) {
             return MakeNoErrVal(std::vector<size_t>{});
         }
-        if (const VariableDecl *variable_decl = tagDecl->as<VariableDecl>()) {
-            // 是变量定义并且定义为多维
-            return MakeNoErrVal(variable_decl->dimensions_);
-        } else if (const BuiltinTypeDecl *builtin_type_decl = tagDecl->as<BuiltinTypeDecl>()) {
-            // 内置类型只有字节集能够被索引
-            return MakeNoErrVal(std::vector<size_t>{0});
+        if (const ArrayDecl *array_decl = typeDecl->as<ArrayDecl>()) {
+            // 变量定义为数组
+            return MakeNoErrVal(array_decl->dimensions_);
+        } else if (const BuiltinTypeDecl *builtin_type_decl = typeDecl->as<BuiltinTypeDecl>()) {
+            if (builtin_type_decl->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDataSet) {
+                // 内置类型只有字节集能够被索引
+                return MakeNoErrVal(std::vector<size_t>{0});
+            } else {
+                assert(false);
+                return ErrOr<std::vector<size_t>>::CreateError(1);
+            }
         } else {
             assert(false);
             return ErrOr<std::vector<size_t>>::CreateError(1);
         }
     }
 
+    TypeDecl * ASTUtility::GetIndexableTypeElement(TypeDecl *typeDecl) {
+        if (ASTAssert::TypeCanIndexable(typeDecl) == false) {
+            return nullptr;
+        }
+        if (const BuiltinTypeDecl *builtin_type_decl = typeDecl->as<BuiltinTypeDecl>()) {
+            if (builtin_type_decl->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDataSet) {
+                TranslateUnit *translate_unit = ASTUtility::FindSpecifyTypeParent<TranslateUnit>(typeDecl);
+                return ASTUtility::QueryBuiltinTypeWithEnum(translate_unit, BuiltinTypeDecl::EnumOfBuiltinType::kBTypeChar);
+            } else {
+                return nullptr;
+            }
+        } else if (const ArrayDecl *array_decl = typeDecl->as<ArrayDecl>()) {
+            do {
+                typeDecl = array_decl->base_type_;
+            } while (array_decl = typeDecl->as<ArrayDecl>());
+            return typeDecl;
+        }
+    }
+
+    TypeDecl * ASTUtility::QueryBuiltinTypeWithEnum(TranslateUnit *translateUnit, BuiltinTypeDecl::EnumOfBuiltinType type_enum) {
+            StringRef && type_name = translateUnit->ast_context_->CreateString(Str2Attr::BuiltinType2Name(type_enum).Value());
+            TypeDecl * type_decl = ASTUtility::QueryTypeDeclWithName(translateUnit, type_name);
+            assert(type_decl);
+            return type_decl;
+    }
+
+    TypeDecl * ASTUtility::QueryTypeDeclWithName(TranslateUnit *translateUnit, const StringRef &name) {
+        auto found = translateUnit->global_type_.find(name);
+        if (found != translateUnit->global_type_.end()) {
+            return found->second;
+        } else {
+            assert(false);
+            return nullptr;
+        }
+    }
+
+    FunctorDecl * ASTUtility::GetFunctionDeclare(FunctionCall *functionCall) {
+        TranslateUnit *translate_unit = ASTUtility::FindSpecifyTypeParent<TranslateUnit>(functionCall);
+        if (functionCall->function_name_->name_.string_.empty() || (functionCall->function_name_->base_ != nullptr || functionCall->function_name_->index_ != nullptr)) {
+            assert(false);
+            return nullptr;
+        }
+        auto found = translate_unit->functor_declares_.find(functionCall->function_name_->name_.string_);
+        if (found == translate_unit->functor_declares_.end()) {
+            assert(false);
+            return nullptr;
+        }
+        functionCall->functor_declare_ = found->second;
+        return functionCall->functor_declare_;
+    }
+
+    FunctorDecl *ASTUtility::GetFunctionDeclare(FuncAddrExpression *funcAddrExpression) {
+        TranslateUnit *translate_unit = ASTUtility::FindSpecifyTypeParent<TranslateUnit>(funcAddrExpression);
+        if (funcAddrExpression->function_name_.string_.empty()) {
+            assert(false);
+            return nullptr;
+        }
+        auto found = translate_unit->functor_declares_.find(funcAddrExpression->function_name_.string_);
+        if (found == translate_unit->functor_declares_.end()) {
+            assert(false);
+            return nullptr;
+        }
+        funcAddrExpression->functor_declare_ = found->second;
+        return funcAddrExpression->functor_declare_;
+    }
 }

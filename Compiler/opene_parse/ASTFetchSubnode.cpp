@@ -128,7 +128,7 @@ namespace opene {
         return ASTFetchSubnode::FetchTypeDecl(structureDecl, result);
     }
 
-    bool ASTFetchSubnode::FetchSubProgDecl(const SubProgDecl *subProgDecl, ASTFetchSubnode::ASTFetchResult &result) {
+    bool ASTFetchSubnode::FetchSubProgDecl(const FunctionDecl *subProgDecl, ASTFetchSubnode::ASTFetchResult &result) {
         if (Fetch(subProgDecl->parameters_, result) == false) { return false; }
         if (Fetch(subProgDecl->local_vari_, result) == false) { return false; }
         if (Fetch(subProgDecl->statement_list_, result) == false) { return false; }
@@ -217,7 +217,7 @@ namespace opene {
     }
 
     bool ASTFetchSubnode::FetchUnaryExpression(const UnaryExpression *unaryExpression, ASTFetchSubnode::ASTFetchResult &result) {
-        if (Fetch(unaryExpression->op_value_, result) == false) { return false; }
+        if (Fetch(unaryExpression->operand_value_, result) == false) { return false; }
         return ASTFetchSubnode::Fetch_OperatorExpression(unaryExpression, result);
     }
 
@@ -252,7 +252,7 @@ namespace opene {
         else if (node->node_type_ == NodeType::kNTyBuiltinTypeDecl)         { return FetchBuiltinTypeDecl(static_cast<const BuiltinTypeDecl *>(node), result); }
         else if (node->node_type_ == NodeType::kNTyArrayDecl)               { return FetchArrayDecl(static_cast<const ArrayDecl *>(node), result); }
         else if (node->node_type_ == NodeType::kNTyStructureDecl)           { return FetchStructureDecl(static_cast<const StructureDecl *>(node), result); }
-        else if (node->node_type_ == NodeType::kNTySubProgDecl)             { return FetchSubProgDecl(static_cast<const SubProgDecl *>(node), result); }
+        else if (node->node_type_ == NodeType::kNTyFunctionDecl)             { return FetchSubProgDecl(static_cast<const FunctionDecl *>(node), result); }
         else if (node->node_type_ == NodeType::kNTyProgSetDecl)             { return FetchProgSetDecl(static_cast<const ProgSetDecl *>(node), result); }
         else if (node->node_type_ == NodeType::kNTyDllCommandDecl)          { return FetchDllCommandDecl(static_cast<const DllCommandDecl *>(node), result); }
         else if (node->node_type_ == NodeType::kNTyStatement)               { return FetchStatement(static_cast<const Statement *>(node), result); }

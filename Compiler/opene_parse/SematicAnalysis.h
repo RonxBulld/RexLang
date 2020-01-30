@@ -32,8 +32,6 @@ namespace opene {
     class SematicAnalysis {
     private:
         TranslateUnit * translate_unit_ = nullptr;
-        ProgSetDecl * current_program_file_ = nullptr;
-        SubProgDecl * current_function_ = nullptr;
 
     private:
         /*
@@ -45,14 +43,6 @@ namespace opene {
          * 合并所有全局符号到翻译单元的容器中
          */
         bool MergeGlobal();
-
-        /*
-         * 通过名称引用类型定义指针
-         * 若找不到则返回空指针
-         */
-        TypeDecl *QueryTypeDeclWithName(const StringRef &name);
-
-        TypeDecl *QueryBuiltinTypeWithEnum(BuiltinTypeDecl::EnumOfBuiltinType type_enum);
 
         // =============== 类型和属性的绑定和处理 ===============
         //<editor-fold desc="类型和属性的绑定和处理">
@@ -67,9 +57,14 @@ namespace opene {
         bool SetupGlobalAndFileStaticVariableType();
 
         /*
-         * 设置所有函数的返回类型、参数类型和局部变量的类型指针
+         * 设置可调用对象的返回类型和参数类型的类型指针
          */
-        bool SetupFunctionVariableType(SubProgDecl * function);
+        bool SetupFunctorVariableType(FunctorDecl *functorDecl);
+
+        /*
+         * 设置函数的局部变量的类型指针
+         */
+        bool SetupFunctionLocalVariableType(FunctionDecl *functionDecl);
 
         /*
          * 为广义变量绑定或生成类型指针及处理属性字段
@@ -121,29 +116,14 @@ namespace opene {
         TypeDecl *CheckExpression(Expression *expression);
 
         /*
-         * 获取完整可靠的类型描述符
+         * 检查实参是否匹配形参
          */
-        TypeDecl *GetQualifiedType(BaseVariDecl *baseVariDecl);
+        bool CheckIfArgumentMatch(std::vector<ExpressionPtr> &arguments, std::vector<ParameterDeclPtr> &parameters);
 
         /*
-         * 获取名称组件的确切来源
+         * 获取二元表达式运算结果的类型
          */
-        NameComponent *GetNameComponentQualifiedBase(NameComponent *nameComponent);
-
-        /*
-         * 获取名称组件的确切名字
-         */
-        ErrOr<StringRef> GetNameComponentQualifiedName(NameComponent *nameComponent);
-
-        /*
-         * 通过名称在各个层级中查找变量
-         */
-        BaseVariDecl *FindVariableWithNameInHierarchy(const StringRef &variable_name);
-
-        /*
-         * 在指定的结构类型中查找变量
-         */
-        BaseVariDecl *FindVariableWithNameInStructureType(TypeDecl *typeDecl, const StringRef &variable_name);
+        TypeDecl *GetBinaryOperationType(TypeDecl *lhsType, TypeDecl *rhsType, _OperatorExpression::OperatorType operatorType);
 
     public:
         bool Run(TranslateUnit * translateUnitPtr);

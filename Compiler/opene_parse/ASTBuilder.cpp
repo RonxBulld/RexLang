@@ -10,6 +10,7 @@
 
 #include "ASTBuilder.h"
 #include "NodeDecl.h"
+#include "ASTContext.h"
 
 namespace opene {
     TString ASTBuilder::GetTextIfExist(const antlr4::Token *token, const std::string &hint) const {
@@ -114,7 +115,7 @@ namespace opene {
     }
 
     antlrcpp::Any ASTBuilder::visitProgram_set_file(openeLangParser::Program_set_fileContext *context) {
-        ProgramSetFilePtr program_set_file = CreateNode<ProgramSetFile>(context->getStart(), context->getStop());
+        auto program_set_file = CreateNode<ProgramSetFile>(context->getStart(), context->getStop());
         for (antlr4::Token *token : context->libraries) {
             program_set_file->libraries_.push_back(GetTextIfExist(token));
         }
@@ -153,13 +154,14 @@ namespace opene {
     antlrcpp::Any ASTBuilder::visitDll_command(openeLangParser::Dll_commandContext *context) {
         DllCommandDeclPtr dll_command_decl = CreateNode<DllCommandDecl>(context->getStart(), context->getStop());
         dll_command_decl->name_ = GetTextIfExist(context->name);
-        dll_command_decl->type_ = GetTextIfExist(context->type);
+        dll_command_decl->return_type_name_ = GetTextIfExist(context->type);
         dll_command_decl->file_ = GetTextIfExist(context->file);
         dll_command_decl->api_name_ = GetTextIfExist(context->cmd);
         dll_command_decl->comment_ = GetFromCtxIfExist<TString>(context->table_comment());
         for (openeLangParser::Parameter_declContext *param : context->parameter_decl()) {
             ParameterDeclPtr parameter_decl = GetFromCtxIfExist<ParameterDeclPtr>(param);
-            dll_command_decl->parameters_[parameter_decl->name_.string_] = parameter_decl;
+            dll_command_decl->parameters_.push_back(parameter_decl);
+            dll_command_decl->mapping_names_.push_back(parameter_decl->name_.string_);
         }
         return NodeWarp(dll_command_decl);
     }
@@ -214,7 +216,7 @@ namespace opene {
             prog_set_decl->file_static_variables_[vari_decl->name_.string_] = vari_decl;
         }
         for (auto *func_ctx : context->functions) {
-            SubProgDeclPtr sub_prog_decl = GetFromCtxIfExist<SubProgDeclPtr>(func_ctx);
+            FunctionDeclPtr sub_prog_decl = GetFromCtxIfExist<FunctionDeclPtr>(func_ctx);
             prog_set_decl->function_decls_[sub_prog_decl->name_.string_] = sub_prog_decl;
         }
         return NodeWarp(prog_set_decl);
@@ -230,9 +232,9 @@ namespace opene {
     }
 
     antlrcpp::Any ASTBuilder::visitSub_program(openeLangParser::Sub_programContext *context) {
-        SubProgDeclPtr sub_prog_decl = CreateNode<SubProgDecl>(context->getStart(), context->getStop());
+        FunctionDeclPtr sub_prog_decl = CreateNode<FunctionDecl>(context->getStart(), context->getStop());
         sub_prog_decl->name_ = GetTextIfExist(context->name);
-        sub_prog_decl->type_ = GetTextIfExist(context->type);
+        sub_prog_decl->return_type_name_ = GetTextIfExist(context->type);
         sub_prog_decl->access_ = GetTextIfExist(context->access);
         sub_prog_decl->comment_ = GetFromCtxIfExist<TString>(context->table_comment());
         for (auto *param_vari_ctx : context->params) {
@@ -411,6 +413,26 @@ namespace opene {
     antlrcpp::Any ASTBuilder::visitBinaryExpr(openeLangParser::BinaryExprContext *context) {
         BinaryExpressionPtr binary_expression = CreateNode<BinaryExpression>(context->getStart(), context->getStop());
         binary_expression->operator_ = GetTextIfExist(context->opt);
+        switch (context->opt->getType()) {
+            case openeLangParser::K_ADD_OPT:        binary_expression->operator_type_ = BinaryExpression::OperatorType::kOptAdd;        break;
+            case openeLangParser::K_SUB_OPT:        binary_expression->operator_type_ = BinaryExpression::OperatorType::kOptSub;        break;
+            case openeLangParser::K_MUL_OPT:        binary_expression->operator_type_ = BinaryExpression::OperatorType::kOptMul;        break;
+            case openeLangParser::K_DIV_OPT:        binary_expression->operator_type_ = BinaryExpression::OperatorType::kOptDiv;        break;
+            case openeLangParser::K_FULL_DIV_OPT:   binary_expression->operator_type_ = BinaryExpression::OperatorType::kOptFullDiv;    break;
+            case openeLangParser::K_MOD_OPT:        binary_expression->operator_type_ = BinaryExpression::OperatorType::kOptMod;        break;
+            case openeLangParser::K_AECOM_OPT:      binary_expression->operator_type_ = BinaryExpression::OperatorType::kOptEqual;      break;
+            case openeLangParser::K_ASSIGN_OPT:     binary_expression->operator_type_ = BinaryExpression::OperatorType::kOptEqual;      break;
+            case openeLangParser::K_EQUAL_OPT:      binary_expression->operator_type_ = BinaryExpression::OperatorType::kOptEqual;      break;
+            case openeLangParser::K_NOT_EQUAL_OPT:  binary_expression->operator_type_ = BinaryExpression::OperatorType::kOptNotEqual;   break;
+            case openeLangParser::K_GREAT_OPT:      binary_expression->operator_type_ = BinaryExpression::OperatorType::kOptGreatThan;  break;
+            case openeLangParser::K_LESS_OPT:       binary_expression->operator_type_ = BinaryExpression::OperatorType::kOptLessThan;   break;
+            case openeLangParser::K_GREAT_EQU_OPT:  binary_expression->operator_type_ = BinaryExpression::OperatorType::kOptGreatEqual; break;
+            case openeLangParser::K_LESS_EQU_OPT:   binary_expression->operator_type_ = BinaryExpression::OperatorType::kOptLessEqual;  break;
+            case openeLangParser::K_LIKE_EQU_OPT:   binary_expression->operator_type_ = BinaryExpression::OperatorType::kOptLikeEqual;  break;
+            case openeLangParser::K_AND_OPT:        binary_expression->operator_type_ = BinaryExpression::OperatorType::kOptAnd;        break;
+            case openeLangParser::K_OR_OPT:         binary_expression->operator_type_ = BinaryExpression::OperatorType::kOptOr;         break;
+            default: assert(false);                 binary_expression->operator_type_ = BinaryExpression::OperatorType::kOptNone;       break;
+        }
         binary_expression->lhs_ = GetFromCtxIfExist<ExpressionPtr>(context->lval);
         binary_expression->rhs_ = GetFromCtxIfExist<ExpressionPtr>(context->rval);
         return NodeWarp(binary_expression);
@@ -419,7 +441,11 @@ namespace opene {
     antlrcpp::Any ASTBuilder::visitUnaryExpr(openeLangParser::UnaryExprContext *context) {
         UnaryExpressionPtr unary_expression = CreateNode<UnaryExpression>(context->getStart(), context->getStop());
         unary_expression->operator_ = GetTextIfExist(context->opt);
-        unary_expression->op_value_ = GetFromCtxIfExist<ExpressionPtr>(context->expression());
+        switch (context->opt->getType()) {
+            case openeLangParser::K_SUB_OPT:    unary_expression->operator_type_ = UnaryExpression::OperatorType::kOptSub;  break;
+            default: assert(false);             unary_expression->operator_type_ = UnaryExpression::OperatorType::kOptNone; break;
+        }
+        unary_expression->operand_value_ = GetFromCtxIfExist<ExpressionPtr>(context->expression());
         return NodeWarp(unary_expression);
     }
 

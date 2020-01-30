@@ -65,7 +65,7 @@ namespace opene {
         return std::vector<std::string>();
     }
 
-    std::vector<std::string> DumpSubProgDecl(SubProgDeclPtr *subProgDeclPtr, const DumpStyle &dumpStyle) {
+    std::vector<std::string> DumpSubProgDecl(FunctionDeclPtr *subProgDeclPtr, const DumpStyle &dumpStyle) {
         return std::vector<std::string>();
     }
 

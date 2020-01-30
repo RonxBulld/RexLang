@@ -50,7 +50,8 @@ namespace opene {
     typedef struct ParameterDecl* ParameterDeclPtr;
     typedef struct MemberVariableDecl* MemberVariableDeclPtr;
     typedef struct FileVariableDecl* FileVariableDeclPtr;
-    typedef struct SubProgDecl* SubProgDeclPtr;
+    typedef struct FunctorDecl* FunctorDeclPtr;
+    typedef struct FunctionDecl* FunctionDeclPtr;
     typedef struct ProgSetDecl* ProgSetDeclPtr;
     typedef struct DllCommandDecl* DllCommandDeclPtr;
 
@@ -111,7 +112,8 @@ namespace opene {
         kNTyBuiltinTypeDecl,
         kNTyArrayDecl,
         kNTyStructureDecl,
-        kNTySubProgDecl,
+        kNTyFunctorDecl,
+        kNTyFunctionDecl,
         kNTyProgSetDecl,
         kNTyDllCommandDecl,
         kNTyStatement,
@@ -302,13 +304,6 @@ namespace opene {
         static const NodeType node_type = NodeType::kNTyVariableDecl;
         // 维度的文本描述
         TString dimension_;
-
-        // === 下面是经过语义分析后的数据 ===
-
-        /*
-         * 数组维度信息
-         */
-        std::vector<size_t> dimensions_;
     };
 
     /*
@@ -406,22 +401,35 @@ namespace opene {
 
         // === 下面是经过语义分析后的数据 ===
 
-        TypeDeclPtr base_type = nullptr;
+        TypeDeclPtr base_type_ = nullptr;
         // 数组维度定义，如果不是数组，则为空
         std::vector<size_t> dimensions_;
     };
 
     /**
-     * @brief 子程序/函数定义
+     * @brief 具有函数性的定义
+     * 包含子函数定义和DLL函数定义
      */
-    struct SubProgDecl : public TagDecl {
-        static const NodeType node_type = NodeType::kNTySubProgDecl;
+    struct FunctorDecl : public TagDecl {
+        static const NodeType node_type = NodeType::kNTyFunctorDecl;
         // 返回值类型名
-        TString type_;
-        // 访问级别
-        TString access_;
+        TString return_type_name_;
         // 参数列表
         std::vector<ParameterDeclPtr> parameters_;
+
+        // === 下面是经过语义分析后的数据 ===
+
+        // 返回值类型
+        TypeDeclPtr return_type_ = nullptr;
+    };
+
+    /**
+     * @brief 子程序/函数定义
+     */
+    struct FunctionDecl : public FunctorDecl {
+        static const NodeType node_type = NodeType::kNTyFunctionDecl;
+        // 访问级别
+        TString access_;
         // 局部变量列表
         std::map<StringRef, LocalVariableDeclPtr> local_vari_;
         // 语句列表
@@ -431,8 +439,19 @@ namespace opene {
 
         // 所属程序集
         ProgSetDeclPtr super_set_ = nullptr;
-        // 返回值类型
-        TypeDeclPtr return_type_ = nullptr;
+    };
+
+    /**
+     * @brief DLL函数声明
+     */
+    struct DllCommandDecl : public FunctorDecl {
+        static const NodeType node_type = NodeType::kNTyDllCommandDecl;
+        // DLL动态链接库文件名
+        TString file_;
+        // 原生函数名称
+        TString api_name_;
+        // 原生参数名称
+        std::vector<StringRef> mapping_names_;
     };
 
     /**
@@ -443,18 +462,7 @@ namespace opene {
         TString base_;
         TString access_;
         std::map<StringRef, FileVariableDeclPtr> file_static_variables_;
-        std::map<StringRef, SubProgDeclPtr> function_decls_;
-    };
-
-    /**
-     * @brief DLL函数声明
-     */
-    struct DllCommandDecl : public TagDecl {
-        static const NodeType node_type = NodeType::kNTyDllCommandDecl;
-        TString type_;
-        TString file_;
-        TString api_name_;
-        std::map<StringRef, ParameterDeclPtr> parameters_;
+        std::map<StringRef, FunctionDeclPtr> function_decls_;
     };
 
     /**
@@ -576,16 +584,35 @@ namespace opene {
         static const NodeType node_type = NodeType::kNTyFunctionCall;
         NameComponentPtr function_name_ = nullptr;
         std::vector<ExpressionPtr> arguments_;
+
+        // === 下面是经过语义分析后的数据 ===
+
+        FunctorDecl * functor_declare_ = nullptr;
     };
 
+    /*
+     * 有运算符的表达式
+     */
     struct _OperatorExpression : public Expression {
         static const NodeType node_type = NodeType::kNTy_OperatorExpression;
+        enum class OperatorType {
+            kOptNone,
+            kOptAdd, kOptSub, kOptMul, kOptDiv, kOptFullDiv, kOptMod,
+            kOptEqual, kOptNotEqual, kOptGreatThan, kOptLessThan, kOptGreatEqual, kOptLessEqual, kOptLikeEqual,
+            kOptAnd, kOptOr
+        };
+        OperatorType operator_type_ = OperatorType::kOptNone;
+        /*
+         * 可选运算符：
+         * 一元：-
+         * 二元：* / \ % + - != == < > <= >= ?= && ||
+         */
         TString operator_;
     };
 
     struct UnaryExpression : public _OperatorExpression {
         static const NodeType node_type = NodeType::kNTyUnaryExpression;
-        ExpressionPtr op_value_ = nullptr;
+        ExpressionPtr operand_value_ = nullptr;
     };
 
     struct BinaryExpression : public _OperatorExpression {
@@ -620,6 +647,10 @@ namespace opene {
     struct FuncAddrExpression : public Expression {
         static const NodeType node_type = NodeType::kNTyFuncAddrExpression;
         TString function_name_;
+
+        // === 下面是经过语义分析后的数据 ===
+
+        FunctorDeclPtr functor_declare_ = nullptr;
     };
 
     struct ValueOfBool : public Value {
@@ -663,9 +694,12 @@ namespace opene {
         // 程序集索引表
         std::map<StringRef, ProgSetDeclPtr> program_sets_;
         // 函数定义表
-        std::map<StringRef, SubProgDeclPtr> function_decls_;
+        std::map<StringRef, FunctionDeclPtr> function_decls_;
         // DLL函数声明表
         std::map<StringRef, DllCommandDeclPtr> dll_declares_;
+        // 函数定义表和DLL声明表的合并
+        // TODO: 是否要将上面两个逗逼玩意干掉
+        std::map<StringRef, FunctorDeclPtr> functor_declares_;
     };
 
     struct NodeWarp {

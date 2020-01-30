@@ -21,7 +21,7 @@ digraph G {
 	"opene::ParameterDecl" -> "opene::BaseVariDecl"
 	"opene::VariableDecl" -> "opene::BaseVariDecl"
 	"opene::ArrayDecl" -> "opene::TypeDecl"
-	"opene::SubProgDecl" -> "opene::TagDecl"
+	"opene::FunctionDecl" -> "opene::TagDecl"
 	"opene::ProgSetDecl" -> "opene::TagDecl"
 	"opene::DllCommandDecl" -> "opene::TagDecl"
 	"opene::Statement" -> "opene::Node"

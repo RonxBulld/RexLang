@@ -17,12 +17,12 @@ namespace opene {
         /*
          * 查找名称所指示的变量定义
          */
-        static const BaseVariDecl *FindVariableDeclareInASTWithHierarchyName(const HierarchyIdentifier *hierarchyIdentifier);
+        static BaseVariDecl * FindVariableDeclareInASTWithHierarchyName(HierarchyIdentifier *hierarchyIdentifier);
 
         /*
          * 获取名称所指示的确切的定义描述
          */
-        static TypeDecl *GetVariableQualifiedTypeWithHierarchyName(const HierarchyIdentifier *hierarchyIdentifier);
+        static TypeDecl *GetVariableQualifiedTypeWithHierarchyName(HierarchyIdentifier *hierarchyIdentifier);
 
         /*
          * 获取名称组件的确切名字
@@ -34,16 +34,8 @@ namespace opene {
          */
         static NameComponent *GetNameComponentQualifiedBase(NameComponent *nameComponent);
 
-        template <typename Ty, std::enable_if_t<std::is_base_of_v<Node, Ty>>>
+        template <typename Ty, typename = typename std::enable_if_t<std::is_base_of_v<Node, Ty>>>
         static Ty *FindSpecifyTypeParent(Node *base) {
-            while (base && base->is<Ty>()) {
-                base = base->parent_node_;
-            }
-            return base->as<Ty>();
-        }
-
-        template <typename Ty, std::enable_if_t<std::is_base_of_v<Node, Ty>>>
-        static const Ty *FindSpecifyTypeParent(const Node *base) {
             while (base && base->is<Ty>()) {
                 base = base->parent_node_;
             }
@@ -54,17 +46,12 @@ namespace opene {
          * 向上查找最近一个有域特性的节点
          * 有域特性的节点：函数、程序集、代码文件、翻译单元
          */
-        static const Node *FindNearstScope(const Node *base);
+        static Node * FindNearstScope(Node *base);
 
         /*
          * 在指定的域中查找指定名字的变量
          */
-        static const BaseVariDecl *FindVariableDeclInScopeWithName(const Node *scope, const StringRef &name);
-
-        /*
-         * 在指定的结构类型中查找变量
-         */
-        static const BaseVariDecl *FindVariableWithNameInStructureType(const TypeDecl *typeDecl, const StringRef &variable_name);
+        static BaseVariDecl * FindVariableDeclInScopeWithName(Node *scope, const StringRef &name);
 
         /*
          * 在指定的结构类型中查找变量
@@ -74,12 +61,38 @@ namespace opene {
         /*
          * 获取名称组件中的索引列表
          */
-        static ErrOr<std::vector<Expression*>> GetNameComponentIndexList(const NameComponent *nameComponent);
+        static ErrOr<std::vector<Expression*>> GetNameComponentIndexList(NameComponent *nameComponent);
 
         /*
          * 获取定义的索引维度信息
          */
-        static ErrOr<std::vector<size_t>> GetTypeIndexList(const TagDecl *tagDecl);
+        static ErrOr<std::vector<size_t>> GetTypeIndexList(TypeDecl *typeDecl);
+
+        /*
+         * 获取可索引类型的元素类型
+         */
+        static TypeDecl * GetIndexableTypeElement(TypeDecl *typeDecl);
+
+        /*
+         * 通过内置类型枚举值查询类型定义
+         */
+        static TypeDecl * QueryBuiltinTypeWithEnum(TranslateUnit *translateUnit, BuiltinTypeDecl::EnumOfBuiltinType type_enum);
+
+        /*
+         * 通过名称引用类型定义指针
+         * 若找不到则返回空指针
+         */
+        static TypeDecl * QueryTypeDeclWithName(TranslateUnit *translateUnit, const StringRef &name);
+
+        /*
+         * 获取函数引用的函数定义
+         */
+        static FunctorDecl * GetFunctionDeclare(FunctionCall *functionCall);
+
+        /*
+         * 获取函数引用的函数定义
+         */
+        static FunctorDecl * GetFunctionDeclare(FuncAddrExpression *funcAddrExpression);
 
     };
 

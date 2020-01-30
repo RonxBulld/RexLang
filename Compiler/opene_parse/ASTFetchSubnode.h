@@ -59,7 +59,7 @@ namespace opene {
         static bool FetchBuiltinTypeDecl        (const BuiltinTypeDecl *builtinTypeDecl         , ASTFetchResult &result);
         static bool FetchArrayDecl              (const ArrayDecl *arrayDecl                     , ASTFetchResult &result);
         static bool FetchStructureDecl          (const StructureDecl *structureDecl             , ASTFetchResult &result);
-        static bool FetchSubProgDecl            (const SubProgDecl *subProgDecl                 , ASTFetchResult &result);
+        static bool FetchSubProgDecl            (const FunctionDecl *subProgDecl                 , ASTFetchResult &result);
         static bool FetchProgSetDecl            (const ProgSetDecl *progSetDecl                 , ASTFetchResult &result);
         static bool FetchDllCommandDecl         (const DllCommandDecl *dllCommandDecl           , ASTFetchResult &result);
         static bool FetchStatement              (const Statement *statement                     , ASTFetchResult &result);

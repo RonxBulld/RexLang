@@ -19,12 +19,12 @@ namespace opene {
         /*
          * 判定类型是否可索引
          */
-        static bool TypeCanIndexable(const TagDecl *tagDecl);
+        static bool TypeCanIndexable(const TypeDecl *typeDecl);
 
         /*
          * 判定是否固定维度数组
          */
-        static bool IsFixedDimArray(const TagDecl *tagDecl);
+        static bool IsFixedDimArray(const TypeDecl *typeDecl);
     };
 
 }
