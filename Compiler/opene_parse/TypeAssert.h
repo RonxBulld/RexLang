@@ -117,11 +117,6 @@ namespace opene {
         static bool IsAssignableBetweenType(const TypeDecl * lhs_type, const TypeDecl * rhs_type);
 
         /*
-         * 判断rhs是否可赋值给lhs
-         */
-        static bool IsAssignable(const BaseVariDecl *lhs, const BaseVariDecl *rhs);
-
-        /*
          * 检查二元运算是否合法
          * 该断言主要判断二元表达式中左右子式是否可以通过运算符计算
          */
