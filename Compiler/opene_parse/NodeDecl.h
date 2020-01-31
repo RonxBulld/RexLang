@@ -380,6 +380,7 @@ namespace opene {
             kBTypeDatetime,    // 日期时间型
             kBTypeFuncPtr,     // 子程序指针
             kBTypeDouble,      // 双精度小数型
+            kBTtypeEND,
         } built_in_type_ = EnumOfBuiltinType::kBTypeInteger;
     };
 
@@ -599,7 +600,8 @@ namespace opene {
             kOptNone,
             kOptAdd, kOptSub, kOptMul, kOptDiv, kOptFullDiv, kOptMod,
             kOptEqual, kOptNotEqual, kOptGreatThan, kOptLessThan, kOptGreatEqual, kOptLessEqual, kOptLikeEqual,
-            kOptAnd, kOptOr
+            kOptAnd, kOptOr,
+            kOptEND,
         };
         OperatorType operator_type_ = OperatorType::kOptNone;
         /*

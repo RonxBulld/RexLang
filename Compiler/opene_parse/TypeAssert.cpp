@@ -131,4 +131,90 @@ namespace opene {
         if (TypeAssert::IsDoubleType(typeDecl)) { return true; }
         return false;
     }
+
+    class ValidMarixOpt {
+    private:
+        std::set<_OperatorExpression::OperatorType> TypeValidMatrix[(size_t)BuiltinTypeDecl::EnumOfBuiltinType::kBTtypeEND][(size_t)BuiltinTypeDecl::EnumOfBuiltinType::kBTtypeEND];
+
+        void AddOpt(
+                BuiltinTypeDecl::EnumOfBuiltinType l,    // 左值类型
+                BuiltinTypeDecl::EnumOfBuiltinType r,    // 右值类型
+                _OperatorExpression::OperatorType enumOfBuiltinType,   // 运算符
+                bool commutativeLaw = true              // 符合交换律
+                ) {
+            TypeValidMatrix[(size_t)l][(size_t)r].insert(enumOfBuiltinType);
+            if (commutativeLaw) {
+                TypeValidMatrix[(size_t)r][(size_t)l].insert(enumOfBuiltinType);
+            }
+        }
+
+        void AddOpts(
+                std::set<BuiltinTypeDecl::EnumOfBuiltinType> ls,
+                std::set<BuiltinTypeDecl::EnumOfBuiltinType> rs,
+                std::set<_OperatorExpression::OperatorType> enumOfBuiltinTypes,
+                bool commutativeLaw = true
+                ) {
+            for (BuiltinTypeDecl::EnumOfBuiltinType l : ls) {
+                for (BuiltinTypeDecl::EnumOfBuiltinType r : rs) {
+                    for (_OperatorExpression::OperatorType t : enumOfBuiltinTypes) {
+                        this->AddOpt(l, r, t, commutativeLaw);
+                    }
+                }
+            }
+        }
+
+    public:
+        ValidMarixOpt() {
+            // 简化命名
+            BuiltinTypeDecl::EnumOfBuiltinType C = BuiltinTypeDecl::EnumOfBuiltinType::kBTypeChar;
+            BuiltinTypeDecl::EnumOfBuiltinType I = BuiltinTypeDecl::EnumOfBuiltinType::kBTypeInteger;
+            BuiltinTypeDecl::EnumOfBuiltinType F = BuiltinTypeDecl::EnumOfBuiltinType::kBTypeFloat;
+            BuiltinTypeDecl::EnumOfBuiltinType B = BuiltinTypeDecl::EnumOfBuiltinType::kBTypeBool;
+            BuiltinTypeDecl::EnumOfBuiltinType S = BuiltinTypeDecl::EnumOfBuiltinType::kBTypeString;
+            BuiltinTypeDecl::EnumOfBuiltinType A = BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDataSet;
+            BuiltinTypeDecl::EnumOfBuiltinType H = BuiltinTypeDecl::EnumOfBuiltinType::kBTypeShort;
+            BuiltinTypeDecl::EnumOfBuiltinType L = BuiltinTypeDecl::EnumOfBuiltinType::kBTypeLong;
+            BuiltinTypeDecl::EnumOfBuiltinType T = BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDatetime;
+            BuiltinTypeDecl::EnumOfBuiltinType N = BuiltinTypeDecl::EnumOfBuiltinType::kBTypeFuncPtr;
+            BuiltinTypeDecl::EnumOfBuiltinType D = BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDouble;
+            _OperatorExpression::OperatorType ADD       = _OperatorExpression::OperatorType::kOptAdd;
+            _OperatorExpression::OperatorType SUB       = _OperatorExpression::OperatorType::kOptSub;
+            _OperatorExpression::OperatorType MUL       = _OperatorExpression::OperatorType::kOptMul;
+            _OperatorExpression::OperatorType DIV       = _OperatorExpression::OperatorType::kOptDiv;
+            _OperatorExpression::OperatorType FULLDIV   = _OperatorExpression::OperatorType::kOptFullDiv;
+            _OperatorExpression::OperatorType MOD       = _OperatorExpression::OperatorType::kOptMod;
+            _OperatorExpression::OperatorType EQU       = _OperatorExpression::OperatorType::kOptEqual;
+            _OperatorExpression::OperatorType NEQ       = _OperatorExpression::OperatorType::kOptNotEqual;
+            _OperatorExpression::OperatorType GT        = _OperatorExpression::OperatorType::kOptGreatThan;
+            _OperatorExpression::OperatorType LT        = _OperatorExpression::OperatorType::kOptLessThan;
+            _OperatorExpression::OperatorType GE        = _OperatorExpression::OperatorType::kOptGreatEqual;
+            _OperatorExpression::OperatorType LE        = _OperatorExpression::OperatorType::kOptLessEqual;
+            _OperatorExpression::OperatorType LIKE      = _OperatorExpression::OperatorType::kOptLikeEqual;
+            _OperatorExpression::OperatorType AND       = _OperatorExpression::OperatorType::kOptAnd;
+            _OperatorExpression::OperatorType OR        = _OperatorExpression::OperatorType::kOptOr;
+            this->AddOpts({C, I, F, H, L, D}, {C, I, F, H, L, D}, {ADD, SUB, MUL, DIV, FULLDIV, MOD, EQU, NEQ, GT, LT, GE, LE});
+            this->AddOpts({B}, {B}, {AND, OR});
+            this->AddOpts({S}, {S}, {ADD, LIKE});
+            this->AddOpts({A}, {A}, {ADD});
+            this->AddOpts({T}, {}, {});
+            this->AddOpts({N}, {}, {});
+        }
+
+        bool OperateValid(BuiltinTypeDecl::EnumOfBuiltinType l, BuiltinTypeDecl::EnumOfBuiltinType r, _OperatorExpression::OperatorType operatorType) const {
+            const std::set<_OperatorExpression::OperatorType> &valid_set = TypeValidMatrix[(size_t)l][(size_t)r];
+            return valid_set.find(operatorType) != valid_set.end();
+        }
+    } valid_matrix_opt;
+
+    bool TypeAssert::IsBinaryOperationValid(TypeDecl *lhsType, TypeDecl *rhsType, _OperatorExpression::OperatorType operatorType) {
+        // 只有内置类型才能执行二元运算
+        BuiltinTypeDecl *lhsBuiltinType = lhsType->as<BuiltinTypeDecl>();
+        BuiltinTypeDecl *rhsBuiltinType = rhsType->as<BuiltinTypeDecl>();
+        if (lhsBuiltinType == nullptr || rhsBuiltinType == nullptr) {
+            return false;
+        }
+        BuiltinTypeDecl::EnumOfBuiltinType lhsBTEnum = lhsBuiltinType->built_in_type_;
+        BuiltinTypeDecl::EnumOfBuiltinType rhsBTEnum = rhsBuiltinType->built_in_type_;
+        return valid_matrix_opt.OperateValid(lhsBTEnum, rhsBTEnum, operatorType);
+    }
 }
