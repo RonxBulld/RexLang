@@ -452,4 +452,66 @@ namespace opene {
             return nullptr;
         }
     }
+
+    TypeDecl *SematicAnalysis::GetBinaryOperationType(TypeDecl *lhsType, TypeDecl *rhsType, _OperatorExpression::OperatorType operatorType) {
+        // 首先保证可进行二元计算
+        bool binary_opt_valid = TypeAssert::IsBinaryOperationValid(lhsType, rhsType, operatorType);
+        if (binary_opt_valid == false) {
+            assert(false);
+            return nullptr;
+        }
+        // 再计算结果类型
+        {
+            // 1. 如果是内置类型
+            BuiltinTypeDecl *lhs_builtin = lhsType->as<BuiltinTypeDecl>();
+            BuiltinTypeDecl *rhs_builtin = rhsType->as<BuiltinTypeDecl>();
+            if (lhs_builtin || rhs_builtin) {
+                if (lhs_builtin && rhs_builtin) {
+                    bool lhs_numerical = TypeAssert::IsNumerical(lhs_builtin);
+                    bool rhs_numerical = TypeAssert::IsNumerical(rhs_builtin);
+                    if (lhs_numerical && rhs_numerical) {
+                        // 1.1. 都有数值性
+                        BuiltinTypeDecl::EnumOfBuiltinType upgrade_type = TypeAssert::ResultOfTypeUpgrade(lhs_builtin->built_in_type_, rhs_builtin->built_in_type_);
+                        return ASTUtility::QueryBuiltinTypeWithEnum(this->translate_unit_, upgrade_type);
+                    } else if (!lhs_numerical && !rhs_numerical) {
+                        // 1.2. 都无数值性
+                        if (lhs_builtin == rhs_builtin) {
+                            if (lhs_builtin->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeBool) {
+                                return lhs_builtin;
+                            } else if (lhs_builtin->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeString) {
+                                return lhs_builtin;
+                            } else if (lhs_builtin->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDataSet) {
+                                return lhs_builtin;
+                            } else if (lhs_builtin->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDatetime) {
+                                assert(false);
+                                return nullptr;
+                            } else if (lhs_builtin->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeFuncPtr) {
+                                assert(false);
+                                return nullptr;
+                            } else {
+                                assert(false);
+                                return nullptr;
+                            }
+                        } else {
+                            assert(false);
+                            return nullptr;
+                        }
+                    } else {
+                        // 其中一个有数值性
+                        assert(false);
+                        return nullptr;
+                    }
+                } else {
+                    // 只有一个是内置类型是无法计算的
+                    assert(false);
+                    return nullptr;
+                }
+            }
+        }
+        {
+            // 2. 非内置类型
+            assert(false);
+            return nullptr;
+        }
+    }
 }

@@ -172,31 +172,57 @@ namespace opene {
 
     class ValidMarixOpt {
     private:
+        /*
+         * 类型有效运算矩阵
+         */
         std::set<_OperatorExpression::OperatorType> TypeValidMatrix[(size_t)BuiltinTypeDecl::EnumOfBuiltinType::kBTtypeEND][(size_t)BuiltinTypeDecl::EnumOfBuiltinType::kBTtypeEND];
+        /*
+         * 类型提升矩阵
+         */
+        BuiltinTypeDecl::EnumOfBuiltinType TypeUpgradeMatrix[(size_t)BuiltinTypeDecl::EnumOfBuiltinType::kBTtypeEND][(size_t)BuiltinTypeDecl::EnumOfBuiltinType::kBTtypeEND];
 
-        void AddOpt(
-                BuiltinTypeDecl::EnumOfBuiltinType l,    // 左值类型
-                BuiltinTypeDecl::EnumOfBuiltinType r,    // 右值类型
-                _OperatorExpression::OperatorType enumOfBuiltinType,   // 运算符
-                bool commutativeLaw = true              // 符合交换律
-                ) {
+        /**
+         * @brief 添加有效运算符信息
+         * @param l 左值类型
+         * @param r 右值类型
+         * @param enumOfBuiltinType 运算符
+         * @param commutativeLaw 符合交换律
+         */
+        void AddValid(BuiltinTypeDecl::EnumOfBuiltinType l, BuiltinTypeDecl::EnumOfBuiltinType r, _OperatorExpression::OperatorType enumOfBuiltinType, bool commutativeLaw = true) {
             TypeValidMatrix[(size_t)l][(size_t)r].insert(enumOfBuiltinType);
             if (commutativeLaw) {
                 TypeValidMatrix[(size_t)r][(size_t)l].insert(enumOfBuiltinType);
             }
         }
 
-        void AddOpts(
-                std::set<BuiltinTypeDecl::EnumOfBuiltinType> ls,
-                std::set<BuiltinTypeDecl::EnumOfBuiltinType> rs,
-                std::set<_OperatorExpression::OperatorType> enumOfBuiltinTypes,
-                bool commutativeLaw = true
-                ) {
+        void AddValids(std::set<BuiltinTypeDecl::EnumOfBuiltinType> ls, std::set<BuiltinTypeDecl::EnumOfBuiltinType> rs, std::set<_OperatorExpression::OperatorType> enumOfBuiltinTypes, bool commutativeLaw = true) {
             for (BuiltinTypeDecl::EnumOfBuiltinType l : ls) {
                 for (BuiltinTypeDecl::EnumOfBuiltinType r : rs) {
                     for (_OperatorExpression::OperatorType t : enumOfBuiltinTypes) {
-                        this->AddOpt(l, r, t, commutativeLaw);
+                        this->AddValid(l, r, t, commutativeLaw);
                     }
+                }
+            }
+        }
+
+        /**
+         * @brief 添加类型提升信息
+         * @param l 左值类型
+         * @param r 右值类型
+         * @param result 处理结果类型
+         * @param commutativeLaw 符合交换律
+         */
+        void AddUpgrade(BuiltinTypeDecl::EnumOfBuiltinType l, BuiltinTypeDecl::EnumOfBuiltinType r, BuiltinTypeDecl::EnumOfBuiltinType result, bool commutativeLaw = true) {
+            TypeUpgradeMatrix[(size_t)l][(size_t)r] = result;
+            if (commutativeLaw) {
+                TypeUpgradeMatrix[(size_t)r][(size_t)l] = result;
+            }
+        }
+
+        void AddUpgrades(std::set<BuiltinTypeDecl::EnumOfBuiltinType> ls, std::set<BuiltinTypeDecl::EnumOfBuiltinType> rs, BuiltinTypeDecl::EnumOfBuiltinType result, bool commutativeLaw = true) {
+            for (BuiltinTypeDecl::EnumOfBuiltinType l : ls) {
+                for (BuiltinTypeDecl::EnumOfBuiltinType r : rs) {
+                    AddUpgrade(l, r, result, commutativeLaw);
                 }
             }
         }
@@ -230,19 +256,44 @@ namespace opene {
             _OperatorExpression::OperatorType LIKE      = _OperatorExpression::OperatorType::kOptLikeEqual;
             _OperatorExpression::OperatorType AND       = _OperatorExpression::OperatorType::kOptAnd;
             _OperatorExpression::OperatorType OR        = _OperatorExpression::OperatorType::kOptOr;
-            this->AddOpts({C, I, F, H, L, D}, {C, I, F, H, L, D}, {ADD, SUB, MUL, DIV, FULLDIV, MOD, EQU, NEQ, GT, LT, GE, LE});
-            this->AddOpts({B}, {B}, {AND, OR});
-            this->AddOpts({S}, {S}, {ADD, LIKE});
-            this->AddOpts({A}, {A}, {ADD});
-            this->AddOpts({T}, {}, {});
-            this->AddOpts({N}, {}, {});
+            this->AddValids({C, I, F, H, L, D}, {C, I, F, H, L, D}, {ADD, SUB, MUL, DIV, FULLDIV, MOD, EQU, NEQ, GT, LT, GE, LE});
+            this->AddValids({B}, {B}, {AND, OR});
+            this->AddValids({S}, {S}, {ADD, LIKE});
+            this->AddValids({A}, {A}, {ADD});
+            this->AddValids({T}, {}, {});
+            this->AddValids({N}, {}, {});
+            /*
+             * 类型提升图
+             * C→H→I→L
+             *      ↓ ↓
+             *      F→D
+             * 类型提升矩阵
+             *    C H I L F D
+             *  C C
+             *  H H H
+             *  I I I I
+             *  L L L L L
+             *  F F F F D F
+             *  D D D D D D D
+             */
+            this->AddUpgrades({C}, {C}, C);
+            this->AddUpgrades({H}, {C, H}, H);
+            this->AddUpgrades({I}, {C, H, I}, I);
+            this->AddUpgrades({L}, {C, H, I, L}, L);
+            this->AddUpgrades({F}, {C, H, I, F}, F);
+            this->AddUpgrade(F, L, D);
+            this->AddUpgrades({D}, {C, H, I, L, F, D}, D);
         }
 
         bool OperateValid(BuiltinTypeDecl::EnumOfBuiltinType l, BuiltinTypeDecl::EnumOfBuiltinType r, _OperatorExpression::OperatorType operatorType) const {
             const std::set<_OperatorExpression::OperatorType> &valid_set = TypeValidMatrix[(size_t)l][(size_t)r];
             return valid_set.find(operatorType) != valid_set.end();
         }
-    } valid_matrix_opt;
+
+        BuiltinTypeDecl::EnumOfBuiltinType TypeUpgrade(BuiltinTypeDecl::EnumOfBuiltinType l, BuiltinTypeDecl::EnumOfBuiltinType r) const {
+            return TypeUpgradeMatrix[(size_t)l][(size_t)r];
+        }
+    } type_matrix;
 
     bool TypeAssert::IsBinaryOperationValid(TypeDecl *lhsType, TypeDecl *rhsType, _OperatorExpression::OperatorType operatorType) {
         // 只有内置类型才能执行二元运算
@@ -253,6 +304,10 @@ namespace opene {
         }
         BuiltinTypeDecl::EnumOfBuiltinType lhsBTEnum = lhsBuiltinType->built_in_type_;
         BuiltinTypeDecl::EnumOfBuiltinType rhsBTEnum = rhsBuiltinType->built_in_type_;
-        return valid_matrix_opt.OperateValid(lhsBTEnum, rhsBTEnum, operatorType);
+        return type_matrix.OperateValid(lhsBTEnum, rhsBTEnum, operatorType);
+    }
+
+    BuiltinTypeDecl::EnumOfBuiltinType TypeAssert::ResultOfTypeUpgrade(BuiltinTypeDecl::EnumOfBuiltinType ltype, BuiltinTypeDecl::EnumOfBuiltinType rtype) {
+        return type_matrix.TypeUpgrade(ltype, rtype);
     }
 }
