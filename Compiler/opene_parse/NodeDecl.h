@@ -295,6 +295,7 @@ namespace opene {
          * 是否数组
          */
         bool is_array = false;
+
     };
 
     /*

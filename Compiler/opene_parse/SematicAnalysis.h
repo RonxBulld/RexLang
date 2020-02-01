@@ -118,7 +118,7 @@ namespace opene {
         /*
          * 检查实参是否匹配形参
          */
-        bool CheckIfArgumentMatch(std::vector<ExpressionPtr> &arguments, std::vector<ParameterDeclPtr> &parameters);
+        bool CheckIfArgumentMatch(std::vector<ExpressionPtr> arguments, std::vector<ParameterDeclPtr> parameters);
 
         /*
          * 获取二元表达式运算结果的类型

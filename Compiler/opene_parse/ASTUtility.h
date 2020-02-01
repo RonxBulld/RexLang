@@ -16,6 +16,9 @@ namespace opene {
 
         /*
          * 查找名称所指示的变量定义
+         * 注意：如果变量定义为数组，无论是引用整个数组还是引用数组中的一个元素，
+         * FindVariableDeclareInASTWithHierarchyName返回同一个指针，
+         * 如果需要区别名称指向的类型请使用GetVariableQualifiedTypeWithHierarchyName
          */
         static BaseVariDecl * FindVariableDeclareInASTWithHierarchyName(HierarchyIdentifier *hierarchyIdentifier);
 

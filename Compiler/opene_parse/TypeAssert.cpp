@@ -310,4 +310,8 @@ namespace opene {
     BuiltinTypeDecl::EnumOfBuiltinType TypeAssert::ResultOfTypeUpgrade(BuiltinTypeDecl::EnumOfBuiltinType ltype, BuiltinTypeDecl::EnumOfBuiltinType rtype) {
         return type_matrix.TypeUpgrade(ltype, rtype);
     }
+
+    bool TypeAssert::ExpressionIsLValue(Expression *expression) {
+        return expression->is<HierarchyIdentifier>();
+    }
 }

@@ -287,6 +287,11 @@ namespace opene {
                 parameter->is_nullable = true;
             } else if (attr.string_ == u8"数组") {
                 parameter->is_array = true;
+                assert(parameter->type_decl_ptr_->is<ArrayDecl>() == false);
+                ArrayDecl *array_decl = CreateNode<ArrayDecl>(parameter->ast_context_);
+                array_decl->dimensions_ = {0};
+                array_decl->base_type_ = parameter->type_decl_ptr_;
+                parameter->type_decl_ptr_ = array_decl;
             } else {
                 assert(false);
                 return false;
@@ -359,9 +364,12 @@ namespace opene {
         TranslateUnitPtr translateUnit = this->translate_unit_;
         ASTContext * astContext = translateUnit->ast_context_;
         if (HierarchyIdentifier * hierarchy_identifier = expression->as<HierarchyIdentifier>()) {
-            const BaseVariDecl *vari_decl = ASTUtility::FindVariableDeclareInASTWithHierarchyName(hierarchy_identifier);
-            assert(vari_decl);
-            return vari_decl->type_decl_ptr_;
+            TypeDecl *qualified_type = ASTUtility::GetVariableQualifiedTypeWithHierarchyName(hierarchy_identifier);
+            if (qualified_type == nullptr) {
+                assert(false);
+                return nullptr;
+            }
+            return qualified_type;
 
         } else if (NameComponent * name_component = expression->as<NameComponent>()) {
             // 不应当单独判断NameComponent，因为缺失上下文语境会导致大部分情况无法进行判定
@@ -514,4 +522,106 @@ namespace opene {
             return nullptr;
         }
     }
+
+    bool SematicAnalysis::CheckIfArgumentMatch(std::vector<ExpressionPtr> arguments, std::vector<ParameterDeclPtr> parameters) {
+        // 1. 获取形参有效个数
+        size_t argu_count = arguments.size();
+        size_t param_count = parameters.size();
+        bool dynamic_params = false;
+        if (param_count > 0 && parameters.back()->name_.string_ == u8"...") {
+            param_count -= 1;
+            dynamic_params = true;
+        }
+        // 2. 根据形参有效个数用空指针扩展实参
+        while (argu_count < param_count) {
+            arguments.push_back(nullptr);
+            argu_count++;
+        }
+        // 3. 如果形参长度不定则截取实参前N个进行计算
+        if (dynamic_params) {
+            while (arguments.size() > param_count) {
+                arguments.pop_back();
+            }
+            argu_count = arguments.size();
+        }
+        // 4. 检查形参和实参个数是否匹配
+        if (argu_count != param_count) {
+            assert(false);
+            return false;
+        }
+        // 5. 针对每个实参/形参对
+        for (size_t idx = 0; idx < argu_count; idx++) {
+            if (arguments[idx] == nullptr) {
+                // 5.1. 如果实参为空指针，则检查形参可空属性
+                if (parameters[idx]->is_nullable == false) {
+                    assert(false);
+                    return false;
+                }
+            } else if (parameters[idx]->is_array == true) {
+                // 5.2. 如果形参数组属性为真，则实参必须为左值或左值引用（参考形参）数组变量，且元素类型严格一致
+                if (TypeAssert::ExpressionIsLValue(arguments[idx]) == false) {
+                    assert(false);
+                    return false;
+                }
+                if (HierarchyIdentifier *hierarchy_identifier = arguments[idx]->as<HierarchyIdentifier>()) {
+                    TypeDecl *argu_type = ASTUtility::GetVariableQualifiedTypeWithHierarchyName(hierarchy_identifier);
+                    if (argu_type->is<ArrayDecl>() == true) {
+                        TypeDecl *param_arr_element_type = ASTUtility::GetIndexableTypeElement(parameters[idx]->type_decl_ptr_);
+                        TypeDecl *argu_arr_element_type = ASTUtility::GetIndexableTypeElement(argu_type);
+                        if (param_arr_element_type != argu_arr_element_type) {
+                            assert(false);
+                            return false;
+                        }
+                    } else {
+                        assert(false);
+                        return false;
+                    }
+                } else {
+                    assert(false);
+                    return false;
+                }
+            } else if (parameters[idx]->is_reference == true) {
+                // 5.3. 如果形参参考属性为真，则实参必须为左值或左值引用（参考形参），并且变量类型严格一致
+                if (TypeAssert::ExpressionIsLValue(arguments[idx]) == false) {
+                    assert(false);
+                    return false;
+                }
+                if (HierarchyIdentifier *hierarchy_identifier = arguments[idx]->as<HierarchyIdentifier>()) {
+                    TypeDecl *argu_type = ASTUtility::GetVariableQualifiedTypeWithHierarchyName(hierarchy_identifier);
+                    if (argu_type != parameters[idx]->type_decl_ptr_) {
+                        assert(false);
+                        return false;
+                    }
+                } else {
+                    assert(false);
+                    return false;
+                }
+            } else {
+                // 5.4. 如果形参不具备上述属性
+                TypeDecl *argu_type = this->CheckExpression(arguments[idx]);
+                TypeDecl *param_type = parameters[idx]->type_decl_ptr_;
+                BuiltinTypeDecl *argu_builtin_type = argu_type->as<BuiltinTypeDecl>();
+                BuiltinTypeDecl *param_builtin_type = param_type->as<BuiltinTypeDecl>();
+
+                if (argu_builtin_type == nullptr && param_builtin_type == nullptr) {
+                    // 5.4.1. 如果两者都是用户类型，则类型需一致
+                    if (argu_type != param_type) {
+                        assert(false);
+                        return false;
+                    }
+                } else if (argu_builtin_type != nullptr && param_builtin_type != nullptr) {
+                    // 5.4.2. 如果两者都是内置类型，则按照赋值规则进行检查
+                    if (TypeAssert::IsAssignableBetweenType(param_type, argu_type) == false) {
+                        assert(false);
+                        return false;
+                    }
+                } else {
+                    assert(false);
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
 }

@@ -122,7 +122,15 @@ namespace opene {
          */
         static bool IsBinaryOperationValid(TypeDecl *lhsType, TypeDecl *rhsType, _OperatorExpression::OperatorType operatorType);
 
+        /*
+         * 获取类型提升结果
+         */
         static BuiltinTypeDecl::EnumOfBuiltinType ResultOfTypeUpgrade(BuiltinTypeDecl::EnumOfBuiltinType ltype, BuiltinTypeDecl::EnumOfBuiltinType rtype);
+
+        /*
+         * 判断表达式是否为左值
+         */
+        static bool ExpressionIsLValue(Expression *expression);
     };
 
 }

@@ -217,6 +217,9 @@ namespace opene {
                 typeDecl = array_decl->base_type_;
             } while (array_decl = typeDecl->as<ArrayDecl>());
             return typeDecl;
+        } else {
+            assert(false);
+            return nullptr;
         }
     }
 
