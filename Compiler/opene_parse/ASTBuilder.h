@@ -10,6 +10,7 @@
 #include "gen/openeLangVisitor.h"
 
 #include "NodeDecl.h"
+#include "Diagnostic.h"
 
 namespace opene {
     class ASTBuilder : public openeLangVisitor {

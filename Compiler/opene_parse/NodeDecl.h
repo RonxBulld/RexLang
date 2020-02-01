@@ -191,7 +191,7 @@ namespace opene {
 
         template<typename Ty, typename = typename std::enable_if_t<std::is_base_of_v<Node, Ty>>>
         bool is() const {
-            return dynamic_cast<Ty *>(this) != nullptr;
+            return dynamic_cast<const Ty *>(this) != nullptr;
         }
 
         virtual ~Node() {

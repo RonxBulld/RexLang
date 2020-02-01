@@ -37,8 +37,8 @@ namespace opene {
         ErrOr<StringRef> base_name = ASTUtility::GetNameComponentQualifiedName(base_component);
         if (base_name.NoError() == false) { return nullptr; }
 
-        const Node *nearstScope = hierarchyIdentifier;
-        const BaseVariDecl *base_vari_decl = nullptr;
+        Node *nearstScope = hierarchyIdentifier;
+        BaseVariDecl *base_vari_decl = nullptr;
         while (base_vari_decl == nullptr) {
             nearstScope = ASTUtility::FindNearstScope(nearstScope->parent_node_);
             if (nearstScope == nullptr) {
