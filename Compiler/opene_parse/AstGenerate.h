@@ -8,13 +8,24 @@
 #include <string>
 #include <vector>
 
+#include "NodeDecl.h"
+#include "Diagnostic.h"
+#include "ASTContext.h"
+
 namespace opene {
 
     class AstGenerate {
     public:
-        int BuildASTFromCode(const std::string &code, const std::string &filename, const std::string &toolname);
+        Diagnostic *diagnostic_ = nullptr;
+        ASTContext *ast_context_ = nullptr;
 
-        int BuildASTFromCodeWithArgs(const std::string &code, const std::vector<std::string> &args, const std::string &filename, const std::string &toolname);
+    public:
+        AstGenerate();
+
+    public:
+        TranslateUnitPtr BuildASTFromCode(const std::string &code, const std::string &filename, const std::string &toolname);
+
+        TranslateUnitPtr BuildASTFromCodeWithArgs(const std::string &code, const std::vector<std::string> &args, const std::string &filename, const std::string &toolname);
     };
 
 }

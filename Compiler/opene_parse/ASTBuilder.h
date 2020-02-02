@@ -11,6 +11,7 @@
 
 #include "NodeDecl.h"
 #include "Diagnostic.h"
+#include "ASTContext.h"
 
 namespace opene {
     class ASTBuilder : public openeLangVisitor {
@@ -152,7 +153,7 @@ namespace opene {
         antlrcpp::Any visitString_value(openeLangParser::String_valueContext *context) override;
 
     public:
-        ASTBuilder(Diagnostic *diagnostic);
+        ASTBuilder(ASTContext *ast_context, Diagnostic *diagnostic);
 
         antlrcpp::Any visitLocal_variable_decl(openeLangParser::Local_variable_declContext *context) override;
 

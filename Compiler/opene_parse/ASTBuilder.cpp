@@ -56,7 +56,8 @@ namespace opene {
         if (ctx) {
             antlrcpp::Any ret = visit(ctx);
             if (ret.is<NodeWarp>()) {
-                if (T _vp = ret.as<NodeWarp>()) {
+                NodeWarp node_warp = ret.as<NodeWarp>();
+                if (T _vp = node_warp.node_->as<typename std::remove_pointer_t<T>>()) {
                     return _vp;
                 }
             }
@@ -268,11 +269,33 @@ namespace opene {
     }
 
     antlrcpp::Any ASTBuilder::visitMember_vari_decl(openeLangParser::Member_vari_declContext *context) {
-        return NodeWarp(static_cast<MemberVariableDeclPtr>(GetFromCtxIfExist<VariableDeclPtr>(context)));
+        VariableDeclPtr variable_decl = GetFromCtxIfExist<VariableDeclPtr>(context->variable_decl());
+        MemberVariableDeclPtr member_variable_decl = nullptr;
+        if (variable_decl) {
+            member_variable_decl = CreateNode<MemberVariableDecl>(context->getStart(), context->getStop());
+            member_variable_decl->dimension_ = variable_decl->dimension_;
+            member_variable_decl->type_name_ = variable_decl->type_name_;
+            member_variable_decl->type_decl_ptr_ = variable_decl->type_decl_ptr_;
+            member_variable_decl->name_ = variable_decl->name_;
+            member_variable_decl->comment_ = variable_decl->comment_;
+            delete variable_decl;
+        }
+        return NodeWarp(member_variable_decl);
     }
 
     antlrcpp::Any ASTBuilder::visitFile_vari_decl(openeLangParser::File_vari_declContext *context) {
-        return NodeWarp(static_cast<FileVariableDeclPtr>(GetFromCtxIfExist<VariableDeclPtr>(context)));
+        VariableDeclPtr variable_decl = GetFromCtxIfExist<VariableDeclPtr>(context->variable_decl());
+        FileVariableDeclPtr file_variable_decl = nullptr;
+        if (variable_decl) {
+            file_variable_decl = CreateNode<FileVariableDecl>(context->getStart(), context->getStop());
+            file_variable_decl->dimension_ = variable_decl->dimension_;
+            file_variable_decl->type_name_ = variable_decl->type_name_;
+            file_variable_decl->type_decl_ptr_ = variable_decl->type_decl_ptr_;
+            file_variable_decl->name_ = variable_decl->name_;
+            file_variable_decl->comment_ = variable_decl->comment_;
+            delete variable_decl;
+        }
+        return NodeWarp(file_variable_decl);
     }
 
     antlrcpp::Any ASTBuilder::visitStatement_list(openeLangParser::Statement_listContext *context) {
@@ -592,7 +615,7 @@ namespace opene {
         return NodeWarp(value_of_string);
     }
 
-    ASTBuilder::ASTBuilder(Diagnostic *diagnostic) {
-        this->ast_context_ = new ASTContext;
+    ASTBuilder::ASTBuilder(ASTContext *ast_context, Diagnostic *diagnostic)
+        : ast_context_(ast_context) {
     }
 }
