@@ -36,6 +36,10 @@ namespace opene {
     const std::string &FileEntry::GetCode() const {
         return this->code_;
     }
+
+    bool FileEntry::Valid() const {
+        return this->valid_;
+    }
 }
 
 namespace opene {
@@ -60,6 +64,7 @@ namespace opene {
         compilerInstance.setInstanceName(toolname);
         bool all_parse_success = true;
         for (const FileEntry &entry : entries) {
+            assert(entry.Valid());
             compilerInstance.setParseCode(entry.GetCode());
             if (compilerInstance.runParser() == nullptr) {
                 all_parse_success = false;

@@ -396,7 +396,7 @@ namespace opene {
     antlrcpp::Any ASTBuilder::visitHierarchy_identifier(openeLangParser::Hierarchy_identifierContext *context) {
         HierarchyIdentifierPtr hierarchy_identifier = CreateNode<HierarchyIdentifier>(context->getStart(), context->getStop());
         for (auto *name_component_ctx : context->components) {
-            NameComponentPtr name_component = GetFromCtxIfExist<NameComponentPtr>(name_component_ctx);
+            NameComponentPtr name_component = GetFromCtxIfExist<NameComponentPtr, true>(name_component_ctx);
             hierarchy_identifier->name_components_.push_back(name_component);
         }
         return NodeWarp(hierarchy_identifier);
@@ -413,16 +413,16 @@ namespace opene {
     }
 
     antlrcpp::Any ASTBuilder::visitIdentifier(openeLangParser::IdentifierContext *context) {
-        NameComponentPtr name_component = CreateNode<NameComponent>(context->getStart(), context->getStop());
-        name_component->name_ = GetTextIfExist(context->IDENTIFIER()->getSymbol());
-        return NodeWarp(name_component);
+        IdentifierPtr identifier = CreateNode<Identifier>(context->getStart(), context->getStop());
+        identifier->name_ = GetTextIfExist(context->IDENTIFIER()->getSymbol());
+        return NodeWarp(identifier);
     }
 
     antlrcpp::Any ASTBuilder::visitArrayIndex(openeLangParser::ArrayIndexContext *context) {
-        NameComponentPtr name_component = CreateNode<NameComponent>(context->getStart(), context->getStop());
-        name_component->base_ = GetFromCtxIfExist<NameComponentPtr>(context->name_component());
-        name_component->index_ = GetFromCtxIfExist<ExpressionPtr>(context->expression());
-        return NodeWarp(name_component);
+        ArrayIndexPtr array_index = CreateNode<ArrayIndex>(context->getStart(), context->getStop());
+        array_index->base_ = GetFromCtxIfExist<NameComponentPtr>(context->name_component());
+        array_index->index_ = GetFromCtxIfExist<ExpressionPtr>(context->expression());
+        return NodeWarp(array_index);
     }
 
     antlrcpp::Any ASTBuilder::visitBracket(openeLangParser::BracketContext *context) {

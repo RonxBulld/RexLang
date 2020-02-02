@@ -205,15 +205,23 @@ namespace opene {
     }
 
     bool ASTFetchSubnode::FetchNameComponent(const NameComponent *nameComponent, ASTFetchSubnode::ASTFetchResult &result) {
-        if (Fetch(nameComponent->base_, result) == false) { return false; }
-        if (Fetch(nameComponent->index_, result) == false) { return false; }
         return ASTFetchSubnode::FetchExpression(nameComponent, result);
+    }
+
+    bool ASTFetchSubnode::FetchIdentifier(const Identifier *identifier, ASTFetchSubnode::ASTFetchResult &result) {
+        return ASTFetchSubnode::FetchNameComponent(identifier, result);
+    }
+
+    bool ASTFetchSubnode::FetchArrayIndex(const ArrayIndex *arrayIndex, ASTFetchSubnode::ASTFetchResult &result) {
+        if (Fetch(arrayIndex->base_, result) == false) { return false; }
+        if (Fetch(arrayIndex->index_, result) == false) { return false; }
+        return ASTFetchSubnode::FetchNameComponent(arrayIndex, result);
     }
 
     bool ASTFetchSubnode::FetchFunctionCall(const FunctionCall *functionCall, ASTFetchSubnode::ASTFetchResult &result) {
         if (Fetch(functionCall->function_name_, result) == false) { return false; }
         if (Fetch(functionCall->arguments_, result) == false) { return false; }
-        return ASTFetchSubnode::FetchExpression(functionCall, result);
+        return ASTFetchSubnode::FetchNameComponent(functionCall, result);
     }
 
     bool ASTFetchSubnode::FetchUnaryExpression(const UnaryExpression *unaryExpression, ASTFetchSubnode::ASTFetchResult &result) {
@@ -239,7 +247,7 @@ namespace opene {
         else if (node->node_type_ == NodeType::kNTyGlobalVariableFile)      { return FetchGlobalVariableFile(static_cast<const GlobalVariableFile *>(node), result); }
         else if (node->node_type_ == NodeType::kNTyDataStructureFile)       { return FetchDataStructureFile(static_cast<const DataStructureFile *>(node), result); }
         else if (node->node_type_ == NodeType::kNTyDllDefineFile)           { return FetchDllDefineFile(static_cast<const DllDefineFile *>(node), result); }
-        else if (node->node_type_ == NodeType::kNTyDecl)                    { return FetchDecl(static_cast<const Decl *>(node), result); }
+//        else if (node->node_type_ == NodeType::kNTyDecl)                    { return FetchDecl(static_cast<const Decl *>(node), result); }
         else if (node->node_type_ == NodeType::kNTyTagDecl)                 { return FetchTagDecl(static_cast<const TagDecl *>(node), result); }
         else if (node->node_type_ == NodeType::kNTyVariableDecl)            { return FetchVariableDecl(static_cast<const VariableDecl *>(node), result); }
         else if (node->node_type_ == NodeType::kNTyBaseVariDecl)            { return FetchBaseVariDecl(static_cast<const BaseVariDecl *>(node), result); }
@@ -255,7 +263,7 @@ namespace opene {
         else if (node->node_type_ == NodeType::kNTyFunctionDecl)             { return FetchSubProgDecl(static_cast<const FunctionDecl *>(node), result); }
         else if (node->node_type_ == NodeType::kNTyProgSetDecl)             { return FetchProgSetDecl(static_cast<const ProgSetDecl *>(node), result); }
         else if (node->node_type_ == NodeType::kNTyDllCommandDecl)          { return FetchDllCommandDecl(static_cast<const DllCommandDecl *>(node), result); }
-        else if (node->node_type_ == NodeType::kNTyStatement)               { return FetchStatement(static_cast<const Statement *>(node), result); }
+//        else if (node->node_type_ == NodeType::kNTyStatement)               { return FetchStatement(static_cast<const Statement *>(node), result); }
         else if (node->node_type_ == NodeType::kNTyIfStmt)                  { return FetchIfStmt(static_cast<const IfStmt *>(node), result); }
         else if (node->node_type_ == NodeType::kNTyStatementBlock)          { return FetchStatementBlock(static_cast<const StatementBlock *>(node), result); }
         else if (node->node_type_ == NodeType::kNTyLoopStatement)           { return FetchLoopStatement(static_cast<const LoopStatement *>(node), result); }
@@ -264,13 +272,23 @@ namespace opene {
         else if (node->node_type_ == NodeType::kNTyForStmt)                 { return FetchForStmt(static_cast<const ForStmt *>(node), result); }
         else if (node->node_type_ == NodeType::kNTyDoWhileStmt)             { return FetchDoWhileStmt(static_cast<const DoWhileStmt *>(node), result); }
         else if (node->node_type_ == NodeType::kNTyAssignStmt)              { return FetchAssignStmt(static_cast<const AssignStmt *>(node), result); }
-        else if (node->node_type_ == NodeType::kNTyExpression)              { return FetchExpression(static_cast<const Expression *>(node), result); }
+//        else if (node->node_type_ == NodeType::kNTyExpression)              { return FetchExpression(static_cast<const Expression *>(node), result); }
         else if (node->node_type_ == NodeType::kNTyHierarchyIdentifier)     { return FetchHierarchyIdentifier(static_cast<const HierarchyIdentifier *>(node), result); }
-        else if (node->node_type_ == NodeType::kNTyNameComponent)           { return FetchNameComponent(static_cast<const NameComponent *>(node), result); }
+//        else if (node->node_type_ == NodeType::kNTyNameComponent)           { return FetchNameComponent(static_cast<const NameComponent *>(node), result); }
+        else if (node->node_type_ == NodeType::kNTyIdentifier)              { return FetchIdentifier(static_cast<const Identifier *>(node), result); }
+        else if (node->node_type_ == NodeType::kNTyArrayIndex)              { return FetchArrayIndex(static_cast<const ArrayIndex *>(node), result); }
         else if (node->node_type_ == NodeType::kNTyFunctionCall)            { return FetchFunctionCall(static_cast<const FunctionCall *>(node), result); }
         else if (node->node_type_ == NodeType::kNTyUnaryExpression)         { return FetchUnaryExpression(static_cast<const UnaryExpression *>(node), result); }
         else if (node->node_type_ == NodeType::kNTyBinaryExpression)        { return FetchBinaryExpression(static_cast<const BinaryExpression *>(node), result); }
-        else if (node->node_type_ == NodeType::kNTy_OperatorExpression)     { return Fetch_OperatorExpression(static_cast<const _OperatorExpression *>(node), result); }
+//        else if (node->node_type_ == NodeType::kNTy_OperatorExpression)     { return Fetch_OperatorExpression(static_cast<const _OperatorExpression *>(node), result); }
+//        else if (node->node_type_ == NodeType::kNTyValue)                   { return true; }
+        else if (node->node_type_ == NodeType::kNTyValueOfDataSet)          { return true; }
+        else if (node->node_type_ == NodeType::kNTyValueOfDatetime)         { return true; }
+        else if (node->node_type_ == NodeType::kNTyFuncAddrExpression)      { return true; }
+        else if (node->node_type_ == NodeType::kNTyResourceRefExpression)   { return true; }
+        else if (node->node_type_ == NodeType::kNTyValueOfBool)             { return true; }
+        else if (node->node_type_ == NodeType::kNTyValueOfDecimal)          { return true; }
+        else if (node->node_type_ == NodeType::kNTyValueOfString)           { return true; }
         else { assert(false); return false; }
     }
 

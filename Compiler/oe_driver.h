@@ -25,6 +25,7 @@ namespace opene {
     public:
         const std::string &GetFilename() const;
         const std::string &GetCode() const;
+        bool Valid() const;
     };
 
     class OECompilerInstance {

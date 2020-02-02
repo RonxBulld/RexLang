@@ -16,7 +16,7 @@ namespace opene {
             {std::string(u8"文本型"),    BuiltinTypeDecl::EnumOfBuiltinType::kBTypeString},
             {std::string(u8"字节集"),    BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDataSet},
             {std::string(u8"短整型"),    BuiltinTypeDecl::EnumOfBuiltinType::kBTypeShort},
-            {std::string(u8"长整型"),    BuiltinTypeDecl::EnumOfBuiltinType::kBTypeLong},
+            {std::string(u8"长整数型"),  BuiltinTypeDecl::EnumOfBuiltinType::kBTypeLong},
             {std::string(u8"日期时间型"),  BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDatetime},
             {std::string(u8"子程序指针"),  BuiltinTypeDecl::EnumOfBuiltinType::kBTypeFuncPtr},
             {std::string(u8"双精度小数型"), BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDouble},
@@ -114,7 +114,7 @@ namespace opene {
                 break;
             }
         }
-        if (status == 0) {
+        if (status == 0 || status == 4) {
             return MakeNoErrVal(dims);
         } else {
             return ErrOr<decltype(dims)>::CreateError(1);

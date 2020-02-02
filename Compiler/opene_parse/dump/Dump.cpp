@@ -18,7 +18,7 @@ namespace opene {
         DumpToken dump_token;
         dump_token.node_name = "TranslateUnit";
         dump_token.node_ptr = translateUnitPtr;
-
+        return std::vector<std::string>();
     }
 
     std::vector<std::string> DumpSourceFile(SourceFilePtr *sourceFilePtr, const DumpStyle &dumpStyle) {

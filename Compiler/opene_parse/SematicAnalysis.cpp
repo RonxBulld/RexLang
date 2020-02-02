@@ -340,7 +340,7 @@ namespace opene {
             return false;
         }
         for (const TString &attr : parameter->attributes_) {
-            if (attr.string_ == u8"参考") {
+            if (attr.string_ == u8"参考" || attr.string_ == u8"传址") {
                 parameter->is_reference = true;
             } else if (attr.string_ == u8"可空") {
                 parameter->is_nullable = true;

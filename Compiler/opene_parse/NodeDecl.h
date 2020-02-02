@@ -72,6 +72,8 @@ namespace opene {
     typedef struct Expression* ExpressionPtr;
     typedef struct HierarchyIdentifier* HierarchyIdentifierPtr;
     typedef struct NameComponent* NameComponentPtr;
+    typedef struct Identifier* IdentifierPtr;
+    typedef struct ArrayIndex* ArrayIndexPtr;
     typedef struct FunctionCall* FunctionCallPtr;
     typedef struct UnaryExpression* UnaryExpressionPtr;
     typedef struct BinaryExpression* BinaryExpressionPtr;
@@ -128,6 +130,8 @@ namespace opene {
         kNTyExpression,
         kNTyHierarchyIdentifier,
         kNTyNameComponent,
+        kNTyIdentifier,
+        kNTyArrayIndex,
         kNTyFunctionCall,
         kNTyUnaryExpression,
         kNTyBinaryExpression,
@@ -574,21 +578,32 @@ namespace opene {
      */
     struct NameComponent : public Expression {
         static const NodeType node_type = NodeType::kNTyNameComponent;
+    };
 
-        // === 普通名称组件 ===
-
+    /**
+     * @brief 普通名称组件
+     */
+    struct Identifier : public NameComponent {
+        static const NodeType node_type = NodeType::kNTyIdentifier;
         // 引用名
         TString name_;
+    };
 
-        // === 数组组件 ===
-
+    /**
+     * @brief 数组引用组件
+     */
+    struct ArrayIndex : public NameComponent {
+        static const NodeType node_type = NodeType::kNTyArrayIndex;
         // 索引对象
         NameComponentPtr base_ = nullptr;
         // 索引表达式
         ExpressionPtr index_ = nullptr;
     };
 
-    struct FunctionCall : public Expression {
+    /**
+     * @brief 函数调用组件
+     */
+    struct FunctionCall : public NameComponent {
         static const NodeType node_type = NodeType::kNTyFunctionCall;
         NameComponentPtr function_name_ = nullptr;
         std::vector<ExpressionPtr> arguments_;

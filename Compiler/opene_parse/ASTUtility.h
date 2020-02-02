@@ -29,13 +29,19 @@ namespace opene {
 
         /*
          * 获取名称组件的确切名字
+         * 如果是数组引用则获取数组名；
+         * 如果是函数调用则获取函数名；
+         * 如果是名称直接引用则返回该名称。
          */
         static ErrOr<StringRef> GetNameComponentQualifiedName(NameComponent *nameComponent);
 
         /*
          * 获取名称组件的确切来源
+         * 如果是数组引用则获取数组名组件；
+         * 如果是函数调用则获取函数名组件；
+         * 如果是名称直接引用则返回该组件。
          */
-        static NameComponent *GetNameComponentQualifiedBase(NameComponent *nameComponent);
+        static Identifier *GetNameComponentQualifiedBase(NameComponent *nameComponent);
 
         template <typename Ty, typename = typename std::enable_if_t<std::is_base_of_v<Node, Ty>>>
         static Ty *FindSpecifyTypeParent(Node *base) {

@@ -74,6 +74,8 @@ namespace opene {
         static bool FetchExpression             (const Expression *expression                   , ASTFetchResult &result);
         static bool FetchHierarchyIdentifier    (const HierarchyIdentifier *hierarchyIdentifier , ASTFetchResult &result);
         static bool FetchNameComponent          (const NameComponent *nameComponent             , ASTFetchResult &result);
+        static bool FetchIdentifier             (const Identifier *identifier                , ASTFetchResult &result);
+        static bool FetchArrayIndex             (const ArrayIndex *arrayIndex                , ASTFetchResult &result);
         static bool FetchFunctionCall           (const FunctionCall *functionCall               , ASTFetchResult &result);
         static bool FetchUnaryExpression        (const UnaryExpression *unaryExpression         , ASTFetchResult &result);
         static bool FetchBinaryExpression       (const BinaryExpression *binaryExpression       , ASTFetchResult &result);

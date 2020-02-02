@@ -86,7 +86,7 @@ namespace opene {
     }
 
     ErrOr<StringRef> ASTUtility::GetNameComponentQualifiedName(NameComponent *nameComponent) {
-        NameComponent *base_name_component = ASTUtility::GetNameComponentQualifiedBase(nameComponent);
+        Identifier *base_name_component = ASTUtility::GetNameComponentQualifiedBase(nameComponent);
         if (base_name_component) {
             return MakeNoErrVal<StringRef>(base_name_component->name_.string_);
         } else {
@@ -95,11 +95,13 @@ namespace opene {
         }
     }
 
-    NameComponent *ASTUtility::GetNameComponentQualifiedBase(NameComponent *nameComponent) {
-        if (nameComponent->name_.string_.empty() == false && nameComponent->base_ == nullptr && nameComponent->index_ == nullptr) {
-            return nameComponent;
-        } else if (nameComponent->name_.string_.empty() == true && nameComponent->base_ != nullptr && nameComponent->index_) {
-            return ASTUtility::GetNameComponentQualifiedBase(nameComponent->base_);
+    Identifier *ASTUtility::GetNameComponentQualifiedBase(NameComponent *nameComponent) {
+        if (Identifier *identifier = nameComponent->as<Identifier>()) {
+            return identifier;
+        } else if (ArrayIndex *array_index = nameComponent->as<ArrayIndex>()) {
+            return ASTUtility::GetNameComponentQualifiedBase(array_index->base_);
+        } else if (FunctionCall *function_call = nameComponent->as<FunctionCall>()) {
+            return ASTUtility::GetNameComponentQualifiedBase(function_call->function_name_);
         } else {
             assert(false);
             return nullptr;
@@ -231,6 +233,10 @@ namespace opene {
     }
 
     TypeDecl * ASTUtility::QueryTypeDeclWithName(TranslateUnit *translateUnit, const StringRef &name) {
+        if (name.empty()) {
+            // 类型默认为整数型
+            return ASTUtility::QueryBuiltinTypeWithEnum(translateUnit, BuiltinTypeDecl::EnumOfBuiltinType::kBTypeInteger);
+        }
         auto found = translateUnit->global_type_.find(name);
         if (found != translateUnit->global_type_.end()) {
             return found->second;
