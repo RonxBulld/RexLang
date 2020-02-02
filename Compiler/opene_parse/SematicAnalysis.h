@@ -111,9 +111,24 @@ namespace opene {
         bool CheckStatementsAndExpression(Statement *statement);
 
         /*
+         * 检查表达式类型是否为整数族
+         */
+        bool CheckIfExprTypeIsIntegerClass(Expression *expression);
+
+        /*
+         * 检查循环语句族
+         */
+        bool CheckLoopStatement(LoopStatement *loopStatement);
+
+        /*
          * 检查表达式，并返回表达式的结果类型
          */
         TypeDecl *CheckExpression(Expression *expression);
+
+        /*
+         * 检查常量值，并返回值的结果类型
+         */
+        TypeDecl *CheckValue(Value *value);
 
         /*
          * 检查实参是否匹配形参

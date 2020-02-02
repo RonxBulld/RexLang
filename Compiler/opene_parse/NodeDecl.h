@@ -516,7 +516,10 @@ namespace opene {
     struct RangeForStmt : public LoopStatement {
         static const NodeType node_type = NodeType::kNTyRangeForStmt;
         ExpressionPtr range_size_ = nullptr;
-        TString loop_vari_;
+        HierarchyIdentifierPtr loop_vari_ = nullptr;
+
+        // === 下面是经过语义分析后的数据 ===
+
     };
 
     /**
@@ -528,6 +531,9 @@ namespace opene {
         ExpressionPtr stop_value_ = nullptr;
         ExpressionPtr step_value_ = nullptr;
         HierarchyIdentifierPtr loop_vari_ = nullptr;
+
+        // === 下面是经过语义分析后的数据 ===
+
     };
 
     /**

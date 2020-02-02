@@ -84,28 +84,6 @@ namespace opene {
         return false;
     }
 
-    bool TypeAssert::IsExternBooleanType(const TypeDecl * typeDecl) {
-        if (TypeAssert::IsCharType(typeDecl)) {
-            return true;
-        } else if (TypeAssert::IsIntegerType(typeDecl)) {
-            return true;
-        } else if (TypeAssert::IsFloatType(typeDecl)) {
-            return true;
-        } else if (TypeAssert::IsBoolType(typeDecl)) {
-            return true;
-        } else if (TypeAssert::IsShortType(typeDecl)) {
-            return true;
-        } else if (TypeAssert::IsLongType(typeDecl)) {
-            return true;
-        } else if (TypeAssert::IsFuncPtrType(typeDecl)) {
-            return true;
-        } else if (TypeAssert::IsDoubleType(typeDecl)) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
     bool TypeAssert::IsAssignableBetweenType(const TypeDecl * lhs_type, const TypeDecl * rhs_type) {
         assert(lhs_type);
         assert(rhs_type);
@@ -160,13 +138,25 @@ namespace opene {
         }
     }
 
+    bool TypeAssert::IsExternBooleanType(const TypeDecl * typeDecl) {
+        if (TypeAssert::IsBoolType(typeDecl)) { return true; }
+        if (TypeAssert::IsNumerical(typeDecl)) { return true; }
+        if (TypeAssert::IsFuncPtrType(typeDecl)) { return true; }
+        return false;
+    }
+
     bool TypeAssert::IsNumerical(const TypeDecl *typeDecl) {
+        if (TypeAssert::IsIntegerClass(typeDecl)) { return true; }
+        if (TypeAssert::IsFloatType(typeDecl)) { return true; }
+        if (TypeAssert::IsDoubleType(typeDecl)) { return true; }
+        return false;
+    }
+
+    bool TypeAssert::IsIntegerClass(const TypeDecl *typeDecl) {
         if (TypeAssert::IsCharType(typeDecl)) { return true; }
         if (TypeAssert::IsIntegerType(typeDecl)) { return true; }
-        if (TypeAssert::IsFloatType(typeDecl)) { return true; }
         if (TypeAssert::IsShortType(typeDecl)) { return true; }
         if (TypeAssert::IsLongType(typeDecl)) { return true; }
-        if (TypeAssert::IsDoubleType(typeDecl)) { return true; }
         return false;
     }
 

@@ -104,10 +104,17 @@ namespace opene {
 
         /**
          * @brief 类型是否具有数值性
-         * @param typeDecl
-         * @return
+         * @param typeDecl 需要检查的类型
+         * @return 检查指定类型是否为字节、整数、小数、双精度、短整、长整、浮点、双精度类型
          */
         static bool IsNumerical(const TypeDecl *typeDecl);
+
+        /**
+         * @brief 类型是否整数族
+         * @param typeDecl 需要检查的类型
+         * @return 检查指定类型是否为字节、整数、小数、双精度、短整、长整类型
+         */
+        static bool IsIntegerClass(const TypeDecl *typeDecl);
 
         // === 高阶类型断言 ===
 

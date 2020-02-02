@@ -609,12 +609,12 @@ public:
     RangeForContext(Loop_statementContext *ctx);
 
     openeLangParser::ExpressionContext *times_expr = nullptr;
-    antlr4::Token *loop_variable = nullptr;
+    openeLangParser::Hierarchy_identifierContext *loop_variable = nullptr;
     openeLangParser::Statement_listContext *loop_body = nullptr;
     antlr4::tree::TerminalNode *NEWLINE();
     ExpressionContext *expression();
     Statement_listContext *statement_list();
-    antlr4::tree::TerminalNode *IDENTIFIER();
+    Hierarchy_identifierContext *hierarchy_identifier();
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
 

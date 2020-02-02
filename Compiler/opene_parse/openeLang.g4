@@ -162,7 +162,7 @@ loop_statement
       '.判断循环尾' '(' ')'
                                                                                         # While
 
-    | '.计次循环首' '(' times_expr=expression ',' loop_variable=IDENTIFIER? ')' NEWLINE
+    | '.计次循环首' '(' times_expr=expression ',' loop_variable=hierarchy_identifier? ')' NEWLINE
       loop_body=statement_list
       '.计次循环尾' '(' ')'
                                                                                         # RangeFor

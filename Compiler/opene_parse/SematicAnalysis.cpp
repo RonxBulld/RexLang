@@ -9,6 +9,7 @@
 #include "TypeAssert.h"
 #include "ASTUtility.h"
 #include "ASTContext.h"
+#include "ASTAssert.h"
 
 namespace opene {
     template <typename SrcMapContainer, typename TgtMapContainer, typename Pred>
@@ -261,9 +262,8 @@ namespace opene {
             }
 
             return true;
-        } else if (RangeForStmtPtr range_for_stmt = statement->as<RangeForStmt>()) {
-        } else if (ForStmtPtr for_stmt = statement->as<ForStmt>()) {
-        } else if (DoWhileStmtPtr do_while_stmt = statement->as<DoWhileStmt>()) {
+        } else if (LoopStatementPtr loop_statement = statement->as<LoopStatement>()) {
+            return this->CheckLoopStatement(loop_statement);
         } else if (AssignStmtPtr assign_stmt = statement->as<AssignStmt>()) {
             // 检查赋值语句左右子式类型是否匹配或兼容
             TypeDeclPtr lhs_type = this->CheckExpression(assign_stmt->lhs_);
@@ -273,6 +273,65 @@ namespace opene {
             assert(false);
             return false;
         }
+        return true;
+    }
+
+    bool SematicAnalysis::CheckIfExprTypeIsIntegerClass(Expression *expression) {
+        if (expression == nullptr) {
+            assert(false);
+            return false;
+        }
+        TypeDecl *expr_type = this->CheckExpression(expression);
+        if (expr_type == nullptr) {
+            assert(false);
+            return false;
+        }
+        bool is_integer_class = TypeAssert::IsIntegerClass(expr_type);
+        if (is_integer_class == false) {
+            assert(false);
+            return false;
+        }
+        return true;
+    }
+
+    bool SematicAnalysis::CheckLoopStatement(LoopStatement *loopStatement) {
+        if (RangeForStmtPtr range_for_stmt = loopStatement->as<RangeForStmt>()) {
+            // 检查次数表达式类型是否为整数族
+            if (this->CheckIfExprTypeIsIntegerClass(range_for_stmt->range_size_) == false) { assert(false); return false; }
+            // 如果循环变量存在则检查变量类型是否为整数族
+            if (range_for_stmt->loop_vari_) {
+                TypeDecl *loop_vari_type = ASTUtility::GetVariableQualifiedTypeWithHierarchyName(range_for_stmt->loop_vari_);
+                if (TypeAssert::IsIntegerClass(loop_vari_type) == false) {
+                    assert(false);
+                    return false;
+                }
+            }
+        } else if (ForStmtPtr for_stmt = loopStatement->as<ForStmt>()) {
+            // 检查初值表达式、终值表达式、步长表达式类型是否为整数族
+            if (this->CheckIfExprTypeIsIntegerClass(for_stmt->start_value_) == false) { assert(false); return false; }
+            if (this->CheckIfExprTypeIsIntegerClass(for_stmt->stop_value_) == false) { assert(false); return false; }
+            if (this->CheckIfExprTypeIsIntegerClass(for_stmt->step_value_) == false) { assert(false); return false; }
+            // 如果循环变量存在则检查变量类型是否为整数族
+            if (for_stmt->loop_vari_) {
+                TypeDecl *loop_vari_type = ASTUtility::GetVariableQualifiedTypeWithHierarchyName(for_stmt->loop_vari_);
+                if (TypeAssert::IsIntegerClass(loop_vari_type) == false) {
+                    assert(false);
+                    return false;
+                }
+            }
+        } else if (DoWhileStmtPtr do_while_stmt = loopStatement->as<DoWhileStmt>()) {
+            // 检查条件表达式类型是否为布尔类型
+            TypeDecl *condition_expr_type = this->CheckExpression(do_while_stmt->conditon_);
+            bool is_boolean = TypeAssert::IsBoolType(condition_expr_type);
+            if (is_boolean == false) {
+                assert(false);
+                return false;
+            }
+        } else {
+            assert(false);
+            return false;
+        }
+        this->CheckStatementsAndExpression(loopStatement->loop_body_);
         return true;
     }
 
@@ -420,19 +479,14 @@ namespace opene {
             // 根据运算类型返回类型
             return this->GetBinaryOperationType(lhs_operand_type, rhs_operand_type, unary_expression->operator_type_);
 
-        } else if (ValueOfDataSet * value_of_data_set = expression->as<ValueOfDataSet>()) {
-            TypeDecl *type_decl = ASTUtility::QueryBuiltinTypeWithEnum(this->translate_unit_, BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDataSet);
-            assert(type_decl);
-            return type_decl;
-
-        } else if (ValueOfDatetime * value_of_datetime = expression->as<ValueOfDatetime>()) {
-            TypeDecl *type_decl = ASTUtility::QueryBuiltinTypeWithEnum(this->translate_unit_, BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDatetime);
-            assert(type_decl);
-            return type_decl;
-
         } else if (FuncAddrExpression * func_addr_expression = expression->as<FuncAddrExpression>()) {
             TypeDecl *type_decl = ASTUtility::QueryBuiltinTypeWithEnum(this->translate_unit_, BuiltinTypeDecl::EnumOfBuiltinType::kBTypeFuncPtr);
             assert(type_decl);
+            FunctorDecl * functor_decl = ASTUtility::GetFunctionDeclare(func_addr_expression);
+            if (functor_decl == nullptr) {
+                assert(false);
+                return nullptr;
+            }
             return type_decl;
 
         } else if (ResourceRefExpression * resource_ref_expression_ptr = expression->as<ResourceRefExpression>()) {
@@ -440,17 +494,37 @@ namespace opene {
             assert(false);
             return nullptr;
 
-        } else if (ValueOfBool * value_of_bool = expression->as<ValueOfBool>()) {
+        } else if (Value *value = expression->as<Value>()) {
+            return this->CheckValue(value);
+
+        } else {
+            assert(false);
+            return nullptr;
+        }
+    }
+
+    TypeDecl *SematicAnalysis::CheckValue(Value *value) {
+        if (ValueOfDataSet * value_of_data_set = value->as<ValueOfDataSet>()) {
+            TypeDecl *type_decl = ASTUtility::QueryBuiltinTypeWithEnum(this->translate_unit_, BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDataSet);
+            assert(type_decl);
+            return type_decl;
+
+        } else if (ValueOfDatetime * value_of_datetime = value->as<ValueOfDatetime>()) {
+            TypeDecl *type_decl = ASTUtility::QueryBuiltinTypeWithEnum(this->translate_unit_, BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDatetime);
+            assert(type_decl);
+            return type_decl;
+
+        } else if (ValueOfBool * value_of_bool = value->as<ValueOfBool>()) {
             TypeDecl *type_decl = ASTUtility::QueryBuiltinTypeWithEnum(this->translate_unit_, BuiltinTypeDecl::EnumOfBuiltinType::kBTypeBool);
             assert(type_decl);
             return type_decl;
 
-        } else if (ValueOfDecimal * value_of_decimal = expression->as<ValueOfDecimal>()) {
+        } else if (ValueOfDecimal * value_of_decimal = value->as<ValueOfDecimal>()) {
             TypeDecl *type_decl = ASTUtility::QueryBuiltinTypeWithEnum(this->translate_unit_, BuiltinTypeDecl::EnumOfBuiltinType::kBTypeInteger);
             assert(type_decl);
             return type_decl;
 
-        } else if (ValueOfString * value_of_string = expression->as<ValueOfString>()) {
+        } else if (ValueOfString * value_of_string = value->as<ValueOfString>()) {
             TypeDecl *type_decl = ASTUtility::QueryBuiltinTypeWithEnum(this->translate_unit_, BuiltinTypeDecl::EnumOfBuiltinType::kBTypeString);
             assert(type_decl);
             return type_decl;

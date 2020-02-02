@@ -331,7 +331,7 @@ namespace opene {
     antlrcpp::Any ASTBuilder::visitRangeFor(openeLangParser::RangeForContext *context) {
         RangeForStmtPtr range_for_stmt = CreateNode<RangeForStmt>(context->getStart(), context->getStop());
         range_for_stmt->range_size_ = GetFromCtxIfExist<ExpressionPtr>(context->times_expr);
-        range_for_stmt->loop_vari_ = GetTextIfExist(context->loop_variable);
+        range_for_stmt->loop_vari_ = GetFromCtxIfExist<HierarchyIdentifierPtr>(context->loop_variable);
         range_for_stmt->loop_body_ = GetFromCtxIfExist<StatementPtr>(context->loop_body);
         return NodeWarp(range_for_stmt);
     }
