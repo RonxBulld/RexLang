@@ -178,6 +178,7 @@ namespace opene {
      * @brief 节点基类
      */
     struct Node {
+        size_t node_id_ = 0;
         class ASTContext *ast_context_ = nullptr;
         Node *parent_node_ = nullptr;
         NodeType node_type_ = NodeType::kNTyBadType;

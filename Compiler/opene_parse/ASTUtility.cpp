@@ -28,7 +28,7 @@ namespace opene {
         }
     }
 
-    BaseVariDecl * ASTUtility::FindVariableDeclareInASTWithHierarchyName(HierarchyIdentifier *hierarchyIdentifier) {
+    TagDecl * ASTUtility::FindDeclareInASTWithHierarchyName(HierarchyIdentifier *hierarchyIdentifier) {
         // 判断是否有效
         assert(hierarchyIdentifier->name_components_.size() > 0);
         BaseVariDecl *vari_decl = nullptr;
@@ -44,7 +44,7 @@ namespace opene {
             if (nearstScope == nullptr) {
                 return nullptr;
             }
-            base_vari_decl = ASTUtility::FindVariableDeclInScopeWithName(nearstScope, base_name.Value());
+            base_vari_decl = ASTUtility::FindDeclInScopeWithName(nearstScope, base_name.Value());
         }
 
         // 找递进
@@ -57,9 +57,9 @@ namespace opene {
         return base_vari_decl;
     }
 
-    TypeDecl *ASTUtility::GetVariableQualifiedTypeWithHierarchyName(HierarchyIdentifier *hierarchyIdentifier) {
+    TypeDecl *ASTUtility::GetQualifiedTypeWithHierarchyName(HierarchyIdentifier *hierarchyIdentifier) {
         // 首先查找引用目标变量定义
-        const BaseVariDecl *vari_decl = ASTUtility::FindVariableDeclareInASTWithHierarchyName(hierarchyIdentifier);
+        const BaseVariDecl *vari_decl = ASTUtility::FindDeclareInASTWithHierarchyName(hierarchyIdentifier);
         if (vari_decl == nullptr) { return nullptr; }
         // 判断数组定义和引用情况
         ErrOr<std::vector<size_t>> type_indexes = ASTUtility::GetTypeIndexList(vari_decl->type_decl_ptr_);
@@ -125,16 +125,18 @@ namespace opene {
         return nullptr;
     }
 
-    BaseVariDecl * ASTUtility::FindVariableDeclInScopeWithName(Node *scope, const StringRef &name) {
-        if (const FunctionDecl *sub_prog_decl = scope->as<FunctionDecl>()) {
-            // 1. 查找局部变量
-            for (auto & item : sub_prog_decl->local_vari_) {
-                if (item.first == name) {
-                    return item.second;
+    TagDecl * ASTUtility::FindDeclInScopeWithName(Node *scope, const StringRef &name) {
+        if (const FunctorDecl *functor_decl = scope->as<FunctorDecl>()) {
+            if (const FunctionDecl *function_decl = functor_decl->as<FunctionDecl>()) {
+                // 1. 查找局部变量
+                for (auto & item : function_decl->local_vari_) {
+                    if (item.first == name) {
+                        return item.second;
+                    }
                 }
             }
-            // 2. 查找全局变量
-            for (ParameterDecl *parameter_decl : sub_prog_decl->parameters_) {
+            // 2. 查找参数
+            for (ParameterDecl *parameter_decl : functor_decl->parameters_) {
                 if (parameter_decl->name_.string_ == name) {
                     return parameter_decl;
                 }
@@ -175,9 +177,9 @@ namespace opene {
 
     ErrOr<std::vector<Expression *>> ASTUtility::GetNameComponentIndexList(NameComponent *nameComponent) {
         std::vector<Expression *> indexes;
-        while (nameComponent && nameComponent->index_ != nullptr) {
-            indexes.push_back(nameComponent->index_);
-            nameComponent = nameComponent->base_;
+        while (ArrayIndex *array_index = nameComponent->as<ArrayIndex>()) {
+            indexes.push_back(array_index->index_);
+            nameComponent = array_index->base_;
         }
         return MakeNoErrVal(indexes);
     }
@@ -225,40 +227,44 @@ namespace opene {
         }
     }
 
-    TypeDecl * ASTUtility::QueryBuiltinTypeWithEnum(TranslateUnit *translateUnit, BuiltinTypeDecl::EnumOfBuiltinType type_enum) {
-            StringRef && type_name = translateUnit->ast_context_->CreateString(Str2Attr::BuiltinType2Name(type_enum).Value());
-            TypeDecl * type_decl = ASTUtility::QueryTypeDeclWithName(translateUnit, type_name);
-            assert(type_decl);
-            return type_decl;
+    BuiltinTypeDecl * ASTUtility::QueryBuiltinTypeWithEnum(TranslateUnit *translateUnit, BuiltinTypeDecl::EnumOfBuiltinType type_enum) {
+        StringRef &&type_name = translateUnit->ast_context_->CreateString(Str2Attr::BuiltinType2Name(type_enum).Value());
+        BuiltinTypeDecl *builtin_type_decl = ASTUtility::QueryTypeDeclWithName(translateUnit, type_name, nullptr)->as<BuiltinTypeDecl>();
+        assert(builtin_type_decl);
+        return builtin_type_decl;
     }
 
-    TypeDecl * ASTUtility::QueryTypeDeclWithName(TranslateUnit *translateUnit, const StringRef &name) {
+    TagDecl * ASTUtility::QueryTypeDeclWithName(TranslateUnit *translateUnit, const StringRef &name, SematicAnalysisContext *context) {
         if (name.empty()) {
             // 类型默认为整数型
             return ASTUtility::QueryBuiltinTypeWithEnum(translateUnit, BuiltinTypeDecl::EnumOfBuiltinType::kBTypeInteger);
         }
-        auto found = translateUnit->global_type_.find(name);
-        if (found != translateUnit->global_type_.end()) {
-            return found->second;
-        } else {
-            assert(false);
-            return nullptr;
+        if (TagDecl *decl = context->QueryTagDeclFromDynSymbolTableWithName(name)) {
+            if (decl) {
+                return decl;
+            }
         }
+        assert(false);
+        return nullptr;
     }
 
     FunctorDecl * ASTUtility::GetFunctionDeclare(FunctionCall *functionCall) {
         TranslateUnit *translate_unit = ASTUtility::FindSpecifyTypeParent<TranslateUnit>(functionCall);
-        if (functionCall->function_name_->name_.string_.empty() || (functionCall->function_name_->base_ != nullptr || functionCall->function_name_->index_ != nullptr)) {
+        NameComponent *func_name = functionCall->function_name_;
+        if (Identifier *identifier = func_name->as<Identifier>()) {
+            // 直接函数调用
+            auto found = translate_unit->functor_declares_.find(identifier->name_.string_);
+            if (found == translate_unit->functor_declares_.end()) {
+                assert(false);
+                return nullptr;
+            }
+            functionCall->functor_declare_ = found->second;
+            return functionCall->functor_declare_;
+        } else {
+            // 间接函数调用
             assert(false);
             return nullptr;
         }
-        auto found = translate_unit->functor_declares_.find(functionCall->function_name_->name_.string_);
-        if (found == translate_unit->functor_declares_.end()) {
-            assert(false);
-            return nullptr;
-        }
-        functionCall->functor_declare_ = found->second;
-        return functionCall->functor_declare_;
     }
 
     FunctorDecl *ASTUtility::GetFunctionDeclare(FuncAddrExpression *funcAddrExpression) {

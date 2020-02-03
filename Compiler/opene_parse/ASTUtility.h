@@ -7,6 +7,7 @@
 
 #include "NodeDecl.h"
 #include "ErrOr.h"
+#include "SematicAnalysisContext.h"
 
 namespace opene {
 
@@ -20,12 +21,12 @@ namespace opene {
          * FindVariableDeclareInASTWithHierarchyName返回同一个指针，
          * 如果需要区别名称指向的类型请使用GetVariableQualifiedTypeWithHierarchyName
          */
-        static BaseVariDecl * FindVariableDeclareInASTWithHierarchyName(HierarchyIdentifier *hierarchyIdentifier);
+        static TagDecl * FindDeclareInASTWithHierarchyName(HierarchyIdentifier *hierarchyIdentifier);
 
         /*
          * 获取名称所指示的确切的定义描述
          */
-        static TypeDecl *GetVariableQualifiedTypeWithHierarchyName(HierarchyIdentifier *hierarchyIdentifier);
+        static TypeDecl *GetQualifiedTypeWithHierarchyName(HierarchyIdentifier *hierarchyIdentifier);
 
         /*
          * 获取名称组件的确切名字
@@ -58,9 +59,9 @@ namespace opene {
         static Node * FindNearstScope(Node *base);
 
         /*
-         * 在指定的域中查找指定名字的变量
+         * 在指定的域中查找指定名字的定义
          */
-        static BaseVariDecl * FindVariableDeclInScopeWithName(Node *scope, const StringRef &name);
+        static TagDecl * FindDeclInScopeWithName(Node *scope, const StringRef &name);
 
         /*
          * 在指定的结构类型中查找变量
@@ -85,13 +86,13 @@ namespace opene {
         /*
          * 通过内置类型枚举值查询类型定义
          */
-        static TypeDecl * QueryBuiltinTypeWithEnum(TranslateUnit *translateUnit, BuiltinTypeDecl::EnumOfBuiltinType type_enum);
+        static BuiltinTypeDecl * QueryBuiltinTypeWithEnum(TranslateUnit *translateUnit, BuiltinTypeDecl::EnumOfBuiltinType type_enum);
 
         /*
          * 通过名称引用类型定义指针
          * 若找不到则返回空指针
          */
-        static TypeDecl * QueryTypeDeclWithName(TranslateUnit *translateUnit, const StringRef &name);
+        static TagDecl * QueryTypeDeclWithName(TranslateUnit *translateUnit, const StringRef &name, SematicAnalysisContext *context);
 
         /*
          * 获取函数引用的函数定义

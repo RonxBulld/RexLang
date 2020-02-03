@@ -10,28 +10,17 @@
 #include "ErrOr.h"
 #include "StringRef.h"
 #include "NodeDecl.h"
+#include "SematicAnalysisContext.h"
 
 namespace opene {
 
-    // struct TranslateUnit;
-    // struct ProgramSetFile;
-    // struct GlobalVariableFile;
-    // struct DllDefineFile;
-    // struct StructureDecl;
-    // struct VariableDecl;
-    // struct SourceFile;
-    // struct TypeDecl;
-    // struct SubProgDecl;
-    // struct Statement;
-    // struct Expression;
-    // struct BaseVariDecl;
-    // struct ParameterDecl;
-    // struct LocalVariableDecl;
-    // struct GlobalVariableDecl;
-
+    /*
+     * 语义分析类
+     */
     class SematicAnalysis {
     private:
         TranslateUnit * translate_unit_ = nullptr;
+        SematicAnalysisContext analysis_context_;
 
     private:
         /*

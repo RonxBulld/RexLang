@@ -80,10 +80,13 @@ namespace opene {
         return hint;
     }
 
+    size_t ids = 0;
+
     template<typename NodeTy, typename ... Args, typename>
     NodeTy *ASTBuilder::CreateNode(antlr4::Token *start_token, antlr4::Token *end_token, Args ... args) {
         NodeTy *node = opene::CreateNode<NodeTy>(this->ast_context_, args...);
         Node *base_node = node;
+        base_node->node_id_ = ids++;
         antlr4::TokenSource *sts = start_token->getTokenSource();
         base_node->location_start_ = this->ast_context_->CreateLocation(sts->getSourceName(), sts->getLine(), sts->getCharPositionInLine());
         antlr4::TokenSource *ets = end_token->getTokenSource();
@@ -404,7 +407,7 @@ namespace opene {
 
     antlrcpp::Any ASTBuilder::visitFuncCall(openeLangParser::FuncCallContext *context) {
         FunctionCallPtr function_call = CreateNode<FunctionCall>(context->getStart(), context->getStop());
-        function_call->function_name_ = GetFromCtxIfExist<NameComponentPtr>(context->name_component());
+        function_call->function_name_ = GetFromCtxIfExist<NameComponentPtr, true>(context->name_component());
         for (auto *arg_ctx : context->arguments) {
             ExpressionPtr arg_expr = GetFromCtxIfExist<ExpressionPtr>(arg_ctx);
             function_call->arguments_.push_back(arg_expr);
@@ -420,7 +423,7 @@ namespace opene {
 
     antlrcpp::Any ASTBuilder::visitArrayIndex(openeLangParser::ArrayIndexContext *context) {
         ArrayIndexPtr array_index = CreateNode<ArrayIndex>(context->getStart(), context->getStop());
-        array_index->base_ = GetFromCtxIfExist<NameComponentPtr>(context->name_component());
+        array_index->base_ = GetFromCtxIfExist<NameComponentPtr, true>(context->name_component());
         array_index->index_ = GetFromCtxIfExist<ExpressionPtr>(context->expression());
         return NodeWarp(array_index);
     }

@@ -47,6 +47,8 @@ namespace opene {
         this->CreateBuiltinType();
         // 1.2. 合并全局变量、数据结构、外部库引用、函数定义、DLL声明索引表
         this->MergeGlobal();
+        // 1.3. 用翻译单元初始化分析上下文
+        this->analysis_context_.PushScope(translateUnitPtr);
 
         // 2. 针对数据结构定义、类模块定义
         // 2.1. 明确成员的类型指针
@@ -300,7 +302,7 @@ namespace opene {
             if (this->CheckIfExprTypeIsIntegerClass(range_for_stmt->range_size_) == false) { assert(false); return false; }
             // 如果循环变量存在则检查变量类型是否为整数族
             if (range_for_stmt->loop_vari_) {
-                TypeDecl *loop_vari_type = ASTUtility::GetVariableQualifiedTypeWithHierarchyName(range_for_stmt->loop_vari_);
+                TypeDecl *loop_vari_type = ASTUtility::GetQualifiedTypeWithHierarchyName(range_for_stmt->loop_vari_);
                 if (TypeAssert::IsIntegerClass(loop_vari_type) == false) {
                     assert(false);
                     return false;
@@ -313,7 +315,7 @@ namespace opene {
             if (this->CheckIfExprTypeIsIntegerClass(for_stmt->step_value_) == false) { assert(false); return false; }
             // 如果循环变量存在则检查变量类型是否为整数族
             if (for_stmt->loop_vari_) {
-                TypeDecl *loop_vari_type = ASTUtility::GetVariableQualifiedTypeWithHierarchyName(for_stmt->loop_vari_);
+                TypeDecl *loop_vari_type = ASTUtility::GetQualifiedTypeWithHierarchyName(for_stmt->loop_vari_);
                 if (TypeAssert::IsIntegerClass(loop_vari_type) == false) {
                     assert(false);
                     return false;
@@ -413,7 +415,10 @@ namespace opene {
     }
 
     bool SematicAnalysis::SetupBaseVariableType(BaseVariDecl *baseVariDecl) {
-        if ((baseVariDecl->type_decl_ptr_ = ASTUtility::QueryTypeDeclWithName(this->translate_unit_, baseVariDecl->type_name_.string_)) == nullptr) {
+        StringRef name = baseVariDecl->type_name_.string_;
+        baseVariDecl->type_decl_ptr_ = ASTUtility::QueryTypeDeclWithName(this->translate_unit_, name, &this->analysis_context_)->as<TypeDecl>();
+        if (baseVariDecl->type_decl_ptr_ == nullptr) {
+            assert(false);
             return false;
         }
         return true;
@@ -423,17 +428,13 @@ namespace opene {
         TranslateUnitPtr translateUnit = this->translate_unit_;
         ASTContext * astContext = translateUnit->ast_context_;
         if (HierarchyIdentifier * hierarchy_identifier = expression->as<HierarchyIdentifier>()) {
-            TypeDecl *qualified_type = ASTUtility::GetVariableQualifiedTypeWithHierarchyName(hierarchy_identifier);
+            // 可能是直接名称、函数引用、数组组合的序列
+            TypeDecl *qualified_type = ASTUtility::GetQualifiedTypeWithHierarchyName(hierarchy_identifier);
             if (qualified_type == nullptr) {
                 assert(false);
                 return nullptr;
             }
             return qualified_type;
-
-        } else if (NameComponent * name_component = expression->as<NameComponent>()) {
-            // 不应当单独判断NameComponent，因为缺失上下文语境会导致大部分情况无法进行判定
-            assert(false);
-            return nullptr;
 
         } else if (FunctionCall * function_call = expression->as<FunctionCall>()) {
             // 检查函数实参是否符合形参定义
@@ -638,7 +639,7 @@ namespace opene {
                     return false;
                 }
                 if (HierarchyIdentifier *hierarchy_identifier = arguments[idx]->as<HierarchyIdentifier>()) {
-                    TypeDecl *argu_type = ASTUtility::GetVariableQualifiedTypeWithHierarchyName(hierarchy_identifier);
+                    TypeDecl *argu_type = ASTUtility::GetQualifiedTypeWithHierarchyName(hierarchy_identifier);
                     if (argu_type->is<ArrayDecl>() == true) {
                         TypeDecl *param_arr_element_type = ASTUtility::GetIndexableTypeElement(parameters[idx]->type_decl_ptr_);
                         TypeDecl *argu_arr_element_type = ASTUtility::GetIndexableTypeElement(argu_type);
@@ -661,7 +662,7 @@ namespace opene {
                     return false;
                 }
                 if (HierarchyIdentifier *hierarchy_identifier = arguments[idx]->as<HierarchyIdentifier>()) {
-                    TypeDecl *argu_type = ASTUtility::GetVariableQualifiedTypeWithHierarchyName(hierarchy_identifier);
+                    TypeDecl *argu_type = ASTUtility::GetQualifiedTypeWithHierarchyName(hierarchy_identifier);
                     if (argu_type != parameters[idx]->type_decl_ptr_) {
                         assert(false);
                         return false;
