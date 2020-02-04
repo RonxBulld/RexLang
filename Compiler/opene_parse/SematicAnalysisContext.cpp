@@ -41,15 +41,14 @@ namespace opene {
         }
     }
 
-    void SematicAnalysisContext::PushScope(ProgramSetFile *programSetFile) {
+    void SematicAnalysisContext::PushScope(ProgSetDecl *progSetDecl) {
         this->dyn_symbol_table_.push_back({});
-        ProgSetDecl *prog_set_decl = programSetFile->program_set_declares_;
         // 加载文件变量
-        for (auto &file_vari_item : prog_set_decl->file_static_variables_) {
+        for (auto &file_vari_item : progSetDecl->file_static_variables_) {
             this->AddNamedSymbol(file_vari_item.second);
         }
         // 加载函数定义 这里再次加载函数定义为了提高当前文件作用域符号的优先级
-        for (auto &function_item : prog_set_decl->function_decls_) {
+        for (auto &function_item : progSetDecl->function_decls_) {
             this->AddNamedSymbol(function_item.second);
         }
 

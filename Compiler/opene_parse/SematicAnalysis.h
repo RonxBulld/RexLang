@@ -129,6 +129,37 @@ namespace opene {
          */
         TypeDecl *GetBinaryOperationType(TypeDecl *lhsType, TypeDecl *rhsType, _OperatorExpression::OperatorType operatorType);
 
+    public: // 工具方法
+
+        /*
+         * 递归推断名称组件类型
+         */
+        TypeDecl * EvalBaseNameComponentType(NameComponent *nameComponent, TypeDecl *frontType);
+
+        /*
+         * 获取层次名称描述的准确类型
+         */
+        TypeDecl * GetHierarchyIdentifierQualifiedType(HierarchyIdentifier *hierarchyIdentifier);
+
+        /*
+         * 通过内置类型枚举值查询类型定义
+         */
+        BuiltinTypeDecl * QueryBuiltinTypeWithEnum(TranslateUnit *translateUnit, BuiltinTypeDecl::EnumOfBuiltinType type_enum);
+
+        /*
+         * 获取可索引类型的元素类型
+         * 例如：
+         * 整数型数组返回整数型
+         * 字节集返回字节型
+         */
+        TypeDecl * GetIndexableTypeElement(TypeDecl *typeDecl);
+
+        /*
+         * 通过名称引用类型定义指针
+         * 若找不到则返回空指针
+         */
+        TypeDecl * QueryTypeDeclWithName(TranslateUnit *translateUnit, const StringRef &name, SematicAnalysisContext *context);
+
     public:
         bool Run(TranslateUnit * translateUnitPtr);
     };

@@ -417,7 +417,7 @@ namespace opene {
      * @brief 具有函数性的定义
      * 包含子函数定义和DLL函数定义
      */
-    struct FunctorDecl : public TagDecl {
+    struct FunctorDecl : public TypeDecl {
         static const NodeType node_type = NodeType::kNTyFunctorDecl;
         // 返回值类型名
         TString return_type_name_;
@@ -572,6 +572,11 @@ namespace opene {
     struct HierarchyIdentifier : public Expression {
         static const NodeType node_type = NodeType::kNTyHierarchyIdentifier;
         std::vector<NameComponentPtr> name_components_;
+
+        // === 下面是经过语义分析后的数据 ===
+
+        // 该层次名称所指向的类型
+        TypeDeclPtr qualified_type_ = nullptr;
     };
 
     /**

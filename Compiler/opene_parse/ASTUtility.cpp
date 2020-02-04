@@ -9,6 +9,7 @@
 #include "ASTAssert.h"
 #include "ASTContext.h"
 #include "Str2Attr.h"
+#include "TypeAssert.h"
 
 namespace opene {
 
@@ -28,36 +29,7 @@ namespace opene {
         }
     }
 
-    TagDecl * ASTUtility::FindDeclareInASTWithHierarchyName(HierarchyIdentifier *hierarchyIdentifier) {
-        // 判断是否有效
-        assert(hierarchyIdentifier->name_components_.size() > 0);
-        BaseVariDecl *vari_decl = nullptr;
-        // 找起点
-        NameComponentPtr base_component = hierarchyIdentifier->name_components_.front();
-        ErrOr<StringRef> base_name = ASTUtility::GetNameComponentQualifiedName(base_component);
-        if (base_name.NoError() == false) { return nullptr; }
-
-        Node *nearstScope = hierarchyIdentifier;
-        BaseVariDecl *base_vari_decl = nullptr;
-        while (base_vari_decl == nullptr) {
-            nearstScope = ASTUtility::FindNearstScope(nearstScope->parent_node_);
-            if (nearstScope == nullptr) {
-                return nullptr;
-            }
-            base_vari_decl = ASTUtility::FindDeclInScopeWithName(nearstScope, base_name.Value());
-        }
-
-        // 找递进
-        for (size_t idx = 1; idx < hierarchyIdentifier->name_components_.size(); idx++) {
-            base_name = ASTUtility::GetNameComponentQualifiedName(hierarchyIdentifier->name_components_[idx]);
-            if (base_name.NoError() == false) { return nullptr; }
-            base_vari_decl = ASTUtility::FindVariableWithNameInStructureType(base_vari_decl->type_decl_ptr_, base_name.Value());
-            assert(base_vari_decl);
-        }
-        return base_vari_decl;
-    }
-
-    TypeDecl *ASTUtility::GetQualifiedTypeWithHierarchyName(HierarchyIdentifier *hierarchyIdentifier) {
+    /*TagDecl * ASTUtility::GetQualifiedTypeWithHierarchyName(HierarchyIdentifier *hierarchyIdentifier) {
         // 首先查找引用目标变量定义
         const BaseVariDecl *vari_decl = ASTUtility::FindDeclareInASTWithHierarchyName(hierarchyIdentifier);
         if (vari_decl == nullptr) { return nullptr; }
@@ -83,7 +55,7 @@ namespace opene {
                 return ASTUtility::GetIndexableTypeElement(vari_decl->type_decl_ptr_);
             }
         }
-    }
+    }*/
 
     ErrOr<StringRef> ASTUtility::GetNameComponentQualifiedName(NameComponent *nameComponent) {
         Identifier *base_name_component = ASTUtility::GetNameComponentQualifiedBase(nameComponent);
@@ -125,43 +97,6 @@ namespace opene {
         return nullptr;
     }
 
-    TagDecl * ASTUtility::FindDeclInScopeWithName(Node *scope, const StringRef &name) {
-        if (const FunctorDecl *functor_decl = scope->as<FunctorDecl>()) {
-            if (const FunctionDecl *function_decl = functor_decl->as<FunctionDecl>()) {
-                // 1. 查找局部变量
-                for (auto & item : function_decl->local_vari_) {
-                    if (item.first == name) {
-                        return item.second;
-                    }
-                }
-            }
-            // 2. 查找参数
-            for (ParameterDecl *parameter_decl : functor_decl->parameters_) {
-                if (parameter_decl->name_.string_ == name) {
-                    return parameter_decl;
-                }
-            }
-        } else if (ProgSetDecl *prog_set_decl = scope->as<ProgSetDecl>()) {
-            // 1. 查找文件变量
-            for (auto & item : prog_set_decl->file_static_variables_) {
-                if (item.first == name) {
-                    return item.second;
-                }
-            }
-        } else if (SourceFile *source_file = scope->as<SourceFile>()) {
-        } else if (TranslateUnit *translate_unit = scope->as<TranslateUnit>()) {
-            // 1. 全局变量索引表
-            for (auto & item : translate_unit->global_variables_) {
-                if (item.first == name) {
-                    return item.second;
-                }
-            }
-        } else {
-            assert(false);
-        }
-        return nullptr;
-    }
-
     BaseVariDecl *ASTUtility::FindVariableWithNameInStructureType(TypeDecl *typeDecl, const StringRef &variable_name) {
         if (const StructureDecl *structure_decl = typeDecl->as<StructureDecl>()) {
             for (auto & item : structure_decl->members_) {
@@ -173,6 +108,14 @@ namespace opene {
         } else {
             return nullptr;
         }
+    }
+
+    NameComponent *ASTUtility::GetArrayIndexBase(ArrayIndex *arrayIndex) {
+        NameComponent *base = nullptr;
+        do{
+            base = arrayIndex->base_;
+        } while (arrayIndex = base->as<ArrayIndex>());
+        return base;
     }
 
     ErrOr<std::vector<Expression *>> ASTUtility::GetNameComponentIndexList(NameComponent *nameComponent) {
@@ -205,47 +148,16 @@ namespace opene {
         }
     }
 
-    TypeDecl * ASTUtility::GetIndexableTypeElement(TypeDecl *typeDecl) {
-        if (ASTAssert::TypeCanIndexable(typeDecl) == false) {
+    TypeDecl *ASTUtility::GetCallableReturnType(TypeDecl *typeDecl) {
+        if (ASTAssert::TypeCanCallable(typeDecl) == false) {
             return nullptr;
         }
-        if (const BuiltinTypeDecl *builtin_type_decl = typeDecl->as<BuiltinTypeDecl>()) {
-            if (builtin_type_decl->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDataSet) {
-                TranslateUnit *translate_unit = ASTUtility::FindSpecifyTypeParent<TranslateUnit>(typeDecl);
-                return ASTUtility::QueryBuiltinTypeWithEnum(translate_unit, BuiltinTypeDecl::EnumOfBuiltinType::kBTypeChar);
-            } else {
-                return nullptr;
-            }
-        } else if (const ArrayDecl *array_decl = typeDecl->as<ArrayDecl>()) {
-            do {
-                typeDecl = array_decl->base_type_;
-            } while (array_decl = typeDecl->as<ArrayDecl>());
-            return typeDecl;
+        if (FunctorDecl *functor_decl = typeDecl->as<FunctorDecl>()) {
+            return functor_decl->return_type_;
         } else {
             assert(false);
             return nullptr;
         }
-    }
-
-    BuiltinTypeDecl * ASTUtility::QueryBuiltinTypeWithEnum(TranslateUnit *translateUnit, BuiltinTypeDecl::EnumOfBuiltinType type_enum) {
-        StringRef &&type_name = translateUnit->ast_context_->CreateString(Str2Attr::BuiltinType2Name(type_enum).Value());
-        BuiltinTypeDecl *builtin_type_decl = ASTUtility::QueryTypeDeclWithName(translateUnit, type_name, nullptr)->as<BuiltinTypeDecl>();
-        assert(builtin_type_decl);
-        return builtin_type_decl;
-    }
-
-    TagDecl * ASTUtility::QueryTypeDeclWithName(TranslateUnit *translateUnit, const StringRef &name, SematicAnalysisContext *context) {
-        if (name.empty()) {
-            // 类型默认为整数型
-            return ASTUtility::QueryBuiltinTypeWithEnum(translateUnit, BuiltinTypeDecl::EnumOfBuiltinType::kBTypeInteger);
-        }
-        if (TagDecl *decl = context->QueryTagDeclFromDynSymbolTableWithName(name)) {
-            if (decl) {
-                return decl;
-            }
-        }
-        assert(false);
-        return nullptr;
     }
 
     FunctorDecl * ASTUtility::GetFunctionDeclare(FunctionCall *functionCall) {

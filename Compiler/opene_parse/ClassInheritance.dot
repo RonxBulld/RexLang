@@ -21,7 +21,7 @@ digraph G {
 	"opene::BuiltinTypeDecl" -> "opene::TypeDecl"
 	"opene::StructureDecl" -> "opene::TypeDecl"
 	"opene::ArrayDecl" -> "opene::TypeDecl"
-	"opene::FunctorDecl" -> "opene::TagDecl"
+	"opene::FunctorDecl" -> "opene::TypeDecl"
 	"opene::FunctionDecl" -> "opene::FunctorDecl"
 	"opene::DllCommandDecl" -> "opene::FunctorDecl"
 	"opene::ProgSetDecl" -> "opene::TagDecl"

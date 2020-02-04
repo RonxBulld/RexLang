@@ -38,7 +38,7 @@ namespace opene {
          * 压入作用域
          * 只有这些会被视作作用域：TranslateUnit/ProgramSetFile/FunctionDecl
          */
-        void PushScope(ProgramSetFile *programSetFile);
+        void PushScope(ProgSetDecl *progSetDecl);
 
         /*
          * 压入作用域

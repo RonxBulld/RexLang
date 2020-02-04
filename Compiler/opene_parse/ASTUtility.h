@@ -17,30 +17,29 @@ namespace opene {
 
         /*
          * 查找名称所指示的变量定义
-         * 注意：如果变量定义为数组，无论是引用整个数组还是引用数组中的一个元素，
-         * FindVariableDeclareInASTWithHierarchyName返回同一个指针，
+         * 注意：如果变量定义为数组，无论是引用整个数组还是引用数组中的一个元素，FindDeclareInASTWithHierarchyName返回同一个指针，
          * 如果需要区别名称指向的类型请使用GetVariableQualifiedTypeWithHierarchyName
          */
-        static TagDecl * FindDeclareInASTWithHierarchyName(HierarchyIdentifier *hierarchyIdentifier);
+        //static TypeDecl * FindDeclareInASTWithHierarchyName(HierarchyIdentifier *hierarchyIdentifier, SematicAnalysisContext *context);
 
         /*
          * 获取名称所指示的确切的定义描述
          */
-        static TypeDecl *GetQualifiedTypeWithHierarchyName(HierarchyIdentifier *hierarchyIdentifier);
+        //static TagDecl * GetQualifiedTypeWithHierarchyName(HierarchyIdentifier *hierarchyIdentifier);
 
         /*
          * 获取名称组件的确切名字
-         * 如果是数组引用则获取数组名；
-         * 如果是函数调用则获取函数名；
-         * 如果是名称直接引用则返回该名称。
+         * 如果是数组引用则获取数组名，例如：arr[5]->"arr"；
+         * 如果是函数调用则获取函数名，例如：func()->"func"；
+         * 如果是名称直接引用则返回该名称，例如：name->"name"。
          */
         static ErrOr<StringRef> GetNameComponentQualifiedName(NameComponent *nameComponent);
 
         /*
-         * 获取名称组件的确切来源
-         * 如果是数组引用则获取数组名组件；
-         * 如果是函数调用则获取函数名组件；
-         * 如果是名称直接引用则返回该组件。
+         * 获取名称组件的确切名称对象
+         * 如果是数组引用则获取数组名组件，例如：arr[5]->arr；
+         * 如果是函数调用则获取函数名组件，例如：func()->func；
+         * 如果是名称直接引用则返回该组件，例如：name->name。
          */
         static Identifier *GetNameComponentQualifiedBase(NameComponent *nameComponent);
 
@@ -59,14 +58,17 @@ namespace opene {
         static Node * FindNearstScope(Node *base);
 
         /*
-         * 在指定的域中查找指定名字的定义
-         */
-        static TagDecl * FindDeclInScopeWithName(Node *scope, const StringRef &name);
-
-        /*
          * 在指定的结构类型中查找变量
          */
         static BaseVariDecl *FindVariableWithNameInStructureType(TypeDecl *typeDecl, const StringRef &variable_name);
+
+        /*
+         * 获取数组索引组件的真实基对象
+         * 例如：
+         * arrayIndex[1][2][3][1]->arrayIndex
+         * func()[1][3]->func()
+         */
+        static NameComponent *GetArrayIndexBase(ArrayIndex *arrayIndex);
 
         /*
          * 获取名称组件中的索引列表
@@ -79,20 +81,9 @@ namespace opene {
         static ErrOr<std::vector<size_t>> GetTypeIndexList(TypeDecl *typeDecl);
 
         /*
-         * 获取可索引类型的元素类型
+         * 获取可调用类型的返回值类型
          */
-        static TypeDecl * GetIndexableTypeElement(TypeDecl *typeDecl);
-
-        /*
-         * 通过内置类型枚举值查询类型定义
-         */
-        static BuiltinTypeDecl * QueryBuiltinTypeWithEnum(TranslateUnit *translateUnit, BuiltinTypeDecl::EnumOfBuiltinType type_enum);
-
-        /*
-         * 通过名称引用类型定义指针
-         * 若找不到则返回空指针
-         */
-        static TagDecl * QueryTypeDeclWithName(TranslateUnit *translateUnit, const StringRef &name, SematicAnalysisContext *context);
+        static TypeDecl * GetCallableReturnType(TypeDecl *typeDecl);
 
         /*
          * 获取函数引用的函数定义

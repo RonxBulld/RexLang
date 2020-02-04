@@ -63,19 +63,22 @@ namespace opene {
                 return false;
             }
         }
-        // 4. 针对函数定义
-        for (auto & func_item : this->translate_unit_->function_decls_) {
-            // 4.1. 明确函数定义局部变量的类型指针
-            if (this->SetupFunctionLocalVariableType(func_item.second) == false) {
-                return false;
-            }
-            // 4.2. 检查每一条语句构造和表达式运算是否合法
-            if (this->CheckStatementsAndExpression(func_item.second->statement_list_) == false) {
-                return false;
+        // 4. 针对每一个程序集
+        for (auto & prog_file_item : this->translate_unit_->program_sets_) {
+            this->analysis_context_.PushScope(prog_file_item.second);
+            // 5. 针对函数定义
+            for (auto &func_item : prog_file_item.second->function_decls_) {
+                this->analysis_context_.PushScope(func_item.second);
+                // 5.1. 明确函数定义局部变量的类型指针
+                if (this->SetupFunctionLocalVariableType(func_item.second) == false) {
+                    return false;
+                }
+                // 5.2. 检查每一条语句构造和表达式运算是否合法
+                if (this->CheckStatementsAndExpression(func_item.second->statement_list_) == false) {
+                    return false;
+                }
             }
         }
-        // 4.3. 明确每一个名称引用的定义
-        // 4.4. 展开常量资源引用
         return true;
     }
 
@@ -164,8 +167,10 @@ namespace opene {
                 for (const TString &library_name : program_set_file->libraries_) {
                     translateUnitPtr->libraries_list_.insert(library_name.string_);
                 }
-                // 函数定义
+                // 程序集
                 ProgSetDeclPtr prog_set_decl = program_set_file->program_set_declares_;
+                translateUnitPtr->program_sets_[prog_set_decl->name_.string_] = prog_set_decl;
+                // 函数定义
                 bool success = MergeMap(prog_set_decl->function_decls_, translateUnitPtr->function_decls_);
                 if (!success) { return false; }
                 success = MergeMap(prog_set_decl->function_decls_, translateUnitPtr->functor_declares_, [](FunctionDeclPtr v) -> FunctorDeclPtr {
@@ -187,14 +192,14 @@ namespace opene {
 
     bool SematicAnalysis::SetupFunctorVariableType(FunctorDecl *functorDecl) {
         // 3.1.1. 明确返回值类型
-        functorDecl->return_type_ = ASTUtility::QueryTypeDeclWithName(this->translate_unit_, functorDecl->return_type_name_.string_);
+        functorDecl->return_type_ = this->QueryTypeDeclWithName(this->translate_unit_, functorDecl->return_type_name_.string_, &this->analysis_context_);
         if (functorDecl->return_type_ == nullptr) {
             assert(false);
             return false;
         }
         // 3.1.2. 明确参数类型
         for (ParameterDeclPtr parameter_decl : functorDecl->parameters_) {
-            parameter_decl->type_decl_ptr_ = ASTUtility::QueryTypeDeclWithName(this->translate_unit_, parameter_decl->type_name_.string_);
+            parameter_decl->type_decl_ptr_ = this->QueryTypeDeclWithName(this->translate_unit_, parameter_decl->type_name_.string_, &this->analysis_context_);
             this->SetupParameterType(parameter_decl);
             if (parameter_decl->type_decl_ptr_ == nullptr) {
                 assert(false);
@@ -239,8 +244,8 @@ namespace opene {
                     return false;
                 }
             }
-
             return true;
+
         } else if (StatementListPtr statement_list = statement->as<StatementBlock>()) {
             // 直接遍历列表进行检查
             for (StatementPtr stmt : statement_list->statements_) {
@@ -248,8 +253,8 @@ namespace opene {
                     return false;
                 }
             }
-
             return true;
+
         } else if (WhileStmtPtr while_stmt = statement->as<WhileStmt>()) {
             // 检查循环条件语句的条件表达式是否为扩展布尔类型
             TypeDeclPtr while_expr_type = this->CheckExpression(while_stmt->condition_);
@@ -262,19 +267,25 @@ namespace opene {
                 assert(false);
                 return false;
             }
-
             return true;
+
         } else if (LoopStatementPtr loop_statement = statement->as<LoopStatement>()) {
             return this->CheckLoopStatement(loop_statement);
+
         } else if (AssignStmtPtr assign_stmt = statement->as<AssignStmt>()) {
             // 检查赋值语句左右子式类型是否匹配或兼容
             TypeDeclPtr lhs_type = this->CheckExpression(assign_stmt->lhs_);
             TypeDeclPtr rhs_type = this->CheckExpression(assign_stmt->rhs_);
             return TypeAssert::IsAssignableBetweenType(lhs_type, rhs_type);
+
+        } else if (Expression *expression = statement->as<Expression>()) {
+            return this->CheckExpression(expression) != nullptr;
+
         } else {
             assert(false);
             return false;
         }
+
         return true;
     }
 
@@ -302,7 +313,7 @@ namespace opene {
             if (this->CheckIfExprTypeIsIntegerClass(range_for_stmt->range_size_) == false) { assert(false); return false; }
             // 如果循环变量存在则检查变量类型是否为整数族
             if (range_for_stmt->loop_vari_) {
-                TypeDecl *loop_vari_type = ASTUtility::GetQualifiedTypeWithHierarchyName(range_for_stmt->loop_vari_);
+                TypeDecl *loop_vari_type = this->GetHierarchyIdentifierQualifiedType(range_for_stmt->loop_vari_);
                 if (TypeAssert::IsIntegerClass(loop_vari_type) == false) {
                     assert(false);
                     return false;
@@ -315,7 +326,7 @@ namespace opene {
             if (this->CheckIfExprTypeIsIntegerClass(for_stmt->step_value_) == false) { assert(false); return false; }
             // 如果循环变量存在则检查变量类型是否为整数族
             if (for_stmt->loop_vari_) {
-                TypeDecl *loop_vari_type = ASTUtility::GetQualifiedTypeWithHierarchyName(for_stmt->loop_vari_);
+                TypeDecl *loop_vari_type = this->GetHierarchyIdentifierQualifiedType(for_stmt->loop_vari_);
                 if (TypeAssert::IsIntegerClass(loop_vari_type) == false) {
                     assert(false);
                     return false;
@@ -416,7 +427,7 @@ namespace opene {
 
     bool SematicAnalysis::SetupBaseVariableType(BaseVariDecl *baseVariDecl) {
         StringRef name = baseVariDecl->type_name_.string_;
-        baseVariDecl->type_decl_ptr_ = ASTUtility::QueryTypeDeclWithName(this->translate_unit_, name, &this->analysis_context_)->as<TypeDecl>();
+        baseVariDecl->type_decl_ptr_ = this->QueryTypeDeclWithName(this->translate_unit_, name, &this->analysis_context_)->as<TypeDecl>();
         if (baseVariDecl->type_decl_ptr_ == nullptr) {
             assert(false);
             return false;
@@ -429,7 +440,7 @@ namespace opene {
         ASTContext * astContext = translateUnit->ast_context_;
         if (HierarchyIdentifier * hierarchy_identifier = expression->as<HierarchyIdentifier>()) {
             // 可能是直接名称、函数引用、数组组合的序列
-            TypeDecl *qualified_type = ASTUtility::GetQualifiedTypeWithHierarchyName(hierarchy_identifier);
+            TypeDecl *qualified_type = this->GetHierarchyIdentifierQualifiedType(hierarchy_identifier);
             if (qualified_type == nullptr) {
                 assert(false);
                 return nullptr;
@@ -481,7 +492,7 @@ namespace opene {
             return this->GetBinaryOperationType(lhs_operand_type, rhs_operand_type, unary_expression->operator_type_);
 
         } else if (FuncAddrExpression * func_addr_expression = expression->as<FuncAddrExpression>()) {
-            TypeDecl *type_decl = ASTUtility::QueryBuiltinTypeWithEnum(this->translate_unit_, BuiltinTypeDecl::EnumOfBuiltinType::kBTypeFuncPtr);
+            TypeDecl *type_decl = this->QueryBuiltinTypeWithEnum(this->translate_unit_, BuiltinTypeDecl::EnumOfBuiltinType::kBTypeFuncPtr);
             assert(type_decl);
             FunctorDecl * functor_decl = ASTUtility::GetFunctionDeclare(func_addr_expression);
             if (functor_decl == nullptr) {
@@ -506,27 +517,27 @@ namespace opene {
 
     TypeDecl *SematicAnalysis::CheckValue(Value *value) {
         if (ValueOfDataSet * value_of_data_set = value->as<ValueOfDataSet>()) {
-            TypeDecl *type_decl = ASTUtility::QueryBuiltinTypeWithEnum(this->translate_unit_, BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDataSet);
+            TypeDecl *type_decl = this->QueryBuiltinTypeWithEnum(this->translate_unit_, BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDataSet);
             assert(type_decl);
             return type_decl;
 
         } else if (ValueOfDatetime * value_of_datetime = value->as<ValueOfDatetime>()) {
-            TypeDecl *type_decl = ASTUtility::QueryBuiltinTypeWithEnum(this->translate_unit_, BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDatetime);
+            TypeDecl *type_decl = this->QueryBuiltinTypeWithEnum(this->translate_unit_, BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDatetime);
             assert(type_decl);
             return type_decl;
 
         } else if (ValueOfBool * value_of_bool = value->as<ValueOfBool>()) {
-            TypeDecl *type_decl = ASTUtility::QueryBuiltinTypeWithEnum(this->translate_unit_, BuiltinTypeDecl::EnumOfBuiltinType::kBTypeBool);
+            TypeDecl *type_decl = this->QueryBuiltinTypeWithEnum(this->translate_unit_, BuiltinTypeDecl::EnumOfBuiltinType::kBTypeBool);
             assert(type_decl);
             return type_decl;
 
         } else if (ValueOfDecimal * value_of_decimal = value->as<ValueOfDecimal>()) {
-            TypeDecl *type_decl = ASTUtility::QueryBuiltinTypeWithEnum(this->translate_unit_, BuiltinTypeDecl::EnumOfBuiltinType::kBTypeInteger);
+            TypeDecl *type_decl = this->QueryBuiltinTypeWithEnum(this->translate_unit_, BuiltinTypeDecl::EnumOfBuiltinType::kBTypeInteger);
             assert(type_decl);
             return type_decl;
 
         } else if (ValueOfString * value_of_string = value->as<ValueOfString>()) {
-            TypeDecl *type_decl = ASTUtility::QueryBuiltinTypeWithEnum(this->translate_unit_, BuiltinTypeDecl::EnumOfBuiltinType::kBTypeString);
+            TypeDecl *type_decl = this->QueryBuiltinTypeWithEnum(this->translate_unit_, BuiltinTypeDecl::EnumOfBuiltinType::kBTypeString);
             assert(type_decl);
             return type_decl;
 
@@ -555,7 +566,7 @@ namespace opene {
                     if (lhs_numerical && rhs_numerical) {
                         // 1.1. 都有数值性
                         BuiltinTypeDecl::EnumOfBuiltinType upgrade_type = TypeAssert::ResultOfTypeUpgrade(lhs_builtin->built_in_type_, rhs_builtin->built_in_type_);
-                        return ASTUtility::QueryBuiltinTypeWithEnum(this->translate_unit_, upgrade_type);
+                        return this->QueryBuiltinTypeWithEnum(this->translate_unit_, upgrade_type);
                     } else if (!lhs_numerical && !rhs_numerical) {
                         // 1.2. 都无数值性
                         if (lhs_builtin == rhs_builtin) {
@@ -639,10 +650,10 @@ namespace opene {
                     return false;
                 }
                 if (HierarchyIdentifier *hierarchy_identifier = arguments[idx]->as<HierarchyIdentifier>()) {
-                    TypeDecl *argu_type = ASTUtility::GetQualifiedTypeWithHierarchyName(hierarchy_identifier);
+                    TypeDecl *argu_type = this->GetHierarchyIdentifierQualifiedType(hierarchy_identifier);
                     if (argu_type->is<ArrayDecl>() == true) {
-                        TypeDecl *param_arr_element_type = ASTUtility::GetIndexableTypeElement(parameters[idx]->type_decl_ptr_);
-                        TypeDecl *argu_arr_element_type = ASTUtility::GetIndexableTypeElement(argu_type);
+                        TypeDecl *param_arr_element_type = this->GetIndexableTypeElement(parameters[idx]->type_decl_ptr_);
+                        TypeDecl *argu_arr_element_type = this->GetIndexableTypeElement(argu_type);
                         if (param_arr_element_type != argu_arr_element_type) {
                             assert(false);
                             return false;
@@ -662,7 +673,7 @@ namespace opene {
                     return false;
                 }
                 if (HierarchyIdentifier *hierarchy_identifier = arguments[idx]->as<HierarchyIdentifier>()) {
-                    TypeDecl *argu_type = ASTUtility::GetQualifiedTypeWithHierarchyName(hierarchy_identifier);
+                    TypeDecl *argu_type = this->GetHierarchyIdentifierQualifiedType(hierarchy_identifier);
                     if (argu_type != parameters[idx]->type_decl_ptr_) {
                         assert(false);
                         return false;

@@ -16,10 +16,20 @@ namespace opene {
 
     bool ASTAssert::TypeCanIndexable(const TypeDecl *typeDecl) {
         if (const ArrayDecl *array_decl = typeDecl->as<ArrayDecl>()) {
+            (void) array_decl;
             return true;
         } else if (const BuiltinTypeDecl *builtin_type_decl = typeDecl->as<BuiltinTypeDecl>()) {
             // 内置类型只有字节集能够被索引
             return builtin_type_decl->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDataSet;
+        } else {
+            return false;
+        }
+    }
+
+    bool ASTAssert::TypeCanCallable(const TypeDecl *typeDecl) {
+        if (const FunctorDecl *functor_decl = typeDecl->as<FunctorDecl>()) {
+            (void) functor_decl;
+            return true;
         } else {
             return false;
         }
