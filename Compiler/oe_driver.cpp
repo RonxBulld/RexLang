@@ -5,7 +5,7 @@
 #include <fstream>
 #include <utility>
 #include "oe_driver.h"
-#include "opene_parse/SematicAnalysis.h"
+#include "opene_compiler/SematicAnalysis.h"
 
 namespace opene {
     FileEntry FileEntry::MakeFromFile(const std::string &filename) {

@@ -6,7 +6,8 @@ PROJECT(oel)
 INCLUDE_DIRECTORIES(/usr/local/include/antlr4-runtime)
 LINK_DIRECTORIES(/usr/local/lib)
 
-ADD_SUBDIRECTORY(opene_parse)
+ADD_SUBDIRECTORY(opene_compiler)
+ADD_SUBDIRECTORY(ir)
 
 ADD_EXECUTABLE(oel
         oe_driver.cpp
@@ -17,4 +18,5 @@ ADD_EXECUTABLE(oel
 TARGET_LINK_LIBRARIES(oel
         OECompilerParse
         antlr4-runtime
+        IR
         )

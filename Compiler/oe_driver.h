@@ -7,7 +7,7 @@
 
 #include <string>
 #include <vector>
-#include "opene_parse/AstGenerate.h"
+#include "opene_compiler/AstGenerate.h"
 
 namespace opene {
 
