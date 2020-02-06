@@ -10,6 +10,7 @@
 #include "ASTUtility.h"
 #include "ASTContext.h"
 #include "ASTAssert.h"
+#include "Diagnostic.h"
 
 namespace opene {
     template <typename SrcMapContainer, typename TgtMapContainer, typename Pred>
@@ -276,7 +277,10 @@ namespace opene {
             // 检查赋值语句左右子式类型是否匹配或兼容
             TypeDeclPtr lhs_type = this->CheckExpression(assign_stmt->lhs_);
             TypeDeclPtr rhs_type = this->CheckExpression(assign_stmt->rhs_);
-            return TypeAssert::IsAssignableBetweenType(lhs_type, rhs_type);
+            ErrOr<Expression*> implicit_convert = this->MakeImplicitConvertIfNeccessary(lhs_type, assign_stmt->rhs_);
+            if (implicit_convert.HadError()) { return false; }
+            assign_stmt->rhs_ = implicit_convert.Value();
+            return true;
 
         } else if (Expression *expression = statement->as<Expression>()) {
             return this->CheckExpression(expression) != nullptr;
@@ -303,7 +307,9 @@ namespace opene {
             if (return_stmt->return_value_) {
                 TypeDecl *act_ret_type = this->CheckExpression(return_stmt->return_value_);
                 TypeDecl *decl_ret_type = function_decl->return_type_;
-                if (TypeAssert::IsAssignableBetweenType(decl_ret_type, act_ret_type)) {
+                ErrOr<Expression*> implicit_convert = this->MakeImplicitConvertIfNeccessary(decl_ret_type, return_stmt->return_value_);
+                if (implicit_convert.NoError()) {
+                    return_stmt->return_value_ = implicit_convert.Value();
                     return true;
                 } else {
                     assert(false);
@@ -488,7 +494,8 @@ namespace opene {
         } else if (TypeConvert * type_convert = expression->as<TypeConvert>()) {
             TypeDecl *expr_type = this->CheckExpression(type_convert->from_expression_);
             type_convert->source_type_ = expr_type;
-            if (TypeAssert::IsAssignableBetweenType(type_convert->target_type_, type_convert->source_type_) == false) {
+            // 检查从源类型到目标类型是否可行
+            if (this->IsAssignableBetweenType(type_convert->target_type_, type_convert->source_type_) == false) {
                 assert(false);
                 return nullptr;
             }
@@ -536,7 +543,19 @@ namespace opene {
                 return nullptr;
             }
             // 根据运算类型返回类型
-            return this->GetBinaryOperationType(lhs_operand_type, rhs_operand_type, binary_expression->operator_type_);
+            TypeDecl *result_type = this->GetBinaryOperationType(lhs_operand_type, rhs_operand_type, binary_expression->operator_type_);
+            ErrOr<Expression*> implicit_conv_lhs = this->MakeImplicitConvertIfNeccessary(result_type, binary_expression->lhs_);
+            ErrOr<Expression*> implicit_conv_rhs = this->MakeImplicitConvertIfNeccessary(result_type, binary_expression->rhs_);
+            if (implicit_conv_lhs.NoError()) { binary_expression->lhs_ = implicit_conv_lhs.Value(); }
+            if (implicit_conv_rhs.NoError()) { binary_expression->rhs_ = implicit_conv_rhs.Value(); }
+
+            if (binary_expression->operator_type_ == _OperatorExpression::OperatorType::kOptDiv) {
+                return this->QueryBuiltinTypeWithEnum(this->translate_unit_, BuiltinTypeDecl::EnumOfBuiltinType::kBTypeFloat);
+            } else if (binary_expression->operator_type_ == _OperatorExpression::OperatorType::kOptFullDiv) {
+                return this->QueryBuiltinTypeWithEnum(this->translate_unit_, BuiltinTypeDecl::EnumOfBuiltinType::kBTypeInteger);
+            } else {
+                return result_type;
+            }
 
         } else if (FuncAddrExpression * func_addr_expression = expression->as<FuncAddrExpression>()) {
             TypeDecl *type_decl = this->QueryBuiltinTypeWithEnum(this->translate_unit_, BuiltinTypeDecl::EnumOfBuiltinType::kBTypeFuncPtr);
@@ -594,16 +613,29 @@ namespace opene {
         }
     }
 
-    Expression *SematicAnalysis::MakeImplicitConvertIfNeccessary(TypeDecl *targetType, Expression *convertExpression) {
-        if (convertExpression->expression_type_ == targetType) {
-            return convertExpression;
+    ErrOr<Expression *> SematicAnalysis::MakeImplicitConvertIfNeccessary(TypeDecl *targetType, Expression *convertExpression) {
+        // 先判断赋值性
+        if (!this->IsAssignableBetweenType(targetType, convertExpression->expression_type_)) {
+            // 两边类型不可赋值
+            return ErrOr<Expression*>::CreateError(1);
         }
-        TypeConvert *type_convert = CreateNode<TypeConvert>(convertExpression->ast_context_);
-        type_convert->from_expression_ = convertExpression;
-        type_convert->expression_type_ = targetType;
-        type_convert->source_type_ = convertExpression->expression_type_;
-        type_convert->target_type_ = targetType;
-        return type_convert;
+        // 再判断是否转换
+        if (convertExpression->expression_type_ == targetType) {
+            // 类型一致，无需转换
+            return MakeNoErrVal(convertExpression);
+        } else if (!targetType->is<BuiltinTypeDecl>() || !convertExpression->is<BuiltinTypeDecl>()) {
+            // 其中有非内置类型，无法转换
+            return MakeNoErrVal(convertExpression);
+        } else {
+            TypeConvert *type_convert = CreateNode<TypeConvert>(convertExpression->ast_context_);
+            type_convert->from_expression_ = convertExpression;
+            type_convert->expression_type_ = targetType;
+            type_convert->source_type_ = convertExpression->expression_type_;
+            type_convert->target_type_ = targetType;
+            type_convert->parent_node_ = convertExpression;
+            convertExpression->parent_node_ = type_convert;
+            return MakeNoErrVal<Expression*>(type_convert);
+        }
     }
 
     TypeDecl *SematicAnalysis::GetBinaryOperationType(TypeDecl *lhsType, TypeDecl *rhsType, _OperatorExpression::OperatorType operatorType) {
@@ -616,6 +648,7 @@ namespace opene {
         // 再计算结果类型
         {
             // 1. 如果是内置类型
+
             BuiltinTypeDecl *lhs_builtin = lhsType->as<BuiltinTypeDecl>();
             BuiltinTypeDecl *rhs_builtin = rhsType->as<BuiltinTypeDecl>();
             if (lhs_builtin || rhs_builtin) {
@@ -623,11 +656,16 @@ namespace opene {
                     bool lhs_numerical = TypeAssert::IsNumerical(lhs_builtin);
                     bool rhs_numerical = TypeAssert::IsNumerical(rhs_builtin);
                     if (lhs_numerical && rhs_numerical) {
+
                         // 1.1. 都有数值性
+
                         BuiltinTypeDecl::EnumOfBuiltinType upgrade_type = TypeAssert::ResultOfTypeUpgrade(lhs_builtin->built_in_type_, rhs_builtin->built_in_type_);
                         return this->QueryBuiltinTypeWithEnum(this->translate_unit_, upgrade_type);
+
                     } else if (!lhs_numerical && !rhs_numerical) {
+
                         // 1.2. 都无数值性
+
                         if (lhs_builtin == rhs_builtin) {
                             if (lhs_builtin->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeBool) {
                                 return lhs_builtin;
@@ -650,12 +688,16 @@ namespace opene {
                             return nullptr;
                         }
                     } else {
+
                         // 其中一个有数值性
+
                         assert(false);
                         return nullptr;
                     }
                 } else {
+
                     // 只有一个是内置类型是无法计算的
+
                     assert(false);
                     return nullptr;
                 }
@@ -668,7 +710,7 @@ namespace opene {
         }
     }
 
-    bool SematicAnalysis::CheckIfArgumentMatch(std::vector<ExpressionPtr> arguments, std::vector<ParameterDeclPtr> parameters) {
+    bool SematicAnalysis::CheckIfArgumentMatch(std::vector<ExpressionPtr> &arguments, const std::vector<ParameterDeclPtr> &parameters) {
         // 1. 获取形参有效个数
         size_t argu_count = arguments.size();
         size_t param_count = parameters.size();
@@ -684,10 +726,7 @@ namespace opene {
         }
         // 3. 如果形参长度不定则截取实参前N个进行计算
         if (dynamic_params) {
-            while (arguments.size() > param_count) {
-                arguments.pop_back();
-            }
-            argu_count = arguments.size();
+            argu_count = param_count;
         }
         // 4. 检查形参和实参个数是否匹配
         if (argu_count != param_count) {
@@ -697,20 +736,26 @@ namespace opene {
         // 5. 针对每个实参/形参对
         for (size_t idx = 0; idx < argu_count; idx++) {
             if (arguments[idx] == nullptr) {
-                // 5.1. 如果实参为空指针，则检查形参可空属性
+                // 5.1. 如果实参为空指针
+                // 5.1.1. 检查形参可空属性
                 if (parameters[idx]->is_nullable == false) {
                     assert(false);
                     return false;
+                } else {
+                    continue;
                 }
-            } else if (parameters[idx]->is_array == true) {
+
+            } else if (parameters[idx]->is_array) {
                 // 5.2. 如果形参数组属性为真，则实参必须为左值或左值引用（参考形参）数组变量，且元素类型严格一致
+                // 数组参数只能以引用方式传递
+                parameters[idx]->is_reference = true;
                 if (TypeAssert::ExpressionIsLValue(arguments[idx]) == false) {
                     assert(false);
                     return false;
                 }
                 if (HierarchyIdentifier *hierarchy_identifier = arguments[idx]->as<HierarchyIdentifier>()) {
                     TypeDecl *argu_type = this->GetHierarchyIdentifierQualifiedType(hierarchy_identifier);
-                    if (argu_type->is<ArrayDecl>() == true) {
+                    if (argu_type->is<ArrayDecl>()) {
                         TypeDecl *param_arr_element_type = this->GetIndexableTypeElement(parameters[idx]->type_decl_ptr_);
                         TypeDecl *argu_arr_element_type = this->GetIndexableTypeElement(argu_type);
                         if (param_arr_element_type != argu_arr_element_type) {
@@ -725,7 +770,8 @@ namespace opene {
                     assert(false);
                     return false;
                 }
-            } else if (parameters[idx]->is_reference == true) {
+
+            } else if (parameters[idx]->is_reference) {
                 // 5.3. 如果形参参考属性为真，则实参必须为左值或左值引用（参考形参），并且变量类型严格一致
                 if (TypeAssert::ExpressionIsLValue(arguments[idx]) == false) {
                     assert(false);
@@ -741,25 +787,15 @@ namespace opene {
                     assert(false);
                     return false;
                 }
+
             } else {
                 // 5.4. 如果形参不具备上述属性
                 TypeDecl *argu_type = this->CheckExpression(arguments[idx]);
                 TypeDecl *param_type = parameters[idx]->type_decl_ptr_;
-                BuiltinTypeDecl *argu_builtin_type = argu_type->as<BuiltinTypeDecl>();
-                BuiltinTypeDecl *param_builtin_type = param_type->as<BuiltinTypeDecl>();
+                ErrOr<Expression*> implicit_convert = this->MakeImplicitConvertIfNeccessary(param_type, arguments[idx]);
+                if (implicit_convert.NoError()) {
+                    arguments[idx] = implicit_convert.Value();
 
-                if (argu_builtin_type == nullptr && param_builtin_type == nullptr) {
-                    // 5.4.1. 如果两者都是用户类型，则类型需一致
-                    if (argu_type != param_type) {
-                        assert(false);
-                        return false;
-                    }
-                } else if (argu_builtin_type != nullptr && param_builtin_type != nullptr) {
-                    // 5.4.2. 如果两者都是内置类型，则按照赋值规则进行检查
-                    if (TypeAssert::IsAssignableBetweenType(param_type, argu_type) == false) {
-                        assert(false);
-                        return false;
-                    }
                 } else {
                     assert(false);
                     return false;

@@ -129,10 +129,11 @@ namespace opene {
         /*
          * 检查实参是否匹配形参
          */
-        bool CheckIfArgumentMatch(std::vector<ExpressionPtr> arguments, std::vector<ParameterDeclPtr> parameters);
+        bool CheckIfArgumentMatch(std::vector<ExpressionPtr> &arguments, const std::vector<ParameterDeclPtr> &parameters);
 
         /*
          * 获取二元表达式运算结果的类型
+         * 返回的类型是提升后的类型
          */
         TypeDecl *GetBinaryOperationType(TypeDecl *lhsType, TypeDecl *rhsType, _OperatorExpression::OperatorType operatorType);
 
@@ -142,11 +143,18 @@ namespace opene {
          * 如果是自定义类型，则无法创建隐式转换；
          * @param targetType 转换目标类型
          * @param convertExpression 准备转换的表达式
-         * @return 如果表达式被转换，则返回一个TypeConvert对象；否则将直接返回convertExpression。
+         * @return 如果表达式被转换，则返回一个TypeConvert对象的ErrOr包装；否则将直接返回convertExpression的包装。
+         * 当两边类型不可赋值的时候返回失败的ErrOr包装。
          */
-        Expression *MakeImplicitConvertIfNeccessary(TypeDecl *targetType, Expression *convertExpression);
+        ErrOr<Expression *> MakeImplicitConvertIfNeccessary(TypeDecl *targetType, Expression *convertExpression);
 
-    public: // 工具方法
+    private: // 类型断言
+        /*
+         * 判断左边类型是否可赋值给右边类型
+         */
+        bool IsAssignableBetweenType(TypeDecl *lhs_type, TypeDecl *rhs_type);
+
+    private: // 工具方法
 
         /*
          * 递归推断名称组件类型

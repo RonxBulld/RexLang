@@ -225,7 +225,6 @@ namespace opene {
     }
 
     bool ASTFetchSubnode::FetchTypeConvert(const TypeConvert *expression, ASTFetchSubnode::ASTFetchResult &result) {
-        if (Fetch(expression->target_type_, result) == false) { return false; }
         if (Fetch(expression->from_expression_, result) == false) { return false; }
         return ASTFetchSubnode::FetchExpression(expression, result);
     }

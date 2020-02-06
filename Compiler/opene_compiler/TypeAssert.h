@@ -119,11 +119,6 @@ namespace opene {
         // === 高阶类型断言 ===
 
         /*
-         * 判断左边类型是否可赋值给右边类型
-         */
-        static bool IsAssignableBetweenType(const TypeDecl * lhs_type, const TypeDecl * rhs_type);
-
-        /*
          * 检查二元运算是否合法
          * 该断言主要判断二元表达式中左右子式是否可以通过运算符计算
          */
