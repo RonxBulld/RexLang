@@ -74,7 +74,8 @@ namespace opene {
     }
 
     TagDecl *SematicAnalysisContext::QueryTagDeclFromDynSymbolTableWithName(const StringRef &name) {
-        for (auto &tag_decl_layer : this->dyn_symbol_table_) {
+        for (auto layer_iter = this->dyn_symbol_table_.rbegin(); layer_iter != this->dyn_symbol_table_.rend(); layer_iter++) {
+            auto tag_decl_layer = *layer_iter;
             for (auto &decl_item : tag_decl_layer) {
                 if (decl_item.first.string_ == name) {
                     return decl_item.second;

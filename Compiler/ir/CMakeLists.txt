@@ -10,9 +10,9 @@ include_directories(${LLVM_INCLUDE_DIRS})
 add_definitions(${LLVM_DEFINITIONS})
 
 SET(IR-Source
-        EmitIR.cpp
-        EmitIR.h
-        IR.cpp IR.h)
+        EmitLLVMIR.cpp
+        EmitLLVMIR.h
+        EmitOEIR.cpp EmitOEIR.h)
 
 ADD_LIBRARY(IR SHARED
         ${IR-Source}

@@ -83,11 +83,6 @@ namespace opene {
         bool SetupMemberVariableType(MemberVariableDecl * memberVariableDecl);
 
         /*
-         * 检查结构体是否存在递归引用的情况
-         */
-        bool CheckIfStructureRecursiveReference();
-
-        /*
          * 设置文件变量的类型和属性
          */
         bool SetupFileVariableType(FileVariableDecl * fileVariableDecl);
@@ -148,13 +143,31 @@ namespace opene {
          */
         ErrOr<Expression *> MakeImplicitConvertIfNeccessary(TypeDecl *targetType, Expression *convertExpression);
 
-    private: // 类型断言
+    private:    // 检查类型递归
+        enum class MarkType { kChecking = 1, kChecked = 2 };
+
+        /*
+         * 检查指定类型是否存在递归定义
+         */
+        bool CheckRecursiveDefinition(TypeDecl * typeDecl, std::map<TypeDecl *, MarkType> &marks);
+
+        /*
+         * 检查指定类型是否存在递归定义
+         */
+        bool CheckRecursiveDefinition(TypeDecl * typeDecl);
+
+        /*
+         * 检查所有类型是否存在递归定义
+         */
+        bool CheckIfStructureRecursiveReference();
+
+    private:    // 类型断言
         /*
          * 判断左边类型是否可赋值给右边类型
          */
         bool IsAssignableBetweenType(TypeDecl *lhs_type, TypeDecl *rhs_type);
 
-    private: // 工具方法
+    private:    // 工具方法
 
         /*
          * 递归推断名称组件类型

@@ -56,6 +56,7 @@ namespace opene {
     typedef struct FileVariableDecl* FileVariableDeclPtr;
     typedef struct FunctorDecl* FunctorDeclPtr;
     typedef struct FunctionDecl* FunctionDeclPtr;
+    typedef struct BuiltinFunctionDecl *BuiltinFunctionDeclPtr;
     typedef struct ProgSetDecl* ProgSetDeclPtr;
     typedef struct DllCommandDecl* DllCommandDeclPtr;
 
@@ -127,6 +128,7 @@ namespace opene {
         kNTyStructureDecl,
         kNTyFunctorDecl,
         kNTyFunctionDecl,
+        kNTyBuiltinFunctionDecl,
         kNTyProgSetDecl,
         kNTyDllCommandDecl,
         kNTyStatement,
@@ -467,6 +469,13 @@ namespace opene {
     };
 
     /**
+     * @brief 内建函数声明
+     */
+//    struct BuiltinFunctionDecl : public FunctorDecl {
+//        static const NodeType node_type = NodeType::kNTyBuiltinFunctionDecl;
+//    };
+
+    /**
      * @brief DLL函数声明
      */
     struct DllCommandDecl : public FunctorDecl {
@@ -518,6 +527,11 @@ namespace opene {
      */
     struct LoopControlStmt : public ControlStmt {
         static const NodeType node_type = NodeType::kNTyLoopControlStmt;
+
+        // === 下面是经过语义分析后的数据 ===
+
+        // 所控制的循环语句
+        LoopStatementPtr loop_statement_ = nullptr;
     };
 
     /**
@@ -540,6 +554,9 @@ namespace opene {
     struct ReturnStmt : public ControlStmt {
         static const NodeType node_type = NodeType::kNTyReturnStmt;
         ExpressionPtr return_value_ = nullptr;
+
+        // === 下面是经过语义分析后的数据 ===
+
     };
 
     /**

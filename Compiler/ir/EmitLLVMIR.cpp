@@ -16,7 +16,7 @@
 #include <llvm/IR/DataLayout.h>
 #include <llvm/IR/IRBuilder.h>
 
-#include "EmitIR.h"
+#include "EmitLLVMIR.h"
 #include "../opene_compiler/NodeDecl.h"
 
 namespace opene {
@@ -149,7 +149,7 @@ namespace opene {
         // TODO:
     }
 
-    EmitIR::EmitIR() {
+    EmitLLVMIR::EmitLLVMIR() {
     }
 
 }

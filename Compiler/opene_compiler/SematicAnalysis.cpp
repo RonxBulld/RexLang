@@ -287,8 +287,8 @@ namespace opene {
 
         } else if (LoopControlStmt *loop_control_stmt = statement->as<LoopControlStmt>()) {
             // 检查是否在循环内
-            LoopStatement *loop_statement = ASTUtility::FindSpecifyTypeParent<LoopStatement>(loop_control_stmt);
-            return loop_statement != nullptr;
+            loop_control_stmt->loop_statement_ = ASTUtility::FindSpecifyTypeParent<LoopStatement>(loop_control_stmt);
+            return loop_control_stmt->loop_statement_ != nullptr;
 
         } else if (ReturnStmt *return_stmt = statement->as<ReturnStmt>()) {
             // 检查是否在函数定义内
