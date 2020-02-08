@@ -67,7 +67,7 @@ namespace opene {
         // 4. 针对每一个程序集
         for (auto & prog_file_item : this->translate_unit_->program_sets_) {
             this->analysis_context_.PushScope(prog_file_item.second);
-            // 5. 针对函数定义
+            // 5. 针对每一个函数定义
             for (auto &func_item : prog_file_item.second->function_decls_) {
                 this->analysis_context_.PushScope(func_item.second);
                 // 5.1. 明确函数定义局部变量的类型指针
@@ -76,6 +76,10 @@ namespace opene {
                 }
                 // 5.2. 检查每一条语句构造和表达式运算是否合法
                 if (this->CheckStatementsAndExpression(func_item.second->statement_list_) == false) {
+                    return false;
+                }
+                // 5.3. 检查所有分支返回
+                if (this->CheckAllBranchesReturnCorrectly(func_item.second) == false) {
                     return false;
                 }
             }
@@ -803,6 +807,56 @@ namespace opene {
             }
         }
         return true;
+    }
+
+    bool CheckRet(Statement *stmt, bool need_return) {
+        /*
+         * def check_ret(stmts,need_return):
+         *     for each stmt in stmts:
+         *         if stmt is ASSIGN then continue.
+         *         if stmt is EXPRESSION then continue.
+         *         if stmt is LOOP then continue.
+         *         if stmt is RETURN then return true.
+         *         if stmt is EXIT then return true.
+         *         if stmt is BRANCHES then:
+         *             ok = true.
+         *             for each branch in BRANCHES:
+         *                 ok &= check_ret(branch.stmts).
+         *             ok &= (BRANCHES has default) && check_ret(default).
+         *             if ok == true then return true.
+         *     return !need_return.
+         */
+        std::vector<Statement*> stmts;
+        if (StatementBlock *statement_block = stmt->as<StatementBlock>()) {
+            stmts = statement_block->statements_;
+        } else {
+            stmts = { stmt };
+        }
+        for (Statement *stmt : stmts) {
+            if (stmt->is<AssignStmt>()) { continue; }
+            else if (stmt->is<Expression>()) { continue; }
+            else if (stmt->is<LoopStatement>()) { continue; }
+            else if (stmt->is<ReturnStmt>()) { return true; }
+            else if (stmt->is<ExitStmt>()) { return true; }
+            else if (IfStmt *if_stmt = stmt->as<IfStmt>()) {
+                bool ok = true;
+                for (auto & branch : if_stmt->switches_) {
+                    ok &= CheckRet(branch.second, need_return);
+                }
+                ok &= (if_stmt->default_statement_ != nullptr) && (CheckRet(if_stmt->default_statement_, need_return));
+                if (ok) { return true; }
+            }
+            return !need_return;
+        }
+    }
+
+    bool SematicAnalysis::CheckAllBranchesReturnCorrectly(FunctionDecl *functionDecl) {
+        if (CheckRet(functionDecl->statement_list_, functionDecl->return_type_ != nullptr) == false) {
+            assert(false);
+            return false;
+        } else {
+            return true;
+        }
     }
 
 }

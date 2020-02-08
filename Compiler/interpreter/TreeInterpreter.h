@@ -28,9 +28,14 @@ namespace opene {
         ErrOr<FunctionDecl *>       getAsFuncPtr() const;
         ErrOr<double>               getAsDouble() const;
 
+    public: // 数组对象操作
+
     public: // 结构体取值
         bool hadMember(const std::string &member_name) const;
         ErrOr<TIValue &> getMember(const std::string &member_name);
+
+    public: // 参数对象操作
+        bool isNullObject() const;
     };
 
     class TIVariable {
@@ -43,14 +48,27 @@ namespace opene {
     class RuntimeContext {
     private:
         std::set<TIVariable *> object_pool_;
-        std::vector<std::map<VariableDecl *, TIVariable *>> dyn_symbol_table_;
+        class ContextFragment {
+            std::map<BaseVariDecl *, TIVariable *> variable_;
+            Statement *execute_ptr_ = nullptr;
+        };
+        std::vector<ContextFragment> dyn_symbol_table_;
     private:
-        bool AddVariable(VariableDecl *variableDecl);
     public:
+        bool AddVariable(BaseVariDecl *variableDecl);
         bool PushStack(TranslateUnit *translateUnit);
         bool PushStack(FunctionDecl *functionDecl);
         bool PopStack();
-        TIVariable * QueryVariableObjectFromDynSymbolTable(VariableDecl *variableDecl);
+        TIVariable * QueryVariableObjectFromDynSymbolTable(BaseVariDecl *variableDecl);
+        void SetValue(BaseVariDecl *variableDecl, TIValue tiValue);
+
+    public:
+        void SetLatestReturnValue(TIValue tiValue);
+        TIValue GetLatestReturnValue();
+
+    public:
+        void SetExecutePtr(Statement *statement);
+        Statement *GetExecutePtr();
     };
 
     class TreeInterpreter {
@@ -60,20 +78,24 @@ namespace opene {
         Statement *execute_statement_ptr_ = nullptr;
 
     private:    // 变量加载
-        bool LoadGlobalVariable();
-        bool LoadFileVariable();
-        bool LoadLocalVariable();
+
+        bool LoadFunctionFragment(FunctionDecl *functionDecl);
 
     private:    // 表达式执行
-        TIValue CallFunction(FunctorDecl *functorDecl, std::vector<TIValue> arguments);
+        TIValue CallFunction(FunctorDecl *functorDecl, std::vector<TIValue*> arguments);
         TIValue EvaluateExpression(Expression *expression);
 
     private:    // 语句执行
+        enum class ExecFlag { kSequence, kBreak, kContinue, kReturn, kExit };
         bool ExecAssign(AssignStmt *assignStmt);
         bool ExecLoop(LoopStatement *loopStatement);
         bool ExecControl(ControlStmt *controlStmt);
         bool ExecIf(IfStmt *ifStmt);
-        bool ExecStatementBlock(StatementBlock *statementBlock);
+        bool ExecStmtBlock(StatementBlock *statementBlock);
+        bool ExecStatement(Statement *statement);
+
+    private:
+        bool ExecuteCore();
 
     public:
         /*

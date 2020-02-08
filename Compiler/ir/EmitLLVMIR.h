@@ -11,7 +11,7 @@ namespace opene {
 
     class EmitLLVMIR {
     public:
-        EmitLLVMIR();
+        EmitLLVMIR(TranslateUnit *translateUnit);
     };
 
 }

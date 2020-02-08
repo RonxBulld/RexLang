@@ -143,6 +143,11 @@ namespace opene {
          */
         ErrOr<Expression *> MakeImplicitConvertIfNeccessary(TypeDecl *targetType, Expression *convertExpression);
 
+        /*
+         * 检查所有分支是否正确返回
+         */
+        bool CheckAllBranchesReturnCorrectly(FunctionDecl *functionDecl);
+
     private:    // 检查类型递归
         enum class MarkType { kChecking = 1, kChecked = 2 };
 

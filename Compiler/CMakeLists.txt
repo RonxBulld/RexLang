@@ -8,7 +8,7 @@ LINK_DIRECTORIES(/usr/local/lib)
 
 ADD_SUBDIRECTORY(opene_compiler)
 ADD_SUBDIRECTORY(ir)
-ADD_SUBDIRECTORY(interpreter)
+#ADD_SUBDIRECTORY(interpreter)
 
 ADD_EXECUTABLE(oel
         oe_driver.cpp
