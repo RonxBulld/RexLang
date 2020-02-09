@@ -16,6 +16,8 @@
 #include <llvm/IR/DataLayout.h>
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/Verifier.h>
+#include <llvm/IR/DerivedTypes.h>
+#include <llvm/IR/GlobalVariable.h>
 #include <llvm/Bitcode/BitcodeReader.h>
 #include <llvm/Bitcode/BitcodeWriter.h>
 #include <llvm/Support/ToolOutputFile.h>
@@ -30,35 +32,125 @@ namespace opene {
         llvm::LLVMContext TheContext;
         llvm::IRBuilder<> Builder;
         llvm::Module * TheModule = nullptr;
-        std::map<std::string, llvm::Value *> NamedValues;
+        llvm::Function * TheFunction = nullptr;
         std::map<BaseVariDecl*, llvm::Value*> variable_object_pool_;
+        std::map<TypeDecl*, llvm::Type*> type_object_pool_;
+
+    private:
+        llvm::Type *GetType(TypeDecl *typeDecl) {
+            auto found = type_object_pool_.find(typeDecl);
+            if (found != type_object_pool_.end()) {
+                return found->second;
+            } else {
+                llvm::Type *type_obj = Emit(typeDecl);
+                type_object_pool_[typeDecl] = type_obj;
+                return type_obj;
+            }
+        }
 
     private:
         void InitBuiltStructure() {
             // TODO: 初始化字节集结构和字符串结构
+            // TODO: 初始化数组运行时
         }
 
     public:
-        llvm::Value *Emit(TranslateUnit *translateUnit);
-        llvm::Value *Emit(SourceFile *sourceFile);
-        llvm::Value *Emit(ProgramSetFile *programSetFile);
-        llvm::Value *Emit(GlobalVariableFile *globalVariableFile);
-        llvm::Value *Emit(DataStructureFile *dataStructureFile);
-        llvm::Value *Emit(DllDefineFile *dllDefineFile);
-        llvm::Value *Emit(Decl *decl);
-        llvm::Value *Emit(TagDecl *tagDecl);
-        llvm::Value *Emit(VariableDecl *variableDecl);
-        llvm::Value *Emit(BaseVariDecl *baseVariDecl);
-        llvm::Value *Emit(GlobalVariableDecl *globalVariableDecl);
+        bool Emit(TranslateUnit *translateUnit) {
+            TheModule = new llvm::Module("a.ll", TheContext);
+            InitBuiltStructure();
+            // 全局变量
+            for (auto &global_vari_item : translateUnit->global_variables_) {
+                llvm::GlobalVariable *gvari = Emit(global_vari_item.second);
+                assert(gvari);
+                variable_object_pool_[global_vari_item.second] = gvari;
+            }
+            // 文件变量
+            for (auto &file_item : translateUnit->source_file_) {
+                if (ProgramSetFile *program_set_file = file_item->as<ProgramSetFile>()) {
+                    for (auto &prog_vari_item : program_set_file->program_set_declares_->file_static_variables_) {
+                        FileVariableDecl *file_variable_decl = prog_vari_item.second;
+                        llvm::GlobalVariable *fvari = Emit(file_variable_decl);
+                        assert(fvari);
+                        variable_object_pool_[prog_vari_item.second] = fvari;
+                    }
+                }
+            }
+            // 函数声明
+            for (auto &functor_decl_item : translateUnit->functor_declares_) {
+                llvm::Function *functor_decl = Emit(functor_decl_item.second);
+            }
+            // 函数定义
+            for (auto &function_def_item : translateUnit->function_decls_) {
+                llvm::Function *function_def = Emit(function_def_item.second);
+            }
+            return true;
+        }
+
+//        llvm::Value *Emit(SourceFile *sourceFile);
+//        llvm::Value *Emit(ProgramSetFile *programSetFile);
+//        llvm::Value *Emit(GlobalVariableFile *globalVariableFile);
+//        llvm::Value *Emit(DataStructureFile *dataStructureFile);
+//        llvm::Value *Emit(DllDefineFile *dllDefineFile);
+//        llvm::Value *Emit(Decl *decl);
+//        llvm::Value *Emit(TagDecl *tagDecl);
+//        llvm::Value *Emit(VariableDecl *variableDecl);
+//        llvm::Value *Emit(BaseVariDecl *baseVariDecl);
+
+        llvm::GlobalVariable *Emit(GlobalVariableDecl *globalVariableDecl) {
+            llvm::Type *vari_type = GetType(globalVariableDecl->type_decl_ptr_);
+            std::string vari_name = globalVariableDecl->name_.string_.str();
+            llvm::GlobalVariable *gvari = new llvm::GlobalVariable(
+                    /*Module*/*TheModule,
+                    /*Type*/vari_type,
+                    /*Constant*/false,
+                    /*Linkage*/llvm::GlobalValue::LinkageTypes::ExternalLinkage,
+                    /*Initializer*/nullptr,
+                    /*Name*/vari_name,
+                    /*InsertBefor*/nullptr,
+                    /*ThreadLocal*/llvm::GlobalVariable::ThreadLocalMode::NotThreadLocal,
+                    /*AddressSpace*/0,
+                    /*ExternallyInitalized*/false
+                    );
+            gvari->setAlignment(4);
+
+            return gvari;
+        }
+
         llvm::Value *Emit(ParameterDecl *parameterDecl);
+
         llvm::Value *Emit(MemberVariableDecl *memberVariableDecl);
-        llvm::Value *Emit(FileVariableDecl *fileVariableDecl);
+
+        llvm::GlobalVariable *Emit(FileVariableDecl *fileVariableDecl) {
+            llvm::Type *vari_type = GetType(fileVariableDecl->type_decl_ptr_);
+            std::string vari_name = fileVariableDecl->name_.string_.str();
+            llvm::GlobalVariable *fvari = new llvm::GlobalVariable(
+                    /*Module*/*TheModule,
+                    /*Type*/vari_type,
+                    /*Constant*/false,
+                    /*Linkage*/llvm::GlobalValue::LinkageTypes::ExternalLinkage,
+                    /*Initializer*/nullptr,
+                    /*Name*/vari_name,
+                    /*InsertBefor*/nullptr,
+                    /*ThreadLocal*/llvm::GlobalVariable::ThreadLocalMode::NotThreadLocal,
+                    /*AddressSpace*/0,
+                    /*ExternallyInitalized*/false
+            );
+            fvari->setAlignment(4);
+
+            return fvari;
+        }
+
         llvm::Value *Emit(LocalVariableDecl *localVariableDecl);
+
         llvm::Type *Emit(TypeDecl *typeDecl);
         llvm::Value *Emit(BuiltinTypeDecl *builtinTypeDecl);
         llvm::Value *Emit(ArrayDecl *arrayDecl);
         llvm::Value *Emit(StructureDecl *structureDecl);
 
+        /*
+         * 可调用对象声明
+         * 仅声明原型不定义内容
+         */
         llvm::Function *Emit(FunctorDecl *functorDecl) {
             // 构建形参声明
             std::vector<llvm::Type*> parameter_types;
@@ -81,23 +173,15 @@ namespace opene {
                 variable_object_pool_[functorDecl->parameters_[idx]] = &param;
                 idx++;
             }
-
-            if (FunctionDecl *function_decl = functorDecl->as<FunctionDecl>()) {
-                return this->Emit(function_decl);
-            } else if (DllCommandDecl *dll_command_decl = functorDecl->as<DllCommandDecl>()) {
-                return this->Emit(dll_command_decl);
-            } else {
-                assert(false);
-                return nullptr;
-            }
+            return function;
         }
 
         llvm::Function *Emit(FunctionDecl *functionDecl) {
             std::string function_name = functionDecl->name_.string_.str();
             llvm::Function *function = TheModule->getFunction(function_name);
             if (!function) {
-                assert(false);
-                return nullptr;
+                function = Emit(functionDecl->as<FunctorDecl>());
+                assert(function);
             }
 
             if (!function->empty()) {
@@ -105,9 +189,9 @@ namespace opene {
                 assert(false);
                 return nullptr;
             }
+            this->TheFunction = function;
 
             // 开始创建函数体
-
             llvm::BasicBlock *basic_block = llvm::BasicBlock::Create(TheContext, "entry", function);
             Builder.SetInsertPoint(basic_block);
             Emit(functionDecl->statement_list_);
@@ -115,19 +199,74 @@ namespace opene {
             if (llvm::verifyFunction(*function)) {
                 assert(false);
                 function->eraseFromParent();
-                return nullptr;
+                function = nullptr;
+            }
+
+            this->TheFunction = nullptr;
+            return function;
+        }
+
+        llvm::Function *Emit(DllCommandDecl *dllCommandDecl) {
+            std::string dll_name = dllCommandDecl->name_.string_.str();
+            llvm::Function *function = TheModule->getFunction(dll_name);
+            if (!function) {
+                return Emit(dllCommandDecl->as<FunctorDecl>());
             } else {
                 return function;
             }
         }
 
-        llvm::Value *Emit(ProgSetDecl *progSetDecl);
-
-        llvm::Function *Emit(DllCommandDecl *dllCommandDecl);
-
         llvm::Value *Emit(Statement *statement);
-        llvm::Value *Emit(IfStmt *ifStmt);
-        llvm::Value *Emit(StatementBlock *statementBlock);
+
+        llvm::BranchInst *Emit(IfStmt *ifStmt) {
+            assert(ifStmt->switches_.size() == 1);
+
+            Expression *condition_expr = ifStmt->switches_.front().first;
+            Statement *then_stmt = ifStmt->switches_.front().second;
+
+            llvm::Value *condition = Emit(condition_expr);    // 这里的条件变量应该是1位的布尔值了
+            assert(condition);
+            assert(condition->getType()->getPrimitiveSizeInBits() == 1);
+
+            // 创建块
+            llvm::BasicBlock *then_block = llvm::BasicBlock::Create(TheContext, "then", TheFunction);
+            llvm::BasicBlock *else_block = llvm::BasicBlock::Create(TheContext, "else", TheFunction);
+            llvm::BasicBlock *merge_block = llvm::BasicBlock::Create(TheContext, "ifcont");
+            llvm::BranchInst *branch_inst = Builder.CreateCondBr(condition, then_block, else_block);
+
+            // 处理Then块
+            Builder.SetInsertPoint(then_block);
+            llvm::Value *then_value = Emit(then_stmt);
+            assert(then_value);
+            Builder.CreateBr(merge_block);
+            // 在生成Then块的内容时可能会改变当前块，所以这里需要更新
+            then_block = Builder.GetInsertBlock();
+
+            // 处理Else块
+            TheFunction->getBasicBlockList().push_back(else_block);
+            Builder.SetInsertPoint(else_block);
+            llvm::Value *else_value = Emit(ifStmt->default_statement_);
+            assert(else_value);
+            Builder.CreateBr(merge_block);
+            // 更新
+            else_block = Builder.GetInsertBlock();
+
+            // 处理Merge块
+            TheFunction->getBasicBlockList().push_back(merge_block);
+            Builder.SetInsertPoint(merge_block);
+//            llvm::PHINode *PN = Builder.CreatePHI(llvm::Type::getInt1Ty(TheContext), 2, "iftmp");
+//            PN->addIncoming(then_value, then_block);
+//            PN->addIncoming(else_value, else_block);
+
+            return branch_inst;
+        }
+
+        void Emit(StatementBlock *statementBlock) {
+            for (Statement *statement : statementBlock->statements_) {
+                Emit(statement);
+            }
+        }
+
         llvm::Value *Emit(LoopStatement *loopStatement);
         llvm::Value *Emit(WhileStmt *whileStmt);
         llvm::Value *Emit(RangeForStmt *rangeForStmt);
@@ -138,12 +277,23 @@ namespace opene {
         llvm::Value *Emit(LoopControlStmt *loopControlStmt);
         llvm::Value *Emit(ContinueStmt *continueStmt);
         llvm::Value *Emit(BreakStmt *breakStmt);
-        llvm::Value *Emit(ReturnStmt *returnStmt);
+
+        llvm::ReturnInst *Emit(ReturnStmt *returnStmt) {
+            llvm::ReturnInst *return_inst = nullptr;
+            if (returnStmt->return_value_) {
+                llvm::Value *RV = Emit(returnStmt->return_value_);
+                return_inst = Builder.CreateRet(RV);
+            } else {
+                return_inst = Builder.CreateRetVoid();
+            }
+            assert(return_inst);
+            return return_inst;
+        }
+
         llvm::Value *Emit(ExitStmt *exitStmt);
         llvm::Value *Emit(Expression *expression);
         llvm::Value *Emit(HierarchyIdentifier *hierarchyIdentifier);
         llvm::Value *Emit(NameComponent *nameComponent);
-
         llvm::Value *Emit(Identifier *identifier);
 
         llvm::Value *Emit(ArrayIndex *arrayIndex) {
@@ -238,7 +388,9 @@ namespace opene {
                     return Builder.CreateICmpSLE(L, R, "le");
                 }
                 case _OperatorExpression::OperatorType::kOptLikeEqual: {
-                    return Builder.CreateCall();
+                    // TODO:
+                    assert(false);
+                    return nullptr;
                 }
                 // *** 逻辑系列 ***
                 case _OperatorExpression::OperatorType::kOptAnd: {
@@ -303,8 +455,6 @@ namespace opene {
 
     public:
         IREmit() : Builder(llvm::IRBuilder<>(TheContext)) {
-            TheModule = new llvm::Module("a.ll", TheContext);
-            InitBuiltStructure();
         }
 
         ~IREmit() {
