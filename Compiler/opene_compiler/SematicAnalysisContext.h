@@ -22,12 +22,11 @@ namespace opene {
          * 使用数组模拟栈，用于在语义分析过程中管理复杂的嵌套域
          */
         std::vector<std::map<TString, TagDecl*>> dyn_symbol_table_;
-    private:
+    public:
         /*
-         * 将符号插入到动态符号表中
+         * 将符号插入到当前动态符号表帧中
          */
         bool AddNamedSymbol(TagDecl *tagDecl);
-    public:
         /*
          * 压入作用域
          * 只有这些会被视作作用域：TranslateUnit/ProgramSetFile/FunctionDecl
@@ -55,6 +54,11 @@ namespace opene {
          * 从动态符号表中查找符号定义
          */
         TagDecl *QueryTagDeclFromDynSymbolTableWithName(const StringRef &name);
+
+        /*
+         * 检查名称是否存在
+         */
+        bool CheckIfNameExist(const StringRef &name);
     };
 
 }

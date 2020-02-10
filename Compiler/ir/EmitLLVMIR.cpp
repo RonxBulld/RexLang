@@ -33,8 +33,10 @@ namespace opene {
         llvm::IRBuilder<> Builder;
         llvm::Module * TheModule = nullptr;
         llvm::Function * TheFunction = nullptr;
+        FunctionDecl *TheASTFunction = nullptr;
         std::map<BaseVariDecl*, llvm::Value*> variable_object_pool_;
         std::map<TypeDecl*, llvm::Type*> type_object_pool_;
+        std::map<FunctionDecl*, llvm::Function*> function_object_pool_;
 
     private:
         llvm::Type *GetType(TypeDecl *typeDecl) {
@@ -54,6 +56,18 @@ namespace opene {
             // TODO: 初始化数组运行时
         }
 
+        /*
+         * 根据请求的变量不同执行不同的操作
+         * 参数 - 直接
+         * 全局变量 - Builder.CreateLoad
+         */
+        llvm::Value *UseVariable(llvm::Value *variable) {
+        }
+
+        template <size_t bits = 32>
+        llvm::ConstantInt *CreateInt(int i32v) {
+            return llvm::ConstantInt::get(TheContext, llvm::APInt(bits, i32v));
+        }
     public:
         bool Emit(TranslateUnit *translateUnit) {
             TheModule = new llvm::Module("a.ll", TheContext);
@@ -96,12 +110,11 @@ namespace opene {
 //        llvm::Value *Emit(VariableDecl *variableDecl);
 //        llvm::Value *Emit(BaseVariDecl *baseVariDecl);
 
-        llvm::GlobalVariable *Emit(GlobalVariableDecl *globalVariableDecl) {
-            llvm::Type *vari_type = GetType(globalVariableDecl->type_decl_ptr_);
-            std::string vari_name = globalVariableDecl->name_.string_.str();
+        llvm::GlobalVariable *CreateGlobalVariable(TypeDecl *vari_type, const std::string &vari_name) {
+            llvm::Type *_vari_type = GetType(vari_type);
             llvm::GlobalVariable *gvari = new llvm::GlobalVariable(
                     /*Module*/*TheModule,
-                    /*Type*/vari_type,
+                    /*Type*/_vari_type,
                     /*Constant*/false,
                     /*Linkage*/llvm::GlobalValue::LinkageTypes::ExternalLinkage,
                     /*Initializer*/nullptr,
@@ -110,10 +123,13 @@ namespace opene {
                     /*ThreadLocal*/llvm::GlobalVariable::ThreadLocalMode::NotThreadLocal,
                     /*AddressSpace*/0,
                     /*ExternallyInitalized*/false
-                    );
+            );
             gvari->setAlignment(4);
-
             return gvari;
+        }
+
+        llvm::GlobalVariable *Emit(GlobalVariableDecl *globalVariableDecl) {
+            return CreateGlobalVariable(globalVariableDecl->type_decl_ptr_, globalVariableDecl->name_.string_.str());
         }
 
         llvm::Value *Emit(ParameterDecl *parameterDecl);
@@ -140,7 +156,21 @@ namespace opene {
             return fvari;
         }
 
-        llvm::Value *Emit(LocalVariableDecl *localVariableDecl);
+        llvm::Value *Emit(LocalVariableDecl *localVariableDecl) {
+            llvm::Type *vari_type = GetType(localVariableDecl->type_decl_ptr_);
+            std::string vari_name = localVariableDecl->name_.string_.str();
+            if (localVariableDecl->is_static_ == false) {
+                llvm::AllocaInst *lvari = Builder.CreateAlloca(vari_type, nullptr, vari_name);
+                lvari->setAlignment(4);
+                return lvari;
+            } else {
+                // 在静态变量前增加名字修饰以免冲突
+                vari_name = TheASTFunction->super_set_->name_.string_.str() + "." + TheASTFunction->name_.string_.str() + "." + vari_name;
+                llvm::GlobalVariable *static_vari = CreateGlobalVariable(localVariableDecl->type_decl_ptr_, vari_name);
+                static_vari->setLinkage(llvm::GlobalValue::LinkageTypes::InternalLinkage);
+                return static_vari;
+            }
+        }
 
         llvm::Type *Emit(TypeDecl *typeDecl);
         llvm::Value *Emit(BuiltinTypeDecl *builtinTypeDecl);
@@ -190,10 +220,17 @@ namespace opene {
                 return nullptr;
             }
             this->TheFunction = function;
+            this->TheASTFunction = functionDecl;
+            function_object_pool_[functionDecl] = function;
 
             // 开始创建函数体
             llvm::BasicBlock *basic_block = llvm::BasicBlock::Create(TheContext, "entry", function);
             Builder.SetInsertPoint(basic_block);
+            // 创建局部变量
+            for (auto &local_vari_item : functionDecl->local_vari_) {
+                Emit(local_vari_item.second);
+            }
+            // 处理语句
             Emit(functionDecl->statement_list_);
 
             if (llvm::verifyFunction(*function)) {
@@ -203,6 +240,7 @@ namespace opene {
             }
 
             this->TheFunction = nullptr;
+            this->TheASTFunction = nullptr;
             return function;
         }
 
@@ -218,7 +256,7 @@ namespace opene {
 
         llvm::Value *Emit(Statement *statement);
 
-        llvm::BranchInst *Emit(IfStmt *ifStmt) {
+        llvm::Value *Emit(IfStmt *ifStmt) {
             assert(ifStmt->switches_.size() == 1);
 
             Expression *condition_expr = ifStmt->switches_.front().first;
@@ -254,11 +292,11 @@ namespace opene {
             // 处理Merge块
             TheFunction->getBasicBlockList().push_back(merge_block);
             Builder.SetInsertPoint(merge_block);
-//            llvm::PHINode *PN = Builder.CreatePHI(llvm::Type::getInt1Ty(TheContext), 2, "iftmp");
-//            PN->addIncoming(then_value, then_block);
-//            PN->addIncoming(else_value, else_block);
+            llvm::PHINode *PN = Builder.CreatePHI(llvm::Type::getInt1Ty(TheContext), 2, "iftmp");
+            PN->addIncoming(then_value, then_block);
+            PN->addIncoming(else_value, else_block);
 
-            return branch_inst;
+            return PN;
         }
 
         void Emit(StatementBlock *statementBlock) {
@@ -268,9 +306,41 @@ namespace opene {
         }
 
         llvm::Value *Emit(LoopStatement *loopStatement);
+
         llvm::Value *Emit(WhileStmt *whileStmt);
+
         llvm::Value *Emit(RangeForStmt *rangeForStmt);
-        llvm::Value *Emit(ForStmt *forStmt);
+
+        llvm::Value *Emit(ForStmt *forStmt) {
+            // 初始值
+            llvm::Value *start_value = Emit(forStmt->start_value_);
+            assert(start_value);
+            // 结束值
+            llvm::Value *stop_value = Emit(forStmt->stop_value_);
+            assert(stop_value);
+            // 步进值
+            llvm::Value *step_value = Emit(forStmt->step_value_);
+            assert(step_value);
+            // TODO: 通过对起始值、结束值、步进值进行检查，判断是否有限循环。
+            llvm::Value *K = nullptr;
+            // 循环头块
+            llvm::BasicBlock *preheader_block = Builder.GetInsertBlock();
+            // 循环体块
+            llvm::BasicBlock *loop_block = llvm::BasicBlock::Create(TheContext, "loop", TheFunction);
+            Builder.CreateBr(loop_block);
+            Builder.SetInsertPoint(loop_block);
+            // 将初始化表达式装入头块中
+            llvm::PHINode *loop_variable = Builder.CreatePHI(llvm::Type::getInt64Ty(TheContext), 2, "i");
+            loop_variable->addIncoming(start_value, preheader_block);
+            // 生成循环体
+            llvm::Value *loop_body = Emit(forStmt->loop_body_);
+            assert(loop_body);
+            llvm::Value *next_var = Builder.CreateAdd(loop_variable, step_value, "nextvar");
+            // 循环条件判定
+            // TODO: 根据循环方向，判断比较关系。
+            llvm::Value *stop_condition = Builder.CreateICmpNE(stop_value)
+        }
+
         llvm::Value *Emit(DoWhileStmt *doWhileStmt);
         llvm::Value *Emit(AssignStmt *assignStmt);
         llvm::Value *Emit(ControlStmt *controlStmt);

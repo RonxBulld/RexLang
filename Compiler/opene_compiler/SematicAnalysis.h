@@ -33,6 +33,13 @@ namespace opene {
          */
         bool MergeGlobal();
 
+        /*
+         * 创建局部变量并插入到符号表中
+         * 函数会根据提供的名字创建一个局部变量，如果有命名冲突会做适当的调整。
+         * 类型默认设置为整数型。
+         */
+        LocalVariableDecl *InsertLocalVariable(StringRef referenceName, ASTContext *astContext, FunctionDecl *parentFunction);
+
         // =============== 类型和属性的绑定和处理 ===============
         //<editor-fold desc="类型和属性的绑定和处理">
         /*

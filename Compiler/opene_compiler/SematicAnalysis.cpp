@@ -195,6 +195,21 @@ namespace opene {
         return true;
     }
 
+    LocalVariableDecl *SematicAnalysis::InsertLocalVariable(StringRef referenceName, ASTContext *astContext, FunctionDecl *parentFunction) {
+        size_t idx = 0;
+        while (this->analysis_context_.CheckIfNameExist(referenceName)) {
+            std::string name = referenceName.str();
+            referenceName = astContext->CreateString(name + "_" + std::to_string(idx));
+        }
+        LocalVariableDecl *implicit_local_vari = CreateNode<LocalVariableDecl>(astContext);
+        implicit_local_vari->parent_node_ = parentFunction;
+        implicit_local_vari->name_.string_ = referenceName;
+        implicit_local_vari->type_decl_ptr_ = this->QueryBuiltinTypeWithEnum(this->translate_unit_, BuiltinTypeDecl::EnumOfBuiltinType::kBTypeInteger);
+        parentFunction->local_vari_[referenceName] = implicit_local_vari;
+        this->analysis_context_.AddNamedSymbol(implicit_local_vari);
+        return implicit_local_vari;
+    }
+
     bool SematicAnalysis::SetupFunctorVariableType(FunctorDecl *functorDecl) {
         // 3.1.1. 明确返回值类型
         functorDecl->return_type_ = this->QueryTypeDeclWithName(this->translate_unit_, functorDecl->return_type_name_.string_, &this->analysis_context_);
@@ -368,13 +383,25 @@ namespace opene {
             if (this->CheckIfExprTypeIsIntegerClass(for_stmt->start_value_) == false) { assert(false); return false; }
             if (this->CheckIfExprTypeIsIntegerClass(for_stmt->stop_value_) == false) { assert(false); return false; }
             if (this->CheckIfExprTypeIsIntegerClass(for_stmt->step_value_) == false) { assert(false); return false; }
-            // 如果循环变量存在则检查变量类型是否为整数族
             if (for_stmt->loop_vari_) {
+                // 如果循环变量存在则检查变量类型是否为整数族
                 TypeDecl *loop_vari_type = this->GetHierarchyIdentifierQualifiedType(for_stmt->loop_vari_);
                 if (TypeAssert::IsIntegerClass(loop_vari_type) == false) {
                     assert(false);
                     return false;
                 }
+            } else {
+                // 如果循环变量不存在则隐式创建循环变量
+                FunctionDecl *function_decl = ASTUtility::FindSpecifyTypeParent<FunctionDecl>(loopStatement);
+                assert(function_decl);
+                StringRef reference_name = loopStatement->ast_context_->CreateString("implicit_loop_vari");
+                ASTContext *ast_context = loopStatement->ast_context_;
+                LocalVariableDecl *implicit_lv_decl = this->InsertLocalVariable(reference_name, ast_context, function_decl);
+                for_stmt->loop_vari_ = CreateNode<HierarchyIdentifier>(ast_context);
+                Identifier *implicit_lv = CreateNode<Identifier>(ast_context);
+                implicit_lv->name_.string_ = implicit_lv_decl->name_.string_;
+                for_stmt->loop_vari_->name_components_.push_back(implicit_lv);
+                for_stmt->loop_vari_->qualified_type_ = implicit_lv_decl->type_decl_ptr_;
             }
         } else if (DoWhileStmtPtr do_while_stmt = loopStatement->as<DoWhileStmt>()) {
             // 检查条件表达式类型是否为布尔类型
