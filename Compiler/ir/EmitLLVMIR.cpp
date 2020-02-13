@@ -33,6 +33,7 @@ namespace opene {
         llvm::IRBuilder<> Builder;
         llvm::Module * TheModule = nullptr;
         llvm::Function * TheFunction = nullptr;
+        ProgSetDecl *TheProgramSet = nullptr;
         FunctionDecl *TheASTFunction = nullptr;
         std::map<BaseVariDecl*, llvm::Value*> variable_object_pool_;
         std::map<TypeDecl*, llvm::Type*> type_object_pool_;
@@ -62,12 +63,23 @@ namespace opene {
          * 全局变量 - Builder.CreateLoad
          */
         llvm::Value *UseVariable(llvm::Value *variable) {
+            if (llvm::GlobalVariable *global_variable = llvm::dyn_cast<llvm::GlobalVariable>(variable)) {
+                return Builder.CreateLoad(global_variable->getValueType(), variable);
+            } else if (llvm::Argument *argument = llvm::dyn_cast<llvm::Argument>(variable)) {
+                return argument;
+            } else if (llvm::LoadInst *load_inst = llvm::dyn_cast<llvm::LoadInst>(variable)) {
+                return load_inst;
+            } else {
+                assert(false);
+                return variable;
+            }
         }
 
         template <size_t bits = 32>
-        llvm::ConstantInt *CreateInt(int i32v) {
-            return llvm::ConstantInt::get(TheContext, llvm::APInt(bits, i32v));
+        llvm::ConstantInt *CreateInt(int intValue) {
+            return llvm::ConstantInt::get(TheContext, llvm::APInt(bits, intValue));
         }
+
     public:
         bool Emit(TranslateUnit *translateUnit) {
             TheModule = new llvm::Module("a.ll", TheContext);
@@ -95,7 +107,9 @@ namespace opene {
             }
             // 函数定义
             for (auto &function_def_item : translateUnit->function_decls_) {
+                this->TheProgramSet = function_def_item.second->parent_node_->as<ProgSetDecl>();
                 llvm::Function *function_def = Emit(function_def_item.second);
+                this->TheProgramSet = nullptr;
             }
             return true;
         }
@@ -139,6 +153,8 @@ namespace opene {
         llvm::GlobalVariable *Emit(FileVariableDecl *fileVariableDecl) {
             llvm::Type *vari_type = GetType(fileVariableDecl->type_decl_ptr_);
             std::string vari_name = fileVariableDecl->name_.string_.str();
+            // 文件变量需要重命名以免名称冲突
+            vari_name = TheProgramSet->name_.string_.str() + "." + vari_name;
             llvm::GlobalVariable *fvari = new llvm::GlobalVariable(
                     /*Module*/*TheModule,
                     /*Type*/vari_type,
@@ -311,7 +327,63 @@ namespace opene {
 
         llvm::Value *Emit(RangeForStmt *rangeForStmt);
 
-        llvm::Value *Emit(ForStmt *forStmt) {
+        bool BuildRangeFor(llvm::Value *startValue, llvm::Value *stopValue, llvm::Value *stepValue, llvm::Value *loopVari, Statement *loopBody) {
+
+            llvm::BasicBlock *prehead_block = Builder.GetInsertBlock();
+
+            // Valid = ((stop - start) * step) > 0
+            llvm::Value *range_distance = Builder.CreateSub(stopValue, startValue, "distance");
+            llvm::Value *loop_valid = Builder.CreateICmpSGT(Builder.CreateMul(range_distance, stepValue), CreateInt(0), "valid");
+
+            llvm::BasicBlock *loop_entry_block = llvm::BasicBlock::Create(TheContext, "loop_entry", TheFunction);
+            Builder.SetInsertPoint(loop_entry_block);
+            // 计算K值 K=(S>-S)*2-1
+            llvm::Value *step_gtz = Builder.CreateICmpSGT(stepValue, Builder.CreateNeg(stepValue));
+            step_gtz = Builder.CreateIntCast(step_gtz, llvm::Type::getInt32Ty(TheContext), false, "cast_i1_to_i32");
+            llvm::Value *K = Builder.CreateSub(Builder.CreateMul(step_gtz, CreateInt(2)), CreateInt(1), "K");
+            // 设置初始值
+            Builder.CreateAlignedStore(startValue, loopVari, 4);
+
+            // === 计算循环条件并选择分支 ===
+            // 循环判断块
+            llvm::BasicBlock *loop_cond_block = llvm::BasicBlock::Create(TheContext, "loop_cond", TheFunction);
+            Builder.CreateBr(loop_cond_block);
+            Builder.SetInsertPoint(loop_cond_block);
+            // 循环条件值 (K*i)<=(K*stop)
+            llvm::Value *loop_val = Builder.CreateAlignedLoad(llvm::Type::getInt32Ty(TheContext), loopVari, 4);
+            llvm::Value *loop_cv = Builder.CreateICmpSLE(Builder.CreateMul(K, loop_val), Builder.CreateMul(K, stopValue));
+            // 循环体块
+            llvm::BasicBlock *loop_body_block = llvm::BasicBlock::Create(TheContext, "loop_body", TheFunction);
+            // 循环步进块
+            llvm::BasicBlock *step_block = llvm::BasicBlock::Create(TheContext, "loop_step", TheFunction);
+            // 循环后块
+            llvm::BasicBlock *loop_after_block = llvm::BasicBlock::Create(TheContext, "after_loop", TheFunction);
+            // 插入循环判断分支跳转
+            Builder.CreateCondBr(loop_cv, loop_body_block, loop_after_block);
+
+            // === 开始为循环体生成代码 ===
+            Builder.SetInsertPoint(loop_body_block);
+            Emit(loopBody);
+            Builder.CreateBr(step_block);
+
+            // === 开始处理步进 ===
+            Builder.SetInsertPoint(step_block);
+            // 计算步进后的值
+            llvm::Value *next_var = Builder.CreateAdd(Builder.CreateAlignedLoad(llvm::Type::getInt32Ty(TheContext), loopVari, 4), stepValue, "next_var");
+            Builder.CreateAlignedStore(next_var, loopVari, 4);
+            // 跳转到头部
+            Builder.CreateBr(loop_cond_block);
+            // 回写循环有效判断
+            Builder.SetInsertPoint(prehead_block);
+            Builder.CreateCondBr(loop_valid, loop_entry_block, loop_after_block);
+
+            // 转到新的块中
+            Builder.SetInsertPoint(loop_after_block);
+
+            return true;
+        }
+
+        bool Emit(ForStmt *forStmt) {
             // 初始值
             llvm::Value *start_value = Emit(forStmt->start_value_);
             assert(start_value);
@@ -321,24 +393,9 @@ namespace opene {
             // 步进值
             llvm::Value *step_value = Emit(forStmt->step_value_);
             assert(step_value);
-            // TODO: 通过对起始值、结束值、步进值进行检查，判断是否有限循环。
-            llvm::Value *K = nullptr;
-            // 循环头块
-            llvm::BasicBlock *preheader_block = Builder.GetInsertBlock();
-            // 循环体块
-            llvm::BasicBlock *loop_block = llvm::BasicBlock::Create(TheContext, "loop", TheFunction);
-            Builder.CreateBr(loop_block);
-            Builder.SetInsertPoint(loop_block);
-            // 将初始化表达式装入头块中
-            llvm::PHINode *loop_variable = Builder.CreatePHI(llvm::Type::getInt64Ty(TheContext), 2, "i");
-            loop_variable->addIncoming(start_value, preheader_block);
-            // 生成循环体
-            llvm::Value *loop_body = Emit(forStmt->loop_body_);
-            assert(loop_body);
-            llvm::Value *next_var = Builder.CreateAdd(loop_variable, step_value, "nextvar");
-            // 循环条件判定
-            // TODO: 根据循环方向，判断比较关系。
-            llvm::Value *stop_condition = Builder.CreateICmpNE(stop_value)
+            bool build_range_success = BuildRangeFor(start_value, stop_value, step_value, , forStmt->loop_body_);
+
+            return build_range_success;
         }
 
         llvm::Value *Emit(DoWhileStmt *doWhileStmt);
