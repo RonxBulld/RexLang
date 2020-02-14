@@ -328,9 +328,12 @@ namespace opene {
         llvm::Value *Emit(RangeForStmt *rangeForStmt);
 
         bool BuildRangeFor(llvm::Value *startValue, llvm::Value *stopValue, llvm::Value *stepValue, llvm::Value *loopVari, Statement *loopBody) {
-
+            // 当前块
             llvm::BasicBlock *prehead_block = Builder.GetInsertBlock();
+            // 真实循环变量
+            llvm::Value *real_loop_vari = Builder.CreateAlloca(llvm::Type::getInt32Ty(TheContext), nullptr, "$.real_loop_vari");
 
+            // 判断循环是否有效
             // Valid = ((stop - start) * step) > 0
             llvm::Value *range_distance = Builder.CreateSub(stopValue, startValue, "distance");
             llvm::Value *loop_valid = Builder.CreateICmpSGT(Builder.CreateMul(range_distance, stepValue), CreateInt(0), "valid");
@@ -342,7 +345,7 @@ namespace opene {
             step_gtz = Builder.CreateIntCast(step_gtz, llvm::Type::getInt32Ty(TheContext), false, "cast_i1_to_i32");
             llvm::Value *K = Builder.CreateSub(Builder.CreateMul(step_gtz, CreateInt(2)), CreateInt(1), "K");
             // 设置初始值
-            Builder.CreateAlignedStore(startValue, loopVari, 4);
+            Builder.CreateAlignedStore(startValue, real_loop_vari, 4);
 
             // === 计算循环条件并选择分支 ===
             // 循环判断块
@@ -350,7 +353,7 @@ namespace opene {
             Builder.CreateBr(loop_cond_block);
             Builder.SetInsertPoint(loop_cond_block);
             // 循环条件值 (K*i)<=(K*stop)
-            llvm::Value *loop_val = Builder.CreateAlignedLoad(llvm::Type::getInt32Ty(TheContext), loopVari, 4);
+            llvm::Value *loop_val = Builder.CreateAlignedLoad(llvm::Type::getInt32Ty(TheContext), real_loop_vari, 4);
             llvm::Value *loop_cv = Builder.CreateICmpSLE(Builder.CreateMul(K, loop_val), Builder.CreateMul(K, stopValue));
             // 循环体块
             llvm::BasicBlock *loop_body_block = llvm::BasicBlock::Create(TheContext, "loop_body", TheFunction);
@@ -363,14 +366,18 @@ namespace opene {
 
             // === 开始为循环体生成代码 ===
             Builder.SetInsertPoint(loop_body_block);
+            if (loopVari) {
+                // 更新循环值到名义循环变量
+                Builder.CreateAlignedStore(Builder.CreateAlignedLoad(llvm::Type::getInt32Ty(TheContext), real_loop_vari, 4), loopVari, 4);
+            }
             Emit(loopBody);
             Builder.CreateBr(step_block);
 
             // === 开始处理步进 ===
             Builder.SetInsertPoint(step_block);
             // 计算步进后的值
-            llvm::Value *next_var = Builder.CreateAdd(Builder.CreateAlignedLoad(llvm::Type::getInt32Ty(TheContext), loopVari, 4), stepValue, "next_var");
-            Builder.CreateAlignedStore(next_var, loopVari, 4);
+            llvm::Value *next_var = Builder.CreateAdd(Builder.CreateAlignedLoad(llvm::Type::getInt32Ty(TheContext), real_loop_vari, 4), stepValue, "next_var");
+            Builder.CreateAlignedStore(next_var, real_loop_vari, 4);
             // 跳转到头部
             Builder.CreateBr(loop_cond_block);
             // 回写循环有效判断
@@ -384,7 +391,7 @@ namespace opene {
         }
 
         bool Emit(ForStmt *forStmt) {
-            // 初始值
+            // 初始值std::enable_if
             llvm::Value *start_value = Emit(forStmt->start_value_);
             assert(start_value);
             // 结束值
@@ -393,7 +400,13 @@ namespace opene {
             // 步进值
             llvm::Value *step_value = Emit(forStmt->step_value_);
             assert(step_value);
-            bool build_range_success = BuildRangeFor(start_value, stop_value, step_value, , forStmt->loop_body_);
+            // 循环变量
+            llvm::Value *loop_vari = nullptr;
+            if (forStmt->loop_vari_) {
+                loop_vari = Emit(forStmt->loop_vari_);
+                assert(loop_vari);
+            }
+            bool build_range_success = BuildRangeFor(start_value, stop_value, step_value, loop_vari, forStmt->loop_body_);
 
             return build_range_success;
         }

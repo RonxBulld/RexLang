@@ -392,16 +392,16 @@ namespace opene {
                 }
             } else {
                 // 如果循环变量不存在则隐式创建循环变量
-                FunctionDecl *function_decl = ASTUtility::FindSpecifyTypeParent<FunctionDecl>(loopStatement);
-                assert(function_decl);
-                StringRef reference_name = loopStatement->ast_context_->CreateString("implicit_loop_vari");
-                ASTContext *ast_context = loopStatement->ast_context_;
-                LocalVariableDecl *implicit_lv_decl = this->InsertLocalVariable(reference_name, ast_context, function_decl);
-                for_stmt->loop_vari_ = CreateNode<HierarchyIdentifier>(ast_context);
-                Identifier *implicit_lv = CreateNode<Identifier>(ast_context);
-                implicit_lv->name_.string_ = implicit_lv_decl->name_.string_;
-                for_stmt->loop_vari_->name_components_.push_back(implicit_lv);
-                for_stmt->loop_vari_->qualified_type_ = implicit_lv_decl->type_decl_ptr_;
+//                FunctionDecl *function_decl = ASTUtility::FindSpecifyTypeParent<FunctionDecl>(loopStatement);
+//                assert(function_decl);
+//                StringRef reference_name = loopStatement->ast_context_->CreateString("implicit_loop_vari");
+//                ASTContext *ast_context = loopStatement->ast_context_;
+//                LocalVariableDecl *implicit_lv_decl = this->InsertLocalVariable(reference_name, ast_context, function_decl);
+//                for_stmt->loop_vari_ = CreateNode<HierarchyIdentifier>(ast_context);
+//                Identifier *implicit_lv = CreateNode<Identifier>(ast_context);
+//                implicit_lv->name_.string_ = implicit_lv_decl->name_.string_;
+//                for_stmt->loop_vari_->name_components_.push_back(implicit_lv);
+//                for_stmt->loop_vari_->qualified_type_ = implicit_lv_decl->type_decl_ptr_;
             }
         } else if (DoWhileStmtPtr do_while_stmt = loopStatement->as<DoWhileStmt>()) {
             // 检查条件表达式类型是否为布尔类型
