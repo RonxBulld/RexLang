@@ -29,6 +29,58 @@ namespace opene {
 
     class IREmit {
     private:
+        // 可控结构
+        class ControlableStructure {
+        private:
+            llvm::BasicBlock *head_bb = nullptr;
+            llvm::BasicBlock *true_bb = nullptr;
+            llvm::BasicBlock *false_bb = nullptr;
+            llvm::BasicBlock *tail_bb = nullptr;
+        public:
+            ControlableStructure(
+                    llvm::BasicBlock *headBB,
+                    llvm::BasicBlock *trueBB,
+                    llvm::BasicBlock *falseBB,
+                    llvm::BasicBlock *tailBB
+                    )
+                    : head_bb(headBB), true_bb(trueBB), false_bb(falseBB), tail_bb(tailBB) {
+            }
+
+        public:
+            llvm::BasicBlock *getHeadBB() const {
+                return head_bb;
+            }
+
+            void setHeadBB(llvm::BasicBlock *headBB) {
+                head_bb = headBB;
+            }
+
+            llvm::BasicBlock *getTrueBB() const {
+                return true_bb;
+            }
+
+            void setTrueBb(llvm::BasicBlock *trueBB) {
+                true_bb = trueBB;
+            }
+
+            llvm::BasicBlock *getFalseBB() const {
+                return false_bb;
+            }
+
+            void setFalseBb(llvm::BasicBlock *falseBB) {
+                false_bb = falseBB;
+            }
+
+            llvm::BasicBlock *getTailBB() const {
+                return tail_bb;
+            }
+
+            void setTailBB(llvm::BasicBlock *tailBB) {
+                tail_bb = tailBB;
+            }
+        };
+
+    private:
         llvm::LLVMContext TheContext;
         llvm::IRBuilder<> Builder;
         llvm::Module * TheModule = nullptr;
@@ -38,6 +90,7 @@ namespace opene {
         std::map<BaseVariDecl*, llvm::Value*> variable_object_pool_;
         std::map<TypeDecl*, llvm::Type*> type_object_pool_;
         std::map<FunctionDecl*, llvm::Function*> function_object_pool_;
+        std::stack<ControlableStructure> controlable_struct_stack_;
 
     private:
         llvm::Type *GetType(TypeDecl *typeDecl) {
@@ -61,14 +114,31 @@ namespace opene {
          * 根据请求的变量不同执行不同的操作
          * 参数 - 直接
          * 全局变量 - Builder.CreateLoad
+         * 局部变量 - Builder.CreateLoad
          */
-        llvm::Value *UseVariable(llvm::Value *variable) {
+        llvm::Value *LoadVariable(llvm::Value *variable) {
             if (llvm::GlobalVariable *global_variable = llvm::dyn_cast<llvm::GlobalVariable>(variable)) {
-                return Builder.CreateLoad(global_variable->getValueType(), variable);
+                return Builder.CreateLoad(global_variable->getValueType(), global_variable);
+            } else if (llvm::AllocaInst *alloca_inst = llvm::dyn_cast<llvm::AllocaInst>(variable)) {
+                return Builder.CreateLoad(alloca_inst->getAllocatedType(), alloca_inst);
             } else if (llvm::Argument *argument = llvm::dyn_cast<llvm::Argument>(variable)) {
                 return argument;
             } else if (llvm::LoadInst *load_inst = llvm::dyn_cast<llvm::LoadInst>(variable)) {
                 return load_inst;
+            } else {
+                assert(false);
+                return variable;
+            }
+        }
+
+        bool StoreVariable(llvm::Value *value, llvm::Value *variable) {
+            value = LoadVariable(value);
+            if (llvm::GlobalVariable *global_variable = llvm::dyn_cast<llvm::GlobalVariable>(variable)) {
+                Builder.CreateStore(value, global_variable);
+                return true;
+            } else if (llvm::AllocaInst *alloca_inst = llvm::dyn_cast<llvm::AllocaInst>(variable)) {
+                Builder.CreateStore(value, alloca_inst);
+                return true;
             } else {
                 assert(false);
                 return variable;
@@ -146,7 +216,16 @@ namespace opene {
             return CreateGlobalVariable(globalVariableDecl->type_decl_ptr_, globalVariableDecl->name_.string_.str());
         }
 
-        llvm::Value *Emit(ParameterDecl *parameterDecl);
+        llvm::Value *Emit(ParameterDecl *parameterDecl) {
+            llvm::Type *param_type = GetType(parameterDecl->type_decl_ptr_);
+            // 创建参数在栈内的空间
+            llvm::AllocaInst *alloca_param = Builder.CreateAlloca(param_type, nullptr, parameterDecl->name_.string_.str());
+            variable_object_pool_[parameterDecl] = alloca_param;
+            // 将参数值加载到栈内存中
+            llvm::Argument *argument = TheFunction->arg_begin() + parameterDecl->index_;
+            StoreVariable(argument, alloca_param);
+            return alloca_param;
+        }
 
         llvm::Value *Emit(MemberVariableDecl *memberVariableDecl);
 
@@ -176,14 +255,17 @@ namespace opene {
             llvm::Type *vari_type = GetType(localVariableDecl->type_decl_ptr_);
             std::string vari_name = localVariableDecl->name_.string_.str();
             if (localVariableDecl->is_static_ == false) {
+                // 非静态变量在栈上创建
                 llvm::AllocaInst *lvari = Builder.CreateAlloca(vari_type, nullptr, vari_name);
                 lvari->setAlignment(4);
+                // TODO: 添加初始化表达式
                 return lvari;
             } else {
                 // 在静态变量前增加名字修饰以免冲突
                 vari_name = TheASTFunction->super_set_->name_.string_.str() + "." + TheASTFunction->name_.string_.str() + "." + vari_name;
                 llvm::GlobalVariable *static_vari = CreateGlobalVariable(localVariableDecl->type_decl_ptr_, vari_name);
                 static_vari->setLinkage(llvm::GlobalValue::LinkageTypes::InternalLinkage);
+                // TODO: 添加初始化表达式
                 return static_vari;
             }
         }
@@ -201,13 +283,13 @@ namespace opene {
             // 构建形参声明
             std::vector<llvm::Type*> parameter_types;
             for (ParameterDecl *parameter_decl : functorDecl->parameters_) {
-                llvm::Type *parameter_type = Emit(parameter_decl->type_decl_ptr_);
+                llvm::Type *parameter_type = GetType(parameter_decl->type_decl_ptr_);
                 parameter_types.push_back(parameter_type);
             }
             // 构建返回值类型
-            llvm::Type *return_type = Emit(functorDecl->return_type_);
+            llvm::Type *return_type = GetType(functorDecl->return_type_);
             // 构建函数原型
-            llvm::FunctionType *function_type = llvm::FunctionType::get(return_type, parameter_types, false);
+            llvm::FunctionType *function_type = llvm::FunctionType::get(return_type, parameter_types, false);   // TODO: 这里暂时设为False
             std::string function_name = functorDecl->name_.string_.str();
             // 构建函数
             llvm::Function *function = llvm::Function::Create(function_type, llvm::Function::ExternalLinkage, function_name, TheModule);
@@ -242,6 +324,15 @@ namespace opene {
             // 开始创建函数体
             llvm::BasicBlock *basic_block = llvm::BasicBlock::Create(TheContext, "entry", function);
             Builder.SetInsertPoint(basic_block);
+            // 创建返回值栈空间
+            if (functionDecl->return_type_) {
+                llvm::Type *ret_type = GetType(functionDecl->return_type_);
+                Builder.CreateAlloca(ret_type, nullptr, "$.ret");
+            }
+            // 创建参数变量
+            for (ParameterDecl *param_vari_item : functionDecl->parameters_) {
+                Emit(param_vari_item);
+            }
             // 创建局部变量
             for (auto &local_vari_item : functionDecl->local_vari_) {
                 Emit(local_vari_item.second);
@@ -260,15 +351,7 @@ namespace opene {
             return function;
         }
 
-        llvm::Function *Emit(DllCommandDecl *dllCommandDecl) {
-            std::string dll_name = dllCommandDecl->name_.string_.str();
-            llvm::Function *function = TheModule->getFunction(dll_name);
-            if (!function) {
-                return Emit(dllCommandDecl->as<FunctorDecl>());
-            } else {
-                return function;
-            }
-        }
+//        llvm::Function *Emit(DllCommandDecl *dllCommandDecl)；
 
         llvm::Value *Emit(Statement *statement);
 
@@ -322,18 +405,19 @@ namespace opene {
         }
 
         bool Emit(LoopStatement *loopStatement) {
+            bool success = false;
             if (WhileStmt *whileStmt = loopStatement->as<WhileStmt>()) {
-                return Emit(whileStmt);
+                success = Emit(whileStmt);
             } else if (RangeForStmt *rangeForStmt = loopStatement->as<RangeForStmt>()) {
-                return Emit(rangeForStmt);
+                success = Emit(rangeForStmt);
             } else if (ForStmt *forStmt = loopStatement->as<ForStmt>()) {
-                return Emit(forStmt);
+                success = Emit(forStmt);
             } else if (DoWhileStmt *doWhileStmt = loopStatement->as<DoWhileStmt>()) {
-                return Emit(doWhileStmt);
+                success = Emit(doWhileStmt);
             } else {
                 assert(false);
-                return false;
             }
+            return success;
         }
 
         bool Emit(WhileStmt *whileStmt) {
@@ -350,9 +434,13 @@ namespace opene {
             // 循环条件
             llvm::Value *loop_condition = Emit(whileStmt->condition_);
             Builder.CreateCondBr(loop_condition, loop_block, after_block);
+
+            controlable_struct_stack_.push({condition_block, loop_block, after_block, after_block});
             // 开始生成循环体
             Builder.SetInsertPoint(loop_block);
             Emit(whileStmt->loop_body_);
+            controlable_struct_stack_.pop();
+
             // 直接跳到循环条件块
             Builder.CreateBr(condition_block);
             // 转到新的块中
@@ -397,6 +485,7 @@ namespace opene {
             // 插入循环判断分支跳转
             Builder.CreateCondBr(loop_cv, loop_body_block, loop_after_block);
 
+            controlable_struct_stack_.push({loop_cond_block, loop_body_block, loop_after_block, loop_after_block});
             // === 开始为循环体生成代码 ===
             Builder.SetInsertPoint(loop_body_block);
             if (loopVari) {
@@ -405,6 +494,7 @@ namespace opene {
             }
             Emit(loopBody);
             Builder.CreateBr(step_block);
+            controlable_struct_stack_.pop();
 
             // === 开始处理步进 ===
             Builder.SetInsertPoint(step_block);
@@ -465,11 +555,19 @@ namespace opene {
             // 循环体块
             llvm::BasicBlock *loop_block = llvm::BasicBlock::Create(TheContext, "$.loop", TheFunction);
             Builder.CreateBr(loop_block);
+            // 条件判定块
+            llvm::BasicBlock *cond_block = llvm::BasicBlock::Create(TheContext, "$.cond", TheFunction);
+            // 循环块下一个块
+            llvm::BasicBlock *after_block = llvm::BasicBlock::Create(TheContext, "$.afterloop", TheFunction);
+
+            controlable_struct_stack_.push({cond_block, loop_block, after_block, after_block});
             Builder.SetInsertPoint(loop_block);
             // 循环体
             Emit(doWhileStmt->loop_body_);
-            // 循环块下一个块
-            llvm::BasicBlock *after_block = llvm::BasicBlock::Create(TheContext, "$.afterloop", TheFunction);
+            controlable_struct_stack_.pop();
+            Builder.CreateBr(cond_block);
+
+            Builder.SetInsertPoint(cond_block);
             // 条件判定，分支选择跳转
             llvm::Value *loop_condition = Emit(doWhileStmt->conditon_);
             Builder.CreateCondBr(loop_condition, loop_block, after_block);
@@ -479,10 +577,58 @@ namespace opene {
         }
 
         llvm::Value *Emit(AssignStmt *assignStmt);
-        llvm::Value *Emit(ControlStmt *controlStmt);
-        llvm::Value *Emit(LoopControlStmt *loopControlStmt);
-        llvm::Value *Emit(ContinueStmt *continueStmt);
-        llvm::Value *Emit(BreakStmt *breakStmt);
+
+        bool Emit(ControlStmt *controlStmt) {
+            if (LoopControlStmt *loopControlStmt = controlStmt->as<LoopControlStmt>()) {
+                return Emit(loopControlStmt);
+            } else if (ReturnStmt *returnStmt = controlStmt->as<ReturnStmt>()) {
+                return Emit(returnStmt);
+            } else if (ExitStmt *exitStmt = controlStmt->as<ExitStmt>()) {
+                return Emit(exitStmt);
+            } else {
+                assert(false);
+                return false;
+            }
+        }
+
+        bool Emit(LoopControlStmt *loopControlStmt) {
+            if (ContinueStmt *continueStmt = loopControlStmt->as<ContinueStmt>()) {
+                return Emit(continueStmt);
+            } else if (BreakStmt *breakStmt = loopControlStmt->as<BreakStmt>()) {
+                return Emit(breakStmt);
+            } else {
+                assert(false);
+                return false;
+            }
+        }
+
+        bool Emit(ContinueStmt *continueStmt) {
+            if (controlable_struct_stack_.empty()) {
+                assert(false);
+                return false;
+            }
+            if (llvm::BasicBlock *head_block = controlable_struct_stack_.top().getHeadBB()) {
+                Builder.CreateBr(head_block);
+                return true;
+            } else {
+                assert(false);
+                return false;
+            }
+        }
+
+        bool Emit(BreakStmt *breakStmt) {
+            if (controlable_struct_stack_.empty()) {
+                assert(false);
+                return false;
+            }
+            if (llvm::BasicBlock *head_block = controlable_struct_stack_.top().getTailBB()) {
+                Builder.CreateBr(head_block);
+                return true;
+            } else {
+                assert(false);
+                return false;
+            }
+        }
 
         llvm::ReturnInst *Emit(ReturnStmt *returnStmt) {
             llvm::ReturnInst *return_inst = nullptr;

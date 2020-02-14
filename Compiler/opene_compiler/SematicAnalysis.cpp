@@ -218,9 +218,11 @@ namespace opene {
             return false;
         }
         // 3.1.2. 明确参数类型
+        size_t param_idx = 0;
         for (ParameterDeclPtr parameter_decl : functorDecl->parameters_) {
             parameter_decl->type_decl_ptr_ = this->QueryTypeDeclWithName(this->translate_unit_, parameter_decl->type_name_.string_, &this->analysis_context_);
             this->SetupParameterType(parameter_decl);
+            parameter_decl->index_ = param_idx;
             if (parameter_decl->type_decl_ptr_ == nullptr) {
                 assert(false);
                 return false;

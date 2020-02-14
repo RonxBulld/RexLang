@@ -307,6 +307,11 @@ namespace opene {
         // === 下面是经过语义分析后的数据 ===
 
         /*
+         * 形参位置索引
+         */
+        size_t index_ = 0;
+
+        /*
          * 是否引用类型
          */
         bool is_reference = false;
