@@ -12,9 +12,21 @@
 #include <set>
 
 #include "common_rt/TString.h"
+#include "common_rt/ordered_map/ordered_map.h"
 #include "ASTContext.h"
 
 namespace opene {
+
+    template <typename _Key, typename _Val>
+    class ordered_map : public tsl::ordered_map<_Key, _Val> {
+    public:
+        ordered_map() {}
+        ordered_map(const ordered_map<_Key, _Val> &other) {
+            *this = other;
+        }
+        ~ordered_map() {}
+        ordered_map<_Key, _Val> &operator=(const ordered_map<_Key, _Val> &other) = default;
+    };
 
     class ASTContext;
 
@@ -245,7 +257,7 @@ namespace opene {
      */
     struct GlobalVariableFile : public SourceFile {
         static const NodeType node_type = NodeType::kNTyGlobalVariableFile;
-        std::map<StringRef, GlobalVariableDeclPtr> global_variable_map_;
+        ordered_map<StringRef, GlobalVariableDeclPtr> global_variable_map_;
     };
 
     /**
@@ -253,7 +265,7 @@ namespace opene {
      */
     struct DataStructureFile : public SourceFile {
         static const NodeType node_type = NodeType::kNTyDataStructureFile;
-        std::map<StringRef, StructureDeclPtr> structure_decl_map_;
+        ordered_map<StringRef, StructureDeclPtr> structure_decl_map_;
     };
 
     /**
@@ -261,7 +273,7 @@ namespace opene {
      */
     struct DllDefineFile : public SourceFile {
         static const NodeType node_type = NodeType::kNTyDllDefineFile;
-        std::map<StringRef, DllCommandDeclPtr> dll_declares_;
+        ordered_map<StringRef, DllCommandDeclPtr> dll_declares_;
     };
 
     /**
@@ -421,7 +433,7 @@ namespace opene {
     struct StructureDecl : public TypeDecl {
         static const NodeType node_type = NodeType::kNTyStructureDecl;
         TString access_;
-        std::map<StringRef, MemberVariableDeclPtr> members_;
+        ordered_map<StringRef, MemberVariableDeclPtr> members_;
     };
 
     /*
@@ -463,7 +475,7 @@ namespace opene {
         // 访问级别
         TString access_;
         // 局部变量列表
-        std::map<StringRef, LocalVariableDeclPtr> local_vari_;
+        ordered_map<StringRef, LocalVariableDeclPtr> local_vari_;
         // 语句列表
         StatementListPtr statement_list_ = nullptr;
 
@@ -500,8 +512,8 @@ namespace opene {
         static const NodeType node_type = NodeType::kNTyProgSetDecl;
         TString base_;
         TString access_;
-        std::map<StringRef, FileVariableDeclPtr> file_static_variables_;
-        std::map<StringRef, FunctionDeclPtr> function_decls_;
+        ordered_map<StringRef, FileVariableDeclPtr> file_static_variables_;
+        ordered_map<StringRef, FunctionDeclPtr> function_decls_;
     };
 
     /**
@@ -827,20 +839,22 @@ namespace opene {
         // === 下面是经过语义分析后的数据 ===
 
         // 全局类型索引表
-        std::map<StringRef, TypeDeclPtr> global_type_;
+        ordered_map<StringRef, TypeDeclPtr> global_type_;
         // 全局变量索引表
-        std::map<StringRef, GlobalVariableDeclPtr> global_variables_;
+        ordered_map<StringRef, GlobalVariableDeclPtr> global_variables_;
         // 支持库引用列表
         std::set<StringRef> libraries_list_;
         // 程序集索引表
-        std::map<StringRef, ProgSetDeclPtr> program_sets_;
+        ordered_map<StringRef, ProgSetDeclPtr> program_sets_;
         // 函数定义表
-        std::map<StringRef, FunctionDeclPtr> function_decls_;
+        ordered_map<StringRef, FunctionDeclPtr> function_decls_;
         // DLL函数声明表
-        std::map<StringRef, DllCommandDeclPtr> dll_declares_;
+        ordered_map<StringRef, DllCommandDeclPtr> dll_declares_;
         // 函数定义表和DLL声明表的合并
         // TODO: 是否要将上面两个逗逼玩意干掉
-        std::map<StringRef, FunctorDeclPtr> functor_declares_;
+        ordered_map<StringRef, FunctorDeclPtr> functor_declares_;
+        // 程序入口
+        FunctorDeclPtr main_entry_ = nullptr;
     };
 
     struct NodeWarp {

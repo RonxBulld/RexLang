@@ -67,23 +67,27 @@ namespace opene {
         // 4. 针对每一个程序集
         for (auto & prog_file_item : this->translate_unit_->program_sets_) {
             this->analysis_context_.PushScope(prog_file_item.second);
-            // 5. 针对每一个函数定义
+            // 4.1 针对每一个函数定义
             for (auto &func_item : prog_file_item.second->function_decls_) {
                 this->analysis_context_.PushScope(func_item.second);
-                // 5.1. 明确函数定义局部变量的类型指针
+                // 4.1.1. 明确函数定义局部变量的类型指针
                 if (this->SetupFunctionLocalVariableType(func_item.second) == false) {
                     return false;
                 }
-                // 5.2. 检查每一条语句构造和表达式运算是否合法
+                // 4.1.2. 检查每一条语句构造和表达式运算是否合法
                 if (this->CheckStatementsAndExpression(func_item.second->statement_list_) == false) {
                     return false;
                 }
-                // 5.3. 检查所有分支返回
+                // 4.1.3. 检查所有分支返回
                 if (this->CheckAllBranchesReturnCorrectly(func_item.second) == false) {
                     return false;
                 }
             }
         }
+        // 5. 后续处理
+        // 5.1. 指定入口函数
+        translateUnitPtr->main_entry_ = this->analysis_context_.QueryTagDeclFromDynSymbolTableWithName(u8"_启动子程序")->as<FunctorDecl>();
+        assert(translateUnitPtr->main_entry_);
         return true;
     }
 
