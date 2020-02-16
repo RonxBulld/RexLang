@@ -620,6 +620,20 @@ namespace opene {
 
     TypeDecl *SematicAnalysis::CheckValue(Value *value) {
         if (ValueOfDataSet * value_of_data_set = value->as<ValueOfDataSet>()) {
+            // 当前版本只允许字节集中的元素全为整数常量
+            for (Expression *element : value_of_data_set->elements_) {
+                if (ValueOfDecimal *value_of_decimal = element->as<ValueOfDecimal>()) {
+                    if (value_of_decimal->type_ != ValueOfDecimal::type::kInt) {
+                        assert(false);
+                        return nullptr;
+                    }
+                } else if (ResourceRefExpression *resource_ref_expr = element->as<ResourceRefExpression>()) {
+                    // TODO: 检查值
+                } else {
+                    assert(false);
+                    return nullptr;
+                }
+            }
             TypeDecl *type_decl = this->QueryBuiltinTypeWithEnum(this->translate_unit_, BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDataSet);
             assert(type_decl);
             return type_decl;

@@ -229,9 +229,8 @@ namespace opene {
             }
         }
 
-        template <size_t bits = 32>
-        llvm::ConstantInt *CreateInt(int intValue) {
-            return llvm::ConstantInt::get(TheContext, llvm::APInt(bits, intValue));
+        llvm::ConstantInt *CreateInt(int intValue, unsigned int nBits = 32, bool isSigned = false) {
+            return llvm::ConstantInt::get(TheContext, llvm::APInt(nBits, intValue, isSigned));
         }
 
     public:
@@ -951,7 +950,8 @@ namespace opene {
             } else if (FuncAddrExpression *func_addr_expression = value->as<FuncAddrExpression>()) {
                 return Emit(func_addr_expression);
             } else if (ResourceRefExpression *resource_ref_expr = value->as<ResourceRefExpression>()) {
-                return Emit(resource_ref_expr);
+                assert(false);
+                return nullptr;
             } else if (ValueOfBool *value_of_bool = value->as<ValueOfBool>()) {
                 return Emit(value_of_bool);
             } else if (ValueOfDecimal *value_of_decimal = value->as<ValueOfDecimal>()) {
@@ -964,22 +964,45 @@ namespace opene {
             }
         }
 
-        llvm::Value *Emit(ValueOfDataSet *valueOfDataSet);
+        llvm::Constant *MakeGlobalConstantByteSet(const std::vector<llvm::Constant*> &elements) {
 
-        llvm::Value *Emit(ValueOfDatetime *valueOfDatetime);
+            // 创建数组数据
 
-        llvm::Value *Emit(FuncAddrExpression *funcAddrExpression);
+            llvm::ArrayType *arr_ty = llvm::ArrayType::get(Builder.getInt8Ty(), elements.size());
+            llvm::Constant *init_val = llvm::ConstantArray::get(arr_ty, elements);
 
-        llvm::Value *Emit(ResourceRefExpression *resourceRefExpression);
+            return init_val;
+        }
+
+        llvm::Value *Emit(ValueOfDataSet *valueOfDataSet) {
+            std::vector<llvm::Constant*> elements;
+            for (Expression *element_expr : valueOfDataSet->elements_) {
+                llvm::Constant *e = llvm::dyn_cast<llvm::Constant>(Emit(element_expr));
+                elements.push_back(e);
+            }
+            return MakeGlobalConstantByteSet(elements);
+        }
+
+        llvm::Value *Emit(ValueOfDatetime *valueOfDatetime) {
+            llvm::Type *type = type_object_pool_[valueOfDatetime->expression_type_];
+            assert(type);
+            return CreateInt(valueOfDatetime->time_, type->getScalarSizeInBits());
+        }
+
+        llvm::Value *Emit(FuncAddrExpression *funcAddrExpression) {
+            llvm::Function *func = function_object_pool_[funcAddrExpression->functor_declare_];
+            assert(func);
+            return llvm::ConstantExpr::getPtrToInt(func, Builder.getInt32Ty());
+        }
 
         llvm::Value *Emit(ValueOfBool *valueOfBool) {
-            return llvm::ConstantInt::get(TheContext, llvm::APInt(1, (int)valueOfBool->value_, false));
+            return CreateInt((int)valueOfBool->value_, 1, false);
         }
 
         llvm::Value *Emit(ValueOfDecimal *valueOfDecimal) {
             switch (valueOfDecimal->type_) {
                 case ValueOfDecimal::type::kInt: {
-                    return llvm::ConstantInt::get(TheContext, llvm::APInt(64, valueOfDecimal->int_val_, true));
+                    return CreateInt(valueOfDecimal->int_val_, 32, true);
                 }
                 case ValueOfDecimal::type::kFloat: {
                     return llvm::ConstantFP::get(TheContext, llvm::APFloat(valueOfDecimal->float_val_));
