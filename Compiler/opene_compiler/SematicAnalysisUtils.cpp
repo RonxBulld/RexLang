@@ -18,7 +18,10 @@ namespace opene {
         assert(nameComponent);
         if (ArrayIndex *array_index = nameComponent->as<ArrayIndex>()) {
             TypeDecl *index_target = EvalBaseNameComponentType(ASTUtility::GetArrayIndexBase(array_index), frontType);
-            if (!index_target) { return nullptr; }
+            if (!index_target) {
+                assert(false);
+                return nullptr;
+            }
             // 检查类型是否可索引
             if (ASTAssert::TypeCanIndexable(index_target) == false) {
                 assert(false);
@@ -36,10 +39,11 @@ namespace opene {
             return ASTUtility::GetCallableReturnType(call_target);
 
         } else if (Identifier *identifier = nameComponent->as<Identifier>()) {
-            // 必须是实体定义
             TagDecl *id_type = nullptr;
             if (frontType) {
+
                 // 如果frontType非空表明有父级类型，将从父级类型中查找子类型
+
                 if (StructureDecl *structure_decl = frontType->as<StructureDecl>()) {
                     auto found = structure_decl->members_.find(identifier->name_.string_);
                     if (found != structure_decl->members_.end()) {
@@ -50,12 +54,24 @@ namespace opene {
                     }
                 }
             } else {
+
                 // 如果frontType为空则表明无父级类型，将从动态符号表中查询
+
                 id_type = this->analysis_context_.QueryTagDeclFromDynSymbolTableWithName(identifier->name_.string_);
             }
+
+            // 必须是实体定义
+
             if (TypeDecl *type_decl = id_type->as<TypeDecl>()) {
-                return type_decl;
+                if (FunctionDecl *function_decl = type_decl->as<FunctionDecl>()) {
+                    identifier->function_ref_ = function_decl;
+                    return function_decl;
+                } else {
+                    assert(false);
+                    return nullptr;
+                }
             } else if (BaseVariDecl *base_vari_decl = id_type->as<BaseVariDecl>()) {
+                identifier->reference_ = base_vari_decl;
                 return base_vari_decl->type_decl_ptr_;
             } else {
                 assert(false);

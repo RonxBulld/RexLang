@@ -126,8 +126,10 @@ namespace opene {
     bool SematicAnalysis::SetupAllStructMemberType() {
         for (auto & item: this->translate_unit_->global_type_) {
             if (StructureDeclPtr structure_decl = item.second->as<StructureDecl>()) {
+                size_t idx = 0;
                 for (auto & member_item : structure_decl->members_) {
                     this->SetupMemberVariableType(member_item.second);
+                    member_item.second->index_of_struct_ = idx++;
                     if (member_item.second->type_decl_ptr_ == nullptr) {
                         assert(false);
                         return false;

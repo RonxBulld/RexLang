@@ -118,11 +118,11 @@ namespace opene {
         return base;
     }
 
-    ErrOr<std::vector<Expression *>> ASTUtility::GetNameComponentIndexList(NameComponent *nameComponent) {
+    ErrOr<std::vector<Expression *>> ASTUtility::GetArrayIndexIndexList(ArrayIndex *arrayIndex) {
         std::vector<Expression *> indexes;
-        while (ArrayIndex *array_index = nameComponent->as<ArrayIndex>()) {
-            indexes.push_back(array_index->index_);
-            nameComponent = array_index->base_;
+        while (arrayIndex) {
+            indexes.push_back(arrayIndex->index_);
+            arrayIndex = arrayIndex->base_->as<ArrayIndex>();
         }
         return MakeNoErrVal(indexes);
     }

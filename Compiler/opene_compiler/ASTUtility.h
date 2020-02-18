@@ -73,7 +73,7 @@ namespace opene {
         /*
          * 获取名称组件中的索引列表
          */
-        static ErrOr<std::vector<Expression*>> GetNameComponentIndexList(NameComponent *nameComponent);
+        static ErrOr<std::vector<Expression*>> GetArrayIndexIndexList(ArrayIndex *arrayIndex);
 
         /*
          * 获取定义的索引维度信息

@@ -5,5 +5,4 @@
 #include "LLVMRTIRBuilder.h"
 
 namespace opene {
-
 }

@@ -23,7 +23,9 @@
 #include <llvm/Support/ToolOutputFile.h>
 
 #include "EmitLLVMIR.h"
+#include "LLVMRTIRBuilder.h"
 #include "../opene_compiler/NodeDecl.h"
+#include "../opene_compiler/ASTUtility.h"
 
 namespace opene {
 
@@ -89,6 +91,7 @@ namespace opene {
         llvm::Module * TheModule = nullptr;
         // 当前函数(LLVM)
         llvm::Function * TheFunction = nullptr;
+        LLVMRTIRBuilder RTBuilder;
         llvm::Function *SysEntryFunc = nullptr;
         llvm::Function *InitFunc = nullptr;
         ProgSetDecl *TheProgramSet = nullptr;
@@ -417,12 +420,12 @@ namespace opene {
             structure_decl = llvm::StructType::create(TheContext, structureDecl->name_.string_.str());
             type_object_pool_[structureDecl] = structure_decl;
             // 依次生成成员类型
-            std::vector<llvm::Type*> types;
+            std::vector<llvm::Type*> members_type;
             for (auto &member_item : structureDecl->members_) {
                 llvm::Type *member_type = Emit(member_item.second->type_decl_ptr_);
-                types.emplace_back(member_type);
+                members_type.emplace_back(member_type);
             }
-            structure_decl->setBody(types);
+            structure_decl->setBody(members_type);
             return structure_decl;
         }
 
@@ -822,19 +825,71 @@ namespace opene {
 
         llvm::Value *Emit(Expression *expression);
 
-        llvm::Value *Emit(HierarchyIdentifier *hierarchyIdentifier);
+        llvm::Value *LoadFromStructOrNot(llvm::Value *structInstance, NameComponent *nameComponent) {
+            if (Identifier *identifier = nameComponent->as<Identifier>()) {    // 单名称组件
 
-        llvm::Value *Emit(NameComponent *nameComponent);
+                if (structInstance) {
+                    MemberVariableDecl *member_variable_decl = identifier->reference_->as<MemberVariableDecl>();
+                    assert(member_variable_decl);
+                    return Builder.CreateStructGEP(structInstance, member_variable_decl->index_of_struct_);
+                } else {
+                    if (llvm::Value *variable = variable_object_pool_[identifier->reference_]) {
+                        assert(variable);
+                        return variable;
+                    } else if (llvm::Function *function = function_object_pool_[identifier->function_ref_]) {
+                        assert(function);
+                        return function;
+                    } else {
+                        assert(false);
+                        return nullptr;
+                    }
+                }
 
-        llvm::Value *Emit(Identifier *identifier);
+            } else if (ArrayIndex *array_index = nameComponent->as<ArrayIndex>()) {
 
-        llvm::Value *Emit(ArrayIndex *arrayIndex) {
-            llvm::Value *base = Emit(arrayIndex->base_);
-            llvm::Value *index = Emit(arrayIndex->index_);
-            // TODO: 需要运行时支持
-            assert(false);
-            return nullptr;
+                NameComponent *base = ASTUtility::GetArrayIndexBase(array_index);
+                ErrOr<std::vector<Expression *>> indexes = ASTUtility::GetArrayIndexIndexList(array_index);
+                if (indexes.HadError()) {
+                    assert(false);
+                    return nullptr;
+                }
+                llvm::Value *arr_ptr = LoadFromStructOrNot(structInstance, base);
+                assert(arr_ptr);
+                std::vector<llvm::Value *> indexes_ir;
+                for (Expression *index : indexes.Value()) {
+                    llvm::Value *index_ir = Emit(index);
+                    assert(index_ir);
+                    indexes_ir.push_back(index_ir);
+                }
+                return RTBuilder.getArrayRT().GetElementPointer(arr_ptr, indexes_ir);
+
+            } else if (FunctionCall *function_call = nameComponent->as<FunctionCall>()) {
+                llvm::Function *func_ptr = llvm::dyn_cast<llvm::Function>(LoadFromStructOrNot(structInstance, function_call->function_name_));
+                assert(func_ptr);
+                std::vector<llvm::Value *> arguments_ir;
+                for (Expression *argument : function_call->arguments_) {
+                    llvm::Value *argument_ir = Emit(argument);
+                    assert(argument_ir);
+                    arguments_ir.push_back(argument_ir);
+                }
+                return Builder.CreateCall(func_ptr, arguments_ir);
+            } else {
+                assert(false);
+                return nullptr;
+            }
         }
+
+        llvm::Value *Emit(HierarchyIdentifier *hierarchyIdentifier) {
+            llvm::Value *previous_base = nullptr;
+            for (NameComponent *name_component : hierarchyIdentifier->name_components_) {
+                previous_base = LoadFromStructOrNot(previous_base, name_component);
+            }
+            return previous_base;
+        }
+
+//        llvm::Value *Emit(NameComponent *nameComponent);
+//        llvm::Value *Emit(Identifier *identifier);
+//        llvm::Value *Emit(ArrayIndex *arrayIndex);
 
         llvm::Value *Emit(FunctionCall *functionCall) {
             auto found_func = function_object_pool_.find(functionCall->functor_declare_);
@@ -1020,7 +1075,7 @@ namespace opene {
         }
 
     public:
-        IREmit() : Builder(llvm::IRBuilder<>(TheContext)) {
+        IREmit() : Builder(llvm::IRBuilder<>(TheContext)), RTBuilder(TheModule, Builder) {
         }
 
         ~IREmit() {

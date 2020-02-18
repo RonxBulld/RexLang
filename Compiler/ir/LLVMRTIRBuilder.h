@@ -27,19 +27,18 @@ namespace opene {
     class ArrayRT {
         friend LLVMRTIRBuilder;
     public:
-        struct Array {
-        };
-        Array *CreateArray(llvm::Type *elementType, const std::vector<unsigned> &dimensions);
-        void RedimArray(Array *arrayPtr, const std::vector<llvm::Value *> newDimensions);
-        llvm::Value *GetArrayElementCount(Array *arrayPtr);
-        llvm::Value *GetArrayDimension(Array *arrayPtr, llvm::Value *dimensionIndex);
-        llvm::Value *CloneArray(Array *arrayPtr);
-        llvm::Value *AppendElement(Array *arrayPtr, llvm::Value *newElement);
-        llvm::Value *InsertElement(Array *arrayPtr, llvm::Value *insertPos, llvm::Value *newElement);
-        llvm::Value *RemoveElement(Array *arrayPtr, llvm::Value *position, llvm::Value *count);
-        llvm::Value *CleanArray(Array *arrayPtr);
-        llvm::Value *SortArray(Array *arrayPtr, bool lessToMore);
-        llvm::Value *ZeroArray(Array *arrayPtr);
+        llvm::Value *CreateArray(llvm::Type *elementType, const std::vector<unsigned> &dimensions);
+        void RedimArray(llvm::Value *arrayPtr, const std::vector<llvm::Value *> newDimensions);
+        llvm::Value *GetArrayElementCount(llvm::Value *arrayPtr);
+        llvm::Value *GetArrayDimension(llvm::Value *arrayPtr, llvm::Value *dimensionIndex);
+        llvm::Value *GetElementPointer(llvm::Value *arrayPtr, const std::vector<llvm::Value *> indexes);
+        llvm::Value *CloneArray(llvm::Value *arrayPtr);
+        llvm::Value *AppendElement(llvm::Value *arrayPtr, llvm::Value *newElement);
+        llvm::Value *InsertElement(llvm::Value *arrayPtr, llvm::Value *insertPos, llvm::Value *newElement);
+        llvm::Value *RemoveElement(llvm::Value *arrayPtr, llvm::Value *position, llvm::Value *count);
+        llvm::Value *CleanArray(llvm::Value *arrayPtr);
+        llvm::Value *SortArray(llvm::Value *arrayPtr, bool lessToMore);
+        llvm::Value *ZeroArray(llvm::Value *arrayPtr);
     };
     class StringRT {
         friend LLVMRTIRBuilder;

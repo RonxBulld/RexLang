@@ -370,6 +370,10 @@ namespace opene {
      */
     struct MemberVariableDecl : public VariableDecl {
         static const NodeType node_type = NodeType::kNTyMemberVariableDecl;
+
+        // === 下面是经过语义分析后的数据 ===
+
+        size_t index_of_struct_ = 0;
     };
 
     /*
@@ -693,6 +697,11 @@ namespace opene {
         static const NodeType node_type = NodeType::kNTyIdentifier;
         // 引用名
         TString name_;
+
+        // === 下面是经过语义分析后的数据 ===
+
+        BaseVariDeclPtr reference_ = nullptr;
+        FunctionDeclPtr function_ref_ = nullptr;
     };
 
     /**
