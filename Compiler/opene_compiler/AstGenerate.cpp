@@ -65,9 +65,6 @@ namespace opene {
 
         // 执行语义分析，构建符号表，绑定定义引用。
 
-//        SematicAnalysis sematic_analysis;
-//        bool sematic_success = sematic_analysis.Run(translate_unit);
-
         return translate_unit;
     }
 

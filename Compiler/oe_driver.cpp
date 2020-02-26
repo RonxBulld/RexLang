@@ -65,10 +65,7 @@ namespace opene {
         bool all_parse_success = true;
         for (const FileEntry &entry : entries) {
             assert(entry.Valid());
-            compilerInstance.setParseCode(entry.GetCode());
-            if (compilerInstance.runParser() == nullptr) {
-                all_parse_success = false;
-            }
+            all_parse_success &= (compilerInstance.parseOnFile(entry) != nullptr);
         }
         if (all_parse_success) {
             if (compilerInstance.runSematicAnalysis() == false) {
@@ -93,7 +90,27 @@ namespace opene {
     TranslateUnitPtr OECompilerInstance::runParser() {
         TranslateUnitPtr translate_unit = this->ast_generate_.BuildASTFromCode(this->parse_code_, "", this->instance_name_);
         this->translate_units_.push_back(translate_unit);
+        // 对于引入的外部库进行分析
+        if (!translate_unit->source_file_.empty()) {
+            if (ProgramSetFile *program_set_file = translate_unit->source_file_.front()->as<ProgramSetFile>()) {
+                for (const TString &library : program_set_file->libraries_) {
+                    StringRef library_name = library.string_;
+                    if (this->libraries_name.find(library_name) == this->libraries_name.end()) {
+                        this->libraries_name.insert(library_name);
+                        FileEntry file_entry = FileEntry::MakeFromFile("libraries/" + library_name.str() + ".elh");
+                        TranslateUnit *library_tu = this->parseOnFile(file_entry);
+                        assert(library_tu);
+                        this->translate_units_.push_back(library_tu);
+                    }
+                }
+            }
+        }
         return translate_unit;
+    }
+
+    TranslateUnitPtr OECompilerInstance::parseOnFile(const FileEntry &fileEntry) {
+        this->setParseCode(fileEntry.GetCode());
+        return this->runParser();
     }
 
     bool OECompilerInstance::assembleTranslate() {

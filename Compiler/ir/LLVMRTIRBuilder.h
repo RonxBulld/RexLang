@@ -26,9 +26,13 @@ namespace opene {
 
     class ArrayRT {
         friend LLVMRTIRBuilder;
+        llvm::IRBuilder<> &Builder;
+        llvm::LLVMContext &Context;
     public:
-        llvm::Value *CreateArray(llvm::Type *elementType, const std::vector<unsigned> &dimensions);
-        void RedimArray(llvm::Value *arrayPtr, const std::vector<llvm::Value *> newDimensions);
+        llvm::Type *CreateArrayType(llvm::Type *elementType, const std::vector<size_t> &dimensions);
+        llvm::Value *CreateArray(llvm::Type *elementType, const std::vector<size_t> &dimensions);
+        llvm::Value *CreateArray(llvm::Type *arrayType);
+        void ReDimArray(llvm::Value *arrayPtr, const std::vector<llvm::Value *> newDimensions);
         llvm::Value *GetArrayElementCount(llvm::Value *arrayPtr);
         llvm::Value *GetArrayDimension(llvm::Value *arrayPtr, llvm::Value *dimensionIndex);
         llvm::Value *GetElementPointer(llvm::Value *arrayPtr, const std::vector<llvm::Value *> indexes);
@@ -42,9 +46,24 @@ namespace opene {
     };
     class StringRT {
         friend LLVMRTIRBuilder;
+        llvm::IRBuilder<> &Builder;
+        llvm::LLVMContext &Context;
+    public:
+        llvm::Type *CreateStringType();
     };
-    class DataSetRT{
+    class DataSetRT {
         friend LLVMRTIRBuilder;
+        llvm::IRBuilder<> &Builder;
+        llvm::LLVMContext &Context;
+    public:
+        llvm::Type *CreateDataSetType();
+    };
+    class StructRT {
+        friend LLVMRTIRBuilder;
+        llvm::IRBuilder<> &Builder;
+        llvm::LLVMContext &Context;
+    public:
+        llvm::Value *CloneStruct(llvm::Value *structPtr);
     };
 
     class LLVMRTIRBuilder {
@@ -54,6 +73,7 @@ namespace opene {
         ArrayRT &getArrayRT();
         StringRT &getStringRT();
         DataSetRT &getDataSetRT();
+        StructRT &getStructRT();
     };
 
 }

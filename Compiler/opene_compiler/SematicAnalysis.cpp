@@ -307,6 +307,16 @@ namespace opene {
             ErrOr<Expression*> implicit_convert = this->MakeImplicitConvertIfNeccessary(lhs_type, assign_stmt->rhs_);
             if (implicit_convert.HadError()) { return false; }
             assign_stmt->rhs_ = implicit_convert.Value();
+            /*// 如果是数组、自定义类型、字节集、字符串则调用相关内置函数
+            if (lhs_type->is<ArrayDecl>()) {
+                // TODO: 调用函数 rhs = $array_copy(lhs);
+            } else if (lhs_type->is<StructureDecl>()) {
+                // TODO: 调用函数 rhs = $struct_copy(lhs);
+            } else if (BuiltinTypeDecl *builtin_type_decl = lhs_type->as<BuiltinTypeDecl>()) {
+                if (builtin_type_decl->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDataSet) {
+                } else if (builtin_type_decl->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeString) {
+                }
+            }*/
             return true;
 
         } else if (Expression *expression = statement->as<Expression>()) {

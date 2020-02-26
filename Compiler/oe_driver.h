@@ -35,6 +35,7 @@ namespace opene {
         std::string parse_code_;
         std::vector<TranslateUnitPtr> translate_units_;
         TranslateUnitPtr major_translate_unit_ = nullptr;
+        std::set<StringRef> libraries_name;
 
     private:
         bool assembleTranslate();
@@ -47,6 +48,8 @@ namespace opene {
         SourceManager &getSourceManager();
 
         TranslateUnitPtr runParser();
+
+        TranslateUnitPtr parseOnFile(const FileEntry &fileEntry);
 
         bool runSematicAnalysis();
 

@@ -362,7 +362,18 @@ namespace opene {
             }
         }
 
-        llvm::Type *Emit(TypeDecl *typeDecl);
+        llvm::Type *Emit(TypeDecl *typeDecl) {
+            if (BuiltinTypeDecl *builtin_type_decl = typeDecl->as<BuiltinTypeDecl>()) {
+                return Emit(builtin_type_decl);
+            } else if (ArrayDecl *array_decl = typeDecl->as<ArrayDecl>()) {
+                return Emit(array_decl);
+            } else if (StructureDecl *structure_decl = typeDecl->as<StructureDecl>()) {
+                return Emit(structure_decl);
+            } else {
+                assert(false);
+                return nullptr;
+            }
+        }
 
         llvm::Type *Emit(BuiltinTypeDecl *builtinTypeDecl) {
             auto type_found = type_object_pool_.find(builtinTypeDecl);
@@ -412,21 +423,32 @@ namespace opene {
             return type;
         }
 
-        llvm::Value *Emit(ArrayDecl *arrayDecl);
+        /*
+         * 创建数组
+         * 返回数组指针类型
+         */
+        llvm::PointerType *Emit(ArrayDecl *arrayDecl) {
+            llvm::Type *element_type = GetType(arrayDecl->base_type_);
+            return RTBuilder.getArrayRT().CreateArrayType(element_type, arrayDecl->dimensions_);
+        }
 
-        llvm::StructType *Emit(StructureDecl *structureDecl) {
+        /*
+         * 创建结构体定义
+         * 返回结构体指针类型
+         */
+        llvm::PointerType *Emit(StructureDecl *structureDecl) {
             llvm::StructType *structure_decl = llvm::dyn_cast<llvm::StructType>(type_object_pool_[structureDecl]);
-            if (structure_decl) { return structure_decl; }
+            if (structure_decl) { return structure_decl->getPointerTo(); }
             structure_decl = llvm::StructType::create(TheContext, structureDecl->name_.string_.str());
             type_object_pool_[structureDecl] = structure_decl;
             // 依次生成成员类型
             std::vector<llvm::Type*> members_type;
             for (auto &member_item : structureDecl->members_) {
-                llvm::Type *member_type = Emit(member_item.second->type_decl_ptr_);
+                llvm::Type *member_type = GetType(member_item.second->type_decl_ptr_);
                 members_type.emplace_back(member_type);
             }
             structure_decl->setBody(members_type);
-            return structure_decl;
+            return structure_decl->getPointerTo();
         }
 
         /*
@@ -745,16 +767,44 @@ namespace opene {
             return true;
         }
 
+        llvm::Value *MakeAggregateCopy(llvm::Value *object, llvm::PointerType *aggregate_type) {
+            llvm::Type *element_type = aggregate_type->getPointerElementType();
+            if (element_type->isArrayTy()) {
+                return RTBuilder.getArrayRT().CloneArray(object);
+            } else if (element_type->isStructTy()) {
+                Builder.CreateMemCpy();
+            } else {
+                assert(false);
+            }
+        }
+
         bool Emit(AssignStmt *assignStmt) {
             llvm::Value *lhs = Emit(assignStmt->lhs_);
             assert(lhs);
             llvm::Value *rhs = Emit(assignStmt->rhs_);
             assert(rhs);
-            llvm::Value *rhs_val = LoadVariable(rhs);
-            assert(rhs_val);
+            llvm::Type *lhs_type = lhs->getType();
+            llvm::Type *rhs_type = rhs->getType();
+            llvm::Value *rhs_val = nullptr;
+            // 区分数组、字节集、字符串、结构体和其它类型
+            if (rhs_type->isPointerTy()) {
+                llvm::Type *element_type = rhs_type->getPointerElementType();
+                if (element_type->isArrayTy()) {
+                    rhs_val = RTBuilder.getArrayRT().CloneArray(rhs);
+                } else if (element_type->isStructTy()) {
+                    rhs_val = RTBuilder.getStructRT().CloneStruct(rhs);
+                } else {
+                    assert(false);
+                }
+                assert(rhs_val);
+                assert(rhs_val->getType()->isPointerTy());
+            } else {
+                rhs_val = LoadVariable(rhs);
+                assert(rhs_val);
+            }
             bool assign_success = StoreVariable(rhs_val, lhs);
             assert(assign_success);
-            return false;
+            return true;
         }
 
         bool Emit(ControlStmt *controlStmt) {
