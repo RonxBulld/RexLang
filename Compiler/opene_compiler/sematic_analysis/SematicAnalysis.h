@@ -7,10 +7,11 @@
 
 #include <memory>
 
-#include "common_rt/ErrOr.h"
-#include "common_rt/StringRef.h"
-#include "NodeDecl.h"
+#include "../common_rt/ErrOr.h"
+#include "../common_rt/StringRef.h"
+#include "../NodeDecl.h"
 #include "SematicAnalysisContext.h"
+//#include "../ASTBuilder.h"
 
 namespace opene {
 
@@ -21,6 +22,7 @@ namespace opene {
     private:
         TranslateUnit * translate_unit_ = nullptr;
         SematicAnalysisContext analysis_context_;
+        //ASTBuilder *ast_builder_ = nullptr;
 
     private:
         /*

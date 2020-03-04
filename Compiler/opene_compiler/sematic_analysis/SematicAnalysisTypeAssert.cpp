@@ -3,7 +3,7 @@
 //
 
 #include "SematicAnalysis.h"
-#include "TypeAssert.h"
+#include "../TypeAssert.h"
 
 namespace opene {
 

@@ -4,13 +4,14 @@
 
 #include "SematicAnalysis.h"
 
-#include "NodeDecl.h"
-#include "Str2Attr.h"
-#include "TypeAssert.h"
-#include "ASTUtility.h"
-#include "ASTContext.h"
-#include "ASTAssert.h"
-#include "Diagnostic.h"
+#include "../NodeDecl.h"
+#include "../utilities/Str2Attr.h"
+#include "../TypeAssert.h"
+#include "../ASTUtility.h"
+#include "../ASTContext.h"
+#include "../ASTAssert.h"
+#include "../utilities/Diagnostic.h"
+#include "../utilities/Defer.h"
 
 namespace opene {
     template <typename SrcMapContainer, typename TgtMapContainer, typename Pred>
@@ -35,6 +36,9 @@ namespace opene {
     }
 
     bool SematicAnalysis::Run(TranslateUnit * translateUnitPtr) {
+
+        // this->ast_builder_ = new ASTBuilder(*translateUnitPtr->ast_context_);
+        // defer free_ast_builer([&](){ delete this->ast_builder_; this->ast_builder_ = nullptr; });
 
         if (translateUnitPtr->edition_ != 2) {
             translateUnitPtr->ast_context_->GetDiagnostic()->EditionWrong(translateUnitPtr->edition_);
@@ -86,7 +90,8 @@ namespace opene {
         }
         // 5. 后续处理
         // 5.1. 指定入口函数
-        translateUnitPtr->main_entry_ = this->analysis_context_.QueryTagDeclFromDynSymbolTableWithName(u8"_启动子程序")->as<FunctorDecl>();
+        StringRef start_entry = translateUnitPtr->ast_context_->CreateString(u8"_启动子程序");
+        translateUnitPtr->main_entry_ = this->analysis_context_.QueryTagDeclFromDynSymbolTableWithName(start_entry)->as<FunctorDecl>();
         assert(translateUnitPtr->main_entry_);
         return true;
     }
@@ -307,16 +312,7 @@ namespace opene {
             ErrOr<Expression*> implicit_convert = this->MakeImplicitConvertIfNeccessary(lhs_type, assign_stmt->rhs_);
             if (implicit_convert.HadError()) { return false; }
             assign_stmt->rhs_ = implicit_convert.Value();
-            /*// 如果是数组、自定义类型、字节集、字符串则调用相关内置函数
-            if (lhs_type->is<ArrayDecl>()) {
-                // TODO: 调用函数 rhs = $array_copy(lhs);
-            } else if (lhs_type->is<StructureDecl>()) {
-                // TODO: 调用函数 rhs = $struct_copy(lhs);
-            } else if (BuiltinTypeDecl *builtin_type_decl = lhs_type->as<BuiltinTypeDecl>()) {
-                if (builtin_type_decl->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDataSet) {
-                } else if (builtin_type_decl->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeString) {
-                }
-            }*/
+            assign_stmt->rhs_->parent_node_ = assign_stmt;
             return true;
 
         } else if (Expression *expression = statement->as<Expression>()) {
@@ -907,6 +903,7 @@ namespace opene {
             }
             return !need_return;
         }
+        return false;
     }
 
     bool SematicAnalysis::CheckAllBranchesReturnCorrectly(FunctionDecl *functionDecl) {

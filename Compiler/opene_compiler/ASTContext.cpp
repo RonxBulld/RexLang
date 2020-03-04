@@ -3,7 +3,7 @@
 //
 
 #include "ASTContext.h"
-#include "Diagnostic.h"
+#include "utilities/Diagnostic.h"
 
 namespace opene {
     ASTContext::ASTContext() = default;

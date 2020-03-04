@@ -27,8 +27,8 @@ namespace opene {
         return true;
     }
 
-    template <typename TySrcN>
-    bool Fetch(const std::map<StringRef, TySrcN*> &container, ASTFetchSubnode::ASTFetchResult &result) {
+    template <typename TySrcN, template <typename K, typename V> class ContainerTy>
+    bool Fetch(const ContainerTy<StringRef, TySrcN*> &container, ASTFetchSubnode::ASTFetchResult &result) {
         for (auto & item : container) {
             if (Fetch(item.second, result) == false) {
                 return false;

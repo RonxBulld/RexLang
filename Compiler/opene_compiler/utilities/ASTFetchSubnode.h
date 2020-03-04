@@ -7,8 +7,8 @@
 
 #include <set>
 
-#include "NodeDecl.h"
-#include "common_rt/ErrOr.h"
+#include "../NodeDecl.h"
+#include "../common_rt/ErrOr.h"
 
 namespace opene {
 

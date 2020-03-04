@@ -24,14 +24,34 @@
 namespace opene {
     class LLVMRTIRBuilder;
 
+    enum ExtraType { DArrayTyID = llvm::Type::TypeID::VectorTyID + 32};
+
+    class DArrayType : public llvm::Type {
+    private:
+        llvm::Type *element_type = nullptr;
+        std::vector<size_t> dimensions;
+
+    public:
+        DArrayType(llvm::LLVMContext &C) : llvm::Type(C, (llvm::Type::TypeID)DArrayTyID) {}
+        void SetElementType(llvm::Type *element_ty);
+        void SetDimensions(const std::vector<size_t> &dims);
+        /// Implement support type inquiry through isa, cast, and dyn_cast.
+        static bool classof(const llvm::Type *T) {
+            return (T->getTypeID() == (llvm::Type::TypeID)DArrayTyID);
+        }
+    };
+
     class ArrayRT {
         friend LLVMRTIRBuilder;
         llvm::IRBuilder<> &Builder;
         llvm::LLVMContext &Context;
+    private:
+        llvm::Function *getCreateArrayRTFN();
+
     public:
         llvm::Type *CreateArrayType(llvm::Type *elementType, const std::vector<size_t> &dimensions);
-        llvm::Value *CreateArray(llvm::Type *elementType, const std::vector<size_t> &dimensions);
-        llvm::Value *CreateArray(llvm::Type *arrayType);
+        llvm::Value *CreateArrayInst(llvm::Type *elementType, const std::vector<size_t> &dimensions);
+        llvm::Value *CreateArrayInst(llvm::Type *arrayType);
         void ReDimArray(llvm::Value *arrayPtr, const std::vector<llvm::Value *> newDimensions);
         llvm::Value *GetArrayElementCount(llvm::Value *arrayPtr);
         llvm::Value *GetArrayDimension(llvm::Value *arrayPtr, llvm::Value *dimensionIndex);

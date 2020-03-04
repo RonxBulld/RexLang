@@ -6,7 +6,7 @@
 #define OPENELANGUAGE_LOCATION_H
 
 #include <map>
-#include "common_rt/StringRef.h"
+#include "../common_rt/StringRef.h"
 
 namespace opene {
 

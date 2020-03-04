@@ -6,7 +6,7 @@
 #define OPENELANGUAGE_TSTRING_H
 
 #include "StringRef.h"
-#include "../Location.h"
+#include "../utilities/Location.h"
 
 namespace opene {
 

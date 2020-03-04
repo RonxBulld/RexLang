@@ -5,10 +5,10 @@
 #include <queue>
 
 #include "ASTUtility.h"
-#include "ASTFetchSubnode.h"
+#include "utilities/ASTFetchSubnode.h"
 #include "ASTAssert.h"
 #include "ASTContext.h"
-#include "Str2Attr.h"
+#include "utilities/Str2Attr.h"
 #include "TypeAssert.h"
 
 namespace opene {

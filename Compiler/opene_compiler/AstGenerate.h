@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "NodeDecl.h"
-#include "Diagnostic.h"
+#include "utilities/Diagnostic.h"
 #include "ASTContext.h"
 
 namespace opene {

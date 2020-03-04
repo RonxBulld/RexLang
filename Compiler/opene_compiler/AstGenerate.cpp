@@ -9,10 +9,10 @@
 #include "gen/openeLangLexer.h"
 #include "gen/openeLangParser.h"
 #include "AstGenerate.h"
-#include "SematicAnalysis.h"
-#include "Diagnostic.h"
+#include "sematic_analysis/SematicAnalysis.h"
+#include "utilities/Diagnostic.h"
 
-#include "ASTBuilder.h"
+#include "CST2ASTConvert.h"
 
 namespace opene {
     TranslateUnitPtr AstGenerate::BuildASTFromCode(const std::string &code,
@@ -49,23 +49,8 @@ namespace opene {
 
         // 遍历树以生成抽象语法树。
 
-        ASTBuilder ast_builder(ast_context_, diagnostic_);
-        antlrcpp::Any build_result = ast_builder.visit(__tree);
-        TranslateUnitPtr translate_unit = nullptr;
-        if (build_result.is<NodeWarp>()) {
-            if ((translate_unit = build_result.as<NodeWarp>())) {
-            } else {
-                assert(false);
-                return nullptr;
-            }
-        } else {
-            assert(false);
-            return nullptr;
-        }
-
-        // 执行语义分析，构建符号表，绑定定义引用。
-
-        return translate_unit;
+        CST2ASTConvert ast_builder(ast_context_, diagnostic_);
+        return ast_builder.BuildTranslateUnitFromParseTree(__tree);
     }
 
     AstGenerate::AstGenerate() {

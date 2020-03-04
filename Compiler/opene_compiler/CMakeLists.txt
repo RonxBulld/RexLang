@@ -38,41 +38,41 @@ SET(OECompilerParse-Source
         ${antlr4-demo-GENERATED_SRC}
         AstGenerate.cpp
         AstGenerate.h
-        Diagnostic.cpp
-        Diagnostic.h
+        utilities/Diagnostic.cpp
+        utilities/Diagnostic.h
         NodeDecl.h
         ASTContext.cpp
         ASTContext.h
-        Location.cpp
-        Location.h
+        utilities/Location.cpp
+        utilities/Location.h
         common_rt/StringRef.cpp
         common_rt/StringRef.h
         common_rt/TString.cpp
         common_rt/TString.h
         dump/Dump.cpp
         dump/Dump.h
-        ASTBuilder.cpp
-        ASTBuilder.h
-        SematicAnalysis.cpp
-        SematicAnalysis.h
+        CST2ASTConvert.cpp
+        CST2ASTConvert.h
+        sematic_analysis/SematicAnalysis.cpp
+        sematic_analysis/SematicAnalysis.h
         common_rt/ErrOr.cpp
         common_rt/ErrOr.h
-        Str2Attr.cpp
-        Str2Attr.h
+        utilities/Str2Attr.cpp
+        utilities/Str2Attr.h
         TypeAssert.cpp
         TypeAssert.h
-        ASTFetchSubnode.cpp
-        ASTFetchSubnode.h
+        utilities/ASTFetchSubnode.cpp
+        utilities/ASTFetchSubnode.h
         ASTUtility.cpp
         ASTUtility.h
         ASTAssert.cpp
         ASTAssert.h
         TypeSystem.cpp
         TypeSystem.h
-        SematicAnalysisContext.cpp
-        SematicAnalysisContext.h
-        SematicAnalysisUtils.cpp
-        SematicAnalysisTypeAssert.cpp)
+        sematic_analysis/SematicAnalysisContext.cpp
+        sematic_analysis/SematicAnalysisContext.h
+        sematic_analysis/SematicAnalysisUtils.cpp
+        sematic_analysis/SematicAnalysisTypeAssert.cpp ASTBuilder.cpp ASTBuilder.h utilities/Defer.h)
 
 if(NOT CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
     set (flags_1 "-Wno-overloaded-virtual")

@@ -288,6 +288,12 @@ namespace opene {
 //        llvm::Value *Emit(VariableDecl *variableDecl);
 //        llvm::Value *Emit(BaseVariDecl *baseVariDecl);
 
+        void CreateVariableInitialization(llvm::Value *variable) {
+            if (llvm::GlobalVariable *gvari = llvm::dyn_cast<llvm::GlobalVariable>(variable)) {
+                // TODO:
+            }
+        }
+
         llvm::GlobalVariable *CreateGlobalVariable(TypeDecl *vari_type, const std::string &vari_name) {
             llvm::Type *_vari_type = GetType(vari_type);
             llvm::GlobalVariable *gvari = new llvm::GlobalVariable(
@@ -303,6 +309,7 @@ namespace opene {
                     /*ExternallyInitalized*/false
             );
             gvari->setAlignment(4);
+            CreateVariableInitialization(gvari);
             return gvari;
         }
 
@@ -429,7 +436,7 @@ namespace opene {
          */
         llvm::PointerType *Emit(ArrayDecl *arrayDecl) {
             llvm::Type *element_type = GetType(arrayDecl->base_type_);
-            return RTBuilder.getArrayRT().CreateArrayType(element_type, arrayDecl->dimensions_);
+            return RTBuilder.getArrayRT().CreateArrayType(element_type, arrayDecl->dimensions_)->getPointerTo();
         }
 
         /*

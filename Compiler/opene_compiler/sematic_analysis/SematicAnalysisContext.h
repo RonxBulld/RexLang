@@ -8,7 +8,7 @@
 #include <vector>
 #include <map>
 
-#include "NodeDecl.h"
+#include "../NodeDecl.h"
 
 namespace opene {
 

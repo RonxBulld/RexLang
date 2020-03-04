@@ -3,11 +3,11 @@
 //
 
 #include "SematicAnalysis.h"
-#include "TypeAssert.h"
-#include "ASTAssert.h"
-#include "ASTUtility.h"
-#include "ASTContext.h"
-#include "Str2Attr.h"
+#include "../TypeAssert.h"
+#include "../ASTAssert.h"
+#include "../ASTUtility.h"
+#include "../ASTContext.h"
+#include "../utilities/Str2Attr.h"
 
 namespace opene {
 

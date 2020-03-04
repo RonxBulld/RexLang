@@ -5,7 +5,7 @@
 #include <algorithm>
 
 #include "Diagnostic.h"
-#include "gen/openeLangParser.h"
+#include "../gen/openeLangParser.h"
 
 namespace opene {
 

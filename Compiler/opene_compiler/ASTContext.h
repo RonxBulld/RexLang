@@ -6,7 +6,7 @@
 #define OPENELANGUAGE_ASTCONTEXT_H
 
 #include "common_rt/StringRef.h"
-#include "Location.h"
+#include "utilities/Location.h"
 
 namespace opene {
 

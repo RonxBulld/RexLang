@@ -5,9 +5,9 @@
 #ifndef OPENELANGUAGE_STR2ATTR_H
 #define OPENELANGUAGE_STR2ATTR_H
 
-#include "common_rt/ErrOr.h"
-#include "common_rt/StringRef.h"
-#include "NodeDecl.h"
+#include "../common_rt/ErrOr.h"
+#include "../common_rt/StringRef.h"
+#include "../NodeDecl.h"
 
 namespace opene {
 
