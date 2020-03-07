@@ -86,6 +86,8 @@ namespace opene {
 
     public:
         llvm::ConstantInt *CreateInt(int intValue, unsigned int nBits = 32, bool isSigned = false);
+        bool isOrdinaryType(TypeDecl *typeDecl) const;
+        llvm::FunctionCallee getRTAPIFunction(const std::string &name, llvm::Type *retType, llvm::ArrayRef<llvm::Type *> argTypes, bool isVariArgs = false);
 
         llvm::Value *Malloc(int size);
         void Free(llvm::Value *ptr);
@@ -94,6 +96,9 @@ namespace opene {
 
     class LLVMRTIRBuilder : public RuntimeAPICreator {
     private:
+        llvm::Value *CloneAggregateObject(llvm::Value *objectPtr, TypeDecl *referenceAstType);
+        llvm::Value *CloneObjectIfAggregate(llvm::Value *value, TypeDecl *referenceAstType);
+
     public:
         LLVMRTIRBuilder(llvm::Module * Module, llvm::IRBuilder<> &Builder);
 
@@ -102,35 +107,72 @@ namespace opene {
          * 包含该字段在内的内存总长度 - 4字节
          * 数组维度数量 - 4字节
          * 数组维度列表 - 4*N字节
-         * 数组元素列表 - 4*M字节
+         * 数组元素列表 - M字节
          */
         llvm::Type *CreateArrayType(llvm::Type *elementType, const std::vector<size_t> &dimensions);
-        llvm::Value *CreateArrayInst(llvm::Type *elementType, const std::vector<size_t> &dimensions);
+        /*
+         * 根据类型信息创建数组实例
+         */
         llvm::Value *CreateArrayInst(DArrayType *arrayType);
-        void ReDimArray(llvm::Value *arrayPtr, const std::vector<llvm::Value *> newDimensions);
+        /*
+         * 重定义数组维度数
+         */
+        void ReDimArray(llvm::Value *arrayVariablePtr, bool clear, const std::vector<llvm::Value *>& newDimensions);
+        /*
+         * 获取数组元素个数
+         */
         llvm::Value *GetArrayElementCount(llvm::Value *arrayPtr);
+        /*
+         * 获取数组指定维度下标
+         */
         llvm::Value *GetArrayDimension(llvm::Value *arrayPtr, llvm::Value *dimensionIndex);
-        llvm::Value *GetArrayElementPointer(llvm::Value *arrayPtr, const std::vector<llvm::Value *> indexes);
+        /*
+         * 获取数组指定元素指针
+         */
+        llvm::Value *GetArrayElementPointer(llvm::Value *arrayPtr, const std::vector<llvm::Value *>& indexes);
+        /*
+         * 克隆数组
+         */
         llvm::Value *CloneArray(llvm::Value *arrayPtr, TypeDecl *astType);
-        llvm::Value *AppendArrayElement(llvm::Value *arrayPtr, llvm::Value *newElement);
-        llvm::Value *InsertArrayElement(llvm::Value *arrayPtr, llvm::Value *insertPos, llvm::Value *newElement);
+        /*
+         * 将元素加入到数组
+         */
+        llvm::Value *AppendArrayElement(llvm::Value *arrayPtr, llvm::Value *newElement, TypeDecl *newElemAstType);
+        /*
+         * 将元素插入到数组
+         */
+        llvm::Value *InsertArrayElement(llvm::Value *arrayPtr, llvm::Value *insertPos, llvm::Value *newElement, TypeDecl *newElemAstType);
+        /*
+         * 从数组中移除元素
+         */
         llvm::Value *RemoveArrayElement(llvm::Value *arrayPtr, llvm::Value *position, llvm::Value *count);
+        /*
+         * 清除数组
+         */
         llvm::Value *CleanArray(llvm::Value *arrayPtr);
+        /*
+         * 数组排序
+         */
         llvm::Value *SortArray(llvm::Value *arrayPtr, bool lessToMore);
+        /*
+         * 清空数组
+         */
         llvm::Value *ZeroArray(llvm::Value *arrayPtr);
 
+
+
         /*
-         * 结构体
+         * 克隆结构体
          */
         llvm::Value *CloneStructure(llvm::Value *structurePtr, StructureDecl *astStructureDecl);
 
         /*
-         * 字符串
+         * 克隆字符串
          */
         llvm::Value *CloneString(llvm::Value *stringPtr);
 
         /*
-         * 字节集
+         * 克隆字节集
          */
         llvm::Value *CloneDataset(llvm::Value *datasetPtr);
     };
