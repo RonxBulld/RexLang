@@ -12,7 +12,7 @@ add_definitions(${LLVM_DEFINITIONS})
 SET(IR-Source
         EmitLLVMIR.cpp
         EmitLLVMIR.h
-        EmitOEIR.cpp EmitOEIR.h LLVMRTIRBuilder.cpp LLVMRTIRBuilder.h)
+        EmitOEIR.cpp EmitOEIR.h LLVMRTIRBuilder.cpp LLVMRTIRBuilder.h Type.cpp Type.h)
 
 ADD_LIBRARY(IR SHARED
         ${IR-Source}

@@ -319,6 +319,9 @@ namespace opene {
 
         llvm::Value *Emit(ParameterDecl *parameterDecl) {
             llvm::Type *param_type = GetType(parameterDecl->type_decl_ptr_);
+            if (parameterDecl->is_reference && !param_type->isPointerTy()) {
+                param_type = param_type->getPointerTo();
+            }
             // 创建参数在栈内的空间
             llvm::AllocaInst *alloca_param = Builder.CreateAlloca(param_type, nullptr, parameterDecl->name_.string_.str());
             variable_object_pool_[parameterDecl] = alloca_param;
@@ -774,17 +777,6 @@ namespace opene {
             return true;
         }
 
-        llvm::Value *MakeAggregateCopy(llvm::Value *object, llvm::PointerType *aggregate_type) {
-            llvm::Type *element_type = aggregate_type->getPointerElementType();
-            if (element_type->isArrayTy()) {
-                return RTBuilder.getArrayRT().CloneArray(object);
-            } else if (element_type->isStructTy()) {
-                Builder.CreateMemCpy();
-            } else {
-                assert(false);
-            }
-        }
-
         bool Emit(AssignStmt *assignStmt) {
             llvm::Value *lhs = Emit(assignStmt->lhs_);
             assert(lhs);
@@ -797,9 +789,9 @@ namespace opene {
             if (rhs_type->isPointerTy()) {
                 llvm::Type *element_type = rhs_type->getPointerElementType();
                 if (element_type->isArrayTy()) {
-                    rhs_val = RTBuilder.getArrayRT().CloneArray(rhs);
+                    rhs_val = RTBuilder.CloneArray(rhs, assignStmt->rhs_->expression_type_);
                 } else if (element_type->isStructTy()) {
-                    rhs_val = RTBuilder.getStructRT().CloneStruct(rhs);
+                    rhs_val = RTBuilder.CloneStructure(rhs, assignStmt->rhs_->expression_type_);
                 } else {
                     assert(false);
                 }
