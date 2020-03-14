@@ -236,6 +236,11 @@ namespace opene {
             return llvm::ConstantInt::get(TheContext, llvm::APInt(nBits, intValue, isSigned));
         }
 
+        void InitVariable(llvm::Value *variable, TypeDecl *type) {
+            if (!isOrdinaryType(type)) {
+            }
+        }
+
     public:
         bool Emit(TranslateUnit *translateUnit) {
             TheModule = new llvm::Module("a.ll", TheContext);
@@ -439,7 +444,7 @@ namespace opene {
          */
         llvm::PointerType *Emit(ArrayDecl *arrayDecl) {
             llvm::Type *element_type = GetType(arrayDecl->base_type_);
-            return RTBuilder.getArrayRT().CreateArrayType(element_type, arrayDecl->dimensions_)->getPointerTo();
+            return RTBuilder.CreateArrayType(element_type, arrayDecl->dimensions_);
         }
 
         /*
@@ -447,18 +452,12 @@ namespace opene {
          * 返回结构体指针类型
          */
         llvm::PointerType *Emit(StructureDecl *structureDecl) {
-            llvm::StructType *structure_decl = llvm::dyn_cast<llvm::StructType>(type_object_pool_[structureDecl]);
-            if (structure_decl) { return structure_decl->getPointerTo(); }
-            structure_decl = llvm::StructType::create(TheContext, structureDecl->name_.string_.str());
-            type_object_pool_[structureDecl] = structure_decl;
-            // 依次生成成员类型
             std::vector<llvm::Type*> members_type;
             for (auto &member_item : structureDecl->members_) {
                 llvm::Type *member_type = GetType(member_item.second->type_decl_ptr_);
                 members_type.emplace_back(member_type);
             }
-            structure_decl->setBody(members_type);
-            return structure_decl->getPointerTo();
+            return RTBuilder.CreateStructureType(structureDecl->name_.string_.str(), members_type);
         }
 
         /*
@@ -789,9 +788,9 @@ namespace opene {
             if (rhs_type->isPointerTy()) {
                 llvm::Type *element_type = rhs_type->getPointerElementType();
                 if (element_type->isArrayTy()) {
-                    rhs_val = RTBuilder.CloneArray(rhs, assignStmt->rhs_->expression_type_);
+                    rhs_val = RTBuilder.CloneArray(rhs);
                 } else if (element_type->isStructTy()) {
-                    rhs_val = RTBuilder.CloneStructure(rhs, assignStmt->rhs_->expression_type_);
+                    rhs_val = RTBuilder.CloneStructure(rhs);
                 } else {
                     assert(false);
                 }
@@ -875,7 +874,7 @@ namespace opene {
         llvm::Value *Emit(Expression *expression);
 
         llvm::Value *LoadFromStructOrNot(llvm::Value *structInstance, NameComponent *nameComponent) {
-            if (Identifier *identifier = nameComponent->as<Identifier>()) {    // 单名称组件
+            if (Identifier *identifier = nameComponent->as<Identifier>()) {         // 目标类型是单名称组件
 
                 if (structInstance) {
                     MemberVariableDecl *member_variable_decl = identifier->reference_->as<MemberVariableDecl>();
@@ -894,7 +893,7 @@ namespace opene {
                     }
                 }
 
-            } else if (ArrayIndex *array_index = nameComponent->as<ArrayIndex>()) {
+            } else if (ArrayIndex *array_index = nameComponent->as<ArrayIndex>()) {     // 目标类型是数组索引
 
                 NameComponent *base = ASTUtility::GetArrayIndexBase(array_index);
                 ErrOr<std::vector<Expression *>> indexes = ASTUtility::GetArrayIndexIndexList(array_index);
@@ -910,9 +909,9 @@ namespace opene {
                     assert(index_ir);
                     indexes_ir.push_back(index_ir);
                 }
-                return RTBuilder.getArrayRT().GetElementPointer(arr_ptr, indexes_ir);
+                return RTBuilder.GetArrayElementPointer(arr_ptr, indexes_ir);
 
-            } else if (FunctionCall *function_call = nameComponent->as<FunctionCall>()) {
+            } else if (FunctionCall *function_call = nameComponent->as<FunctionCall>()) {   // 目标类型是函数调用
                 llvm::Function *func_ptr = llvm::dyn_cast<llvm::Function>(LoadFromStructOrNot(structInstance, function_call->function_name_));
                 assert(func_ptr);
                 std::vector<llvm::Value *> arguments_ir;

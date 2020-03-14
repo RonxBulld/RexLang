@@ -27,66 +27,37 @@ namespace opene {
 
     enum ExtraType { DArrayTyID = llvm::Type::TypeID::VectorTyID + 32, DStringTyID, DDataSetTyID};
 
-    class DArrayType : public llvm::Type {
-    private:
-        llvm::Type *element_type = nullptr;
-        std::vector<size_t> dimensions;
-
-    public:
-        DArrayType(llvm::LLVMContext &C) : llvm::Type(C, (llvm::Type::TypeID) DArrayTyID) {
-        }
-
-        void SetElementType(llvm::Type *element_ty) {
-            element_type = element_ty;
-        }
-
-        llvm::Type *GetElementType() const {
-            return element_type;
-        }
-
-        void SetDimensions(const std::vector<size_t> &dims) {
-            dimensions = dims;
-        }
-
-        const std::vector<size_t> &GetDimensions() {
-            return dimensions;
-        }
-
-        /// Implement support type inquiry through isa, cast, and dyn_cast.
-        static bool classof(const llvm::Type *T) {
-            return (T->getTypeID() == (llvm::Type::TypeID) DArrayTyID);
-        }
-    };
-
-    class DStringType : public llvm::Type {
-    private:
-    public:
-        DStringType(llvm::LLVMContext &C) : llvm::Type(C, (llvm::Type::TypeID) DStringTyID) {}
-
-        static bool classof(const llvm::Type *T) {
-            return (T->getTypeID() == (llvm::Type::TypeID) DStringTyID);
-        }
-    };
-
-    class DDataSetType : public llvm::Type {
-    private:
-    public:
-        DDataSetType(llvm::LLVMContext &C) : llvm::Type(C, (llvm::Type::TypeID) DDataSetTyID) {}
-
-        static bool classof(const llvm::Type *T) {
-            return (T->getTypeID() == (llvm::Type::TypeID) DDataSetTyID);
-        }
-    };
+    bool isOrdinaryType(TypeDecl *typeDecl);
 
     class RuntimeAPICreator {
+    protected:
+//        class RealType {
+//        public:
+//            virtual ~RealType() = default;
+//        };
+//        class DynamicArrayType : public RealType {
+//        public:
+//            llvm::Type *element_type;
+//            std::vector<size_t> dimensions;
+//            DynamicArrayType(llvm::Type *elementType, const std::vector<size_t> &dimensions) : element_type(elementType), dimensions(dimensions) {}
+//        };
     protected:
         llvm::IRBuilder<> &Builder;
         llvm::LLVMContext &Context;
         llvm::Module &Module;
+//        ordered_map<llvm::PointerType*, RealType*> RealTypeMap;
 
     public:
+        RuntimeAPICreator(llvm::IRBuilder<> &Builder, llvm::LLVMContext &Context, llvm::Module &Module);
+
+    public:
+
+        size_t getTypeByteWidth(llvm::Type *type) const;
         llvm::ConstantInt *CreateInt(int intValue, unsigned int nBits = 32, bool isSigned = false);
-        bool isOrdinaryType(TypeDecl *typeDecl) const;
+        virtual llvm::Value *CreateAggregateObject(llvm::Type *llType) = 0;
+        virtual llvm::Value *CloneAggregateObject(llvm::Value *objectPtr) = 0;
+        virtual llvm::Value *CloneObjectIfAggregate(llvm::Value *value) = 0;
+        virtual llvm::Value *CreateInitializeValue(llvm::Type *llType) = 0;
         llvm::FunctionCallee getRTAPIFunction(const std::string &name, llvm::Type *retType, llvm::ArrayRef<llvm::Type *> argTypes, bool isVariArgs = false);
 
         llvm::Value *Malloc(int size);
@@ -96,8 +67,16 @@ namespace opene {
 
     class LLVMRTIRBuilder : public RuntimeAPICreator {
     private:
-        llvm::Value *CloneAggregateObject(llvm::Value *objectPtr, TypeDecl *referenceAstType);
-        llvm::Value *CloneObjectIfAggregate(llvm::Value *value, TypeDecl *referenceAstType);
+    public:
+        llvm::Value *CreateAggregateObject(llvm::Type *llType) override;
+
+    private:
+    public:
+        llvm::Value *CreateInitializeValue(llvm::Type *llType) override;
+
+    private:
+        llvm::Value *CloneAggregateObject(llvm::Value *objectPtr) override;
+        llvm::Value *CloneObjectIfAggregate(llvm::Value *value) override;
 
     public:
         LLVMRTIRBuilder(llvm::Module * Module, llvm::IRBuilder<> &Builder);
@@ -109,11 +88,20 @@ namespace opene {
          * 数组维度列表 - 4*N字节
          * 数组元素列表 - M字节
          */
-        llvm::Type *CreateArrayType(llvm::Type *elementType, const std::vector<size_t> &dimensions);
+
+        typedef llvm::PointerType DynamicArrayType;
+        DynamicArrayType *getArrayType();
+        bool isArrayType(llvm::Type *type);
+
         /*
-         * 根据类型信息创建数组实例
+         * 创建数组类型
          */
-        llvm::Value *CreateArrayInst(DArrayType *arrayType);
+        LLVMRTIRBuilder::DynamicArrayType *CreateArrayType(llvm::Type *elementType, const std::vector<size_t> &dimensions);
+        /*
+         * 根据类型信息创建数组实例并初始化
+         */
+        llvm::Value *CreateArrayInst(llvm::ArrayType *arrayType);
+        llvm::Value *CreateArrayInst(LLVMRTIRBuilder::DynamicArrayType *arrayType);
         /*
          * 重定义数组维度数
          */
@@ -133,7 +121,7 @@ namespace opene {
         /*
          * 克隆数组
          */
-        llvm::Value *CloneArray(llvm::Value *arrayPtr, TypeDecl *astType);
+        llvm::Value *CloneArray(llvm::Value *arrayPtr);
         /*
          * 将元素加入到数组
          */
@@ -160,21 +148,54 @@ namespace opene {
         llvm::Value *ZeroArray(llvm::Value *arrayPtr);
 
 
+        /*
+         * 结构体的内存布局：
+         * 包含该字段在内的内存总长度 - 4字节
+         * 数组维度数量 - 4字节
+         * 数组维度列表 - 4*N字节
+         * 数组元素列表 - M字节
+         */
 
+        typedef llvm::PointerType StructureType;
+        StructureType *getStructureType(llvm::StructType *structType);
+        bool isStructureType(llvm::Type *type);
+        /*
+         * 获取或生成结构体创建器
+         */
+        llvm::Function *getStructCreator(llvm::StructType *structType);
+        /*
+         * 创建结构体
+         */
+        LLVMRTIRBuilder::StructureType *CreateStructureType(const std::string &name, const std::vector<llvm::Type*> &member_types);
+        /*
+         * 获取结构体内存物理大小
+         */
+        size_t getStructureSize(llvm::StructType *llStructType);
+        /*
+         * 根据类型信息创建结构体实例并初始化
+         */
+        llvm::Value *CreateStructureInst(llvm::StructType *structType);
+        llvm::Value *CreateStructureInst(LLVMRTIRBuilder::StructureType *structureType);
         /*
          * 克隆结构体
          */
-        llvm::Value *CloneStructure(llvm::Value *structurePtr, StructureDecl *astStructureDecl);
+        llvm::Value *CloneStructure(llvm::Value *structurePtr);
 
+
+        /*
+         * 字符串的内存布局：
+         * 字符串长度 - 4字节
+         * 字符串内容 - M字节
+         */
+
+        typedef llvm::PointerType StringType;
+        StructureType *getStringType();
+        bool isStringType(llvm::Type *type);
         /*
          * 克隆字符串
          */
         llvm::Value *CloneString(llvm::Value *stringPtr);
 
-        /*
-         * 克隆字节集
-         */
-        llvm::Value *CloneDataset(llvm::Value *datasetPtr);
     };
 
 }

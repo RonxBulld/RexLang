@@ -5,7 +5,32 @@
 #include <llvm/Analysis/MemoryBuiltins.h>
 #include "LLVMRTIRBuilder.h"
 
-namespace opene {
+namespace opene {       // 公共功能和基础工具
+
+    bool isOrdinaryType(TypeDecl *typeDecl) {
+        bool is_ordinary = typeDecl->is<BuiltinTypeDecl>();
+        if (is_ordinary) {
+            BuiltinTypeDecl *builtin_type_decl = typeDecl->as<BuiltinTypeDecl>();
+            if (builtin_type_decl->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeString ||
+                builtin_type_decl->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDataSet) {
+                is_ordinary = false;
+            }
+        }
+        return is_ordinary;
+    }
+
+    bool isOrdinaryType(llvm::Type *type) {
+        return !type->isPointerTy();
+    }
+
+    RuntimeAPICreator::RuntimeAPICreator(llvm::IRBuilder<> &Builder, llvm::LLVMContext &Context, llvm::Module &Module)
+            : Builder(Builder), Context(Context), Module(Module) {
+    }
+
+    LLVMRTIRBuilder::LLVMRTIRBuilder(llvm::Module *Module, llvm::IRBuilder<> &Builder)
+            : RuntimeAPICreator(Builder, Module->getContext(), *Module) {
+    }
+
     llvm::ConstantInt *RuntimeAPICreator::CreateInt(int intValue, unsigned int nBits, bool isSigned) {
         return llvm::ConstantInt::get(Context, llvm::APInt(nBits, intValue, isSigned));
     }
@@ -20,7 +45,9 @@ namespace opene {
                 Builder.getInt8PtrTy(),
                 {Builder.getInt32Ty()}
         );
-        return Builder.CreateCall(malloc_fn, { CreateInt(size) });
+        llvm::Value *malloc_ptr = Builder.CreateCall(malloc_fn, { CreateInt(size) });
+        assert(malloc_ptr->getType()->isPointerTy());
+        return malloc_ptr;
     }
 
     void RuntimeAPICreator::Free(llvm::Value *ptr) {
@@ -36,102 +63,186 @@ namespace opene {
         Builder.CreateCall(free_fn, { ptr });
     }
 
-    bool RuntimeAPICreator::isOrdinaryType(TypeDecl *typeDecl) const {
-        bool is_ordinary = typeDecl->is<BuiltinTypeDecl>();
-        if (is_ordinary) {
-            BuiltinTypeDecl *builtin_type_decl = typeDecl->as<BuiltinTypeDecl>();
-            if (builtin_type_decl->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeString ||
-                builtin_type_decl->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDataSet) {
-                is_ordinary = false;
-            }
+    size_t RuntimeAPICreator::getTypeByteWidth(llvm::Type *type) const {
+        size_t bit_width = 0;
+        if (type->isPointerTy()) {
+            bit_width = Builder.getInt8PtrTy()->getIntegerBitWidth();
+        } else if (type->isIntegerTy()) {
+            bit_width = type->getIntegerBitWidth();
+        } else if (type->isFloatTy()) {
+            bit_width = 8 * 4;
+        } else if (type->isDoubleTy()) {
+            bit_width = 8 * 8;
+        } else {
+            assert(false);
         }
-        return is_ordinary;
+        return bit_width / 8;
     }
 
-    llvm::Value *LLVMRTIRBuilder::CloneAggregateObject(llvm::Value *objectPtr, TypeDecl *referenceAstType) {
-        if (!objectPtr->getType()->isPointerTy()) {
-            assert(false);
-            return nullptr;
-        }
-        if (StructureDecl *structure_decl = referenceAstType->as<StructureDecl>()) {
-            return CloneStructure(objectPtr, structure_decl);
-        } else if (ArrayDecl *array_decl = referenceAstType->as<ArrayDecl>()) {
-            return CloneArray(objectPtr, array_decl);
-        } else if (BuiltinTypeDecl *builtin_type_decl = referenceAstType->as<BuiltinTypeDecl>()) {
-            if (builtin_type_decl->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeString) {
-                return CloneString(objectPtr);
-            } else if (builtin_type_decl->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDataSet) {
-                return CloneDataset(objectPtr);
-            } else {
-                assert(false);
-                return nullptr;
-            }
+    llvm::Value *LLVMRTIRBuilder::CreateAggregateObject(llvm::Type *llType) {
+
+        llvm::PointerType *pointer_type = llvm::dyn_cast<llvm::PointerType>(llType);
+        assert(pointer_type);
+        llvm::Type *element_type = pointer_type->getElementType();
+
+        if (llvm::ArrayType *array_decl = llvm::dyn_cast<llvm::ArrayType>(element_type)) {    // 优先判定数组
+            return CreateArrayInst(array_decl);
+
+        } else if (llvm::StructType *struct_decl = llvm::dyn_cast<llvm::StructType>(element_type)) {  // 再判定结构体
+            return CreateStructureInst(struct_decl);
+
+        } else if (pointer_type == Builder.getInt8PtrTy()) {    // 最后字节集和字符串混为一谈
+            // TODO:
+
         } else {
             assert(false);
             return nullptr;
         }
     }
 
-    llvm::Value *LLVMRTIRBuilder::CloneObjectIfAggregate(llvm::Value *value, TypeDecl *referenceAstType) {
-        if (isOrdinaryType(referenceAstType)) {
+    llvm::Value *LLVMRTIRBuilder::CloneAggregateObject(llvm::Value *objectPtr) {
+        llvm::Type *obj_type = objectPtr->getType();
+        if (!obj_type->isPointerTy()) {
+            assert(false);
+            return nullptr;
+        }
+        if (isStructureType(obj_type)) {
+            return CloneStructure(objectPtr);
+
+        } else if (isArrayType(obj_type)) {
+            return CloneArray(objectPtr);
+
+        } else if (isStringType(obj_type)) {
+            return CloneString(objectPtr);
+
+        } else {
+            assert(false);
+            return nullptr;
+        }
+    }
+
+    llvm::Value *LLVMRTIRBuilder::CloneObjectIfAggregate(llvm::Value *value) {
+        if (isOrdinaryType(value->getType())) {
             return value;
         } else {
-            return CloneAggregateObject(value, referenceAstType);
+            return CloneAggregateObject(value);
         }
     }
 
-    /*
-     * 获取类型名称
-     */
-    std::string GetTypeQualifiedName(llvm::Type *type) {
-        if (DArrayType *array_type = llvm::dyn_cast<DArrayType>(type)) {
-            return "#array." + GetTypeQualifiedName(array_type->GetElementType());
-        } else if (llvm::StructType *struct_type = llvm::dyn_cast<llvm::StructType>(type)) {
-            return "#struct_" + struct_type->getName().str();
-        } else if (DStringType *string_type = llvm::dyn_cast<DStringType>(type)) {
-            return "#string";
-        } else if (DDataSetType *dataset_type = llvm::dyn_cast<DDataSetType>(type)) {
-            return "#dataset";
-        } else if (type->isIntegerTy()) {
-            return "#int" + std::to_string(type->getIntegerBitWidth());
+    llvm::Value *LLVMRTIRBuilder::CreateInitializeValue(llvm::Type *llType) {
+        if (llType->isPointerTy()) {
+            return CreateAggregateObject(llType);
+        } else if (llType->isIntegerTy()) {         // 整数类型族
+            return CreateInt(0, llType->getIntegerBitWidth());
+        } else if (llType->isFloatTy()) {           // 浮点类型
+            return llvm::ConstantFP::get(Context, llvm::APFloat(0.0f));
+        } else if (llType->isDoubleTy()) {          // 双精度类型
+            return llvm::ConstantFP::get(Context, llvm::APFloat(0.0));
         } else {
             assert(false);
+            return nullptr;
         }
     }
+
 }
 
 namespace opene {   // 数组
-    llvm::Type *LLVMRTIRBuilder::CreateArrayType(llvm::Type *elementType, const std::vector<size_t> &dimensions) {
-        DArrayType *d_array_type = new DArrayType(Context);
-        d_array_type->SetElementType(elementType);
-        d_array_type->SetDimensions(dimensions);
-        return d_array_type;
+    LLVMRTIRBuilder::DynamicArrayType *LLVMRTIRBuilder::getArrayType() {
+        return Builder.getVoidTy()->getPointerTo();
     }
 
-    llvm::Value *LLVMRTIRBuilder::CreateArrayInst(DArrayType *arrayType) {
+    bool LLVMRTIRBuilder::isArrayType(llvm::Type *type) {
+        llvm::PointerType *ptr_type = llvm::dyn_cast<llvm::PointerType>(type);
+        if (!ptr_type) { return false; }
+        if (ptr_type->getElementType()->isArrayTy()) { return true; }
+        assert(false);
+        return false;
+    }
+
+    LLVMRTIRBuilder::DynamicArrayType *LLVMRTIRBuilder::CreateArrayType(llvm::Type *elementType, const std::vector<size_t> &dimensions) {
+        assert(!dimensions.empty());
+        llvm::Type *array_type = elementType;
+        for (size_t dim : dimensions) {
+            array_type = llvm::ArrayType::get(array_type, dim);
+        }
+        return array_type->getPointerTo();
+    }
+
+    llvm::Value *LLVMRTIRBuilder::CreateArrayInst(llvm::ArrayType *arrayType) {
+        assert(arrayType);
+
+        // 获取真实类型
         // 准备维度信息
-        const std::vector<size_t> &dims = arrayType->GetDimensions();
+
+        llvm::Type *element_type = nullptr;
         std::vector<llvm::Constant*> lldims;
-        lldims.reserve(dims.size());
-        for (size_t dim : dims) { lldims.emplace_back(CreateInt(dim)); }
+        size_t element_count = 1;
+        do {
+            size_t dim_n = arrayType->getArrayNumElements();
+            element_count *= dim_n;
+            llvm::Constant *dim = CreateInt(dim_n);
+            lldims.push_back(dim);
+            element_type = arrayType->getElementType();
+            arrayType = llvm::dyn_cast<llvm::ArrayType>(element_type);
+        } while (arrayType);
+        assert(element_type);
+
         // 准备RTAPI调用对象
+
         llvm::FunctionCallee create_array_fn = getRTAPIFunction(
                 "$create_array",
-                Builder.getInt8PtrTy(),    // 数组数据指针
+                getArrayType(),    // 数组数据指针
                 {Builder.getInt32Ty()},   // 维度数
                 true
         );
+
         // 执行调用
+
         std::vector<llvm::Value*> args{CreateInt(lldims.size())};
         args.insert(args.end(), lldims.begin(), lldims.end());
-        return Builder.CreateCall(create_array_fn, args);
+        llvm::Value *ptr_to_array = Builder.CreateCall(create_array_fn, args);
+
+        // 初始化数组
+
+        size_t element_bitwidth = getTypeByteWidth(element_type) * 8;
+        std::vector<llvm::Value *> initilazation_list;
+        for (size_t i = 0; i < element_count; ++i) {
+            llvm::Value *init_val = nullptr;
+            if (element_type->isIntegerTy()) {
+                init_val = Builder.getInt(llvm::APInt(element_bitwidth, 0, true));
+            } else if (element_type->isFloatTy()) {
+                init_val = llvm::ConstantFP::get(Builder.getFloatTy(), 0.0);
+            } else if (element_type->isDoubleTy()) {
+                init_val = llvm::ConstantFP::get(Builder.getDoubleTy(), 0.0);
+            } else {
+                init_val = CreateAggregateObject(element_type);
+            }
+            initilazation_list.push_back(init_val);
+        }
+        llvm::FunctionCallee init_array_fn = getRTAPIFunction(
+                "$init_array_" + std::to_string(element_bitwidth),
+                Builder.getVoidTy(),
+                {getArrayType(), Builder.getInt32Ty()},  // 数组数据指针 维度数
+                true
+        );
+        args.clear();
+        args.push_back(ptr_to_array);
+        args.push_back(CreateInt(element_count));
+        args.insert(args.end(), initilazation_list.begin(), initilazation_list.end());
+        Builder.CreateCall(init_array_fn, args);
+
+        return ptr_to_array;
+    }
+
+    llvm::Value *LLVMRTIRBuilder::CreateArrayInst(LLVMRTIRBuilder::DynamicArrayType *arrayType) {
+        return CreateArrayInst(llvm::dyn_cast<llvm::ArrayType>(arrayType->getPointerElementType()));
     }
 
     void LLVMRTIRBuilder::ReDimArray(llvm::Value *arrayVariablePtr, bool clear, const std::vector<llvm::Value *> &newDimensions) {
         llvm::FunctionCallee redim_fn = getRTAPIFunction(
                 "$redim_array",
                 Builder.getVoidTy(),
-                {Builder.getInt32Ty()->getPointerTo(), Builder.getInt1Ty(), Builder.getInt32Ty()}, // 数组变量指针 是否清空 新维度数
+                {getArrayType(), Builder.getInt1Ty(), Builder.getInt32Ty()}, // 数组变量指针 是否清空 新维度数
                 true
         );
         std::vector<llvm::Value *> args{arrayVariablePtr, Builder.getInt1(clear), CreateInt(newDimensions.size())};
@@ -139,21 +250,24 @@ namespace opene {   // 数组
         Builder.CreateCall(redim_fn, args);
     }
 
-    llvm::Value *LLVMRTIRBuilder::CloneArray(llvm::Value *arrayPtr, TypeDecl *astType) {
+    llvm::Value *LLVMRTIRBuilder::CloneArray(llvm::Value *arrayPtr) {
+
         // 准备RTAPI调用对象
+
         llvm::FunctionCallee clone_array_fn = getRTAPIFunction(
                 "$clone_array",
-                Builder.getInt8PtrTy(),
-                {Builder.getInt8PtrTy()}
+                getArrayType(),
+                {getArrayType()}
                 );
         llvm::Value *new_array = Builder.CreateCall(clone_array_fn, {arrayPtr});
+
         // 判断是否简单类型
-        ArrayDecl *ast_array_decl = astType->as<ArrayDecl>();
-        assert(ast_array_decl);
-        bool is_ordinary = isOrdinaryType(ast_array_decl->base_type_);
+
+        bool is_ordinary = isOrdinaryType(arrayPtr->getType());
+
         // 针对复杂类型调用相应的复制函数
+
         if (!is_ordinary) {
-            TypeDecl *base_type = ast_array_decl->base_type_;
             llvm::Value *actual_size = GetArrayElementCount(new_array);
             llvm::Value *clone_idx = Builder.CreateAlloca(Builder.getInt32Ty());
             Builder.CreateStore(CreateInt(0), clone_idx);
@@ -164,22 +278,23 @@ namespace opene {   // 数组
 
             Builder.CreateBr(cond_bb);
             Builder.SetInsertPoint(cond_bb);
-            Builder.CreateCondBr(Builder.CreateICmpULT(clone_idx, actual_size), clone_bb, tail_bb);
+            Builder.CreateCondBr(Builder.CreateICmpULT(Builder.CreateLoad(clone_idx), actual_size), clone_bb, tail_bb);
 
             Builder.CreateBr(clone_bb);
             Builder.SetInsertPoint(clone_bb);
 
-            llvm::Value *element_ptr = GetArrayElementPointer(arrayPtr, {clone_idx});
+            llvm::Value *element_ptr = GetArrayElementPointer(arrayPtr, {Builder.CreateLoad(clone_idx)});
             if (!element_ptr) {
                 return nullptr;
             }
 
-            llvm::Value *clone_obj_ptr = CloneAggregateObject(Builder.CreateLoad(element_ptr), base_type);
+            llvm::Value *clone_obj_ptr = CloneAggregateObject(Builder.CreateLoad(element_ptr));
             if (!clone_obj_ptr) {
                 return nullptr;
             }
 
             Builder.CreateStore(clone_obj_ptr, element_ptr);
+            Builder.CreateStore(Builder.CreateAdd(Builder.CreateLoad(clone_idx), CreateInt(1)), clone_idx);
             Builder.CreateBr(cond_bb);
 
             Builder.SetInsertPoint(tail_bb);
@@ -191,7 +306,7 @@ namespace opene {   // 数组
         llvm::FunctionCallee get_array_elem_cnt_fn = getRTAPIFunction(
                 "$get_array_elem_cnt",
                 Builder.getInt32Ty(),
-                {Builder.getInt8PtrTy()},    // 数组数据指针
+                {getArrayType()},    // 数组数据指针
                 false
         );
         return Builder.CreateCall(get_array_elem_cnt_fn, {arrayPtr});
@@ -201,7 +316,7 @@ namespace opene {   // 数组
         llvm::FunctionCallee get_array_dimension_fn = getRTAPIFunction(
                 "$get_array_dimension",
                 Builder.getInt32Ty(),
-                {Builder.getInt8PtrTy(), Builder.getInt32Ty()}   // 数组数据指针 维数
+                {getArrayType(), Builder.getInt32Ty()}   // 数组数据指针 维数
         );
         return Builder.CreateCall(get_array_dimension_fn, {arrayPtr, dimensionIndex});
     }
@@ -210,7 +325,7 @@ namespace opene {   // 数组
         llvm::FunctionCallee get_array_ep_fn = getRTAPIFunction(
                 "$get_array_ep",
                 Builder.getInt32Ty()->getPointerTo(),
-                {Builder.getInt8PtrTy(), Builder.getInt32Ty()},  // 数组数据指针 维度个数
+                {getArrayType(), Builder.getInt32Ty()},  // 数组数据指针 维度个数
                 true
         );
         std::vector<llvm::Value *> args{arrayPtr, CreateInt(indexes.size())};
@@ -222,9 +337,9 @@ namespace opene {   // 数组
         llvm::FunctionCallee append_array_element_fn = getRTAPIFunction(
                 "$append_array_element",
                 Builder.getVoidTy(),
-                {Builder.getInt8PtrTy(), Builder.getInt32Ty()}   // 数组数据指针 数据
+                {getArrayType(), Builder.getInt32Ty()}   // 数组数据指针 数据
         );
-        newElement = CloneObjectIfAggregate(newElement, newElemAstType);
+        newElement = CloneObjectIfAggregate(newElement);
         return Builder.CreateCall(append_array_element_fn, {arrayPtr, newElement});
     }
 
@@ -232,9 +347,9 @@ namespace opene {   // 数组
         llvm::FunctionCallee insert_array_element_fn = getRTAPIFunction(
                 "$insert_array_element",
                 Builder.getVoidTy(),
-                {Builder.getInt8PtrTy(), Builder.getInt32Ty(), Builder.getInt32Ty()}  // 数组数据指针 插入位置 数据
+                {getArrayType(), Builder.getInt32Ty(), Builder.getInt32Ty()}  // 数组数据指针 插入位置 数据
         );
-        newElement = CloneObjectIfAggregate(newElement, newElemAstType);
+        newElement = CloneObjectIfAggregate(newElement);
         return Builder.CreateCall(insert_array_element_fn, {arrayPtr, insertPos, newElement});
     }
 
@@ -242,7 +357,7 @@ namespace opene {   // 数组
         llvm::FunctionCallee remove_array_element_fn = getRTAPIFunction(
                 "$remove_array_element",
                 Builder.getVoidTy(),
-                {Builder.getInt8PtrTy(), Builder.getInt32Ty(), Builder.getInt32Ty()}    // 数组数据指针 删除位置 删除数量
+                {getArrayType(), Builder.getInt32Ty(), Builder.getInt32Ty()}    // 数组数据指针 删除位置 删除数量
         );
         return Builder.CreateCall(remove_array_element_fn, {arrayPtr, position, count});
     }
@@ -251,7 +366,7 @@ namespace opene {   // 数组
         llvm::FunctionCallee clean_array_fn = getRTAPIFunction(
                 "$clean_array",
                 Builder.getVoidTy(),
-                {Builder.getInt8PtrTy()}    // 数组数据指针
+                {getArrayType()}    // 数组数据指针
         );
         return Builder.CreateCall(clean_array_fn, {arrayPtr});
     }
@@ -260,7 +375,7 @@ namespace opene {   // 数组
         llvm::FunctionCallee sort_array_fn = getRTAPIFunction(
                 "$sort_array",
                 Builder.getVoidTy(),
-                {Builder.getInt8PtrTy(), Builder.getInt1Ty()}   // 数组数据指针 是否从小到大
+                {getArrayType(), Builder.getInt1Ty()}   // 数组数据指针 是否从小到大
         );
         return Builder.CreateCall(sort_array_fn, {arrayPtr, Builder.getInt1(lessToMore)});
     }
@@ -269,8 +384,155 @@ namespace opene {   // 数组
         llvm::FunctionCallee zero_array_fn = getRTAPIFunction(
                 "$zero_array",
                 Builder.getVoidTy(),
-                {Builder.getInt8PtrTy()}    // 数组数据指针
+                {getArrayType()}    // 数组数据指针
         );
         return Builder.CreateCall(zero_array_fn, {arrayPtr});
+    }
+
+}
+
+namespace opene {   // 结构体
+    LLVMRTIRBuilder::StructureType *LLVMRTIRBuilder::getStructureType(llvm::StructType *structType) {
+        return structType->getPointerTo();
+    }
+
+    bool LLVMRTIRBuilder::isStructureType(llvm::Type *type) {
+        llvm::PointerType *ptr_type = llvm::dyn_cast<llvm::PointerType>(type);
+        if (!ptr_type) { return false; }
+        if (ptr_type->getElementType()->isStructTy()) { return true; }
+        assert(false);
+        return false;
+    }
+
+    std::string getStructCreatorFnName(llvm::StructType *structType) {
+        llvm::StringRef struct_name = structType->getStructName();
+        return "$" + struct_name.str() + "_creator";
+    }
+
+    llvm::Function *LLVMRTIRBuilder::getStructCreator(llvm::StructType *structType) {
+        std::string creator_fn_name = getStructCreatorFnName(structType);
+        llvm::Function *creator_fn = Module.getFunction(creator_fn_name);
+        if (creator_fn) {
+            return creator_fn;
+        }
+
+        // 结构体创建器声明
+
+        llvm::FunctionType *create_fn_ty = llvm::FunctionType::get(
+                getStructureType(structType),
+                {},
+                false
+        );
+        creator_fn = llvm::Function::Create(
+                create_fn_ty,
+                llvm::GlobalValue::LinkageTypes::ExternalLinkage,
+                getStructCreatorFnName(structType),
+                Module
+        );
+
+        // 实现创建器
+
+        llvm::BasicBlock *pre_head = Builder.GetInsertBlock();
+        llvm::BasicBlock *creator_entry = llvm::BasicBlock::Create(Context, "creator_entry", creator_fn);
+        Builder.SetInsertPoint(creator_entry);
+
+        // 分配内存
+
+        size_t struct_bytes_n = getStructureSize(structType);
+        llvm::Value *struct_ptr = Malloc(struct_bytes_n);
+        struct_ptr = Builder.CreatePointerCast(struct_ptr, getStructureType(structType));
+
+        // 初始化各个成员
+
+        for (size_t idx = 0; idx < structType->getStructNumElements(); ++idx) {
+            llvm::Type *mem_type = structType->getElementType(idx);
+            llvm::Value *initial_value = CreateInitializeValue(mem_type);
+            llvm::Value *mem_ptr = Builder.CreateStructGEP(struct_ptr, idx);
+            Builder.CreateStore(initial_value, mem_ptr);
+        }
+
+        // 返回初始化后的指针
+        struct_ptr = Builder.CreatePointerCast(struct_ptr, getStructureType(structType));
+        Builder.CreateRet(struct_ptr);
+
+        Builder.SetInsertPoint(pre_head);
+        return creator_fn;
+    }
+
+    LLVMRTIRBuilder::StructureType *LLVMRTIRBuilder::CreateStructureType(const std::string &name, const std::vector<llvm::Type *> &member_types) {
+        llvm::StructType *structure_decl = llvm::StructType::create(Context, name);
+        structure_decl->setBody(member_types);
+        return getStructureType(structure_decl);
+    }
+
+    size_t LLVMRTIRBuilder::getStructureSize(llvm::StructType *llStructType) {
+        size_t all_bytes_size = 0;
+        std::vector<llvm::Type*> body_types = llStructType->elements();
+        for (llvm::Type *type : body_types) {
+            size_t byte_size = getTypeByteWidth(type);
+            all_bytes_size += byte_size;
+        }
+        return all_bytes_size;
+    }
+
+    llvm::Value *LLVMRTIRBuilder::CreateStructureInst(llvm::StructType *structType) {
+        assert(structType);
+        llvm::Function *creator_fn = getStructCreator(structType);
+        return Builder.CreateCall(creator_fn, {});
+    }
+
+    llvm::Value *LLVMRTIRBuilder::CreateStructureInst(LLVMRTIRBuilder::StructureType *structureType) {
+        return CreateStructureInst(llvm::dyn_cast<llvm::StructType>(structureType->getPointerElementType()));
+    }
+
+    llvm::Value *LLVMRTIRBuilder::CloneStructure(llvm::Value *structurePtr) {
+
+        // 分配内存空间
+
+        assert(structurePtr->getType()->isPointerTy());
+        llvm::StructType *struct_type = llvm::dyn_cast<llvm::StructType>(structurePtr->getType()->getPointerElementType());
+        assert(struct_type);
+        size_t struct_bytes_n = getStructureSize(struct_type);
+        llvm::Value *struct_ptr = Malloc(struct_bytes_n);
+        struct_ptr = Builder.CreatePointerCast(struct_ptr, getStructureType(struct_type));
+
+        // 依次拷贝数据
+
+        std::vector<llvm::Type*> elements = struct_type->elements();
+        for (size_t idx = 0; idx < elements.size(); ++idx) {
+            llvm::Value *r_member_ptr = Builder.CreateStructGEP(structurePtr, idx);
+            llvm::Value *w_member_ptr = Builder.CreateStructGEP(struct_ptr, idx);
+            llvm::Value *r_member_val = Builder.CreateLoad(r_member_ptr);
+            r_member_val = CloneObjectIfAggregate(r_member_val);
+            Builder.CreateStore(r_member_val, w_member_ptr);
+        }
+
+        // 返回内存空间指针
+        struct_ptr = Builder.CreatePointerCast(struct_ptr, getStructureType(struct_type));
+        return struct_ptr;
+    }
+
+}
+
+namespace opene {   // 字符串
+    LLVMRTIRBuilder::StructureType *LLVMRTIRBuilder::getStringType() {
+        return Builder.getInt8Ty()->getPointerTo();
+    }
+
+    bool LLVMRTIRBuilder::isStringType(llvm::Type *type) {
+        llvm::PointerType *ptr_type = llvm::dyn_cast<llvm::PointerType>(type);
+        if (!ptr_type) { return false; }
+        if (ptr_type->getElementType()->isIntegerTy(8)) { return true; }
+        assert(false);
+        return false;
+    }
+
+    llvm::Value *LLVMRTIRBuilder::CloneString(llvm::Value *stringPtr) {
+        llvm::FunctionCallee clone_string_fn = getRTAPIFunction(
+                "$clone_string",
+                Builder.getInt8PtrTy(),
+                {Builder.getInt8PtrTy()}
+        );
+        return Builder.CreateCall(clone_string_fn, {stringPtr});
     }
 }
