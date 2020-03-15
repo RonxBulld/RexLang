@@ -236,11 +236,6 @@ namespace opene {
             return llvm::ConstantInt::get(TheContext, llvm::APInt(nBits, intValue, isSigned));
         }
 
-        void InitVariable(llvm::Value *variable, TypeDecl *type) {
-            if (!isOrdinaryType(type)) {
-            }
-        }
-
     public:
         bool Emit(TranslateUnit *translateUnit) {
             TheModule = new llvm::Module("a.ll", TheContext);
@@ -295,11 +290,28 @@ namespace opene {
 
         void CreateVariableInitialization(llvm::Value *variable) {
             if (llvm::GlobalVariable *gvari = llvm::dyn_cast<llvm::GlobalVariable>(variable)) {
-                // TODO:
+
+                llvm::BasicBlock *pre_head = Builder.GetInsertBlock();
+
+                llvm::BasicBlock *init_bb = CreateInitBlock();
+                Builder.SetInsertPoint(init_bb);
+                llvm::Value *init_val = RTBuilder.CreateInitializeValue(gvari->getType());
+                StoreVariable(init_val, gvari);
+                AddInitBlocks(init_bb, init_bb);
+
+                Builder.SetInsertPoint(pre_head);
+
+            } else if (llvm::AllocaInst *lvari = llvm::dyn_cast<llvm::AllocaInst>(variable)) {
+
+                llvm::Value *init_val = RTBuilder.CreateInitializeValue(lvari->getType());
+                StoreVariable(init_val, lvari);
+
+            } else {
+                assert(false);
             }
         }
 
-        llvm::GlobalVariable *CreateGlobalVariable(TypeDecl *vari_type, const std::string &vari_name) {
+        llvm::GlobalVariable *CreateGlobalVariableAndInit(TypeDecl *vari_type, const std::string &vari_name) {
             llvm::Type *_vari_type = GetType(vari_type);
             llvm::GlobalVariable *gvari = new llvm::GlobalVariable(
                     /*Module*/*TheModule,
@@ -319,7 +331,7 @@ namespace opene {
         }
 
         llvm::GlobalVariable *Emit(GlobalVariableDecl *globalVariableDecl) {
-            return CreateGlobalVariable(globalVariableDecl->type_decl_ptr_, globalVariableDecl->name_.string_.str());
+            return CreateGlobalVariableAndInit(globalVariableDecl->type_decl_ptr_, globalVariableDecl->name_.string_.str());
         }
 
         llvm::Value *Emit(ParameterDecl *parameterDecl) {
@@ -337,43 +349,36 @@ namespace opene {
         }
 
         llvm::GlobalVariable *Emit(FileVariableDecl *fileVariableDecl) {
-            llvm::Type *vari_type = GetType(fileVariableDecl->type_decl_ptr_);
-            std::string vari_name = fileVariableDecl->name_.string_.str();
             // 文件变量需要重命名以免名称冲突
+            std::string vari_name = fileVariableDecl->name_.string_.str();
             vari_name = TheProgramSet->name_.string_.str() + "." + vari_name;
-            llvm::GlobalVariable *fvari = new llvm::GlobalVariable(
-                    /*Module*/*TheModule,
-                    /*Type*/vari_type,
-                    /*Constant*/false,
-                    /*Linkage*/llvm::GlobalValue::LinkageTypes::ExternalLinkage,
-                    /*Initializer*/nullptr,
-                    /*Name*/vari_name,
-                    /*InsertBefor*/nullptr,
-                    /*ThreadLocal*/llvm::GlobalVariable::ThreadLocalMode::NotThreadLocal,
-                    /*AddressSpace*/0,
-                    /*ExternallyInitalized*/false
-            );
-            fvari->setAlignment(4);
 
-            return fvari;
+            llvm::GlobalVariable *file_vari = CreateGlobalVariableAndInit(fileVariableDecl->type_decl_ptr_, vari_name);
+            file_vari->setLinkage(llvm::GlobalValue::LinkageTypes::InternalLinkage);
+            return file_vari;
         }
 
         llvm::Value *Emit(LocalVariableDecl *localVariableDecl) {
             llvm::Type *vari_type = GetType(localVariableDecl->type_decl_ptr_);
             std::string vari_name = localVariableDecl->name_.string_.str();
-            if (localVariableDecl->is_static_ == false) {
+            if (!localVariableDecl->is_static_) {
+
                 // 非静态变量在栈上创建
-                llvm::AllocaInst *lvari = Builder.CreateAlloca(vari_type, nullptr, vari_name);
-                lvari->setAlignment(4);
-                // TODO: 添加初始化表达式
-                return lvari;
+
+                llvm::AllocaInst *local_vari = Builder.CreateAlloca(vari_type, nullptr, vari_name);
+                local_vari->setAlignment(4);
+                CreateVariableInitialization(local_vari);
+                return local_vari;
+
             } else {
+
                 // 在静态变量前增加名字修饰以免冲突
+
                 vari_name = TheASTFunction->super_set_->name_.string_.str() + "." + TheASTFunction->name_.string_.str() + "." + vari_name;
-                llvm::GlobalVariable *static_vari = CreateGlobalVariable(localVariableDecl->type_decl_ptr_, vari_name);
+                llvm::GlobalVariable *static_vari = CreateGlobalVariableAndInit(localVariableDecl->type_decl_ptr_, vari_name);
                 static_vari->setLinkage(llvm::GlobalValue::LinkageTypes::InternalLinkage);
-                // TODO: 添加初始化表达式
                 return static_vari;
+
             }
         }
 
@@ -465,20 +470,30 @@ namespace opene {
          * 仅声明原型不定义内容
          */
         llvm::Function *Emit(FunctorDecl *functorDecl) {
+
             // 构建形参声明
+
             std::vector<llvm::Type*> parameter_types;
             for (ParameterDecl *parameter_decl : functorDecl->parameters_) {
                 llvm::Type *parameter_type = GetType(parameter_decl->type_decl_ptr_);
                 parameter_types.push_back(parameter_type);
             }
+
             // 构建返回值类型
+
             llvm::Type *return_type = GetType(functorDecl->return_type_);
+
             // 构建函数原型
+
             llvm::FunctionType *function_type = llvm::FunctionType::get(return_type, parameter_types, false);   // TODO: 这里暂时设为False
             std::string function_name = functorDecl->name_.string_.str();
+
             // 构建函数
+
             llvm::Function *function = llvm::Function::Create(function_type, llvm::Function::ExternalLinkage, function_name, TheModule);
+
             // 设置参数名
+
             unsigned idx = 0;
             for (auto &param : function->args()) {
                 param.setName(functorDecl->parameters_[idx]->name_.string_.str());
@@ -486,7 +501,9 @@ namespace opene {
                 variable_object_pool_[functorDecl->parameters_[idx]] = &param;
                 idx++;
             }
+
             // 所有函数声明都添加到查找表中
+
             function_object_pool_[functorDecl] = function;
             return function;
         }
@@ -869,18 +886,78 @@ namespace opene {
             return return_inst;
         }
 
-        llvm::Value *Emit(ExitStmt *exitStmt);
+        bool Emit(ExitStmt *exitStmt) {
+            llvm::FunctionCallee exit_fn = RTBuilder.getRTAPIFunction("$exit", Builder.getVoidTy(), {});
+            Builder.CreateCall(exit_fn);
+            return true;
+        }
 
-        llvm::Value *Emit(Expression *expression);
+        llvm::Value *Emit(Expression *expression) {
+            if (HierarchyIdentifier *hierarchy_identifier = expression->as<HierarchyIdentifier>()) {
+                return Emit(hierarchy_identifier);
+            } else if (TypeConvert *type_convert = expression->as<TypeConvert>()) {
+                return Emit(type_convert);
+            } else if (UnaryExpression *unary_expression = expression->as<UnaryExpression>()) {
+                return Emit(unary_expression);
+            } else if (BinaryExpression *binary_expression = expression->as<BinaryExpression>()) {
+                return Emit(binary_expression);
+            } else if (Value *value = expression->as<Value>()) {
+                return Emit(value);
+            } else if (FuncAddrExpression *func_addr_expression = expression->as<FuncAddrExpression>()) {
+                return Emit(func_addr_expression);
+            } else {
+                assert(false);
+                return nullptr;
+            }
+        }
+
+        llvm::Value *Emit(TypeConvert *typeConvert) {
+            llvm::Value *expr = Emit(typeConvert->from_expression_);
+            llvm::Type *target_type = Emit(typeConvert->target_type_);
+            llvm::Type *source_type = Emit(typeConvert->source_type_);
+            // 指针到指针
+            if (target_type->isPointerTy() && source_type->isPointerTy()) {
+                return Builder.CreatePointerCast(expr, target_type);
+            }
+            // 指针到整数
+            else if (target_type->isIntegerTy() && source_type->isPointerTy()) {
+                return Builder.CreatePtrToInt(expr, target_type);
+            }
+            // 整数到指针
+            else if (target_type->isPointerTy() && source_type->isIntegerTy()) {
+                return Builder.CreateIntToPtr(expr, target_type);
+            }
+            // 整数到浮点
+            else if ((target_type->isFloatTy() || target_type->isDoubleTy()) && source_type->isIntegerTy()) {
+                return Builder.CreateSIToFP(expr, target_type);
+            }
+            // 浮点到整数
+            else if (target_type->isIntegerTy() && (target_type->isFloatTy() || target_type->isDoubleTy())) {
+                return Builder.CreateFPToSI(expr, target_type);
+            }
+            else {
+                assert(false);
+                return nullptr;
+            }
+        }
 
         llvm::Value *LoadFromStructOrNot(llvm::Value *structInstance, NameComponent *nameComponent) {
-            if (Identifier *identifier = nameComponent->as<Identifier>()) {         // 目标类型是单名称组件
 
+            // 目标类型是单名称组件
+
+            if (Identifier *identifier = nameComponent->as<Identifier>()) {
                 if (structInstance) {
+
+                    // 作为成员解析
+
                     MemberVariableDecl *member_variable_decl = identifier->reference_->as<MemberVariableDecl>();
                     assert(member_variable_decl);
                     return Builder.CreateStructGEP(structInstance, member_variable_decl->index_of_struct_);
+
                 } else {
+
+                    // 作为普通变量或者函数名解析
+
                     if (llvm::Value *variable = variable_object_pool_[identifier->reference_]) {
                         assert(variable);
                         return variable;
@@ -891,18 +968,31 @@ namespace opene {
                         assert(false);
                         return nullptr;
                     }
+
                 }
 
-            } else if (ArrayIndex *array_index = nameComponent->as<ArrayIndex>()) {     // 目标类型是数组索引
+            }
 
-                NameComponent *base = ASTUtility::GetArrayIndexBase(array_index);
+            // 目标类型是数组索引
+
+            else if (ArrayIndex *array_index = nameComponent->as<ArrayIndex>()) {
+
+                // 取索引列表
+
                 ErrOr<std::vector<Expression *>> indexes = ASTUtility::GetArrayIndexIndexList(array_index);
                 if (indexes.HadError()) {
                     assert(false);
                     return nullptr;
                 }
+
+                // 取数组指针
+
+                NameComponent *base = ASTUtility::GetArrayIndexBase(array_index);
                 llvm::Value *arr_ptr = LoadFromStructOrNot(structInstance, base);
                 assert(arr_ptr);
+
+                // 取元素指针
+
                 std::vector<llvm::Value *> indexes_ir;
                 for (Expression *index : indexes.Value()) {
                     llvm::Value *index_ir = Emit(index);
@@ -911,17 +1001,32 @@ namespace opene {
                 }
                 return RTBuilder.GetArrayElementPointer(arr_ptr, indexes_ir);
 
-            } else if (FunctionCall *function_call = nameComponent->as<FunctionCall>()) {   // 目标类型是函数调用
+            }
+
+            // 目标类型是函数调用
+
+            else if (FunctionCall *function_call = nameComponent->as<FunctionCall>()) {
+
+                // 获取调用目标
+
                 llvm::Function *func_ptr = llvm::dyn_cast<llvm::Function>(LoadFromStructOrNot(structInstance, function_call->function_name_));
                 assert(func_ptr);
+
+                // 计算实参
+                // TODO: 处理引用属性和可空属性
+
                 std::vector<llvm::Value *> arguments_ir;
                 for (Expression *argument : function_call->arguments_) {
                     llvm::Value *argument_ir = Emit(argument);
                     assert(argument_ir);
                     arguments_ir.push_back(argument_ir);
                 }
+
+                // 开始调用
+
                 return Builder.CreateCall(func_ptr, arguments_ir);
-            } else {
+            }
+            else {
                 assert(false);
                 return nullptr;
             }
@@ -933,33 +1038,6 @@ namespace opene {
                 previous_base = LoadFromStructOrNot(previous_base, name_component);
             }
             return previous_base;
-        }
-
-//        llvm::Value *Emit(NameComponent *nameComponent);
-//        llvm::Value *Emit(Identifier *identifier);
-//        llvm::Value *Emit(ArrayIndex *arrayIndex);
-
-        llvm::Value *Emit(FunctionCall *functionCall) {
-            auto found_func = function_object_pool_.find(functionCall->functor_declare_);
-            if (found_func == function_object_pool_.end()) {
-                assert(false);
-                return nullptr;
-            }
-            llvm::Function *callee = found_func->second;
-            if (!callee) {
-                assert(false);
-                return nullptr;
-            }
-            std::vector<llvm::Value *> arguments;
-            for (Expression *expression : functionCall->arguments_) {
-                llvm::Value *argu = Emit(expression);
-                if (!argu) {
-                    assert(false);
-                    return nullptr;
-                }
-                arguments.push_back(argu);
-            }
-            return Builder.CreateCall(callee, arguments, "$.calltmp");
         }
 
         llvm::Value *Emit(UnaryExpression *unaryExpression) {
@@ -1027,9 +1105,7 @@ namespace opene {
                     return Builder.CreateICmpSLE(L, R, "$.le");
                 }
                 case _OperatorExpression::OperatorType::kOptLikeEqual: {
-                    // TODO:
-                    assert(false);
-                    return nullptr;
+                    return RTBuilder.StringLikeEqual(L, R);
                 }
                 // *** 逻辑系列 ***
                 case _OperatorExpression::OperatorType::kOptAnd: {

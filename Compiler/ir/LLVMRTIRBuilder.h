@@ -189,12 +189,16 @@ namespace opene {
          */
 
         typedef llvm::PointerType StringType;
-        StructureType *getStringType();
+        StringType *getStringType();
         bool isStringType(llvm::Type *type);
         /*
          * 克隆字符串
          */
         llvm::Value *CloneString(llvm::Value *stringPtr);
+        /*
+         * 近似等于
+         */
+        llvm::Value *StringLikeEqual(llvm::Value *lhs, llvm::Value *rhs);
 
     };
 

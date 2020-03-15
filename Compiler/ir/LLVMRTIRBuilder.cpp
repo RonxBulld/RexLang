@@ -515,7 +515,7 @@ namespace opene {   // 结构体
 }
 
 namespace opene {   // 字符串
-    LLVMRTIRBuilder::StructureType *LLVMRTIRBuilder::getStringType() {
+    LLVMRTIRBuilder::StringType *LLVMRTIRBuilder::getStringType() {
         return Builder.getInt8Ty()->getPointerTo();
     }
 
@@ -530,9 +530,18 @@ namespace opene {   // 字符串
     llvm::Value *LLVMRTIRBuilder::CloneString(llvm::Value *stringPtr) {
         llvm::FunctionCallee clone_string_fn = getRTAPIFunction(
                 "$clone_string",
-                Builder.getInt8PtrTy(),
-                {Builder.getInt8PtrTy()}
+                getStringType(),
+                {getStringType()}
         );
         return Builder.CreateCall(clone_string_fn, {stringPtr});
+    }
+
+    llvm::Value *LLVMRTIRBuilder::StringLikeEqual(llvm::Value *lhs, llvm::Value *rhs) {
+        llvm::FunctionCallee string_like_equal_fn = getRTAPIFunction(
+                "$string_like_equal",
+                Builder.getInt1Ty(),
+                {getStringType(), getStringType()}
+        );
+        return Builder.CreateCall(string_like_equal_fn, {lhs, rhs});
     }
 }
