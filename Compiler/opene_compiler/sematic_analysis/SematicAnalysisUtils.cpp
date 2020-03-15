@@ -16,14 +16,17 @@ namespace opene {
      */
     TypeDecl * SematicAnalysis::EvalBaseNameComponentType(NameComponent *nameComponent, TypeDecl *frontType) {
         assert(nameComponent);
+
         if (ArrayIndex *array_index = nameComponent->as<ArrayIndex>()) {
             TypeDecl *index_target = EvalBaseNameComponentType(ASTUtility::GetArrayIndexBase(array_index), frontType);
             if (!index_target) {
                 assert(false);
                 return nullptr;
             }
+
             // 检查类型是否可索引
-            if (ASTAssert::TypeCanIndexable(index_target) == false) {
+
+            if (!ASTAssert::TypeCanIndexable(index_target)) {
                 assert(false);
                 return nullptr;
             }
@@ -31,19 +34,24 @@ namespace opene {
 
         } else if (FunctionCall *function_call = nameComponent->as<FunctionCall>()) {
             TypeDecl *call_target = EvalBaseNameComponentType(function_call->function_name_, frontType);
+
             // 检查类型是否可调用
-            if (ASTAssert::TypeCanCallable(call_target) == false) {
+
+            if (!ASTAssert::TypeCanCallable(call_target)) {
                 assert(false);
                 return nullptr;
             }
+
+            this->CheckExpression(function_call);
+
             return ASTUtility::GetCallableReturnType(call_target);
 
         } else if (Identifier *identifier = nameComponent->as<Identifier>()) {
             TagDecl *id_type = nullptr;
+
+            // 如果frontType非空表明有父级类型，将从父级类型中查找子类型
+
             if (frontType) {
-
-                // 如果frontType非空表明有父级类型，将从父级类型中查找子类型
-
                 if (StructureDecl *structure_decl = frontType->as<StructureDecl>()) {
                     auto found = structure_decl->members_.find(identifier->name_.string_);
                     if (found != structure_decl->members_.end()) {
@@ -53,11 +61,14 @@ namespace opene {
                         return nullptr;
                     }
                 }
-            } else {
 
-                // 如果frontType为空则表明无父级类型，将从动态符号表中查询
+            }
 
+            // 如果frontType为空则表明无父级类型，将从动态符号表中查询
+
+            else {
                 id_type = this->analysis_context_.QueryTagDeclFromDynSymbolTableWithName(identifier->name_.string_);
+
             }
 
             // 必须是实体定义

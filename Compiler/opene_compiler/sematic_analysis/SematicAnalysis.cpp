@@ -47,49 +47,78 @@ namespace opene {
         this->translate_unit_ = translateUnitPtr;
 
         // 1. 初始化动作
+
         ASTUtility::FixNodeParent(translateUnitPtr);
+
         // 1.1. 创建内置数据类型并写入索引表
+
         this->CreateBuiltinType();
+
         // 1.2. 合并全局变量、数据结构、外部库引用、函数定义、DLL声明索引表
+
         this->MergeGlobal();
+
         // 1.3. 用翻译单元初始化分析上下文
+
         this->analysis_context_.PushScope(translateUnitPtr);
 
         // 2. 针对数据结构定义、类模块定义
+
         // 2.1. 明确成员的类型指针
+
         this->SetupAllStructMemberType();
+
         // 2.2. 明确全局变量、程序集变量类型指针
+
         this->SetupGlobalAndFileStaticVariableType();
 
         // 3. 针对可调用声明
+
         for (auto & func_item : this->translate_unit_->functor_declares_) {
+
             // 3.1. 明确每一个可调用对象的参数和返回值的类型指针
+
             if (this->SetupFunctorVariableType(func_item.second) == false) {
                 return false;
             }
         }
+
         // 4. 针对每一个程序集
+
         for (auto & prog_file_item : this->translate_unit_->program_sets_) {
             this->analysis_context_.PushScope(prog_file_item.second);
+
             // 4.1 针对每一个函数定义
+
             for (auto &func_item : prog_file_item.second->function_decls_) {
                 this->analysis_context_.PushScope(func_item.second);
+
+                std::cout << u8"语义分析函数：" << func_item.first.str() << std::endl;
+
                 // 4.1.1. 明确函数定义局部变量的类型指针
+
                 if (this->SetupFunctionLocalVariableType(func_item.second) == false) {
                     return false;
                 }
+
                 // 4.1.2. 检查每一条语句构造和表达式运算是否合法
+
                 if (this->CheckStatementsAndExpression(func_item.second->statement_list_) == false) {
                     return false;
                 }
+
                 // 4.1.3. 检查所有分支返回
+
                 if (this->CheckAllBranchesReturnCorrectly(func_item.second) == false) {
                     return false;
                 }
             }
         }
+
         // 5. 后续处理
+
         // 5.1. 指定入口函数
+
         StringRef start_entry = translateUnitPtr->ast_context_->CreateString(u8"_启动子程序");
         translateUnitPtr->main_entry_ = this->analysis_context_.QueryTagDeclFromDynSymbolTableWithName(start_entry)->as<FunctorDecl>();
         assert(translateUnitPtr->main_entry_);
@@ -260,12 +289,16 @@ namespace opene {
             return true;
         }
         if (IfStmtPtr if_stmt = statement->as<IfStmt>()) {
+
             // 检查是否有分支
+
             if (if_stmt->switches_.empty()) {
                 assert(false);
                 return false;
             }
+
             // 检查条件语句的条件表达式是否为扩展布尔类型
+
             for (auto & branch : if_stmt->switches_) {
                 TypeDeclPtr switch_expr_type = this->CheckExpression(branch.first);
                 if (TypeAssert::IsExternBooleanType(switch_expr_type) == false) {
@@ -277,10 +310,17 @@ namespace opene {
                     return false;
                 }
             }
+            if (if_stmt->default_statement_) {
+                if (this->CheckStatementsAndExpression(if_stmt->default_statement_) ==  false) {
+                    return false;
+                }
+            }
             return true;
 
-        } else if (StatementListPtr statement_list = statement->as<StatementBlock>()) {
+        } else if (StatementBlockPtr statement_list = statement->as<StatementBlock>()) {
+
             // 直接遍历列表进行检查
+
             for (StatementPtr stmt : statement_list->statements_) {
                 if (this->CheckStatementsAndExpression(stmt) == false) {
                     return false;
@@ -289,7 +329,9 @@ namespace opene {
             return true;
 
         } else if (WhileStmtPtr while_stmt = statement->as<WhileStmt>()) {
+
             // 检查循环条件语句的条件表达式是否为扩展布尔类型
+
             TypeDeclPtr while_expr_type = this->CheckExpression(while_stmt->condition_);
             if (TypeAssert::IsExternBooleanType(while_expr_type) == false) {
                 assert(false);
@@ -306,7 +348,9 @@ namespace opene {
             return this->CheckLoopStatement(loop_statement);
 
         } else if (AssignStmtPtr assign_stmt = statement->as<AssignStmt>()) {
+
             // 检查赋值语句左右子式类型是否匹配或兼容
+
             TypeDeclPtr lhs_type = this->CheckExpression(assign_stmt->lhs_);
             TypeDeclPtr rhs_type = this->CheckExpression(assign_stmt->rhs_);
             ErrOr<Expression*> implicit_convert = this->MakeImplicitConvertIfNeccessary(lhs_type, assign_stmt->rhs_);
@@ -527,27 +571,33 @@ namespace opene {
 
     TypeDecl *SematicAnalysis::__CheckExpressionImpl__(Expression *expression) {
         TranslateUnitPtr translateUnit = this->translate_unit_;
-        ASTContext * astContext = translateUnit->ast_context_;
         if (HierarchyIdentifier * hierarchy_identifier = expression->as<HierarchyIdentifier>()) {
+
             // 可能是直接名称、函数引用、数组组合的序列
+
             TypeDecl *qualified_type = this->GetHierarchyIdentifierQualifiedType(hierarchy_identifier);
             if (qualified_type == nullptr) {
                 assert(false);
                 return nullptr;
             }
             return qualified_type;
+
         } else if (TypeConvert * type_convert = expression->as<TypeConvert>()) {
             TypeDecl *expr_type = this->CheckExpression(type_convert->from_expression_);
             type_convert->source_type_ = expr_type;
+
             // 检查从源类型到目标类型是否可行
-            if (this->IsAssignableBetweenType(type_convert->target_type_, type_convert->source_type_) == false) {
+
+            if (!this->IsAssignableBetweenType(type_convert->target_type_, type_convert->source_type_)) {
                 assert(false);
                 return nullptr;
             }
             return type_convert->target_type_;
 
         } else if (FunctionCall * function_call = expression->as<FunctionCall>()) {
+
             // 检查函数实参是否符合形参定义
+
             std::vector<ExpressionPtr> &arguments = function_call->arguments_;
             FunctorDecl *functor_decl = ASTUtility::GetFunctionDeclare(function_call);
             if (functor_decl == nullptr) {
@@ -559,26 +609,36 @@ namespace opene {
                 assert(false);
                 return nullptr;
             }
+
             // 将函数返回值类型作为返回类型
+
             assert(functor_decl->return_type_);
             return functor_decl->return_type_;
 
         } else if (UnaryExpression * unary_expression = expression->as<UnaryExpression>()) {
+
             // 检查一元表达式是否合法
+
             if (unary_expression->operator_type_ == UnaryExpression::OperatorType::kOptNone) { return nullptr; }
             TypeDecl *operand_type = this->CheckExpression(unary_expression->operand_value_);
             if (operand_type == nullptr) { return nullptr; }
+
             // 由于一元运算只支持符号求反，故只检查其数值性
+
             bool is_numerical = TypeAssert::IsNumerical(operand_type);
             if (is_numerical == false) {
                 assert(false);
                 return nullptr;
             }
+
             // 根据运算类型返回类型
+
             return operand_type;
 
         } else if (BinaryExpression * binary_expression = expression->as<BinaryExpression>()) {
+
             // 检查二元表达式是否可结合
+
             if (binary_expression->operator_type_ == UnaryExpression::OperatorType::kOptNone) { return nullptr; }
             TypeDecl *lhs_operand_type = this->CheckExpression(binary_expression->lhs_);
             TypeDecl *rhs_operand_type = this->CheckExpression(binary_expression->rhs_);
@@ -682,7 +742,7 @@ namespace opene {
         if (convertExpression->expression_type_ == targetType) {
             // 类型一致，无需转换
             return MakeNoErrVal(convertExpression);
-        } else if (!targetType->is<BuiltinTypeDecl>() || !convertExpression->is<BuiltinTypeDecl>()) {
+        } else if (!targetType->is<BuiltinTypeDecl>() || !convertExpression->expression_type_->is<BuiltinTypeDecl>()) {
             // 其中有非内置类型，无法转换
             return MakeNoErrVal(convertExpression);
         } else {
@@ -864,9 +924,9 @@ namespace opene {
         return true;
     }
 
-    bool CheckRet(Statement *stmt, bool need_return) {
+    bool CheckFullReturn(Statement *stmt, bool need_return) {
         /*
-         * def check_ret(stmts,need_return):
+         * def check_full_ret(stmts,need_return):
          *     for each stmt in stmts:
          *         if stmt is ASSIGN then continue.
          *         if stmt is EXPRESSION then continue.
@@ -876,8 +936,8 @@ namespace opene {
          *         if stmt is BRANCHES then:
          *             ok = true.
          *             for each branch in BRANCHES:
-         *                 ok &= check_ret(branch.stmts).
-         *             ok &= (BRANCHES has default) && check_ret(default).
+         *                 ok &= check_full_ret(branch.stmts).
+         *             ok &= (BRANCHES has default) && check_full_ret(default).
          *             if ok == true then return true.
          *     return !need_return.
          */
@@ -896,9 +956,9 @@ namespace opene {
             else if (IfStmt *if_stmt = stmt->as<IfStmt>()) {
                 bool ok = true;
                 for (auto & branch : if_stmt->switches_) {
-                    ok &= CheckRet(branch.second, need_return);
+                    ok &= CheckFullReturn(branch.second, need_return);
                 }
-                ok &= (if_stmt->default_statement_ != nullptr) && (CheckRet(if_stmt->default_statement_, need_return));
+                ok &= (if_stmt->default_statement_ != nullptr) && (CheckFullReturn(if_stmt->default_statement_, need_return));
                 if (ok) { return true; }
             }
             return !need_return;
@@ -907,7 +967,7 @@ namespace opene {
     }
 
     bool SematicAnalysis::CheckAllBranchesReturnCorrectly(FunctionDecl *functionDecl) {
-        if (CheckRet(functionDecl->statement_list_, functionDecl->return_type_ != nullptr) == false) {
+        if (!CheckFullReturn(functionDecl->statement_list_, functionDecl->return_type_ != nullptr)) {
             assert(false);
             return false;
         } else {

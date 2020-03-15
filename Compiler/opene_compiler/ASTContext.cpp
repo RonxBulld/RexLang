@@ -37,4 +37,8 @@ namespace opene {
     size_t ASTContext::GetNodeIndex() {
         return this->node_index_++;
     }
+
+    size_t ASTContext::GetLineNumber(size_t position_id) {
+        return this->location_pool_.GetLineNumber(position_id);
+    }
 }

@@ -115,6 +115,10 @@ namespace opene {
          */
         llvm::Value *GetArrayDimension(llvm::Value *arrayPtr, llvm::Value *dimensionIndex);
         /*
+         * 获取数组元素类型
+         */
+        llvm::Type *GetArrayElementType(DynamicArrayType *arrayType);
+        /*
          * 获取数组指定元素指针
          */
         llvm::Value *GetArrayElementPointer(llvm::Value *arrayPtr, const std::vector<llvm::Value *>& indexes);

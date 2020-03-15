@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include "opene_compiler/AstGenerate.h"
+#include "ir/EmitLLVMIR.h"
 
 namespace opene {
 

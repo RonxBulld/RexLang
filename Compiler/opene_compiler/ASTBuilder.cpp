@@ -18,6 +18,7 @@ namespace opene {
         parameter_decl->is_reference = isReference;
         parameter_decl->is_nullable = isNullable;
         parameter_decl->is_array = isArray;
+        return parameter_decl;
     }
 
     FunctorDecl * ASTBuilder::CreateFunctorDecl(const std::string &name, TypeDecl *returnType, const std::vector<ParameterDecl *> &params, TranslateUnit *translateUnit) {
@@ -55,16 +56,7 @@ namespace opene {
     }
 
     FunctorDecl *ASTBuilder::CreateSysRTFunctor(const StringRef &name, TranslateUnit *translateUnit) {
-        if (name == "$array_copy") {
-            ArrayDecl *array_type = CreateNode<ArrayDecl>(&context_);
-            ParameterDecl *array_copy_param = CreateParameter("arrPtr", array_type, true, false, true);
-            CreateFunctorDecl(name.str(), array_type, {array_copy_param}, translateUnit);
-        } else if (name == "$struct_copy") {
-        } else if (name == "$dataset_copy") {
-        } else if (name == "$string_copy") {
-        } else {
-            assert(false);
-            return nullptr;
-        }
+        assert(false);
+        return nullptr;
     }
 }

@@ -36,6 +36,8 @@ namespace opene {
         Diagnostic *GetDiagnostic();
 
         size_t GetNodeIndex();
+
+        size_t GetLineNumber(size_t position_id);
     };
 
 }

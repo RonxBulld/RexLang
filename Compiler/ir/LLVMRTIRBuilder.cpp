@@ -83,15 +83,14 @@ namespace opene {       // 公共功能和基础工具
 
         llvm::PointerType *pointer_type = llvm::dyn_cast<llvm::PointerType>(llType);
         assert(pointer_type);
-        llvm::Type *element_type = pointer_type->getElementType();
 
-        if (llvm::ArrayType *array_decl = llvm::dyn_cast<llvm::ArrayType>(element_type)) {    // 优先判定数组
-            return CreateArrayInst(array_decl);
+        if (isArrayType(llType)) {    // 优先判定数组
+            return CreateArrayInst(llvm::dyn_cast<LLVMRTIRBuilder::DynamicArrayType>(llType));
 
-        } else if (llvm::StructType *struct_decl = llvm::dyn_cast<llvm::StructType>(element_type)) {  // 再判定结构体
-            return CreateStructureInst(struct_decl);
+        } else if (isStructureType(llType)) {  // 再判定结构体
+            return CreateStructureInst(llvm::dyn_cast<LLVMRTIRBuilder::StructureType>(llType));
 
-        } else if (pointer_type == Builder.getInt8PtrTy()) {    // 最后字节集和字符串混为一谈
+        } else if (isStringType(llType)) {    // 最后字节集和字符串混为一谈
             return CreateString();
 
         } else {
@@ -155,8 +154,17 @@ namespace opene {   // 数组
         llvm::PointerType *ptr_type = llvm::dyn_cast<llvm::PointerType>(type);
         if (!ptr_type) { return false; }
         if (ptr_type->getElementType()->isArrayTy()) { return true; }
-        assert(false);
         return false;
+    }
+
+    llvm::Type *LLVMRTIRBuilder::GetArrayElementType(DynamicArrayType *arrayType) {
+        llvm::Type *element_type = arrayType->getElementType();
+        assert(element_type->isArrayTy());
+        while (element_type->isArrayTy()) {
+            element_type = element_type->getArrayElementType();
+            assert(element_type);
+        }
+        return element_type;
     }
 
     LLVMRTIRBuilder::DynamicArrayType *LLVMRTIRBuilder::CreateArrayType(llvm::Type *elementType, const std::vector<size_t> &dimensions) {
@@ -324,7 +332,7 @@ namespace opene {   // 数组
     llvm::Value *LLVMRTIRBuilder::GetArrayElementPointer(llvm::Value *arrayPtr, const std::vector<llvm::Value *> &indexes) {
         llvm::FunctionCallee get_array_ep_fn = getRTAPIFunction(
                 "$get_array_ep",
-                Builder.getInt32Ty()->getPointerTo(),
+                GetArrayElementType(llvm::dyn_cast<DynamicArrayType>(arrayPtr->getType()))->getPointerTo(),
                 {getArrayType(), Builder.getInt32Ty()},  // 数组数据指针 维度个数
                 true
         );
@@ -400,7 +408,6 @@ namespace opene {   // 结构体
         llvm::PointerType *ptr_type = llvm::dyn_cast<llvm::PointerType>(type);
         if (!ptr_type) { return false; }
         if (ptr_type->getElementType()->isStructTy()) { return true; }
-        assert(false);
         return false;
     }
 
@@ -523,7 +530,6 @@ namespace opene {   // 字符串
         llvm::PointerType *ptr_type = llvm::dyn_cast<llvm::PointerType>(type);
         if (!ptr_type) { return false; }
         if (ptr_type->getElementType()->isIntegerTy(8)) { return true; }
-        assert(false);
         return false;
     }
 

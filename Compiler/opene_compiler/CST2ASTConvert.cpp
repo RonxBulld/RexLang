@@ -246,7 +246,7 @@ namespace opene {
             LocalVariableDeclPtr local_vari = GetFromCtxIfExist<LocalVariableDeclPtr>(local_vari_ctx);
             sub_prog_decl->local_vari_[local_vari->name_.string_] = local_vari;
         }
-        sub_prog_decl->statement_list_ = GetFromCtxIfExist<StatementListPtr>(context->statement_list());
+        sub_prog_decl->statement_list_ = GetFromCtxIfExist<StatementBlockPtr>(context->statement_list());
         return NodeWarp(sub_prog_decl);
     }
 
@@ -299,7 +299,7 @@ namespace opene {
     }
 
     antlrcpp::Any CST2ASTConvert::visitStatement_list(openeLangParser::Statement_listContext *context) {
-        StatementListPtr statement_list = CreateNode<StatementBlock>(context->getStart(), context->getStop());
+        StatementBlockPtr statement_list = CreateNode<StatementBlock>(context->getStart(), context->getStop());
         for (auto *stmt_ctx : context->stmts) {
             statement_list->statements_.push_back(GetFromCtxIfExist<StatementPtr>(stmt_ctx));
         }

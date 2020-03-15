@@ -76,7 +76,7 @@ namespace opene {
 
     typedef struct Statement* StatementPtr;
     typedef struct IfStmt* IfStmtPtr;
-    typedef struct StatementBlock* StatementListPtr;
+    typedef struct StatementBlock* StatementBlockPtr;
     typedef struct LoopStatement* LoopStatementPtr;
     typedef struct WhileStmt* WhileStmtPtr;
     typedef struct RangeForStmt* RangeForStmtPtr;
@@ -481,7 +481,7 @@ namespace opene {
         // 局部变量列表
         ordered_map<StringRef, LocalVariableDeclPtr> local_vari_;
         // 语句列表
-        StatementListPtr statement_list_ = nullptr;
+        StatementBlockPtr statement_list_ = nullptr;
 
         // === 下面是经过语义分析后的数据 ===
 
