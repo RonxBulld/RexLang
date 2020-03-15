@@ -92,7 +92,7 @@ namespace opene {       // 公共功能和基础工具
             return CreateStructureInst(struct_decl);
 
         } else if (pointer_type == Builder.getInt8PtrTy()) {    // 最后字节集和字符串混为一谈
-            // TODO:
+            return CreateString();
 
         } else {
             assert(false);
@@ -525,6 +525,15 @@ namespace opene {   // 字符串
         if (ptr_type->getElementType()->isIntegerTy(8)) { return true; }
         assert(false);
         return false;
+    }
+
+    llvm::Value *LLVMRTIRBuilder::CreateString() {
+        llvm::FunctionCallee create_string_fn = getRTAPIFunction(
+                "$create_string",
+                getStringType(),
+                {}
+        );
+        return Builder.CreateCall(create_string_fn, {});
     }
 
     llvm::Value *LLVMRTIRBuilder::CloneString(llvm::Value *stringPtr) {

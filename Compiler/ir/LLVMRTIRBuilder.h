@@ -191,6 +191,7 @@ namespace opene {
         typedef llvm::PointerType StringType;
         StringType *getStringType();
         bool isStringType(llvm::Type *type);
+        llvm::Value *CreateString();
         /*
          * 克隆字符串
          */
