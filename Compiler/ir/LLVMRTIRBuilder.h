@@ -204,6 +204,17 @@ namespace opene {
          * 近似等于
          */
         llvm::Value *StringLikeEqual(llvm::Value *lhs, llvm::Value *rhs);
+        /*
+         * 字符串连接
+         */
+        llvm::Value *StringConnect(llvm::Value *lhs, llvm::Value *rhs);
+        /*
+         * 字符串比较
+         * 0 - 相等
+         * 1 - lhs大于rhs
+         * -1 - lhs小于rhs
+         */
+        llvm::Value *StringCompare(llvm::Value *lhs, llvm::Value *rhs);
 
     };
 

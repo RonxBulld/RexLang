@@ -1144,55 +1144,224 @@ namespace opene {
             }
             L = LoadVariable(L);
             R = LoadVariable(R);
+
+            assert(L->getType() == R->getType());
+            llvm::Type *opt_type = L->getType();
+
             switch (binaryExpression->operator_type_) {
                 // *** 运算系列 ***
                 case _OperatorExpression::OperatorType::kOptAdd: {
-                    return Builder.CreateAdd(L, R, "$.addtmp");
+
+                    // 支持整数、浮点、字符串、字节集
+
+                    if (opt_type->isIntegerTy()) {
+                        return Builder.CreateAdd(L, R);
+                    } else if (opt_type->isFloatTy() || opt_type->isDoubleTy()) {
+                        return Builder.CreateFAdd(L, R);
+                    } else if (RTBuilder.isStringType(opt_type)) {
+                        return RTBuilder.StringConnect(L, R);
+                    } else {
+                        assert(false);
+                        return nullptr;
+                    }
                 }
                 case _OperatorExpression::OperatorType::kOptSub: {
-                    return Builder.CreateSub(L, R, "$.subtmp");
+
+                    // 支持整数、浮点
+
+                    if (opt_type->isIntegerTy()) {
+                        return Builder.CreateSub(L, R);
+                    } else if (opt_type->isFloatTy() || opt_type->isDoubleTy()) {
+                        return Builder.CreateFSub(L, R);
+                    } else {
+                        assert(false);
+                        return nullptr;
+                    }
                 }
                 case _OperatorExpression::OperatorType::kOptMul: {
-                    return Builder.CreateMul(L, R, "$.multmp");
+
+                    // 支持整数、浮点
+
+                    if (opt_type->isIntegerTy()) {
+                        return Builder.CreateMul(L, R);
+                    } else if (opt_type->isFloatTy() || opt_type->isDoubleTy()) {
+                        return Builder.CreateFMul(L, R);
+                    } else {
+                        assert(false);
+                        return nullptr;
+                    }
                 }
                 case _OperatorExpression::OperatorType::kOptDiv: {
-                    return Builder.CreateFDiv(L, R, "$.divtmp");
+
+                    // 支持整数、浮点
+
+                    if (opt_type->isIntegerTy()) {
+                        return Builder.CreateSDiv(L, R);
+                    } else if (opt_type->isFloatTy() || opt_type->isDoubleTy()) {
+                        return Builder.CreateFDiv(L, R);
+                    } else {
+                        assert(false);
+                        return nullptr;
+                    }
                 }
                 case _OperatorExpression::OperatorType::kOptFullDiv: {
-                    llvm::Value *div_res = Builder.CreateSDiv(L, R, "$.fulldivtmp");
-                    return Builder.CreateFPToSI(div_res, llvm::Type::getInt64Ty(TheContext), "$.fp2si");
+
+                    // 支持整数、浮点
+
+                    llvm::Value *div_res = nullptr;
+                    if (opt_type->isIntegerTy()) {
+                        div_res = Builder.CreateSDiv(L, R);
+                    } else if (opt_type->isFloatTy() || opt_type->isDoubleTy()) {
+                        div_res = Builder.CreateFDiv(L, R);
+                    } else {
+                        assert(false);
+                        return nullptr;
+                    }
+                    return Builder.CreateFPToSI(div_res, Builder.getInt64Ty());
                 }
                 case _OperatorExpression::OperatorType::kOptMod: {
-                    return Builder.CreateSRem(L, R, "$.mod");
+
+                    // 支持整数、浮点
+
+                    if (opt_type->isIntegerTy()) {
+                        return Builder.CreateSRem(L, R);
+                    } else if (opt_type->isFloatTy() || opt_type->isDoubleTy()) {
+                        return Builder.CreateFRem(L, R);
+                    } else {
+                        assert(false);
+                        return nullptr;
+                    }
                 }
                 // *** 比较系列 ***
                 case _OperatorExpression::OperatorType::kOptEqual: {
-                    return Builder.CreateICmpEQ(L, R, "$.eq");
+
+                    // 支持整数、浮点、字符串、字节集
+
+                    if (opt_type->isIntegerTy()) {
+                        return Builder.CreateICmpEQ(L, R);
+                    } else if (opt_type->isFloatTy() || opt_type->isDoubleTy()) {
+                        return Builder.CreateFCmpOEQ(L, R);     // 这里用有序比较
+                    } else if (RTBuilder.isStringType(opt_type)) {
+                        // StrCmp(L,R)=0
+                        return Builder.CreateICmpEQ(RTBuilder.StringCompare(L, R), CreateInt(0));
+                    } else {
+                        assert(false);
+                        return nullptr;
+                    }
                 }
                 case _OperatorExpression::OperatorType::kOptNotEqual: {
-                    return Builder.CreateICmpNE(L, R, "$.ne");
+
+                    // 支持整数、浮点、字符串、字节集
+
+                    if (opt_type->isIntegerTy()) {
+                        return Builder.CreateICmpNE(L, R);
+                    } else if (opt_type->isFloatTy() || opt_type->isDoubleTy()) {
+                        return Builder.CreateFCmpONE(L, R);     // 这里用有序比较
+                    } else if (RTBuilder.isStringType(opt_type)) {
+                        // StrCmp(L,R)!=0
+                        return Builder.CreateICmpNE(RTBuilder.StringCompare(L, R), CreateInt(0));
+                    } else {
+                        assert(false);
+                        return nullptr;
+                    }
                 }
                 case _OperatorExpression::OperatorType::kOptGreatThan: {
-                    return Builder.CreateICmpSGT(L, R, "$.gt");
+
+                    // 支持整数、浮点、字符串、字节集
+
+                    if (opt_type->isIntegerTy()) {
+                        return Builder.CreateICmpSGT(L, R);
+                    } else if (opt_type->isFloatTy() || opt_type->isDoubleTy()) {
+                        return Builder.CreateFCmpOGT(L, R);     // 这里用有序比较
+                    } else if (RTBuilder.isStringType(opt_type)) {
+                        // StrCmp(L,R)>0
+                        return Builder.CreateICmpSGT(RTBuilder.StringCompare(L, R), CreateInt(0));
+                    } else {
+                        assert(false);
+                        return nullptr;
+                    }
                 }
                 case _OperatorExpression::OperatorType::kOptLessThan: {
-                    return Builder.CreateICmpSLT(L, R, "$.lt");
+
+                    // 支持整数、浮点、字符串、字节集
+
+                    if (opt_type->isIntegerTy()) {
+                        return Builder.CreateICmpSLT(L, R);
+                    } else if (opt_type->isFloatTy() || opt_type->isDoubleTy()) {
+                        return Builder.CreateFCmpOLT(L, R);     // 这里用有序比较
+                    } else if (RTBuilder.isStringType(opt_type)) {
+                        // StrCmp(L,R)<0
+                        return Builder.CreateICmpSLT(RTBuilder.StringCompare(L, R), CreateInt(0));
+                    } else {
+                        assert(false);
+                        return nullptr;
+                    }
                 }
                 case _OperatorExpression::OperatorType::kOptGreatEqual: {
-                    return Builder.CreateICmpSGE(L, R, "$.ge");
+
+                    // 支持整数、浮点、字符串、字节集
+
+                    if (opt_type->isIntegerTy()) {
+                        return Builder.CreateICmpSGE(L, R);
+                    } else if (opt_type->isFloatTy() || opt_type->isDoubleTy()) {
+                        return Builder.CreateFCmpOGE(L, R);     // 这里用有序比较
+                    } else if (RTBuilder.isStringType(opt_type)) {
+                        // StrCmp(L,R)>=0
+                        return Builder.CreateICmpSGE(RTBuilder.StringCompare(L, R), CreateInt(0));
+                    } else {
+                        assert(false);
+                        return nullptr;
+                    }
                 }
                 case _OperatorExpression::OperatorType::kOptLessEqual: {
-                    return Builder.CreateICmpSLE(L, R, "$.le");
+
+                    // 支持整数、浮点、字符串、字节集
+
+                    if (opt_type->isIntegerTy()) {
+                        return Builder.CreateICmpSLE(L, R);
+                    } else if (opt_type->isFloatTy() || opt_type->isDoubleTy()) {
+                        return Builder.CreateFCmpOLE(L, R);     // 这里用有序比较
+                    } else if (RTBuilder.isStringType(opt_type)) {
+                        // StrCmp(L,R)<=0
+                        return Builder.CreateICmpSLE(RTBuilder.StringCompare(L, R), CreateInt(0));
+                    } else {
+                        assert(false);
+                        return nullptr;
+                    }
                 }
                 case _OperatorExpression::OperatorType::kOptLikeEqual: {
-                    return RTBuilder.StringLikeEqual(L, R);
+
+                    // 支持字符串、字节集
+
+                    if (RTBuilder.isStringType(opt_type)) {
+                        return RTBuilder.StringLikeEqual(L, R);
+                    } else {
+                        assert(false);
+                        return nullptr;
+                    }
                 }
                 // *** 逻辑系列 ***
                 case _OperatorExpression::OperatorType::kOptAnd: {
-                    return Builder.CreateAnd(L, R, "$.and");
+
+                    // 支持整数
+
+                    if (opt_type->isIntegerTy()) {
+                        return Builder.CreateAnd(L, R);
+                    } else {
+                        assert(false);
+                        return nullptr;
+                    }
                 }
                 case _OperatorExpression::OperatorType::kOptOr: {
-                    return Builder.CreateOr(L, R, "$.or");
+
+                    // 支持整数
+
+                    if (opt_type->isIntegerTy()) {
+                        return Builder.CreateOr(L, R);
+                    } else {
+                        assert(false);
+                        return nullptr;
+                    }
                 }
                 default: {
                     assert(false);

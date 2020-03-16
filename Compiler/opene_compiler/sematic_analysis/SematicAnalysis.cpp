@@ -647,7 +647,9 @@ namespace opene {
                 assert(false);
                 return nullptr;
             }
+
             // 根据运算类型返回类型
+
             TypeDecl *result_type = this->GetBinaryOperationType(lhs_operand_type, rhs_operand_type, binary_expression->operator_type_);
             ErrOr<Expression*> implicit_conv_lhs = this->MakeImplicitConvertIfNeccessary(result_type, binary_expression->lhs_);
             ErrOr<Expression*> implicit_conv_rhs = this->MakeImplicitConvertIfNeccessary(result_type, binary_expression->rhs_);
@@ -655,10 +657,15 @@ namespace opene {
             if (implicit_conv_rhs.NoError()) { binary_expression->rhs_ = implicit_conv_rhs.Value(); }
 
             if (binary_expression->operator_type_ == _OperatorExpression::OperatorType::kOptDiv) {
+
                 return this->QueryBuiltinTypeWithEnum(this->translate_unit_, BuiltinTypeDecl::EnumOfBuiltinType::kBTypeFloat);
+
             } else if (binary_expression->operator_type_ == _OperatorExpression::OperatorType::kOptFullDiv) {
+
                 return this->QueryBuiltinTypeWithEnum(this->translate_unit_, BuiltinTypeDecl::EnumOfBuiltinType::kBTypeInteger);
+
             } else {
+
                 return result_type;
             }
 
@@ -673,7 +680,9 @@ namespace opene {
             return type_decl;
 
         } else if (ResourceRefExpression * resource_ref_expression_ptr = expression->as<ResourceRefExpression>()) {
+
             // TODO: 需要通过查找常量表来确定类型
+
             assert(false);
             return nullptr;
 
@@ -688,7 +697,9 @@ namespace opene {
 
     TypeDecl *SematicAnalysis::CheckValue(Value *value) {
         if (ValueOfDataSet * value_of_data_set = value->as<ValueOfDataSet>()) {
+
             // 当前版本只允许字节集中的元素全为整数常量
+
             for (Expression *element : value_of_data_set->elements_) {
                 if (ValueOfDecimal *value_of_decimal = element->as<ValueOfDecimal>()) {
                     if (value_of_decimal->type_ != ValueOfDecimal::type::kInt) {
@@ -696,7 +707,9 @@ namespace opene {
                         return nullptr;
                     }
                 } else if (ResourceRefExpression *resource_ref_expr = element->as<ResourceRefExpression>()) {
+
                     // TODO: 检查值
+
                 } else {
                     assert(false);
                     return nullptr;
@@ -788,23 +801,30 @@ namespace opene {
                         if (lhs_builtin == rhs_builtin) {
                             if (lhs_builtin->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeBool) {
                                 return lhs_builtin;
+
                             } else if (lhs_builtin->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeString) {
                                 return lhs_builtin;
+
                             } else if (lhs_builtin->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDataSet) {
                                 return lhs_builtin;
+
                             } else if (lhs_builtin->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDatetime) {
                                 assert(false);
                                 return nullptr;
+
                             } else if (lhs_builtin->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeFuncPtr) {
                                 assert(false);
                                 return nullptr;
+
                             } else {
                                 assert(false);
                                 return nullptr;
+
                             }
                         } else {
                             assert(false);
                             return nullptr;
+
                         }
                     } else {
 

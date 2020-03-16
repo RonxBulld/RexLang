@@ -559,4 +559,22 @@ namespace opene {   // 字符串
         );
         return Builder.CreateCall(string_like_equal_fn, {lhs, rhs});
     }
+
+    llvm::Value *LLVMRTIRBuilder::StringConnect(llvm::Value *lhs, llvm::Value *rhs) {
+        llvm::FunctionCallee string_connect_fn = getRTAPIFunction(
+                "$string_connect",
+                getStringType(),
+                {getStringType(), getStringType()}
+        );
+        return Builder.CreateCall(string_connect_fn, {lhs, rhs});
+    }
+
+    llvm::Value *LLVMRTIRBuilder::StringCompare(llvm::Value *lhs, llvm::Value *rhs) {
+        llvm::FunctionCallee string_compare_fn = getRTAPIFunction(
+                "$string_compare",
+                Builder.getInt1Ty(),
+                {getStringType(), getStringType()}
+        );
+        return Builder.CreateCall(string_compare_fn, {lhs, rhs});
+    }
 }
