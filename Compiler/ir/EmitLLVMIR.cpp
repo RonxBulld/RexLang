@@ -216,7 +216,12 @@ namespace opene {
             llvm::BasicBlock *latest_init_block = &block_list.back();
             Builder.SetInsertPoint(latest_init_block);
             Builder.CreateRetVoid();
-            return true;
+            if (llvm::verifyFunction(*InitFunc, &llvm::outs())) {
+                assert(false);
+                return false;
+            } else {
+                return true;
+            }
         }
 
         /*
@@ -1467,10 +1472,19 @@ namespace opene {
 namespace opene {
 
     EmitLLVMIR::EmitLLVMIR(TranslateUnit *translateUnit) {
-        IREmit emitter;
-        emitter.Emit(translateUnit);
-        llvm::verifyModule(*emitter.GetModule());
-        emitter.GetModule()->print(llvm::outs(), nullptr);
+        emitter = new IREmit;
+        emitter->Emit(translateUnit);
+        llvm::verifyModule(*emitter->GetModule());
     }
 
+    void EmitLLVMIR::WriteOutIR() {
+        std::error_code EC;
+        llvm::raw_fd_ostream of(emitter->GetModule()->getName().str(), EC, llvm::sys::fs::F_None);
+        emitter->GetModule()->print(
+                of,
+                nullptr,
+                false,
+                true
+                );
+    }
 }

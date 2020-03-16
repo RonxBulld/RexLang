@@ -20,6 +20,8 @@ int main(int argc, char *argv[]) {
     std::cout << u8"生成代码..." << std::endl;
     opene::EmitLLVMIR emitter(translate_unit_ptr);
 
+    emitter.WriteOutIR();
+
     std::cout << u8"执行程序..." << std::endl;
     return 0;
 }

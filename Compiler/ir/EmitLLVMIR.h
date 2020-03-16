@@ -9,9 +9,17 @@
 
 namespace opene {
 
+    class IREmit;
+
     class EmitLLVMIR {
     public:
         EmitLLVMIR(TranslateUnit *translateUnit);
+
+    public:
+        void WriteOutIR();
+
+    private:
+        IREmit *emitter = nullptr;
     };
 
 }
