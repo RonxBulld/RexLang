@@ -217,6 +217,7 @@ namespace opene {
             Builder.SetInsertPoint(latest_init_block);
             Builder.CreateRetVoid();
             if (llvm::verifyFunction(*InitFunc, &llvm::outs())) {
+                TheModule->print(llvm::outs(), nullptr);
                 assert(false);
                 return false;
             } else {

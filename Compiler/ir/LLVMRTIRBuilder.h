@@ -89,23 +89,24 @@ namespace opene {
          * 数组元素列表 - M字节
          */
 
-        typedef llvm::PointerType DynamicArrayType;
-        DynamicArrayType *getArrayType();
+        typedef llvm::PointerType DynamicArrayRTType;
+        DynamicArrayRTType *getRTAPIArrayType();
         bool isArrayType(llvm::Type *type);
 
+        llvm::Value *CastArrayToAPIArgu(llvm::Value *arrayPtr);
         /*
          * 创建数组类型
          */
-        LLVMRTIRBuilder::DynamicArrayType *CreateArrayType(llvm::Type *elementType, const std::vector<size_t> &dimensions);
+        LLVMRTIRBuilder::DynamicArrayRTType *CreateArrayType(llvm::Type *elementType, const std::vector<size_t> &dimensions);
         /*
          * 根据类型信息创建数组实例并初始化
          */
         llvm::Value *CreateArrayInst(llvm::ArrayType *arrayType);
-        llvm::Value *CreateArrayInst(LLVMRTIRBuilder::DynamicArrayType *arrayType);
+        llvm::Value *CreateArrayInst(LLVMRTIRBuilder::DynamicArrayRTType *arrayType);
         /*
          * 重定义数组维度数
          */
-        void ReDimArray(llvm::Value *arrayVariablePtr, bool clear, const std::vector<llvm::Value *>& newDimensions);
+        void ReDimArray(llvm::Value *arrayPtr, bool clear, const std::vector<llvm::Value *>& newDimensions);
         /*
          * 获取数组元素个数
          */
@@ -117,7 +118,7 @@ namespace opene {
         /*
          * 获取数组元素类型
          */
-        llvm::Type *GetArrayElementType(DynamicArrayType *arrayType);
+        llvm::Type *GetArrayElementType(DynamicArrayRTType *arrayType);
         /*
          * 获取数组指定元素指针
          */

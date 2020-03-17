@@ -85,7 +85,7 @@ namespace opene {       // 公共功能和基础工具
         assert(pointer_type);
 
         if (isArrayType(llType)) {    // 优先判定数组
-            return CreateArrayInst(llvm::dyn_cast<LLVMRTIRBuilder::DynamicArrayType>(llType));
+            return CreateArrayInst(llvm::dyn_cast<LLVMRTIRBuilder::DynamicArrayRTType>(llType));
 
         } else if (isStructureType(llType)) {  // 再判定结构体
             return CreateStructureInst(llvm::dyn_cast<LLVMRTIRBuilder::StructureType>(llType));
@@ -146,7 +146,7 @@ namespace opene {       // 公共功能和基础工具
 }
 
 namespace opene {   // 数组
-    LLVMRTIRBuilder::DynamicArrayType *LLVMRTIRBuilder::getArrayType() {
+    LLVMRTIRBuilder::DynamicArrayRTType *LLVMRTIRBuilder::getRTAPIArrayType() {
         return Builder.getVoidTy()->getPointerTo();
     }
 
@@ -157,7 +157,7 @@ namespace opene {   // 数组
         return false;
     }
 
-    llvm::Type *LLVMRTIRBuilder::GetArrayElementType(DynamicArrayType *arrayType) {
+    llvm::Type *LLVMRTIRBuilder::GetArrayElementType(DynamicArrayRTType *arrayType) {
         llvm::Type *element_type = arrayType->getElementType();
         assert(element_type->isArrayTy());
         while (element_type->isArrayTy()) {
@@ -167,7 +167,11 @@ namespace opene {   // 数组
         return element_type;
     }
 
-    LLVMRTIRBuilder::DynamicArrayType *LLVMRTIRBuilder::CreateArrayType(llvm::Type *elementType, const std::vector<size_t> &dimensions) {
+    llvm::Value *LLVMRTIRBuilder::CastArrayToAPIArgu(llvm::Value *arrayPtr) {
+        return Builder.CreatePointerCast(arrayPtr, getRTAPIArrayType());
+    }
+
+    LLVMRTIRBuilder::DynamicArrayRTType *LLVMRTIRBuilder::CreateArrayType(llvm::Type *elementType, const std::vector<size_t> &dimensions) {
         assert(!dimensions.empty());
         llvm::Type *array_type = elementType;
         for (size_t dim : dimensions) {
@@ -199,7 +203,7 @@ namespace opene {   // 数组
 
         llvm::FunctionCallee create_array_fn = getRTAPIFunction(
                 "$create_array",
-                getArrayType(),    // 数组数据指针
+                getRTAPIArrayType(),    // 数组数据指针
                 {Builder.getInt32Ty()},   // 维度数
                 true
         );
@@ -230,7 +234,7 @@ namespace opene {   // 数组
         llvm::FunctionCallee init_array_fn = getRTAPIFunction(
                 "$init_array_" + std::to_string(element_bitwidth),
                 Builder.getVoidTy(),
-                {getArrayType(), Builder.getInt32Ty()},  // 数组数据指针 维度数
+                {getRTAPIArrayType(), Builder.getInt32Ty()},  // 数组数据指针 维度数
                 true
         );
         args.clear();
@@ -242,18 +246,18 @@ namespace opene {   // 数组
         return ptr_to_array;
     }
 
-    llvm::Value *LLVMRTIRBuilder::CreateArrayInst(LLVMRTIRBuilder::DynamicArrayType *arrayType) {
+    llvm::Value *LLVMRTIRBuilder::CreateArrayInst(LLVMRTIRBuilder::DynamicArrayRTType *arrayType) {
         return CreateArrayInst(llvm::dyn_cast<llvm::ArrayType>(arrayType->getPointerElementType()));
     }
 
-    void LLVMRTIRBuilder::ReDimArray(llvm::Value *arrayVariablePtr, bool clear, const std::vector<llvm::Value *> &newDimensions) {
+    void LLVMRTIRBuilder::ReDimArray(llvm::Value *arrayPtr, bool clear, const std::vector<llvm::Value *> &newDimensions) {
         llvm::FunctionCallee redim_fn = getRTAPIFunction(
                 "$redim_array",
                 Builder.getVoidTy(),
-                {getArrayType(), Builder.getInt1Ty(), Builder.getInt32Ty()}, // 数组变量指针 是否清空 新维度数
+                {getRTAPIArrayType(), Builder.getInt1Ty(), Builder.getInt32Ty()}, // 数组变量指针 是否清空 新维度数
                 true
         );
-        std::vector<llvm::Value *> args{arrayVariablePtr, Builder.getInt1(clear), CreateInt(newDimensions.size())};
+        std::vector<llvm::Value *> args{CastArrayToAPIArgu(arrayPtr), Builder.getInt1(clear), CreateInt(newDimensions.size())};
         args.insert(args.end(), newDimensions.begin(), newDimensions.end());
         Builder.CreateCall(redim_fn, args);
     }
@@ -264,10 +268,10 @@ namespace opene {   // 数组
 
         llvm::FunctionCallee clone_array_fn = getRTAPIFunction(
                 "$clone_array",
-                getArrayType(),
-                {getArrayType()}
+                getRTAPIArrayType(),
+                {getRTAPIArrayType()}
                 );
-        llvm::Value *new_array = Builder.CreateCall(clone_array_fn, {arrayPtr});
+        llvm::Value *new_array = Builder.CreateCall(clone_array_fn, {CastArrayToAPIArgu(arrayPtr)});
 
         // 判断是否简单类型
 
@@ -314,29 +318,29 @@ namespace opene {   // 数组
         llvm::FunctionCallee get_array_elem_cnt_fn = getRTAPIFunction(
                 "$get_array_elem_cnt",
                 Builder.getInt32Ty(),
-                {getArrayType()},    // 数组数据指针
+                {getRTAPIArrayType()},    // 数组数据指针
                 false
         );
-        return Builder.CreateCall(get_array_elem_cnt_fn, {arrayPtr});
+        return Builder.CreateCall(get_array_elem_cnt_fn, {CastArrayToAPIArgu(arrayPtr)});
     }
 
     llvm::Value *LLVMRTIRBuilder::GetArrayDimension(llvm::Value *arrayPtr, llvm::Value *dimensionIndex) {
         llvm::FunctionCallee get_array_dimension_fn = getRTAPIFunction(
                 "$get_array_dimension",
                 Builder.getInt32Ty(),
-                {getArrayType(), Builder.getInt32Ty()}   // 数组数据指针 维数
+                {getRTAPIArrayType(), Builder.getInt32Ty()}   // 数组数据指针 维数
         );
-        return Builder.CreateCall(get_array_dimension_fn, {arrayPtr, dimensionIndex});
+        return Builder.CreateCall(get_array_dimension_fn, {CastArrayToAPIArgu(arrayPtr), dimensionIndex});
     }
 
     llvm::Value *LLVMRTIRBuilder::GetArrayElementPointer(llvm::Value *arrayPtr, const std::vector<llvm::Value *> &indexes) {
         llvm::FunctionCallee get_array_ep_fn = getRTAPIFunction(
                 "$get_array_ep",
-                GetArrayElementType(llvm::dyn_cast<DynamicArrayType>(arrayPtr->getType()))->getPointerTo(),
-                {getArrayType(), Builder.getInt32Ty()},  // 数组数据指针 维度个数
+                GetArrayElementType(llvm::dyn_cast<DynamicArrayRTType>(arrayPtr->getType()))->getPointerTo(),
+                {getRTAPIArrayType(), Builder.getInt32Ty()},  // 数组数据指针 维度个数
                 true
         );
-        std::vector<llvm::Value *> args{arrayPtr, CreateInt(indexes.size())};
+        std::vector<llvm::Value *> args{CastArrayToAPIArgu(arrayPtr), CreateInt(indexes.size())};
         args.insert(args.end(), indexes.begin(), indexes.end());
         return Builder.CreateCall(get_array_ep_fn, args);
     }
@@ -345,56 +349,56 @@ namespace opene {   // 数组
         llvm::FunctionCallee append_array_element_fn = getRTAPIFunction(
                 "$append_array_element",
                 Builder.getVoidTy(),
-                {getArrayType(), Builder.getInt32Ty()}   // 数组数据指针 数据
+                {getRTAPIArrayType(), Builder.getInt32Ty()}   // 数组数据指针 数据
         );
         newElement = CloneObjectIfAggregate(newElement);
-        return Builder.CreateCall(append_array_element_fn, {arrayPtr, newElement});
+        return Builder.CreateCall(append_array_element_fn, {Builder.CreatePointerCast(CastArrayToAPIArgu(arrayPtr), getRTAPIArrayType()), newElement});
     }
 
     llvm::Value *LLVMRTIRBuilder::InsertArrayElement(llvm::Value *arrayPtr, llvm::Value *insertPos, llvm::Value *newElement, TypeDecl *newElemAstType) {
         llvm::FunctionCallee insert_array_element_fn = getRTAPIFunction(
                 "$insert_array_element",
                 Builder.getVoidTy(),
-                {getArrayType(), Builder.getInt32Ty(), Builder.getInt32Ty()}  // 数组数据指针 插入位置 数据
+                {getRTAPIArrayType(), Builder.getInt32Ty(), Builder.getInt32Ty()}  // 数组数据指针 插入位置 数据
         );
         newElement = CloneObjectIfAggregate(newElement);
-        return Builder.CreateCall(insert_array_element_fn, {arrayPtr, insertPos, newElement});
+        return Builder.CreateCall(insert_array_element_fn, {CastArrayToAPIArgu(arrayPtr), insertPos, newElement});
     }
 
     llvm::Value *LLVMRTIRBuilder::RemoveArrayElement(llvm::Value *arrayPtr, llvm::Value *position, llvm::Value *count) {
         llvm::FunctionCallee remove_array_element_fn = getRTAPIFunction(
                 "$remove_array_element",
                 Builder.getVoidTy(),
-                {getArrayType(), Builder.getInt32Ty(), Builder.getInt32Ty()}    // 数组数据指针 删除位置 删除数量
+                {getRTAPIArrayType(), Builder.getInt32Ty(), Builder.getInt32Ty()}    // 数组数据指针 删除位置 删除数量
         );
-        return Builder.CreateCall(remove_array_element_fn, {arrayPtr, position, count});
+        return Builder.CreateCall(remove_array_element_fn, {CastArrayToAPIArgu(arrayPtr), position, count});
     }
 
     llvm::Value *LLVMRTIRBuilder::CleanArray(llvm::Value *arrayPtr) {
         llvm::FunctionCallee clean_array_fn = getRTAPIFunction(
                 "$clean_array",
                 Builder.getVoidTy(),
-                {getArrayType()}    // 数组数据指针
+                {getRTAPIArrayType()}    // 数组数据指针
         );
-        return Builder.CreateCall(clean_array_fn, {arrayPtr});
+        return Builder.CreateCall(clean_array_fn, {CastArrayToAPIArgu(arrayPtr)});
     }
 
     llvm::Value *LLVMRTIRBuilder::SortArray(llvm::Value *arrayPtr, bool lessToMore) {
         llvm::FunctionCallee sort_array_fn = getRTAPIFunction(
                 "$sort_array",
                 Builder.getVoidTy(),
-                {getArrayType(), Builder.getInt1Ty()}   // 数组数据指针 是否从小到大
+                {getRTAPIArrayType(), Builder.getInt1Ty()}   // 数组数据指针 是否从小到大
         );
-        return Builder.CreateCall(sort_array_fn, {arrayPtr, Builder.getInt1(lessToMore)});
+        return Builder.CreateCall(sort_array_fn, {CastArrayToAPIArgu(arrayPtr), Builder.getInt1(lessToMore)});
     }
 
     llvm::Value *LLVMRTIRBuilder::ZeroArray(llvm::Value *arrayPtr) {
         llvm::FunctionCallee zero_array_fn = getRTAPIFunction(
                 "$zero_array",
                 Builder.getVoidTy(),
-                {getArrayType()}    // 数组数据指针
+                {getRTAPIArrayType()}    // 数组数据指针
         );
-        return Builder.CreateCall(zero_array_fn, {arrayPtr});
+        return Builder.CreateCall(zero_array_fn, {CastArrayToAPIArgu(arrayPtr)});
     }
 
 }
