@@ -119,6 +119,7 @@ namespace opene {
          * 获取数组元素类型
          */
         llvm::Type *GetArrayElementType(DynamicArrayRTType *arrayType);
+        llvm::Type *GetArrayElementType(llvm::ArrayType *arrayType);
         /*
          * 获取数组指定元素指针
          */

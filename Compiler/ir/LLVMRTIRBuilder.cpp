@@ -157,6 +157,10 @@ namespace opene {   // 数组
         return false;
     }
 
+    llvm::Type *LLVMRTIRBuilder::GetArrayElementType(llvm::ArrayType *arrayType) {
+        return GetArrayElementType(arrayType->getPointerTo());
+    }
+
     llvm::Type *LLVMRTIRBuilder::GetArrayElementType(DynamicArrayRTType *arrayType) {
         llvm::Type *element_type = arrayType->getElementType();
         assert(element_type->isArrayTy());
@@ -189,14 +193,13 @@ namespace opene {   // 数组
         llvm::Type *element_type = nullptr;
         std::vector<llvm::Constant*> lldims;
         size_t element_count = 1;
-        do {
-            size_t dim_n = arrayType->getArrayNumElements();
+        for (llvm::ArrayType *__array_type = arrayType; __array_type; __array_type = llvm::dyn_cast<llvm::ArrayType>(element_type)) {
+            size_t dim_n = __array_type->getArrayNumElements();
             element_count *= dim_n;
             llvm::Constant *dim = CreateInt(dim_n);
             lldims.push_back(dim);
-            element_type = arrayType->getElementType();
-            arrayType = llvm::dyn_cast<llvm::ArrayType>(element_type);
-        } while (arrayType);
+            element_type = __array_type->getElementType();
+        }
         assert(element_type);
 
         // 准备RTAPI调用对象
@@ -242,6 +245,8 @@ namespace opene {   // 数组
         args.push_back(CreateInt(element_count));
         args.insert(args.end(), initilazation_list.begin(), initilazation_list.end());
         Builder.CreateCall(init_array_fn, args);
+
+        ptr_to_array = Builder.CreatePointerCast(ptr_to_array, arrayType->getPointerTo());
 
         return ptr_to_array;
     }
@@ -467,6 +472,9 @@ namespace opene {   // 结构体
         Builder.CreateRet(struct_ptr);
 
         Builder.SetInsertPoint(pre_head);
+
+        llvm::verifyFunction(*creator_fn, &llvm::outs());
+
         return creator_fn;
     }
 
