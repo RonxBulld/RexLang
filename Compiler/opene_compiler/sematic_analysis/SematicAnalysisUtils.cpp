@@ -74,9 +74,9 @@ namespace opene {
             // 必须是实体定义
 
             if (TypeDecl *type_decl = id_type->as<TypeDecl>()) {
-                if (FunctionDecl *function_decl = type_decl->as<FunctionDecl>()) {
-                    identifier->function_ref_ = function_decl;
-                    return function_decl;
+                if (FunctorDecl *functor_decl = type_decl->as<FunctorDecl>()) {
+                    identifier->function_ref_ = functor_decl;
+                    return functor_decl;
                 } else {
                     assert(false);
                     return nullptr;

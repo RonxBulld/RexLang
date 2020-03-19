@@ -13,6 +13,14 @@
 #include "ASTContext.h"
 
 namespace opene {
+    void CST2ASTConvert::RemoveRoundQuotes(TString &tString) const {
+        if (!tString.string_.empty()&& tString.string_.str().front() == '"' && tString.string_.str().back() == '"') {
+            std::string _string = tString.string_.str();
+            _string = _string.substr(1, _string.length() - 2);
+            tString.string_ = this->ast_context_->CreateString(_string);
+        }
+    }
+
     TString CST2ASTConvert::GetTextIfExist(const antlr4::Token *token, const std::string &hint) const {
         TString t_string;
         if (token) {
@@ -158,6 +166,7 @@ namespace opene {
         dll_command_decl->return_type_name_ = GetTextIfExist(context->type);
         dll_command_decl->file_ = GetTextIfExist(context->file);
         dll_command_decl->api_name_ = GetTextIfExist(context->cmd);
+        RemoveRoundQuotes(dll_command_decl->api_name_);
         dll_command_decl->comment_ = GetFromCtxIfExist<TString>(context->table_comment());
         for (openeLangParser::Parameter_declContext *param : context->parameter_decl()) {
             ParameterDeclPtr parameter_decl = GetFromCtxIfExist<ParameterDeclPtr>(param);

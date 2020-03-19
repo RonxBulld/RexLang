@@ -532,8 +532,15 @@ namespace opene {
 
             // 构建函数原型
 
-            llvm::FunctionType *function_type = llvm::FunctionType::get(return_type, parameter_types, false);   // TODO: 这里暂时设为False
+            bool is_vari_arg = false;
+            if (!functorDecl->parameters_.empty() && functorDecl->parameters_.back()->name_.string_.str() == "...") {
+                is_vari_arg = true;
+            }
+            llvm::FunctionType *function_type = llvm::FunctionType::get(return_type, parameter_types, is_vari_arg);
             std::string function_name = functorDecl->name_.string_.str();
+            if (DllCommandDecl *dll_command_decl = functorDecl->as<DllCommandDecl>()) {
+                function_name = dll_command_decl->api_name_.string_.str();
+            }
 
             // 构建函数
 
@@ -635,16 +642,18 @@ namespace opene {
 //        llvm::Function *Emit(DllCommandDecl *dllCommandDecl)；
 
         bool Emit(Statement *statement) {
-            if (AssignStmt *assignStmt = statement->as<AssignStmt>()) {
-                return Emit(assignStmt);
-            } else if (ControlStmt *controlStmt = statement->as<ControlStmt>()) {
-                return Emit(controlStmt);
-            } else if (IfStmt *ifStmt = statement->as<IfStmt>()) {
-                return Emit(ifStmt);
-            } else if (LoopStatement *loopStatement = statement->as<LoopStatement>()) {
-                return Emit(loopStatement);
-            } else if (StatementBlock *statementBlock = statement->as<StatementBlock>()) {
-                return Emit(statementBlock);
+            if (AssignStmt *assign_stmt = statement->as<AssignStmt>()) {
+                return Emit(assign_stmt);
+            } else if (ControlStmt *control_stmt = statement->as<ControlStmt>()) {
+                return Emit(control_stmt);
+            } else if (IfStmt *if_stmt = statement->as<IfStmt>()) {
+                return Emit(if_stmt);
+            } else if (LoopStatement *loop_statement = statement->as<LoopStatement>()) {
+                return Emit(loop_statement);
+            } else if (StatementBlock *statement_block = statement->as<StatementBlock>()) {
+                return Emit(statement_block);
+            } else if (Expression *expression = statement->as<Expression>()) {
+                return Emit(expression);
             } else {
                 assert(false);
                 return false;

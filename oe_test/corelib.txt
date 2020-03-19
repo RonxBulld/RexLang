@@ -1,0 +1,4 @@
+.版本 2
+
+.DLL命令 调试输出整数值, , , "DebugTraceOutInt", , DebugTraceOutInt
+    .参数 整数值, 长整数型, , IntVal

@@ -10,6 +10,7 @@ int main(int argc, char *argv[]) {
 //        "oe_test/struct_declare.txt",
 //        "oe_test/dll_define.txt",
 //        "oe_test/global_variable.txt",
+        "oe_test/corelib.txt",
         "oe_test/gcd_algorithm.txt",
         }, "demo");
     if (!translate_unit_ptr) {

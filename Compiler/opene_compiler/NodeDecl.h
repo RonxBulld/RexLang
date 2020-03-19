@@ -701,7 +701,7 @@ namespace opene {
         // === 下面是经过语义分析后的数据 ===
 
         BaseVariDeclPtr reference_ = nullptr;
-        FunctionDeclPtr function_ref_ = nullptr;
+        FunctorDeclPtr function_ref_ = nullptr;
     };
 
     /**

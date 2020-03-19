@@ -19,6 +19,8 @@ namespace opene {
         ASTContext *ast_context_ = nullptr;
 
     private:
+        void RemoveRoundQuotes(TString &tString) const;
+
         TString GetTextIfExist(const antlr4::Token *token, const std::string &hint = "") const;
 
         long GetLongIfExist(const antlr4::Token *token, int hint = 0) const;
