@@ -262,7 +262,7 @@ namespace opene {
         for (ParameterDeclPtr parameter_decl : functorDecl->parameters_) {
             parameter_decl->type_decl_ptr_ = this->QueryTypeDeclWithName(this->translate_unit_, parameter_decl->type_name_.string_, &this->analysis_context_);
             this->SetupParameterType(parameter_decl);
-            parameter_decl->index_ = param_idx;
+            parameter_decl->index_ = param_idx++;
             if (parameter_decl->type_decl_ptr_ == nullptr) {
                 assert(false);
                 return false;

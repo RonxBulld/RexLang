@@ -375,10 +375,14 @@ namespace opene {
             if (parameterDecl->is_reference && !param_type->isPointerTy()) {
                 param_type = param_type->getPointerTo();
             }
+
             // 创建参数在栈内的空间
+
             llvm::AllocaInst *alloca_param = Builder.CreateAlloca(param_type, nullptr, parameterDecl->name_.string_.str());
             variable_object_pool_[parameterDecl] = alloca_param;
+
             // 将参数值加载到栈内存中
+
             llvm::Argument *argument = TheFunction->arg_begin() + parameterDecl->index_;
             StoreVariable(argument, alloca_param);
             variable_object_pool_[parameterDecl] = alloca_param;
