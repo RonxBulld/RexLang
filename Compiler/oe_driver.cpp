@@ -133,7 +133,7 @@ namespace opene {
 
     int tooling::GenerateCodeFromTranslateUnit(TranslateUnitPtr translateUnit, const std::string &gen_file) {
         opene::EmitLLVMIR emitter(translateUnit);
-        emitter.WriteOutIR();
+//        emitter.WriteOutIR();
         opene::LLCodeGen ll_code_gen(emitter);
         return ll_code_gen.WriteOutBC(gen_file);
     }
@@ -152,7 +152,9 @@ namespace opene {
                 projectDB.GetExecuteFilename().c_str(),
                 target_triple.c_str()
         );
-        return system(link_cmd.c_str());
+        int link_ret = system(link_cmd.c_str());
+        remove(projectDB.GetObjectFilename().c_str());
+        return link_ret;
     }
 }
 
