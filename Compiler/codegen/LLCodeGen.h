@@ -19,7 +19,9 @@ namespace opene {
         LLCodeGen(EmitLLVMIR &llvmIREmitter);
 
     public:
-        void WriteOutBC(const std::string &bc_filename);
+        int WriteOutBC(const std::string &bc_filename);
+
+        void WriteOutObject(const std::string &bc_filename);
 
     };
 

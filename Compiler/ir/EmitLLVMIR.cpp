@@ -1481,7 +1481,7 @@ namespace opene {
             llvm::InitializeAllAsmParsers();
             llvm::InitializeAllAsmPrinters();
 
-            // 使用我们的目标三元组来获得Target
+            // 设置目标三元组
 
             auto TargetTriple = llvm::sys::getDefaultTargetTriple();
             TheModule->setTargetTriple(TargetTriple);

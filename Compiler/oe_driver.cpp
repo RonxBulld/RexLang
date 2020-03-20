@@ -6,6 +6,62 @@
 #include <utility>
 #include "oe_driver.h"
 #include "opene_compiler/sematic_analysis/SematicAnalysis.h"
+#include "../lite_util/StringUtil.h"
+#include "../lite_util/ContainerUtil.h"
+
+namespace opene {
+    void ProjectDB::SetProjectName(const std::string &project_name) {
+        project_name_ = project_name;
+    }
+
+    const std::string &ProjectDB::GetProjectName() {
+        return project_name_;
+    }
+
+    std::string ProjectDB::GetProjectName() const {
+        return project_name_;
+    }
+
+    void ProjectDB::SetFileList(const std::vector<std::string> &filelist) {
+        file_list_ = filelist;
+    }
+
+    const std::vector<std::string> &ProjectDB::GetFileList() {
+        return file_list_;
+    }
+
+    std::vector<std::string> ProjectDB::GetFileList() const {
+        return file_list_;
+    }
+
+    void ProjectDB::SetTranslateUnit(TranslateUnit *translateUnit) {
+        translate_unit_ = translateUnit;
+    }
+
+    TranslateUnit *ProjectDB::GetTranslateUnit() {
+        return translate_unit_;
+    }
+
+    const TranslateUnit *ProjectDB::GetTranslateUnit() const {
+        return translate_unit_;
+    }
+
+    ASTContext &ProjectDB::GetASTContext() {
+        return *translate_unit_->ast_context_;
+    }
+
+    const ASTContext &ProjectDB::GetASTContext() const {
+        return *translate_unit_->ast_context_;
+    }
+
+    std::string ProjectDB::GetObjectFilename() const {
+        return project_name_ + ".bc";
+    }
+
+    std::string ProjectDB::GetExecuteFilename() const {
+        return project_name_;
+    }
+}
 
 namespace opene {
     FileEntry FileEntry::MakeFromFile(const std::string &filename) {
@@ -73,6 +129,30 @@ namespace opene {
             }
         }
         return compilerInstance.getTranslateUnit();
+    }
+
+    int tooling::GenerateCodeFromTranslateUnit(TranslateUnitPtr translateUnit, const std::string &gen_file) {
+        opene::EmitLLVMIR emitter(translateUnit);
+        emitter.WriteOutIR();
+        opene::LLCodeGen ll_code_gen(emitter);
+        return ll_code_gen.WriteOutBC(gen_file);
+    }
+
+    int tooling::LinkExecuteFromObjects(ProjectDB &projectDB) {
+        std::vector<opene::StringRef> dependence_libs = projectDB.GetASTContext().GetDependenceLibraries();
+        auto libraries_link_flag = ContainerUtil::Map<std::vector, std::string>(dependence_libs, [](opene::StringRef &elem){ return "-l" + elem.str(); });
+        auto libraries_link_flag_str = StringUtil::Join(libraries_link_flag, " ");
+        std::string link_exec = "clang";
+        std::string target_triple = "x86_64-unknown-linux-gnu";
+        std::string link_cmd = StringUtil::Sprintf(
+                "%s -Lcorelib %s %s -o %s -target %s",
+                link_exec.c_str(),
+                projectDB.GetObjectFilename().c_str(),
+                libraries_link_flag_str.c_str(),
+                projectDB.GetExecuteFilename().c_str(),
+                target_triple.c_str()
+        );
+        return system(link_cmd.c_str());
     }
 }
 

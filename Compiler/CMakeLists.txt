@@ -22,4 +22,5 @@ TARGET_LINK_LIBRARIES(oel
         antlr4-runtime
         IR
         CodeGen
+        lite_util
         )

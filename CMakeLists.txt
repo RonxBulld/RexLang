@@ -7,4 +7,9 @@ PROJECT(OpenELanguage)
 
 set(CMAKE_CXX_FLAGS "-ggdb -g -O0")
 
+ADD_SUBDIRECTORY(lite_util)
 ADD_SUBDIRECTORY(Compiler)
+ADD_SUBDIRECTORY(corelib)
+
+ADD_CUSTOM_TARGET(OpenELanguage)
+ADD_DEPENDENCIES(OpenELanguage oel newcore)
