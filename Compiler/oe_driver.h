@@ -10,35 +10,12 @@
 #include "opene_compiler/AstGenerate.h"
 #include "ir/EmitLLVMIR.h"
 #include "codegen/LLCodeGen.h"
+#include "link/Linker.h"
+#include "project_db.h"
 
 namespace opene {
 
     class TranslateUnit;
-
-    class ProjectDB {
-    private:
-        std::string project_name_;
-        std::vector<std::string> file_list_;
-        TranslateUnit *translate_unit_ = nullptr;
-
-    public:
-        void SetProjectName(const std::string &project_name);
-        const std::string & GetProjectName();
-        std::string GetProjectName() const;
-
-        void SetFileList(const std::vector<std::string> &filelist);
-        const std::vector<std::string> &GetFileList();
-        std::vector<std::string> GetFileList() const;
-
-        void SetTranslateUnit(TranslateUnit *translateUnit);
-        TranslateUnit * GetTranslateUnit();
-        const TranslateUnit * GetTranslateUnit() const;
-        ASTContext &GetASTContext();
-        const ASTContext &GetASTContext() const;
-
-        std::string GetObjectFilename() const;
-        std::string GetExecuteFilename() const;
-    };
 
     class SourceManager {};
 
@@ -86,7 +63,7 @@ namespace opene {
     };
 
     namespace tooling {
-        TranslateUnitPtr BuildASTFromFiles(const std::vector<std::string> &filenames, const std::string &toolname);
+        TranslateUnitPtr BuildASTFromFiles(ProjectDB &projectDB, const std::string &toolname);
 
         TranslateUnitPtr BuildASTFromCodes(const std::vector<std::string> &codes, const std::string &filename, const std::string &toolname);
 

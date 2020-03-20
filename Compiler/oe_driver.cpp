@@ -99,9 +99,9 @@ namespace opene {
 }
 
 namespace opene {
-    TranslateUnitPtr tooling::BuildASTFromFiles(const std::vector<std::string> &filenames, const std::string &toolname) {
+    TranslateUnitPtr tooling::BuildASTFromFiles(ProjectDB &projectDB, const std::string &toolname) {
         std::vector<FileEntry> enties;
-        for (const std::string &filename : filenames) {
+        for (const std::string &filename : projectDB.GetFileList()) {
             enties.push_back(FileEntry::MakeFromFile(filename));
         }
         return tooling::BuildASTFromCodeWithArgs(enties, {}, toolname);
@@ -140,21 +140,8 @@ namespace opene {
 
     int tooling::LinkExecuteFromObjects(ProjectDB &projectDB) {
         std::vector<opene::StringRef> dependence_libs = projectDB.GetASTContext().GetDependenceLibraries();
-        auto libraries_link_flag = ContainerUtil::Map<std::vector, std::string>(dependence_libs, [](opene::StringRef &elem){ return "-l" + elem.str(); });
-        auto libraries_link_flag_str = StringUtil::Join(libraries_link_flag, " ");
-        std::string link_exec = "clang";
-        std::string target_triple = "x86_64-unknown-linux-gnu";
-        std::string link_cmd = StringUtil::Sprintf(
-                "%s -Lcorelib %s %s -o %s -target %s",
-                link_exec.c_str(),
-                projectDB.GetObjectFilename().c_str(),
-                libraries_link_flag_str.c_str(),
-                projectDB.GetExecuteFilename().c_str(),
-                target_triple.c_str()
-        );
-        int link_ret = system(link_cmd.c_str());
-        remove(projectDB.GetObjectFilename().c_str());
-        return link_ret;
+        Linker linker;
+        return linker.LinkProject(projectDB.GetObjectFilename(), projectDB.GetExecuteFilename(), dependence_libs);
     }
 }
 

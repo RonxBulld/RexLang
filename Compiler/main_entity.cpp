@@ -15,7 +15,7 @@ int main(int argc, char *argv[]) {
     });
 
     std::cout << u8"开始编译..." << std::endl;
-    opene::TranslateUnit *translate_unit_ptr = opene::tooling::BuildASTFromFiles(project_db.GetFileList(), "demo");
+    opene::TranslateUnit *translate_unit_ptr = opene::tooling::BuildASTFromFiles(project_db, "demo");
     project_db.SetTranslateUnit(translate_unit_ptr);
     if (!translate_unit_ptr) {
         std::cout << u8"编译失败..." << std::endl;

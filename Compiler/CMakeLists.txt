@@ -9,13 +9,14 @@ LINK_DIRECTORIES(/usr/local/lib)
 ADD_SUBDIRECTORY(opene_compiler)
 ADD_SUBDIRECTORY(ir)
 ADD_SUBDIRECTORY(codegen)
+ADD_SUBDIRECTORY(link)
 #ADD_SUBDIRECTORY(interpreter)
 
 ADD_EXECUTABLE(oel
         oe_driver.cpp
         oe_driver.h
         main_entity.cpp
-        )
+        project_db.h)
 
 TARGET_LINK_LIBRARIES(oel
         OECompilerParse
@@ -23,4 +24,5 @@ TARGET_LINK_LIBRARIES(oel
         IR
         CodeGen
         lite_util
+        Link
         )
