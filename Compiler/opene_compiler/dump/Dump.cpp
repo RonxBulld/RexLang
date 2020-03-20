@@ -74,7 +74,7 @@ namespace opene {
         return DumpToken();
     }
 
-    DumpToken DumpDllCommandDecl(DllCommandDecl *dllCommandDeclPtr, const DumpStyle &dumpStyle) {
+    DumpToken DumpDllCommandDecl(APICommandDecl *dllCommandDeclPtr, const DumpStyle &dumpStyle) {
         return DumpToken();
     }
 

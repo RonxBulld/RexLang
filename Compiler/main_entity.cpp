@@ -23,6 +23,12 @@ int main(int argc, char *argv[]) {
 
     emitter.WriteOutIR();
 
+    opene::LLCodeGen ll_code_gen(emitter);
+    ll_code_gen.WriteOutBC("gcd_algorithm.bc");
+
+    std::cout << u8"连接程序..." << std::endl;
+    std::vector<opene::StringRef> dependence_libs = translate_unit_ptr->ast_context_->GetDependenceLibraries();
+
     std::cout << u8"执行程序..." << std::endl;
     return 0;
 }

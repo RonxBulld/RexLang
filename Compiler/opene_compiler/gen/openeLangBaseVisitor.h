@@ -45,6 +45,10 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual antlrcpp::Any visitLib_command(openeLangParser::Lib_commandContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual antlrcpp::Any visitGlobal_variable_list(openeLangParser::Global_variable_listContext *ctx) override {
     return visitChildren(ctx);
   }

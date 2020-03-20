@@ -21,6 +21,7 @@
 #include <llvm/Bitcode/BitcodeReader.h>
 #include <llvm/Bitcode/BitcodeWriter.h>
 #include <llvm/Support/ToolOutputFile.h>
+#include <llvm/Support/TargetSelect.h>
 
 #include "EmitLLVMIR.h"
 #include "LLVMRTIRBuilder.h"
@@ -538,7 +539,7 @@ namespace opene {
             }
             llvm::FunctionType *function_type = llvm::FunctionType::get(return_type, parameter_types, is_vari_arg);
             std::string function_name = functorDecl->name_.string_.str();
-            if (DllCommandDecl *dll_command_decl = functorDecl->as<DllCommandDecl>()) {
+            if (APICommandDecl *dll_command_decl = functorDecl->as<APICommandDecl>()) {
                 function_name = dll_command_decl->api_name_.string_.str();
             }
 
@@ -1471,6 +1472,19 @@ namespace opene {
                 : TheModule(new llvm::Module("a.ll", TheContext)),
                   Builder(llvm::IRBuilder<>(TheContext)),
                   RTBuilder(TheModule, Builder) {
+
+            // 初始化发出目标代码的所有目标
+
+            llvm::InitializeAllTargetInfos();
+            llvm::InitializeAllTargets();
+            llvm::InitializeAllTargetMCs();
+            llvm::InitializeAllAsmParsers();
+            llvm::InitializeAllAsmPrinters();
+
+            // 使用我们的目标三元组来获得Target
+
+            auto TargetTriple = llvm::sys::getDefaultTargetTriple();
+            TheModule->setTargetTriple(TargetTriple);
         }
 
         ~IREmit() {
@@ -1500,5 +1514,9 @@ namespace opene {
                 false,
                 true
                 );
+    }
+
+    llvm::Module *EmitLLVMIR::GetModule() const {
+        return emitter->GetModule();
     }
 }

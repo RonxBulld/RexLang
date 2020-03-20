@@ -42,6 +42,14 @@ namespace opene {
                 return nullptr;
             }
 
+            // 添加依赖库
+
+            FunctorDecl *call_functor = call_target->as<FunctorDecl>();
+            if (ASTAssert::IsStaticLibraryAPI(call_functor)) {
+                APICommandDecl *api_command_decl = call_functor->as<APICommandDecl>();
+                function_call->ast_context_->AddDependenceLibrary(api_command_decl->library_file_.string_);
+            }
+
             this->CheckExpression(function_call);
 
             return ASTUtility::GetCallableReturnType(call_target);

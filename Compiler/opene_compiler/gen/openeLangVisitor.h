@@ -34,6 +34,8 @@ public:
 
     virtual antlrcpp::Any visitDll_command(openeLangParser::Dll_commandContext *context) = 0;
 
+    virtual antlrcpp::Any visitLib_command(openeLangParser::Lib_commandContext *context) = 0;
+
     virtual antlrcpp::Any visitGlobal_variable_list(openeLangParser::Global_variable_listContext *context) = 0;
 
     virtual antlrcpp::Any visitGlobal_variable_item(openeLangParser::Global_variable_itemContext *context) = 0;

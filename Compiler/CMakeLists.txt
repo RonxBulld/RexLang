@@ -8,6 +8,7 @@ LINK_DIRECTORIES(/usr/local/lib)
 
 ADD_SUBDIRECTORY(opene_compiler)
 ADD_SUBDIRECTORY(ir)
+ADD_SUBDIRECTORY(codegen)
 #ADD_SUBDIRECTORY(interpreter)
 
 ADD_EXECUTABLE(oel
@@ -20,4 +21,5 @@ TARGET_LINK_LIBRARIES(oel
         OECompilerParse
         antlr4-runtime
         IR
+        CodeGen
         )

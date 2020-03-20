@@ -39,6 +39,9 @@ public:
   virtual void enterDll_command(openeLangParser::Dll_commandContext * /*ctx*/) override { }
   virtual void exitDll_command(openeLangParser::Dll_commandContext * /*ctx*/) override { }
 
+  virtual void enterLib_command(openeLangParser::Lib_commandContext * /*ctx*/) override { }
+  virtual void exitLib_command(openeLangParser::Lib_commandContext * /*ctx*/) override { }
+
   virtual void enterGlobal_variable_list(openeLangParser::Global_variable_listContext * /*ctx*/) override { }
   virtual void exitGlobal_variable_list(openeLangParser::Global_variable_listContext * /*ctx*/) override { }
 

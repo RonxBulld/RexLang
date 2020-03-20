@@ -32,6 +32,10 @@ namespace opene {
          * 判定是否固定维度数组
          */
         static bool IsFixedDimArray(const TypeDecl *typeDecl);
+
+        static bool IsStaticLibraryAPI(const FunctorDecl *functorDecl);
+
+        static bool IsDynamicLibraryAPI(const FunctorDecl *functorDecl);
     };
 
 }

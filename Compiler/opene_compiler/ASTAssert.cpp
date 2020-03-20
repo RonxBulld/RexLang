@@ -48,4 +48,19 @@ namespace opene {
         }
     }
 
+    bool ASTAssert::IsStaticLibraryAPI(const FunctorDecl *functorDecl) {
+        if (const APICommandDecl *api_command_decl = functorDecl->as<APICommandDecl>()) {
+            return api_command_decl->library_type_ == LibraryType::kLTStatic;
+        } else {
+            return false;
+        }
+    }
+
+    bool ASTAssert::IsDynamicLibraryAPI(const FunctorDecl *functorDecl) {
+        if (const APICommandDecl *api_command_decl = functorDecl->as<APICommandDecl>()) {
+            return api_command_decl->library_type_ == LibraryType::kLTDynamic;
+        } else {
+            return false;
+        }
+    }
 }

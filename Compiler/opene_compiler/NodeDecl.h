@@ -68,9 +68,9 @@ namespace opene {
     typedef struct FileVariableDecl* FileVariableDeclPtr;
     typedef struct FunctorDecl* FunctorDeclPtr;
     typedef struct FunctionDecl* FunctionDeclPtr;
-    typedef struct BuiltinFunctionDecl *BuiltinFunctionDeclPtr;
+//    typedef struct BuiltinFunctionDecl *BuiltinFunctionDeclPtr;
     typedef struct ProgSetDecl* ProgSetDeclPtr;
-    typedef struct DllCommandDecl* DllCommandDeclPtr;
+    typedef struct APICommandDecl* APICommandDeclPtr;
 
     // Statement
 
@@ -273,7 +273,7 @@ namespace opene {
      */
     struct DllDefineFile : public SourceFile {
         static const NodeType node_type = NodeType::kNTyDllDefineFile;
-        ordered_map<StringRef, DllCommandDeclPtr> dll_declares_;
+        ordered_map<StringRef, APICommandDeclPtr> dll_declares_;
     };
 
     /**
@@ -496,13 +496,17 @@ namespace opene {
 //        static const NodeType node_type = NodeType::kNTyBuiltinFunctionDecl;
 //    };
 
+    enum LibraryType { kLTDynamic, kLTStatic };
+
     /**
      * @brief DLL函数声明
      */
-    struct DllCommandDecl : public FunctorDecl {
+    struct APICommandDecl : public FunctorDecl {
         static const NodeType node_type = NodeType::kNTyDllCommandDecl;
-        // DLL动态链接库文件名
-        TString file_;
+        // API库文件名
+        TString library_file_;
+        // API库类型
+        LibraryType library_type_ = LibraryType::kLTDynamic;
         // 原生函数名称
         TString api_name_;
         // 原生参数名称
@@ -858,7 +862,7 @@ namespace opene {
         // 函数定义表
         ordered_map<StringRef, FunctionDeclPtr> function_decls_;
         // DLL函数声明表
-        ordered_map<StringRef, DllCommandDeclPtr> dll_declares_;
+        ordered_map<StringRef, APICommandDeclPtr> dll_declares_;
         // 函数定义表和DLL声明表的合并
         // TODO: 是否要将上面两个逗逼玩意干掉
         ordered_map<StringRef, FunctorDeclPtr> functor_declares_;

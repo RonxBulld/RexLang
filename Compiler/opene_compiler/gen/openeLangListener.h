@@ -37,6 +37,9 @@ public:
   virtual void enterDll_command(openeLangParser::Dll_commandContext *ctx) = 0;
   virtual void exitDll_command(openeLangParser::Dll_commandContext *ctx) = 0;
 
+  virtual void enterLib_command(openeLangParser::Lib_commandContext *ctx) = 0;
+  virtual void exitLib_command(openeLangParser::Lib_commandContext *ctx) = 0;
+
   virtual void enterGlobal_variable_list(openeLangParser::Global_variable_listContext *ctx) = 0;
   virtual void exitGlobal_variable_list(openeLangParser::Global_variable_listContext *ctx) = 0;
 

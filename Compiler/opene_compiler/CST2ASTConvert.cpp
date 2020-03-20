@@ -153,7 +153,11 @@ namespace opene {
     antlrcpp::Any CST2ASTConvert::visitDll_define_file(openeLangParser::Dll_define_fileContext *context) {
         DllDefineFilePtr dll_define_file = CreateNode<DllDefineFile>(context->getStart(), context->getStop());
         for (auto *dll_cmd_decl_ctx : context->dll_command()) {
-            DllCommandDeclPtr dll_command_decl = GetFromCtxIfExist<DllCommandDeclPtr>(dll_cmd_decl_ctx);
+            APICommandDeclPtr dll_command_decl = GetFromCtxIfExist<APICommandDeclPtr>(dll_cmd_decl_ctx);
+            dll_define_file->dll_declares_[dll_command_decl->name_.string_] = dll_command_decl;
+        }
+        for (auto *dll_cmd_decl_ctx : context->lib_command()) {
+            APICommandDeclPtr dll_command_decl = GetFromCtxIfExist<APICommandDeclPtr>(dll_cmd_decl_ctx);
             dll_define_file->dll_declares_[dll_command_decl->name_.string_] = dll_command_decl;
         }
         dll_define_file->file_type_ = SourceFile::FileType::kDllDefineFile;
@@ -161,10 +165,30 @@ namespace opene {
     }
 
     antlrcpp::Any CST2ASTConvert::visitDll_command(openeLangParser::Dll_commandContext *context) {
-        DllCommandDeclPtr dll_command_decl = CreateNode<DllCommandDecl>(context->getStart(), context->getStop());
+        APICommandDeclPtr dll_command_decl = CreateNode<APICommandDecl>(context->getStart(), context->getStop());
         dll_command_decl->name_ = GetTextIfExist(context->name);
         dll_command_decl->return_type_name_ = GetTextIfExist(context->type);
-        dll_command_decl->file_ = GetTextIfExist(context->file);
+        dll_command_decl->library_file_ = GetTextIfExist(context->file);
+        RemoveRoundQuotes(dll_command_decl->library_file_);
+        dll_command_decl->library_type_ = LibraryType::kLTDynamic;
+        dll_command_decl->api_name_ = GetTextIfExist(context->cmd);
+        RemoveRoundQuotes(dll_command_decl->api_name_);
+        dll_command_decl->comment_ = GetFromCtxIfExist<TString>(context->table_comment());
+        for (openeLangParser::Parameter_declContext *param : context->parameter_decl()) {
+            ParameterDeclPtr parameter_decl = GetFromCtxIfExist<ParameterDeclPtr>(param);
+            dll_command_decl->parameters_.push_back(parameter_decl);
+            dll_command_decl->mapping_names_.push_back(parameter_decl->name_.string_);
+        }
+        return NodeWarp(dll_command_decl);
+    }
+
+    antlrcpp::Any CST2ASTConvert::visitLib_command(openeLangParser::Lib_commandContext *context) {
+        APICommandDeclPtr dll_command_decl = CreateNode<APICommandDecl>(context->getStart(), context->getStop());
+        dll_command_decl->name_ = GetTextIfExist(context->name);
+        dll_command_decl->return_type_name_ = GetTextIfExist(context->type);
+        dll_command_decl->library_file_ = GetTextIfExist(context->file);
+        RemoveRoundQuotes(dll_command_decl->library_file_);
+        dll_command_decl->library_type_ = LibraryType::kLTStatic;
         dll_command_decl->api_name_ = GetTextIfExist(context->cmd);
         RemoveRoundQuotes(dll_command_decl->api_name_);
         dll_command_decl->comment_ = GetFromCtxIfExist<TString>(context->table_comment());

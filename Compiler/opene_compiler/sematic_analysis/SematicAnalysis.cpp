@@ -226,7 +226,7 @@ namespace opene {
                 // DLL声明
                 bool success = MergeMap(dll_define_file->dll_declares_, translateUnitPtr->dll_declares_);
                 if (!success) { return success; }
-                success = MergeMap(dll_define_file->dll_declares_, translateUnitPtr->functor_declares_, [](DllCommandDeclPtr v) -> FunctorDeclPtr {
+                success = MergeMap(dll_define_file->dll_declares_, translateUnitPtr->functor_declares_, [](APICommandDeclPtr v) -> FunctorDeclPtr {
                     return v->as<FunctorDecl>();
                 });
                 if (!success) { return false; }

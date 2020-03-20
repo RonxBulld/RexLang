@@ -21,28 +21,28 @@ public:
     T__32 = 33, T__33 = 34, T__34 = 35, T__35 = 36, T__36 = 37, T__37 = 38, 
     T__38 = 39, T__39 = 40, T__40 = 41, T__41 = 42, T__42 = 43, T__43 = 44, 
     T__44 = 45, T__45 = 46, T__46 = 47, T__47 = 48, T__48 = 49, T__49 = 50, 
-    T__50 = 51, T__51 = 52, T__52 = 53, K_ADD_OPT = 54, K_SUB_OPT = 55, 
-    K_MUL_OPT = 56, K_DIV_OPT = 57, K_FULL_DIV_OPT = 58, K_MOD_OPT = 59, 
-    K_AECOM_OPT = 60, K_ASSIGN_OPT = 61, K_EQUAL_OPT = 62, K_NOT_EQUAL_OPT = 63, 
-    K_GREAT_OPT = 64, K_LESS_OPT = 65, K_GREAT_EQU_OPT = 66, K_LESS_EQU_OPT = 67, 
-    K_LIKE_EQU_OPT = 68, K_OR_OPT = 69, K_AND_OPT = 70, INTEGER_LITERAL = 71, 
-    FLOAT_LITERAL = 72, IDENTIFIER = 73, WHITESPACE = 74, NEWLINE = 75, 
-    STRING_LITERAL = 76, OTHER_CHAR = 77
+    T__50 = 51, T__51 = 52, T__52 = 53, T__53 = 54, K_ADD_OPT = 55, K_SUB_OPT = 56, 
+    K_MUL_OPT = 57, K_DIV_OPT = 58, K_FULL_DIV_OPT = 59, K_MOD_OPT = 60, 
+    K_AECOM_OPT = 61, K_ASSIGN_OPT = 62, K_EQUAL_OPT = 63, K_NOT_EQUAL_OPT = 64, 
+    K_GREAT_OPT = 65, K_LESS_OPT = 66, K_GREAT_EQU_OPT = 67, K_LESS_EQU_OPT = 68, 
+    K_LIKE_EQU_OPT = 69, K_OR_OPT = 70, K_AND_OPT = 71, INTEGER_LITERAL = 72, 
+    FLOAT_LITERAL = 73, IDENTIFIER = 74, WHITESPACE = 75, NEWLINE = 76, 
+    STRING_LITERAL = 77, OTHER_CHAR = 78
   };
 
   enum {
     RuleOpene_src = 0, RuleSrc_content = 1, RuleProgram_set_file = 2, RuleData_structure_file = 3, 
     RuleGlobal_variable_file = 4, RuleDll_define_file = 5, RuleDll_command = 6, 
-    RuleGlobal_variable_list = 7, RuleGlobal_variable_item = 8, RuleEdition_spec = 9, 
-    RuleStruct_declare = 10, RuleTable_comment = 11, RuleProg_set = 12, 
-    RuleVariable_decl = 13, RuleMember_vari_decl = 14, RuleFile_vari_decl = 15, 
-    RuleSub_program = 16, RuleLocal_variable_decl = 17, RuleParameter_decl = 18, 
-    RuleStatement_list = 19, RuleStatement = 20, RuleSwitch_statement = 21, 
-    RuleLoop_statement = 22, RuleCondition_statement = 23, RuleControl_statement = 24, 
-    RuleHierarchy_identifier = 25, RuleName_component = 26, RuleExpression = 27, 
-    RuleData_set_value = 28, RuleDatetime_value = 29, RuleDatetime_value_core = 30, 
-    RuleMacro_value = 31, RuleFunc_ptr = 32, RuleBool_value = 33, RuleNumber = 34, 
-    RuleString_value = 35
+    RuleLib_command = 7, RuleGlobal_variable_list = 8, RuleGlobal_variable_item = 9, 
+    RuleEdition_spec = 10, RuleStruct_declare = 11, RuleTable_comment = 12, 
+    RuleProg_set = 13, RuleVariable_decl = 14, RuleMember_vari_decl = 15, 
+    RuleFile_vari_decl = 16, RuleSub_program = 17, RuleLocal_variable_decl = 18, 
+    RuleParameter_decl = 19, RuleStatement_list = 20, RuleStatement = 21, 
+    RuleSwitch_statement = 22, RuleLoop_statement = 23, RuleCondition_statement = 24, 
+    RuleControl_statement = 25, RuleHierarchy_identifier = 26, RuleName_component = 27, 
+    RuleExpression = 28, RuleData_set_value = 29, RuleDatetime_value = 30, 
+    RuleDatetime_value_core = 31, RuleMacro_value = 32, RuleFunc_ptr = 33, 
+    RuleBool_value = 34, RuleNumber = 35, RuleString_value = 36
   };
 
   openeLangParser(antlr4::TokenStream *input);
@@ -62,6 +62,7 @@ public:
   class Global_variable_fileContext;
   class Dll_define_fileContext;
   class Dll_commandContext;
+  class Lib_commandContext;
   class Global_variable_listContext;
   class Global_variable_itemContext;
   class Edition_specContext;
@@ -186,6 +187,8 @@ public:
     virtual size_t getRuleIndex() const override;
     std::vector<Dll_commandContext *> dll_command();
     Dll_commandContext* dll_command(size_t i);
+    std::vector<Lib_commandContext *> lib_command();
+    Lib_commandContext* lib_command(size_t i);
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -222,6 +225,33 @@ public:
   };
 
   Dll_commandContext* dll_command();
+
+  class  Lib_commandContext : public antlr4::ParserRuleContext {
+  public:
+    antlr4::Token *name = nullptr;;
+    antlr4::Token *type = nullptr;;
+    antlr4::Token *file = nullptr;;
+    antlr4::Token *cmd = nullptr;;
+    Lib_commandContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    std::vector<antlr4::tree::TerminalNode *> NEWLINE();
+    antlr4::tree::TerminalNode* NEWLINE(size_t i);
+    std::vector<antlr4::tree::TerminalNode *> IDENTIFIER();
+    antlr4::tree::TerminalNode* IDENTIFIER(size_t i);
+    std::vector<antlr4::tree::TerminalNode *> STRING_LITERAL();
+    antlr4::tree::TerminalNode* STRING_LITERAL(size_t i);
+    Table_commentContext *table_comment();
+    std::vector<Parameter_declContext *> parameter_decl();
+    Parameter_declContext* parameter_decl(size_t i);
+
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  Lib_commandContext* lib_command();
 
   class  Global_variable_listContext : public antlr4::ParserRuleContext {
   public:

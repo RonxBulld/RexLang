@@ -141,7 +141,7 @@ namespace opene {
         return ASTFetchSubnode::FetchTagDecl(progSetDecl, result);
     }
 
-    bool ASTFetchSubnode::FetchDllCommandDecl(const DllCommandDecl *dllCommandDecl, ASTFetchSubnode::ASTFetchResult &result) {
+    bool ASTFetchSubnode::FetchDllCommandDecl(const APICommandDecl *dllCommandDecl, ASTFetchSubnode::ASTFetchResult &result) {
         if (Fetch(dllCommandDecl->parameters_, result) == false) { return false; }
         return ASTFetchSubnode::FetchTagDecl(dllCommandDecl, result);
     }
@@ -292,7 +292,7 @@ namespace opene {
         else if (node->node_type_ == NodeType::kNTyStructureDecl)           { return FetchStructureDecl(static_cast<const StructureDecl *>(node), result); }
         else if (node->node_type_ == NodeType::kNTyFunctionDecl)             { return FetchSubProgDecl(static_cast<const FunctionDecl *>(node), result); }
         else if (node->node_type_ == NodeType::kNTyProgSetDecl)             { return FetchProgSetDecl(static_cast<const ProgSetDecl *>(node), result); }
-        else if (node->node_type_ == NodeType::kNTyDllCommandDecl)          { return FetchDllCommandDecl(static_cast<const DllCommandDecl *>(node), result); }
+        else if (node->node_type_ == NodeType::kNTyDllCommandDecl)          { return FetchDllCommandDecl(static_cast<const APICommandDecl *>(node), result); }
 //        else if (node->node_type_ == NodeType::kNTyStatement)               { return FetchStatement(static_cast<const Statement *>(node), result); }
         else if (node->node_type_ == NodeType::kNTyIfStmt)                  { return FetchIfStmt(static_cast<const IfStmt *>(node), result); }
         else if (node->node_type_ == NodeType::kNTyStatementBlock)          { return FetchStatementBlock(static_cast<const StatementBlock *>(node), result); }

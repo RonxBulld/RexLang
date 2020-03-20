@@ -7,16 +7,23 @@
 
 #include "../opene_compiler/NodeDecl.h"
 
+namespace llvm {
+    class Module;
+}
+
 namespace opene {
 
     class IREmit;
-
+    class LLCodeGen;
     class EmitLLVMIR {
+        friend LLCodeGen;
     public:
         EmitLLVMIR(TranslateUnit *translateUnit);
 
     public:
         void WriteOutIR();
+
+        llvm::Module *GetModule() const;
 
     private:
         IREmit *emitter = nullptr;

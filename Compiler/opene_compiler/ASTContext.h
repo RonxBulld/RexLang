@@ -5,6 +5,8 @@
 #ifndef OPENELANGUAGE_ASTCONTEXT_H
 #define OPENELANGUAGE_ASTCONTEXT_H
 
+#include <set>
+#include <vector>
 #include "common_rt/StringRef.h"
 #include "utilities/Location.h"
 
@@ -18,6 +20,8 @@ namespace opene {
         LocationPool location_pool_;
         Diagnostic *diagnostic_ = nullptr;
         size_t node_index_ = 0;
+        std::set<StringRef> dependence_libraries_;
+
     public:
         ASTContext();
 
@@ -38,6 +42,10 @@ namespace opene {
         size_t GetNodeIndex();
 
         size_t GetLineNumber(size_t position_id);
+
+        void AddDependenceLibrary(const StringRef &library_name);
+
+        std::vector<StringRef> GetDependenceLibraries() const;
     };
 
 }

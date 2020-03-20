@@ -41,4 +41,16 @@ namespace opene {
     size_t ASTContext::GetLineNumber(size_t position_id) {
         return this->location_pool_.GetLineNumber(position_id);
     }
+
+    void ASTContext::AddDependenceLibrary(const StringRef &library_name) {
+        this->dependence_libraries_.insert(library_name);
+    }
+
+    std::vector<StringRef> ASTContext::GetDependenceLibraries() const {
+        std::vector<StringRef> libraries;
+        for (const StringRef &library : this->dependence_libraries_) {
+            libraries.push_back(library);
+        }
+        return libraries;
+    }
 }

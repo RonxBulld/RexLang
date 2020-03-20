@@ -69,10 +69,17 @@ global_variable_file
 
 dll_define_file
     : dll_command*
+    | lib_command*
     ;
 
 dll_command
     : '.DLL命令' name=IDENTIFIER ',' type=IDENTIFIER? ',' file=STRING_LITERAL? ',' cmd=STRING_LITERAL (',' table_comment)? NEWLINE
+      parameter_decl*
+      NEWLINE*
+    ;
+
+lib_command
+    : '.LIB命令' name=IDENTIFIER ',' type=IDENTIFIER? ',' file=STRING_LITERAL? ',' cmd=STRING_LITERAL (',' table_comment)? NEWLINE
       parameter_decl*
       NEWLINE*
     ;

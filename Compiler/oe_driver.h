@@ -9,6 +9,7 @@
 #include <vector>
 #include "opene_compiler/AstGenerate.h"
 #include "ir/EmitLLVMIR.h"
+#include "codegen/LLCodeGen.h"
 
 namespace opene {
 

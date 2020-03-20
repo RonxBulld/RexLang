@@ -58,6 +58,8 @@ namespace opene {
 
         antlrcpp::Any visitDll_command(openeLangParser::Dll_commandContext *context) override;
 
+        antlrcpp::Any visitLib_command(openeLangParser::Lib_commandContext *context) override;
+
         antlrcpp::Any visitGlobal_variable_list(openeLangParser::Global_variable_listContext *context) override;
 
         antlrcpp::Any visitGlobal_variable_item(openeLangParser::Global_variable_itemContext *context) override;
