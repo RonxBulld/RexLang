@@ -8,9 +8,8 @@
 #include "support/Command.h"
 
 void SetupArgumentParser(opene::ArgumentParser &argumentParser) {
+    argumentParser.LoadGlobalParam();
 //    argumentParser.AddParam(opene::CmdParameter("f", "file", "待编译的文件", false).CfgAsValue());
-    argumentParser.AddParam(opene::CmdParameter("o", "", "生成的目标文件路径", false).CfgAsValue());
-    argumentParser.AddParam(opene::CmdParameter("", "project", "工程名称", false).CfgAsValue());
     argumentParser.AddParam(opene::CmdParameter("h", "help", "打印命令行帮助信息并退出", false).CfgAsSwitch());
     argumentParser.AddParam(opene::CmdParameter("v", "version", "打印版本信息并退出", false).CfgAsSwitch());
 }
@@ -28,11 +27,7 @@ int main(int argc, char *argv[]) {
     }
 
     opene::ProjectDB project_db;
-    project_db.SetProjectName("gcd_algorithm");
-    project_db.SetFileList({
-            "oe_test/corelib.txt",
-            "oe_test/gcd_algorithm.txt",
-    });
+    project_db.ApplyArgument(argument_parser);
 
     std::cout << u8"开始编译..." << std::endl;
     opene::TranslateUnit *translate_unit_ptr = opene::tooling::BuildASTFromFiles(project_db, "demo");
@@ -55,7 +50,7 @@ int main(int argc, char *argv[]) {
     }
 
     std::cout << u8"执行程序..." << std::endl;
-    int exec_ret = system("./gcd_algorithm");
+    int exec_ret = system(("./" + project_db.GetExecuteFilename()).c_str());
     std::cout << u8"程序运行结束，返回值为 " << exec_ret << std::endl;
     return exec_ret;
 }

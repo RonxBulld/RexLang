@@ -8,4 +8,6 @@ LINK_DIRECTORIES(/usr/local/lib)
 ADD_LIBRARY(Support SHARED
         ProjectDB.h
         ProjectDB.cpp
-        Command.cpp Command.h)
+        Command.cpp
+        Command.h
+        )

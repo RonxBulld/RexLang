@@ -12,21 +12,31 @@ namespace opene {
 
     class TranslateUnit;
     class ASTContext;
+    class ArgumentParser;
 
     class ProjectDB {
     private:
+        std::string random_string_;
         std::string project_name_;
         std::vector<std::string> file_list_;
-        TranslateUnit *translate_unit_ = nullptr;
+        std::string target_bin_name_;
+        TranslateUnit *translate_unit_;
 
     public:
+        ProjectDB();
+        bool ApplyArgument(const ArgumentParser &argumentParser);
+
         void SetProjectName(const std::string &project_name);
-        const std::string & GetProjectName();
-        std::string GetProjectName() const;
+        const std::string & GetProjectName() const;
+        std::string GetProjectName();
 
         void SetFileList(const std::vector<std::string> &filelist);
-        const std::vector<std::string> &GetFileList();
-        std::vector<std::string> GetFileList() const;
+        const std::vector<std::string> &GetFileList() const;
+        std::vector<std::string> GetFileList();
+
+        void SetTargetBinName(const std::string &targetBinName);
+        const std::string & GetTargetBinName() const;
+        std::string GetTargetBinName();
 
         void SetTranslateUnit(TranslateUnit *translateUnit);
         TranslateUnit * GetTranslateUnit();

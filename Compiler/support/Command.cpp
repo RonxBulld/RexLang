@@ -5,6 +5,7 @@
 #include <assert.h>
 #include <stack>
 #include <string.h>
+#include <iostream>
 
 #include "Command.h"
 #include "../../lite_util/StringUtil.h"
@@ -15,14 +16,16 @@ namespace opene {
             const std::string &shortSwitch,
             const std::string &longSwitch,
             const std::string &description,
-            bool optional
+            bool optional,
+            const std::string &moduleName
     )
             :
             short_switch_(shortSwitch),
             long_switch_(longSwitch),
             description_(description),
             optional_(optional),
-            param_type_(ParamType::kSwitch) {
+            param_type_(ParamType::kSwitch),
+            module_name_(moduleName) {
     }
 
     CmdParameter &CmdParameter::CfgAsSwitch() {
@@ -78,7 +81,7 @@ namespace opene {
 }
 
 namespace opene {
-    const CmdParameter *ArgumentParser::GetParameterRef(const std::string &flag_str) const {
+    const CmdParameter *ArgumentParser::GetParameterRef(const std::string &moduleName, const std::string &flag_str) const {
         if (!flag_str.empty()) {
             for (const CmdParameter &parameter : parameters_) {
                 if (parameter.short_switch_ == flag_str || parameter.long_switch_ == flag_str) {
@@ -89,15 +92,27 @@ namespace opene {
         return nullptr;
     }
 
-    bool ArgumentParser::SwitchRequestArgument(const std::string &flag_str) {
-        if (const CmdParameter *cmd_parameter = GetParameterRef(flag_str)) {
+    bool ArgumentParser::SwitchRequestArgument(const std::string &moduleName, const std::string &flag_str) {
+        if (const CmdParameter *cmd_parameter = GetParameterRef(moduleName, flag_str)) {
             return cmd_parameter->param_type_ != ParamType::kSwitch;
         } else {
             return false;
         }
     }
 
+    bool ArgumentParser::IsFreeArgument(const std::pair<const CmdParameter *, std::string> &argument) const {
+        return argument.first == nullptr;
+    }
+
     ArgumentParser::ArgumentParser() {
+    }
+
+    static std::vector<CmdParameter> *global_parameters = nullptr;
+    void ArgumentParser::AddGlobalParam(const CmdParameter &parameter) {
+        if (!global_parameters) {
+            global_parameters = new std::vector<CmdParameter>;
+        }
+        global_parameters->push_back(parameter);
     }
 
     bool ArgumentParser::AddParam(const CmdParameter &parameter) {
@@ -105,17 +120,26 @@ namespace opene {
             assert(false);
             return false;
         }
-        const CmdParameter *cmd_parameter = GetParameterRef(parameter.short_switch_);
+        const CmdParameter *cmd_parameter = GetParameterRef(parameter.module_name_, parameter.short_switch_);
         if (cmd_parameter) {
             assert(false);
             return false;
         }
-        cmd_parameter = GetParameterRef(parameter.long_switch_);
+        cmd_parameter = GetParameterRef(parameter.module_name_, parameter.long_switch_);
         if (cmd_parameter) {
             assert(false);
             return false;
         }
         parameters_.push_back(parameter);
+        return true;
+    }
+
+    bool ArgumentParser::LoadGlobalParam() {
+        for (const CmdParameter &parameter : *global_parameters) {
+            if (!AddParam(parameter)) {
+                return false;
+            }
+        }
         return true;
     }
 
@@ -174,9 +198,9 @@ namespace opene {
             }
 
             if (!purge_switch_name.empty()) {
-                const CmdParameter *cmd_parameter = GetParameterRef(purge_switch_name);
+                const CmdParameter *cmd_parameter = GetParameterRef(dest_module.top(), purge_switch_name);
                 if (cmd_parameter) {
-                    if (SwitchRequestArgument(purge_switch_name)) {
+                    if (SwitchRequestArgument(dest_module.top(), purge_switch_name)) {
                         arguments_[dest_module.top()].push_back(std::make_pair(cmd_parameter, args[++idx]));
                     } else {
                         arguments_[dest_module.top()].push_back(std::make_pair(cmd_parameter, ""));
@@ -197,7 +221,7 @@ namespace opene {
         if (module_iter == arguments_.end()) {
             return {};
         }
-        const CmdParameter *target_parameter = GetParameterRef(flagStr);
+        const CmdParameter *target_parameter = GetParameterRef(moduleName, flagStr);
         if (!target_parameter) {
             assert(false);
             return {};
@@ -211,12 +235,26 @@ namespace opene {
         return actual_arguments;
     }
 
+    std::vector<std::string> ArgumentParser::GetFreeArguments(const std::string &moduleName) const {
+        auto module_iter = arguments_.find(moduleName);
+        if (module_iter == arguments_.end()) {
+            return {};
+        }
+        std::vector<std::string> actual_arguments;
+        for (auto &argu : module_iter->second) {
+            if (IsFreeArgument(argu)) {
+                actual_arguments.push_back(argu.second);
+            }
+        }
+        return actual_arguments;
+    }
+
     bool ArgumentParser::HadSwitch(const std::string &moduleName, const std::string &flagStr) const {
         auto module_iter = arguments_.find(moduleName);
         if (module_iter == arguments_.end()) {
             return false;
         }
-        const CmdParameter *target_parameter = GetParameterRef(flagStr);
+        const CmdParameter *target_parameter = GetParameterRef(moduleName, flagStr);
         if (!target_parameter) {
             assert(false);
             return false;
@@ -242,6 +280,7 @@ namespace opene {
             if (parameter.optional_) {
                 ss << "\t\t本参数是可选的" << std::endl;
             }
+            ss << "\t\t请求模块：" << (parameter.module_name_.empty() ? "公共模块" : parameter.module_name_) << std::endl;
             ss << "\t\t参数描述：" << parameter.description_ << std::endl;
             switch (parameter.param_type_) {
                 case ParamType::kSwitch: {
@@ -264,6 +303,7 @@ namespace opene {
                 }
             }
         }
+        ss << "在指定模块时，使用 -X模块名 指定后面的参数要传递到的目标模块，并用 -- 结束对该模块的传参同时回到使用 -X 前的状态。" << std::endl;
         return ss.str();
     }
 }

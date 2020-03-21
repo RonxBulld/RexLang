@@ -4,30 +4,84 @@
 
 #include "ProjectDB.h"
 #include "../opene_compiler/NodeDecl.h"
+#include "Command.h"
 
 namespace opene {
+
+    const std::string ProjectDBModuleName;
+
+    class ProjectDBParamDef {
+    public:
+        ProjectDBParamDef() {
+            ArgumentParser::AddGlobalParam(CmdParameter("o", "", "生成的目标文件路径", false, ProjectDBModuleName).CfgAsValue());
+            ArgumentParser::AddGlobalParam(CmdParameter("", "project", "工程名称", false, ProjectDBModuleName).CfgAsValue());
+        }
+    } projectdb_param_def;
+
+    void gen_random(char *s, const int len) {
+        static const char alphanum[] =
+                "0123456789"
+                "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                "abcdefghijklmnopqrstuvwxyz";
+        for (int i = 0; i < len; ++i) {
+            s[i] = alphanum[rand() % (sizeof(alphanum) - 1)];
+        }
+        s[len] = 0;
+    }
+
+    ProjectDB::ProjectDB() : translate_unit_(nullptr) {
+        char rnd_str[8+1];
+        gen_random(rnd_str, sizeof(rnd_str) - 1);
+        random_string_ = rnd_str;
+    }
+
+    bool ProjectDB::ApplyArgument(const ArgumentParser &argumentParser) {
+        if (argumentParser.HadSwitch(ProjectDBModuleName, "project")) {
+            auto args = argumentParser.GetSwitchArguments(ProjectDBModuleName, "project");
+            SetProjectName(args.back());
+        }
+        if (argumentParser.HadSwitch(ProjectDBModuleName, "o")) {
+            auto args = argumentParser.GetSwitchArguments(ProjectDBModuleName, "o");
+            SetTargetBinName(args.back());
+        }
+        SetFileList(argumentParser.GetFreeArguments(ProjectDBModuleName));
+        return true;
+    }
+
     void ProjectDB::SetProjectName(const std::string &project_name) {
         project_name_ = project_name;
     }
 
-    const std::string &ProjectDB::GetProjectName() {
-        return project_name_;
+    const std::string &ProjectDB::GetProjectName() const {
+        return project_name_.empty() ? random_string_ : project_name_;
     }
 
-    std::string ProjectDB::GetProjectName() const {
-        return project_name_;
+    std::string ProjectDB::GetProjectName() {
+        return project_name_.empty() ? random_string_ : project_name_;
     }
 
     void ProjectDB::SetFileList(const std::vector<std::string> &filelist) {
         file_list_ = filelist;
     }
 
-    const std::vector<std::string> &ProjectDB::GetFileList() {
+    const std::vector<std::string> &ProjectDB::GetFileList() const {
         return file_list_;
     }
 
-    std::vector<std::string> ProjectDB::GetFileList() const {
+    std::vector<std::string> ProjectDB::GetFileList() {
         return file_list_;
+    }
+
+    void ProjectDB::SetTargetBinName(const std::string &targetBinName) {
+        target_bin_name_ = targetBinName;
+    }
+
+    const std::string &ProjectDB::GetTargetBinName() const {
+        return target_bin_name_.empty() ? random_string_ : target_bin_name_;
+    }
+
+    std::string ProjectDB::GetTargetBinName() {
+        return target_bin_name_.empty() ? random_string_ : target_bin_name_;
     }
 
     void ProjectDB::SetTranslateUnit(TranslateUnit *translateUnit) {
@@ -51,10 +105,10 @@ namespace opene {
     }
 
     std::string ProjectDB::GetObjectFilename() const {
-        return project_name_ + ".bc";
+        return GetProjectName() + ".bc";
     }
 
     std::string ProjectDB::GetExecuteFilename() const {
-        return project_name_;
+        return GetTargetBinName();
     }
 }
