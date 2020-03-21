@@ -11,7 +11,7 @@
 #include "ir/EmitLLVMIR.h"
 #include "codegen/LLCodeGen.h"
 #include "link/Linker.h"
-#include "project_db.h"
+#include "support/ProjectDB.h"
 
 namespace opene {
 

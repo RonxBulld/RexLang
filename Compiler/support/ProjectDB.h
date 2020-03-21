@@ -2,8 +2,8 @@
 // Created by rex on 2020/3/20.
 //
 
-#ifndef OPENELANGUAGE_PROJECT_DB_H
-#define OPENELANGUAGE_PROJECT_DB_H
+#ifndef OPENELANGUAGE_PROJECTDB_H
+#define OPENELANGUAGE_PROJECTDB_H
 
 #include <string>
 #include <vector>
@@ -39,4 +39,4 @@ namespace opene {
     };
 
 }
-#endif //OPENELANGUAGE_PROJECT_DB_H
+#endif //OPENELANGUAGE_PROJECTDB_H

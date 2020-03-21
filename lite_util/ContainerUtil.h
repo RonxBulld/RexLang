@@ -29,6 +29,16 @@ public:
         }
         return __dest;
     }
+
+    template <template <typename> typename ContainerTy, typename ElemTy>
+    static bool InSet(const ContainerTy<ElemTy> &container, const ElemTy &findElem) {
+        for (const ElemTy &elem : container) {
+            if (elem == findElem) {
+                return true;
+            }
+        }
+        return false;
+    }
 };
 
 

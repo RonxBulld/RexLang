@@ -5,8 +5,28 @@
 #include "oe_driver.h"
 #include "../lite_util/StringUtil.h"
 #include "../lite_util/ContainerUtil.h"
+#include "support/Command.h"
+
+void SetupArgumentParser(opene::ArgumentParser &argumentParser) {
+//    argumentParser.AddParam(opene::CmdParameter("f", "file", "待编译的文件", false).CfgAsValue());
+    argumentParser.AddParam(opene::CmdParameter("o", "", "生成的目标文件路径", false).CfgAsValue());
+    argumentParser.AddParam(opene::CmdParameter("", "project", "工程名称", false).CfgAsValue());
+    argumentParser.AddParam(opene::CmdParameter("h", "help", "打印命令行帮助信息并退出", false).CfgAsSwitch());
+    argumentParser.AddParam(opene::CmdParameter("v", "version", "打印版本信息并退出", false).CfgAsSwitch());
+}
 
 int main(int argc, char *argv[]) {
+    opene::ArgumentParser argument_parser;
+    SetupArgumentParser(argument_parser);
+    argument_parser.ParseArguments(argc - 1, argv + 1);
+
+    if (argument_parser.HadSwitch("", "help") || argc == 1) {
+        std::cout << "直译语言编译器命令行使用方式：" << std::endl;
+        std::cout << argv[0] << " [后接下列可选参数] <需要编译的文件列表>" << std::endl;
+        std::cout << argument_parser.GetHelpInfomation() << std::endl;
+        return 0;
+    }
+
     opene::ProjectDB project_db;
     project_db.SetProjectName("gcd_algorithm");
     project_db.SetFileList({
