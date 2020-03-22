@@ -10,4 +10,6 @@ ADD_LIBRARY(Support SHARED
         ProjectDB.cpp
         Command.cpp
         Command.h
-        )
+        ProgramDB.cpp ProgramDB.h)
+
+TARGET_LINK_LIBRARIES(Support stdc++fs)
