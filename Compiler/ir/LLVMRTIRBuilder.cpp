@@ -5,6 +5,12 @@
 #include <llvm/Analysis/MemoryBuiltins.h>
 #include "LLVMRTIRBuilder.h"
 
+namespace opene {
+    std::string DoNewCoreRTAPINameMangle(const std::string &rtApiName) {
+        return "NewCore_v01_" + rtApiName;
+    }
+}
+
 namespace opene {       // 公共功能和基础工具
 
     bool isOrdinaryType(TypeDecl *typeDecl) {
@@ -41,7 +47,7 @@ namespace opene {       // 公共功能和基础工具
 
     llvm::Value *RuntimeAPICreator::Malloc(int size) {
         llvm::FunctionCallee malloc_fn = getRTAPIFunction(
-                "$malloc",
+                DoNewCoreRTAPINameMangle("Malloc"),
                 Builder.getInt8PtrTy(),
                 {Builder.getInt32Ty()}
         );
@@ -56,7 +62,7 @@ namespace opene {       // 公共功能和基础工具
             assert(false);
         }
         llvm::FunctionCallee free_fn = getRTAPIFunction(
-                "$free",
+                DoNewCoreRTAPINameMangle("Free"),
                 Builder.getVoidTy(),
                 {Builder.getInt8PtrTy()}
         );
@@ -205,7 +211,7 @@ namespace opene {   // 数组
         // 准备RTAPI调用对象
 
         llvm::FunctionCallee create_array_fn = getRTAPIFunction(
-                "$create_array",
+                DoNewCoreRTAPINameMangle("create_array"),
                 getRTAPIArrayType(),    // 数组数据指针
                 {Builder.getInt32Ty()},   // 维度数
                 true
@@ -235,7 +241,7 @@ namespace opene {   // 数组
             initilazation_list.push_back(init_val);
         }
         llvm::FunctionCallee init_array_fn = getRTAPIFunction(
-                "$init_array_" + std::to_string(element_bitwidth),
+                DoNewCoreRTAPINameMangle("init_array_" + std::to_string(element_bitwidth) + "bit"),
                 Builder.getVoidTy(),
                 {getRTAPIArrayType(), Builder.getInt32Ty()},  // 数组数据指针 维度数
                 true
@@ -257,7 +263,7 @@ namespace opene {   // 数组
 
     void LLVMRTIRBuilder::ReDimArray(llvm::Value *arrayPtr, bool clear, const std::vector<llvm::Value *> &newDimensions) {
         llvm::FunctionCallee redim_fn = getRTAPIFunction(
-                "$redim_array",
+                DoNewCoreRTAPINameMangle("redim_array"),
                 Builder.getVoidTy(),
                 {getRTAPIArrayType(), Builder.getInt1Ty(), Builder.getInt32Ty()}, // 数组变量指针 是否清空 新维度数
                 true
@@ -272,7 +278,7 @@ namespace opene {   // 数组
         // 准备RTAPI调用对象
 
         llvm::FunctionCallee clone_array_fn = getRTAPIFunction(
-                "$clone_array",
+                DoNewCoreRTAPINameMangle("clone_array"),
                 getRTAPIArrayType(),
                 {getRTAPIArrayType()}
                 );
@@ -289,9 +295,9 @@ namespace opene {   // 数组
             llvm::Value *clone_idx = Builder.CreateAlloca(Builder.getInt32Ty());
             Builder.CreateStore(CreateInt(0), clone_idx);
 
-            llvm::BasicBlock *cond_bb = llvm::BasicBlock::Create(Context, "$.element.clone.cond");
-            llvm::BasicBlock *clone_bb = llvm::BasicBlock::Create(Context, "$.element.clone.body");
-            llvm::BasicBlock *tail_bb = llvm::BasicBlock::Create(Context, "$.element.clone.tail");
+            llvm::BasicBlock *cond_bb = llvm::BasicBlock::Create(Context, ".element.clone.cond");
+            llvm::BasicBlock *clone_bb = llvm::BasicBlock::Create(Context, ".element.clone.body");
+            llvm::BasicBlock *tail_bb = llvm::BasicBlock::Create(Context, ".element.clone.tail");
 
             Builder.CreateBr(cond_bb);
             Builder.SetInsertPoint(cond_bb);
@@ -321,7 +327,7 @@ namespace opene {   // 数组
 
     llvm::Value *LLVMRTIRBuilder::GetArrayElementCount(llvm::Value *arrayPtr) {
         llvm::FunctionCallee get_array_elem_cnt_fn = getRTAPIFunction(
-                "$get_array_elem_cnt",
+                DoNewCoreRTAPINameMangle("get_array_elem_cnt"),
                 Builder.getInt32Ty(),
                 {getRTAPIArrayType()},    // 数组数据指针
                 false
@@ -331,7 +337,7 @@ namespace opene {   // 数组
 
     llvm::Value *LLVMRTIRBuilder::GetArrayDimension(llvm::Value *arrayPtr, llvm::Value *dimensionIndex) {
         llvm::FunctionCallee get_array_dimension_fn = getRTAPIFunction(
-                "$get_array_dimension",
+                DoNewCoreRTAPINameMangle("get_array_dimension"),
                 Builder.getInt32Ty(),
                 {getRTAPIArrayType(), Builder.getInt32Ty()}   // 数组数据指针 维数
         );
@@ -340,7 +346,7 @@ namespace opene {   // 数组
 
     llvm::Value *LLVMRTIRBuilder::GetArrayElementPointer(llvm::Value *arrayPtr, const std::vector<llvm::Value *> &indexes) {
         llvm::FunctionCallee get_array_ep_fn = getRTAPIFunction(
-                "$get_array_ep",
+                DoNewCoreRTAPINameMangle("get_array_ep"),
                 GetArrayElementType(llvm::dyn_cast<DynamicArrayRTType>(arrayPtr->getType()))->getPointerTo(),
                 {getRTAPIArrayType(), Builder.getInt32Ty()},  // 数组数据指针 维度个数
                 true
@@ -352,7 +358,7 @@ namespace opene {   // 数组
 
     llvm::Value *LLVMRTIRBuilder::AppendArrayElement(llvm::Value *arrayPtr, llvm::Value *newElement, TypeDecl *newElemAstType) {
         llvm::FunctionCallee append_array_element_fn = getRTAPIFunction(
-                "$append_array_element",
+                DoNewCoreRTAPINameMangle("append_array_element"),
                 Builder.getVoidTy(),
                 {getRTAPIArrayType(), Builder.getInt32Ty()}   // 数组数据指针 数据
         );
@@ -362,7 +368,7 @@ namespace opene {   // 数组
 
     llvm::Value *LLVMRTIRBuilder::InsertArrayElement(llvm::Value *arrayPtr, llvm::Value *insertPos, llvm::Value *newElement, TypeDecl *newElemAstType) {
         llvm::FunctionCallee insert_array_element_fn = getRTAPIFunction(
-                "$insert_array_element",
+                DoNewCoreRTAPINameMangle("insert_array_element"),
                 Builder.getVoidTy(),
                 {getRTAPIArrayType(), Builder.getInt32Ty(), Builder.getInt32Ty()}  // 数组数据指针 插入位置 数据
         );
@@ -372,7 +378,7 @@ namespace opene {   // 数组
 
     llvm::Value *LLVMRTIRBuilder::RemoveArrayElement(llvm::Value *arrayPtr, llvm::Value *position, llvm::Value *count) {
         llvm::FunctionCallee remove_array_element_fn = getRTAPIFunction(
-                "$remove_array_element",
+                DoNewCoreRTAPINameMangle("remove_array_element"),
                 Builder.getVoidTy(),
                 {getRTAPIArrayType(), Builder.getInt32Ty(), Builder.getInt32Ty()}    // 数组数据指针 删除位置 删除数量
         );
@@ -381,7 +387,7 @@ namespace opene {   // 数组
 
     llvm::Value *LLVMRTIRBuilder::CleanArray(llvm::Value *arrayPtr) {
         llvm::FunctionCallee clean_array_fn = getRTAPIFunction(
-                "$clean_array",
+                DoNewCoreRTAPINameMangle("clean_array"),
                 Builder.getVoidTy(),
                 {getRTAPIArrayType()}    // 数组数据指针
         );
@@ -390,7 +396,7 @@ namespace opene {   // 数组
 
     llvm::Value *LLVMRTIRBuilder::SortArray(llvm::Value *arrayPtr, bool lessToMore) {
         llvm::FunctionCallee sort_array_fn = getRTAPIFunction(
-                "$sort_array",
+                DoNewCoreRTAPINameMangle("sort_array"),
                 Builder.getVoidTy(),
                 {getRTAPIArrayType(), Builder.getInt1Ty()}   // 数组数据指针 是否从小到大
         );
@@ -399,7 +405,7 @@ namespace opene {   // 数组
 
     llvm::Value *LLVMRTIRBuilder::ZeroArray(llvm::Value *arrayPtr) {
         llvm::FunctionCallee zero_array_fn = getRTAPIFunction(
-                "$zero_array",
+                DoNewCoreRTAPINameMangle("zero_array"),
                 Builder.getVoidTy(),
                 {getRTAPIArrayType()}    // 数组数据指针
         );
@@ -547,7 +553,7 @@ namespace opene {   // 字符串
 
     llvm::Value *LLVMRTIRBuilder::CreateString() {
         llvm::FunctionCallee create_string_fn = getRTAPIFunction(
-                "$create_string",
+                DoNewCoreRTAPINameMangle("create_string"),
                 getStringType(),
                 {}
         );
@@ -556,7 +562,7 @@ namespace opene {   // 字符串
 
     llvm::Value *LLVMRTIRBuilder::CloneString(llvm::Value *stringPtr) {
         llvm::FunctionCallee clone_string_fn = getRTAPIFunction(
-                "$clone_string",
+                DoNewCoreRTAPINameMangle("clone_string"),
                 getStringType(),
                 {getStringType()}
         );
@@ -565,7 +571,7 @@ namespace opene {   // 字符串
 
     llvm::Value *LLVMRTIRBuilder::StringLikeEqual(llvm::Value *lhs, llvm::Value *rhs) {
         llvm::FunctionCallee string_like_equal_fn = getRTAPIFunction(
-                "$string_like_equal",
+                DoNewCoreRTAPINameMangle("string_like_equal"),
                 Builder.getInt1Ty(),
                 {getStringType(), getStringType()}
         );
@@ -574,7 +580,7 @@ namespace opene {   // 字符串
 
     llvm::Value *LLVMRTIRBuilder::StringConnect(llvm::Value *lhs, llvm::Value *rhs) {
         llvm::FunctionCallee string_connect_fn = getRTAPIFunction(
-                "$string_connect",
+                DoNewCoreRTAPINameMangle("string_connect"),
                 getStringType(),
                 {getStringType(), getStringType()}
         );
@@ -583,7 +589,7 @@ namespace opene {   // 字符串
 
     llvm::Value *LLVMRTIRBuilder::StringCompare(llvm::Value *lhs, llvm::Value *rhs) {
         llvm::FunctionCallee string_compare_fn = getRTAPIFunction(
-                "$string_compare",
+                DoNewCoreRTAPINameMangle("string_compare"),
                 Builder.getInt1Ty(),
                 {getStringType(), getStringType()}
         );

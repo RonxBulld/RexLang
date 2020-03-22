@@ -592,12 +592,12 @@ namespace opene {
 
             // 创建返回值栈空间
 
-            llvm::BasicBlock *ret_bb = llvm::BasicBlock::Create(TheContext, "return", function);
+            llvm::BasicBlock *ret_bb = llvm::BasicBlock::Create(TheContext, ".return", function);
             function_retbb_map_[function] = ret_bb;
             llvm::Value *return_value_ptr = nullptr;
             if (functionDecl->return_type_) {
                 llvm::Type *ret_type = GetType(functionDecl->return_type_);
-                return_value_ptr = Builder.CreateAlloca(ret_type, nullptr, "$.ret");
+                return_value_ptr = Builder.CreateAlloca(ret_type, nullptr, ".ret");
             }
             function_retptr_map_[function] = return_value_ptr;
 
@@ -681,11 +681,11 @@ namespace opene {
             assert(condition->getType()->getPrimitiveSizeInBits() == 1);
 
             // THEN块
-            llvm::BasicBlock *then_block = llvm::BasicBlock::Create(TheContext, "$.then", TheFunction);
+            llvm::BasicBlock *then_block = llvm::BasicBlock::Create(TheContext, ".then", TheFunction);
             // ELSE块
-            llvm::BasicBlock *else_block = llvm::BasicBlock::Create(TheContext, "$.else", TheFunction);
+            llvm::BasicBlock *else_block = llvm::BasicBlock::Create(TheContext, ".else", TheFunction);
             // 汇合块
-            llvm::BasicBlock *merge_block = llvm::BasicBlock::Create(TheContext, "$.merge", TheFunction);
+            llvm::BasicBlock *merge_block = llvm::BasicBlock::Create(TheContext, ".merge", TheFunction);
 
             // 分支选择跳转
             Builder.CreateCondBr(condition, then_block, else_block);
@@ -740,13 +740,13 @@ namespace opene {
             // 当前块
             llvm::BasicBlock *preheader_block = Builder.GetInsertBlock();
             // 循环条件块
-            llvm::BasicBlock *condition_block = llvm::BasicBlock::Create(TheContext, "$.condition", TheFunction);
+            llvm::BasicBlock *condition_block = llvm::BasicBlock::Create(TheContext, ".condition", TheFunction);
             Builder.CreateBr(condition_block);
             Builder.SetInsertPoint(condition_block);
             // 循环体块
-            llvm::BasicBlock *loop_block = llvm::BasicBlock::Create(TheContext, "$.loop", TheFunction);
+            llvm::BasicBlock *loop_block = llvm::BasicBlock::Create(TheContext, ".loop", TheFunction);
             // 循环块下一块
-            llvm::BasicBlock *after_block = llvm::BasicBlock::Create(TheContext, "$.afterloop", TheFunction);
+            llvm::BasicBlock *after_block = llvm::BasicBlock::Create(TheContext, ".afterloop", TheFunction);
             // 循环条件
             llvm::Value *loop_condition = Emit(whileStmt->condition_);
             Builder.CreateCondBr(loop_condition, loop_block, after_block);
@@ -775,7 +775,7 @@ namespace opene {
             llvm::Value *range_distance = Builder.CreateSub(stopValue, startValue, "$.distance");
             llvm::Value *loop_valid = Builder.CreateICmpSGT(Builder.CreateMul(range_distance, stepValue), CreateInt(0), "$.valid");
 
-            llvm::BasicBlock *loop_entry_block = llvm::BasicBlock::Create(TheContext, "$.loop_entry", TheFunction);
+            llvm::BasicBlock *loop_entry_block = llvm::BasicBlock::Create(TheContext, ".loop_entry", TheFunction);
             Builder.SetInsertPoint(loop_entry_block);
             // 计算K值 K=(S>-S)*2-1
             llvm::Value *step_gtz = Builder.CreateICmpSGT(stepValue, Builder.CreateNeg(stepValue));
@@ -786,18 +786,18 @@ namespace opene {
 
             // === 计算循环条件并选择分支 ===
             // 循环判断块
-            llvm::BasicBlock *loop_cond_block = llvm::BasicBlock::Create(TheContext, "$.loop_cond", TheFunction);
+            llvm::BasicBlock *loop_cond_block = llvm::BasicBlock::Create(TheContext, ".loop_cond", TheFunction);
             Builder.CreateBr(loop_cond_block);
             Builder.SetInsertPoint(loop_cond_block);
             // 循环条件值 (K*i)<=(K*stop)
             llvm::Value *loop_val = Builder.CreateAlignedLoad(llvm::Type::getInt32Ty(TheContext), real_loop_vari, 4);
             llvm::Value *loop_cv = Builder.CreateICmpSLE(Builder.CreateMul(K, loop_val), Builder.CreateMul(K, stopValue));
             // 循环体块
-            llvm::BasicBlock *loop_body_block = llvm::BasicBlock::Create(TheContext, "$.loop_body", TheFunction);
+            llvm::BasicBlock *loop_body_block = llvm::BasicBlock::Create(TheContext, ".loop_body", TheFunction);
             // 循环步进块
-            llvm::BasicBlock *step_block = llvm::BasicBlock::Create(TheContext, "$.loop_step", TheFunction);
+            llvm::BasicBlock *step_block = llvm::BasicBlock::Create(TheContext, ".loop_step", TheFunction);
             // 循环后块
-            llvm::BasicBlock *loop_after_block = llvm::BasicBlock::Create(TheContext, "$.after_loop", TheFunction);
+            llvm::BasicBlock *loop_after_block = llvm::BasicBlock::Create(TheContext, ".after_loop", TheFunction);
             // 插入循环判断分支跳转
             Builder.CreateCondBr(loop_cv, loop_body_block, loop_after_block);
 
@@ -869,12 +869,12 @@ namespace opene {
             // 当前块
             llvm::BasicBlock *preheader_block = Builder.GetInsertBlock();
             // 循环体块
-            llvm::BasicBlock *loop_block = llvm::BasicBlock::Create(TheContext, "$.loop", TheFunction);
+            llvm::BasicBlock *loop_block = llvm::BasicBlock::Create(TheContext, ".loop", TheFunction);
             Builder.CreateBr(loop_block);
             // 条件判定块
-            llvm::BasicBlock *cond_block = llvm::BasicBlock::Create(TheContext, "$.cond", TheFunction);
+            llvm::BasicBlock *cond_block = llvm::BasicBlock::Create(TheContext, ".cond", TheFunction);
             // 循环块下一个块
-            llvm::BasicBlock *after_block = llvm::BasicBlock::Create(TheContext, "$.afterloop", TheFunction);
+            llvm::BasicBlock *after_block = llvm::BasicBlock::Create(TheContext, ".afterloop", TheFunction);
 
             controlable_struct_stack_.push({cond_block, loop_block, after_block, after_block});
             Builder.SetInsertPoint(loop_block);
