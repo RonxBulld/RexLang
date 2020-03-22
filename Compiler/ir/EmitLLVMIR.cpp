@@ -508,6 +508,7 @@ namespace opene {
         llvm::PointerType *Emit(StructureDecl *structureDecl) {
             std::vector<llvm::Type*> members_type;
             for (auto &member_item : structureDecl->members_) {
+                // TODO: 需要处理引用问题
                 llvm::Type *member_type = GetType(member_item.second->type_decl_ptr_);
                 members_type.emplace_back(member_type);
             }

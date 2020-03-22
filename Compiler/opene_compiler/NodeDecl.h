@@ -345,6 +345,10 @@ namespace opene {
      */
     struct VariableDecl : public BaseVariDecl {
         static const NodeType node_type = NodeType::kNTyVariableDecl;
+
+        // 变量属性
+        std::vector<TString> attributes_;
+
         // 维度的文本描述
         TString dimension_;
     };
@@ -354,6 +358,7 @@ namespace opene {
      */
     struct GlobalVariableDecl : public VariableDecl {
         static const NodeType node_type = NodeType::kNTyGlobalVariableDecl;
+
         // 访问级别的文本描述
         TString access_;
 
@@ -374,6 +379,9 @@ namespace opene {
         // === 下面是经过语义分析后的数据 ===
 
         size_t index_of_struct_ = 0;
+
+        bool is_reference_ = false;
+
     };
 
     /*
@@ -388,11 +396,6 @@ namespace opene {
      */
     struct LocalVariableDecl : public VariableDecl {
         static const NodeType node_type = NodeType::kNTyLocalVariableDecl;
-        /*
-         * 局部变量属性
-         * 目前只支持“静态”属性
-         */
-        TString attributes_;
 
         // === 下面是经过语义分析后的数据 ===
 

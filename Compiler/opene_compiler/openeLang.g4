@@ -113,7 +113,7 @@ prog_set
     ;
 
 variable_decl
-    : name=IDENTIFIER (',' type=IDENTIFIER? (',' ',' dimension=STRING_LITERAL? (',' table_comment)?)?)? NEWLINE
+    : name=IDENTIFIER (',' type=IDENTIFIER? (',' (attributes+=IDENTIFIER)* ',' dimension=STRING_LITERAL? (',' table_comment)?)?)? NEWLINE
     ;
 
 member_vari_decl

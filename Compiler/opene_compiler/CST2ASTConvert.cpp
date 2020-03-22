@@ -260,6 +260,7 @@ namespace opene {
         VariableDeclPtr variable_decl = CreateNode<VariableDecl>(context->getStart(), context->getStop());
         variable_decl->name_ = GetTextIfExist(context->name);
         variable_decl->type_name_ = GetTextIfExist(context->type);
+        variable_decl->attributes_ = GetTextVecIfExist(context->attributes);
         variable_decl->dimension_ = GetTextIfExist(context->dimension);
         variable_decl->comment_ = GetFromCtxIfExist<TString>(context->table_comment());
         return NodeWarp(variable_decl);

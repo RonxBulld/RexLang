@@ -11,7 +11,8 @@ namespace opene {
     }
 }
 
-namespace opene {       // 公共功能和基础工具
+// 公共功能和基础工具
+namespace opene {
 
     bool isOrdinaryType(TypeDecl *typeDecl) {
         bool is_ordinary = typeDecl->is<BuiltinTypeDecl>();
@@ -151,9 +152,10 @@ namespace opene {       // 公共功能和基础工具
 
 }
 
-namespace opene {   // 数组
+// 数组
+namespace opene {
     LLVMRTIRBuilder::DynamicArrayRTType *LLVMRTIRBuilder::getRTAPIArrayType() {
-        return Builder.getVoidTy()->getPointerTo();
+        return llvm::ArrayType::get(Builder.getVoidTy()->getPointerTo(), 1)->getPointerTo();
     }
 
     bool LLVMRTIRBuilder::isArrayType(llvm::Type *type) {
@@ -363,7 +365,7 @@ namespace opene {   // 数组
                 {getRTAPIArrayType(), Builder.getInt32Ty()}   // 数组数据指针 数据
         );
         newElement = CloneObjectIfAggregate(newElement);
-        return Builder.CreateCall(append_array_element_fn, {Builder.CreatePointerCast(CastArrayToAPIArgu(arrayPtr), getRTAPIArrayType()), newElement});
+        return Builder.CreateCall(append_array_element_fn, {CastArrayToAPIArgu(arrayPtr), newElement});
     }
 
     llvm::Value *LLVMRTIRBuilder::InsertArrayElement(llvm::Value *arrayPtr, llvm::Value *insertPos, llvm::Value *newElement, TypeDecl *newElemAstType) {
@@ -414,7 +416,8 @@ namespace opene {   // 数组
 
 }
 
-namespace opene {   // 结构体
+// 结构体
+namespace opene {
     LLVMRTIRBuilder::StructureType *LLVMRTIRBuilder::getStructureType(llvm::StructType *structType) {
         return structType->getPointerTo();
     }
@@ -539,7 +542,8 @@ namespace opene {   // 结构体
 
 }
 
-namespace opene {   // 字符串
+// 字符串
+namespace opene {
     LLVMRTIRBuilder::StringType *LLVMRTIRBuilder::getStringType() {
         return Builder.getInt8Ty()->getPointerTo();
     }

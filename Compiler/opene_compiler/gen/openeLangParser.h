@@ -381,6 +381,8 @@ public:
   public:
     antlr4::Token *name = nullptr;;
     antlr4::Token *type = nullptr;;
+    antlr4::Token *identifierToken = nullptr;;
+    std::vector<antlr4::Token *> attributes;;
     antlr4::Token *dimension = nullptr;;
     Variable_declContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;

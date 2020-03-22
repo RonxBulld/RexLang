@@ -530,7 +530,18 @@ namespace opene {
     }
 
     bool SematicAnalysis::SetupMemberVariableType(MemberVariableDecl *memberVariableDecl) {
-        return this->SetupVariableType(memberVariableDecl);
+        if (!this->SetupVariableType(memberVariableDecl)) {
+            return false;
+        }
+        for (const TString &attr : memberVariableDecl->attributes_) {
+            if (attr.string_ == u8"引用") {
+                memberVariableDecl->is_reference_ = true;
+            } else {
+                assert(false);
+                return false;
+            }
+        }
+        return true;
     }
 
     bool SematicAnalysis::SetupFileVariableType(FileVariableDecl *fileVariableDecl) {
@@ -538,16 +549,16 @@ namespace opene {
     }
 
     bool SematicAnalysis::SetupLocalVariableType(LocalVariableDecl *localVariableDecl) {
-        if (this->SetupVariableType(localVariableDecl) == false) {
+        if (!this->SetupVariableType(localVariableDecl)) {
             return false;
         }
-        if (localVariableDecl->attributes_.string_ == u8"静态") {
-            localVariableDecl->is_static_ = true;
-        } else if (localVariableDecl->attributes_.string_ == u8"") {
-            localVariableDecl->is_static_ = false;
-        } else {
-            assert(false);
-            return false;
+        for (const TString &attr : localVariableDecl->attributes_) {
+            if (attr.string_ == u8"静态") {
+                localVariableDecl->is_static_ = true;
+            } else {
+                assert(false);
+                return false;
+            }
         }
         return true;
     }
