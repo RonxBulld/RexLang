@@ -6,6 +6,7 @@
 #include <string>
 #include <llvm/Support/Host.h>
 #include <cstdlib>
+#include <iostream>
 
 #include "Linker.h"
 #include "../../lite_util/StringUtil.h"
@@ -38,7 +39,11 @@ namespace opene {
                 target_triple.c_str()
         );
         int link_ret = system(link_cmd.c_str());
-        remove(objectFilename.c_str());
+        if (link_ret == 0) {
+            remove(objectFilename.c_str());
+        } else {
+            std::cerr << link_cmd << std::endl;
+        }
         return link_ret;
     }
 }
