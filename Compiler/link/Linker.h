@@ -13,7 +13,7 @@ namespace opene {
 
     class Linker {
     public:
-        int LinkProject(const std::string &objectFilename, const std::string &executeFilename, std::vector<opene::StringRef> dependenceLibs);
+        int LinkProject(ProjectDB &projectDB);
     };
 
 }

@@ -85,9 +85,8 @@ namespace opene {
     }
 
     int tooling::LinkExecuteFromObjects(ProjectDB &projectDB) {
-        std::vector<opene::StringRef> dependence_libs = projectDB.GetASTContext().GetDependenceLibraries();
         Linker linker;
-        return linker.LinkProject(projectDB.GetObjectFilename(), projectDB.GetExecuteFilename(), dependence_libs);
+        return linker.LinkProject(projectDB);
     }
 }
 

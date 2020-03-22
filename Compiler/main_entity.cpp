@@ -6,18 +6,27 @@
 #include "../lite_util/StringUtil.h"
 #include "../lite_util/ContainerUtil.h"
 #include "support/Command.h"
+#include "support/ProgramDB.h"
 
 void SetupArgumentParser(opene::ArgumentParser &argumentParser) {
     argumentParser.LoadGlobalParam();
 //    argumentParser.AddParam(opene::CmdParameter("f", "file", "待编译的文件", false).CfgAsValue());
-    argumentParser.AddParam(opene::CmdParameter("h", "help", "打印命令行帮助信息并退出", false).CfgAsSwitch());
-    argumentParser.AddParam(opene::CmdParameter("v", "version", "打印版本信息并退出", false).CfgAsSwitch());
+    argumentParser.AddParam(opene::CmdParameter("h", "help", "打印命令行帮助信息并退出", true).CfgAsSwitch());
+    argumentParser.AddParam(opene::CmdParameter("v", "version", "打印版本信息并退出", true).CfgAsSwitch());
 }
 
 int main(int argc, char *argv[]) {
+
+    // 解析参数
+
     opene::ArgumentParser argument_parser;
     SetupArgumentParser(argument_parser);
     argument_parser.ParseArguments(argc - 1, argv + 1);
+
+    // 初始化程序数据库
+
+    opene::program_db.SetProgramPath(argv[0]);
+    opene::program_db.ApplyArgument(argument_parser);
 
     if (argument_parser.HadSwitch("", "help") || argc == 1) {
         std::cout << "直译语言编译器命令行使用方式：" << std::endl;
@@ -26,8 +35,15 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
+    // 初始化项目数据库
+
     opene::ProjectDB project_db;
     project_db.ApplyArgument(argument_parser);
+
+    if (project_db.GetFileList().empty()) {
+        std::cerr << u8"没有输入文件" << std::endl;
+        return 1;
+    }
 
     std::cout << u8"开始编译..." << std::endl;
     opene::TranslateUnit *translate_unit_ptr = opene::tooling::BuildASTFromFiles(project_db, "demo");

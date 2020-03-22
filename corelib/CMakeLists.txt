@@ -5,7 +5,7 @@ PROJECT(newcore)
 
 SET(newcore-Source
         newcore.cpp
-        )
+        newcore.h)
 
 ADD_LIBRARY(newcore STATIC
         ${newcore-Source}
@@ -13,10 +13,4 @@ ADD_LIBRARY(newcore STATIC
 
 target_link_libraries(newcore ${llvm_libs})
 
-set_target_properties(
-        newcore
-        PROPERTIES
-        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-)
+file(COPY "corelib.txt" DESTINATION "${INSTALLROOT}/include/")
