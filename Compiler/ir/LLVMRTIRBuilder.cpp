@@ -7,7 +7,7 @@
 
 namespace opene {
     std::string DoNewCoreRTAPINameMangle(const std::string &rtApiName) {
-        return "NewCore_v01_" + rtApiName;
+        return rtApiName;
     }
 }
 
@@ -155,7 +155,7 @@ namespace opene {
 // 数组
 namespace opene {
     LLVMRTIRBuilder::DynamicArrayRTType *LLVMRTIRBuilder::getRTAPIArrayType() {
-        return llvm::ArrayType::get(Builder.getVoidTy()->getPointerTo(), 1)->getPointerTo();
+        return llvm::ArrayType::get(Builder.getInt8PtrTy(), 1)->getPointerTo();
     }
 
     bool LLVMRTIRBuilder::isArrayType(llvm::Type *type) {
@@ -347,9 +347,10 @@ namespace opene {
     }
 
     llvm::Value *LLVMRTIRBuilder::GetArrayElementPointer(llvm::Value *arrayPtr, const std::vector<llvm::Value *> &indexes) {
+        llvm::Type *element_type = GetArrayElementType(llvm::dyn_cast<DynamicArrayRTType>(arrayPtr->getType()));
         llvm::FunctionCallee get_array_ep_fn = getRTAPIFunction(
                 DoNewCoreRTAPINameMangle("get_array_ep"),
-                GetArrayElementType(llvm::dyn_cast<DynamicArrayRTType>(arrayPtr->getType()))->getPointerTo(),
+                element_type->getPointerTo(),
                 {getRTAPIArrayType(), Builder.getInt32Ty()},  // 数组数据指针 维度个数
                 true
         );

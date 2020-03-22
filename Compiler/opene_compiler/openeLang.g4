@@ -31,7 +31,7 @@ fragment UNICODE_CHAR: ('\u4E00'..'\u9FA5' | '\uF900'..'\uFA2D');
 fragment WS: (' ' | '\t')+;
 IDENTIFIER: ([a-z] | [A-Z] | ('0' .. '9') | '_' | UNICODE_CHAR)+;
 WHITESPACE: WS -> skip;
-NEWLINE: ('\r' ? '\n')+;
+NEWLINE: ('\r' | '\n')+;
 STRING_LITERAL
     : '\u201c'.*?'\u201d'    // “...”
     | '"' ~["\r\n]*? '"'

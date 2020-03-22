@@ -98,7 +98,13 @@ namespace opene {
         llvm::Function *InitFunc = nullptr;
         ProgSetDecl *TheProgramSet = nullptr;
         FunctionDecl *TheASTFunction = nullptr;
+
+        /*
+         * 变量表
+         * 当从中引用的时候需要注意，取回的是一个引用对象，作为左值使用时需要解引用
+         */
         std::map<BaseVariDecl*, llvm::Value*> variable_object_pool_;
+
         std::map<TypeDecl*, llvm::Type*> type_object_pool_;
         std::map<FunctorDecl*, llvm::Function*> function_object_pool_;
         std::map<llvm::Function*, llvm::Value*> function_retptr_map_;
@@ -228,6 +234,25 @@ namespace opene {
         }
 
         /*
+         * 获取值/变量的正确类型
+         */
+        llvm::Type *GetTrustType(llvm::Value *value) {
+            if (llvm::GlobalVariable *global_variable = llvm::dyn_cast<llvm::GlobalVariable>(value)) {
+                return global_variable->getType()->getPointerElementType();
+            } else if (llvm::AllocaInst *alloca_inst = llvm::dyn_cast<llvm::AllocaInst>(value)) {
+                return alloca_inst->getType()->getPointerElementType();
+            } else if (llvm::Argument *argument = llvm::dyn_cast<llvm::Argument>(value)) {
+                return argument->getType();
+            } else if (llvm::LoadInst *load_inst = llvm::dyn_cast<llvm::LoadInst>(value)) {
+                return load_inst->getType();
+            } else if (llvm::Constant *constant = llvm::dyn_cast<llvm::Constant>(value)) {
+                return constant->getType();
+            } else {
+                return value->getType();
+            }
+        }
+
+        /*
          * 根据请求的变量不同执行不同的操作
          * 参数 - 直接
          * 全局变量 - Builder.CreateLoad
@@ -236,16 +261,34 @@ namespace opene {
         llvm::Value *LoadVariable(llvm::Value *variable) {
             if (llvm::GlobalVariable *global_variable = llvm::dyn_cast<llvm::GlobalVariable>(variable)) {
                 return Builder.CreateLoad(global_variable->getValueType(), global_variable);
+
             } else if (llvm::AllocaInst *alloca_inst = llvm::dyn_cast<llvm::AllocaInst>(variable)) {
                 return Builder.CreateLoad(alloca_inst->getAllocatedType(), alloca_inst);
+
             } else if (llvm::Argument *argument = llvm::dyn_cast<llvm::Argument>(variable)) {
                 return argument;
+
             } else if (llvm::LoadInst *load_inst = llvm::dyn_cast<llvm::LoadInst>(variable)) {
                 return load_inst;
+
             } else if (llvm::Constant *constant = llvm::dyn_cast<llvm::Constant>(variable)) {
                 return constant;
+
+            } else if (RTBuilder.isArrayType(variable->getType())) {
+                return variable;
+
+            } else if (RTBuilder.isStructureType(variable->getType())) {
+                return variable;
+
+            } else if (RTBuilder.isStringType(variable->getType())) {
+                return variable;
+
+            } else if (variable->getType()->isPointerTy()) {
+                return Builder.CreateLoad(variable->getType()->getPointerElementType(), variable);
+
             } else {
                 return variable;
+
             }
         }
 
@@ -257,9 +300,12 @@ namespace opene {
             } else if (llvm::AllocaInst *alloca_inst = llvm::dyn_cast<llvm::AllocaInst>(variable)) {
                 Builder.CreateStore(value, alloca_inst);
                 return true;
+            } else if (GetTrustType(variable)->isPointerTy()) {
+                Builder.CreateStore(value, variable);
+                return true;
             } else {
                 assert(false);
-                return variable;
+                return false;
             }
         }
 
@@ -331,7 +377,7 @@ namespace opene {
 
                 llvm::BasicBlock *init_bb = CreateInitBlock();
                 Builder.SetInsertPoint(init_bb);
-                llvm::Value *init_val = RTBuilder.CreateInitializeValue(gvari->getType()->getPointerElementType());
+                llvm::Value *init_val = RTBuilder.CreateInitializeValue(GetTrustType(gvari));
                 StoreVariable(init_val, gvari);
                 AddInitBlocks(init_bb, init_bb);
 
@@ -339,7 +385,7 @@ namespace opene {
 
             } else if (llvm::AllocaInst *lvari = llvm::dyn_cast<llvm::AllocaInst>(variable)) {
 
-                llvm::Value *init_val = RTBuilder.CreateInitializeValue(lvari->getType()->getPointerElementType());
+                llvm::Value *init_val = RTBuilder.CreateInitializeValue(GetTrustType(lvari));
                 StoreVariable(init_val, lvari);
 
             } else {
@@ -678,8 +724,9 @@ namespace opene {
 
             // 生成判断条件
             llvm::Value *condition = Emit(condition_expr);
+            condition = LoadVariable(condition);
             assert(condition);
-            assert(condition->getType()->getPrimitiveSizeInBits() == 1);
+            assert(GetTrustType(condition)->getPrimitiveSizeInBits() == 1);
 
             // THEN块
             llvm::BasicBlock *then_block = llvm::BasicBlock::Create(TheContext, ".then", TheFunction);
@@ -898,26 +945,31 @@ namespace opene {
             assert(lhs);
             llvm::Value *rhs = Emit(assignStmt->rhs_);
             assert(rhs);
-            llvm::Type *lhs_type = lhs->getType();
-            llvm::Type *rhs_type = rhs->getType();
-            llvm::Value *rhs_val = nullptr;
+            llvm::Type *lhs_type = GetTrustType(lhs);
+            rhs = LoadVariable(rhs);
+
             // 区分数组、字节集、字符串、结构体和其它类型
+
+            llvm::Type *rhs_type = GetTrustType(rhs);
+            assert(rhs);
             if (rhs_type->isPointerTy()) {
-                llvm::Type *element_type = rhs_type->getPointerElementType();
-                if (element_type->isArrayTy()) {
-                    rhs_val = RTBuilder.CloneArray(rhs);
-                } else if (element_type->isStructTy()) {
-                    rhs_val = RTBuilder.CloneStructure(rhs);
+                if (RTBuilder.isArrayType(rhs_type)) {
+                    rhs = RTBuilder.CloneArray(rhs);
+
+                } else if (RTBuilder.isStructureType(rhs_type)) {
+                    rhs = RTBuilder.CloneStructure(rhs);
+
+                } else if (RTBuilder.isStringType(rhs_type)) {
+                    rhs = RTBuilder.CloneString(rhs);
+
                 } else {
                     assert(false);
+                    rhs = nullptr;
                 }
-                assert(rhs_val);
-                assert(rhs_val->getType()->isPointerTy());
-            } else {
-                rhs_val = LoadVariable(rhs);
-                assert(rhs_val);
+                assert(rhs);
+                assert(GetTrustType(rhs)->isPointerTy());
             }
-            bool assign_success = StoreVariable(rhs_val, lhs);
+            bool assign_success = StoreVariable(rhs, lhs);
             assert(assign_success);
             return true;
         }
@@ -1014,7 +1066,10 @@ namespace opene {
         llvm::Value *Emit(TypeConvert *typeConvert) {
             llvm::Value *expr = Emit(typeConvert->from_expression_);
             llvm::Type *target_type = Emit(typeConvert->target_type_);
-            llvm::Type *source_type = expr->getType();
+            llvm::Type *source_type = GetTrustType(expr);
+
+            // TODO: 只处理了作为右值的情况
+
             // 指针到指针
             if (target_type->isPointerTy() && source_type->isPointerTy()) {
                 return Builder.CreatePointerCast(expr, target_type);
@@ -1045,7 +1100,10 @@ namespace opene {
             }
         }
 
-        llvm::Value * LoadFromStructOrNot(llvm::Value *structInstance, NameComponent *nameComponent) {
+        /*
+         * 从结构体或者对象池中获得变量引用或者函数引用
+         */
+        llvm::Value * GetRefFromStructOrPool(llvm::Value *structInstance, NameComponent *nameComponent) {
 
             // 目标类型是单名称组件
 
@@ -1092,10 +1150,10 @@ namespace opene {
                 // 取数组指针
 
                 NameComponent *base = ASTUtility::GetArrayIndexBase(array_index);
-                llvm::Value *arr_ptr = LoadFromStructOrNot(structInstance, base);
+                llvm::Value *arr_ptr = GetRefFromStructOrPool(structInstance, base);
                 assert(arr_ptr);
 
-                // 取元素指针
+                // 取索引列表
 
                 std::vector<llvm::Value *> indexes_ir;
                 for (Expression *index : indexes.Value()) {
@@ -1103,7 +1161,10 @@ namespace opene {
                     assert(index_ir);
                     indexes_ir.push_back(index_ir);
                 }
-                return RTBuilder.GetArrayElementPointer(arr_ptr, indexes_ir);
+
+                // 取元素指针
+
+                return RTBuilder.GetArrayElementPointer(LoadVariable(arr_ptr), indexes_ir);
 
             }
 
@@ -1113,7 +1174,7 @@ namespace opene {
 
                 // 获取调用目标
 
-                llvm::Function *func_ptr = llvm::dyn_cast<llvm::Function>(LoadFromStructOrNot(structInstance, function_call->function_name_));
+                llvm::Function *func_ptr = llvm::dyn_cast<llvm::Function>(GetRefFromStructOrPool(structInstance, function_call->function_name_));
                 assert(func_ptr);
 
                 // 计算实参
@@ -1139,7 +1200,7 @@ namespace opene {
         llvm::Value *Emit(HierarchyIdentifier *hierarchyIdentifier) {
             llvm::Value *previous_base = nullptr;
             for (NameComponent *name_component : hierarchyIdentifier->name_components_) {
-                previous_base = LoadFromStructOrNot(previous_base, name_component);
+                previous_base = GetRefFromStructOrPool(previous_base, name_component);
             }
             return previous_base;
         }
@@ -1171,8 +1232,8 @@ namespace opene {
             L = LoadVariable(L);
             R = LoadVariable(R);
 
-            assert(L->getType() == R->getType());
-            llvm::Type *opt_type = L->getType();
+            assert(GetTrustType(L) == GetTrustType(R));
+            llvm::Type *opt_type = GetTrustType(L);
 
             switch (binaryExpression->operator_type_) {
                 // *** 运算系列 ***
