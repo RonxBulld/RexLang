@@ -797,6 +797,7 @@ namespace opene {
             llvm::BasicBlock *after_block = llvm::BasicBlock::Create(TheContext, ".afterloop", TheFunction);
             // 循环条件
             llvm::Value *loop_condition = Emit(whileStmt->condition_);
+            loop_condition = LoadVariable(loop_condition);
             Builder.CreateCondBr(loop_condition, loop_block, after_block);
 
             controlable_struct_stack_.push({condition_block, loop_block, after_block, after_block});
@@ -880,6 +881,7 @@ namespace opene {
         bool Emit(RangeForStmt *rangeForStmt) {
             llvm::Value *start_value = CreateInt(1);
             llvm::Value *stop_value = Emit(rangeForStmt->range_size_);
+            stop_value = LoadVariable(stop_value);
             assert(stop_value);
             llvm::Value *step_value = CreateInt(1);
             llvm::Value *loop_vari = nullptr;
@@ -895,12 +897,15 @@ namespace opene {
         bool Emit(ForStmt *forStmt) {
             // 初始值
             llvm::Value *start_value = Emit(forStmt->start_value_);
+            start_value = LoadVariable(start_value);
             assert(start_value);
             // 结束值
             llvm::Value *stop_value = Emit(forStmt->stop_value_);
+            stop_value = LoadVariable(stop_value);
             assert(stop_value);
             // 步进值
             llvm::Value *step_value = Emit(forStmt->step_value_);
+            step_value = LoadVariable(step_value);
             assert(step_value);
             // 循环变量
             llvm::Value *loop_vari = nullptr;
@@ -934,6 +939,7 @@ namespace opene {
             Builder.SetInsertPoint(cond_block);
             // 条件判定，分支选择跳转
             llvm::Value *loop_condition = Emit(doWhileStmt->conditon_);
+            loop_condition = LoadVariable(loop_condition);
             Builder.CreateCondBr(loop_condition, loop_block, after_block);
             // 转到新的块中
             Builder.SetInsertPoint(after_block);
@@ -1064,12 +1070,13 @@ namespace opene {
         }
 
         llvm::Value *Emit(TypeConvert *typeConvert) {
-            llvm::Value *expr = Emit(typeConvert->from_expression_);
-            llvm::Type *target_type = Emit(typeConvert->target_type_);
-            llvm::Type *source_type = GetTrustType(expr);
 
             // TODO: 只处理了作为右值的情况
 
+            llvm::Value *expr = Emit(typeConvert->from_expression_);
+            expr = LoadVariable(expr);
+            llvm::Type *target_type = Emit(typeConvert->target_type_);
+            llvm::Type *source_type = GetTrustType(expr);
             // 指针到指针
             if (target_type->isPointerTy() && source_type->isPointerTy()) {
                 return Builder.CreatePointerCast(expr, target_type);
@@ -1158,6 +1165,7 @@ namespace opene {
                 std::vector<llvm::Value *> indexes_ir;
                 for (Expression *index : indexes.Value()) {
                     llvm::Value *index_ir = Emit(index);
+                    index_ir = LoadVariable(index_ir);
                     assert(index_ir);
                     indexes_ir.push_back(index_ir);
                 }
@@ -1213,6 +1221,7 @@ namespace opene {
             }
             switch (unaryExpression->operator_type_) {
                 case _OperatorExpression::OperatorType::kOptSub: {
+                    V = LoadVariable(V);
                     return Builder.CreateNeg(V, "$.neg");
                 }
                 default: {

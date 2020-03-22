@@ -92,6 +92,5 @@ int *get_array_ep_32bit(RTDynArrayTy arrayPtr, int dims_n, ...) {
     int index = GetLinearIndex(arrayPtr, dims_n, ap);
     va_end(ap);
     int32_t * elem_ptr = ArrayDatas_Ref<int32_t>(arrayPtr) + index;
-    printf("--%d\n", elem_ptr);
     return elem_ptr;
 }
