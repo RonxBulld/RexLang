@@ -245,7 +245,7 @@ namespace opene {
         llvm::FunctionCallee init_array_fn = getRTAPIFunction(
                 DoNewCoreRTAPINameMangle("init_array_" + std::to_string(element_bitwidth) + "bit"),
                 Builder.getVoidTy(),
-                {getRTAPIArrayType(), Builder.getInt32Ty()},  // 数组数据指针 维度数
+                {getRTAPIArrayType(), Builder.getInt32Ty()},  // 数组数据指针 初始值个数
                 true
         );
         args.clear();
@@ -349,7 +349,7 @@ namespace opene {
     llvm::Value *LLVMRTIRBuilder::GetArrayElementPointer(llvm::Value *arrayPtr, const std::vector<llvm::Value *> &indexes) {
         llvm::Type *element_type = GetArrayElementType(llvm::dyn_cast<DynamicArrayRTType>(arrayPtr->getType()));
         llvm::FunctionCallee get_array_ep_fn = getRTAPIFunction(
-                DoNewCoreRTAPINameMangle("get_array_ep"),
+                DoNewCoreRTAPINameMangle("get_array_ep_" + std::to_string(getTypeByteWidth(element_type) * 8) + "bit"),
                 element_type->getPointerTo(),
                 {getRTAPIArrayType(), Builder.getInt32Ty()},  // 数组数据指针 维度个数
                 true
