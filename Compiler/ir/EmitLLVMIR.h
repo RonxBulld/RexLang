@@ -15,10 +15,12 @@ namespace opene {
 
     class IREmit;
     class LLCodeGen;
+    class ProjectDB;
+
     class EmitLLVMIR {
         friend LLCodeGen;
     public:
-        EmitLLVMIR(TranslateUnit *translateUnit);
+        EmitLLVMIR(TranslateUnit *translateUnit, ProjectDB &projectDB);
 
     public:
         void WriteOutIR();

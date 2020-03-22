@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
     }
 
     std::cout << u8"生成代码..." << std::endl;
-    if (int genret = opene::tooling::GenerateCodeFromTranslateUnit(translate_unit_ptr, project_db.GetObjectFilename())) {
+    if (int genret = opene::tooling::GenerateCodeFromTranslateUnit(project_db)) {
         std::cout << u8"生成代码失败，生成器返回 " << genret << std::endl;
         return 2;
     }

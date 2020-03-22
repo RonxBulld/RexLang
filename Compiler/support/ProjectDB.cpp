@@ -29,7 +29,7 @@ namespace opene {
         s[len] = 0;
     }
 
-    ProjectDB::ProjectDB() : translate_unit_(nullptr) {
+    ProjectDB::ProjectDB() : translate_unit_(nullptr), main_entry_(nullptr) {
         char rnd_str[8+1];
         gen_random(rnd_str, sizeof(rnd_str) - 1);
         random_string_ = rnd_str;
@@ -110,5 +110,29 @@ namespace opene {
 
     std::string ProjectDB::GetExecuteFilename() const {
         return GetTargetBinName();
+    }
+
+    void ProjectDB::SetMainEntryName(const std::string &main_entry_name) {
+        main_entry_name_ = main_entry_name;
+    }
+
+    std::string &ProjectDB::GetMainEntryName() {
+        return main_entry_name_;
+    }
+
+    const std::string &ProjectDB::GetMainEntryName() const {
+        return main_entry_name_;
+    }
+
+    void ProjectDB::SetMainEntry(FunctorDecl *main_entry) {
+        main_entry_ = main_entry;
+    }
+
+    FunctorDecl *ProjectDB::GetMainEntry() {
+        return main_entry_;
+    }
+
+    const FunctorDecl *ProjectDB::GetMainEntry() const {
+        return main_entry_;
     }
 }

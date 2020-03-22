@@ -11,6 +11,7 @@
 namespace opene {
 
     class TranslateUnit;
+    class FunctorDecl;
     class ASTContext;
     class ArgumentParser;
 
@@ -21,6 +22,8 @@ namespace opene {
         std::vector<std::string> file_list_;
         std::string target_bin_name_;
         TranslateUnit *translate_unit_;
+        std::string main_entry_name_;
+        FunctorDecl *main_entry_;
 
     public:
         ProjectDB();
@@ -46,6 +49,14 @@ namespace opene {
 
         std::string GetObjectFilename() const;
         std::string GetExecuteFilename() const;
+
+        void SetMainEntryName(const std::string &main_entry_name);
+        std::string &GetMainEntryName();
+        const std::string &GetMainEntryName() const;
+
+        void SetMainEntry(FunctorDecl *main_entry);
+        FunctorDecl *GetMainEntry();
+        const FunctorDecl *GetMainEntry() const;
     };
 
 }

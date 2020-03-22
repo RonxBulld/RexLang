@@ -69,7 +69,7 @@ namespace opene {
 
         TranslateUnitPtr BuildASTFromCodeWithArgs(const std::vector<FileEntry> &entries, const std::vector<std::string> &args, const std::string &toolname);
 
-        int GenerateCodeFromTranslateUnit(TranslateUnitPtr translateUnit, const std::string &gen_file);
+        int GenerateCodeFromTranslateUnit(ProjectDB &projectDB);
 
         int LinkExecuteFromObjects(ProjectDB &projectDB);
     }

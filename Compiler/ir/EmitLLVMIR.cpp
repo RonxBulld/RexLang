@@ -27,6 +27,7 @@
 #include "LLVMRTIRBuilder.h"
 #include "../opene_compiler/NodeDecl.h"
 #include "../opene_compiler/ASTUtility.h"
+#include "../support/ProjectDB.h"
 
 namespace opene {
 
@@ -539,8 +540,12 @@ namespace opene {
             }
             llvm::FunctionType *function_type = llvm::FunctionType::get(return_type, parameter_types, is_vari_arg);
             std::string function_name = functorDecl->name_.string_.str();
+
+            // TODO: 这里可能要重新处理，这种情况下只适合静态链接库，并且会导致和源程序冲突
             if (APICommandDecl *dll_command_decl = functorDecl->as<APICommandDecl>()) {
                 function_name = dll_command_decl->api_name_.string_.str();
+            } else {
+                function_name = "_" + function_name;
             }
 
             // 构建函数
@@ -566,7 +571,7 @@ namespace opene {
         llvm::Function *Emit(FunctionDecl *functionDecl) {
             std::string function_name = functionDecl->name_.string_.str();
             std::cout << "生成函数：" << function_name << std::endl;
-            llvm::Function *function = TheModule->getFunction(function_name);
+            llvm::Function *function = function_object_pool_[functionDecl];
             if (!function) {
                 function = Emit(functionDecl->as<FunctorDecl>());
                 assert(function);
@@ -1039,7 +1044,7 @@ namespace opene {
             }
         }
 
-        llvm::Value *LoadFromStructOrNot(llvm::Value *structInstance, NameComponent *nameComponent) {
+        llvm::Value * LoadFromStructOrNot(llvm::Value *structInstance, NameComponent *nameComponent) {
 
             // 目标类型是单名称组件
 
@@ -1499,7 +1504,7 @@ namespace opene {
 
 namespace opene {
 
-    EmitLLVMIR::EmitLLVMIR(TranslateUnit *translateUnit) {
+    EmitLLVMIR::EmitLLVMIR(TranslateUnit *translateUnit, ProjectDB &projectDB) {
         emitter = new IREmit;
         emitter->Emit(translateUnit);
         llvm::verifyModule(*emitter->GetModule());

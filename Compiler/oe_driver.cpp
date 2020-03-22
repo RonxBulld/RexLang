@@ -77,11 +77,11 @@ namespace opene {
         return compilerInstance.getTranslateUnit();
     }
 
-    int tooling::GenerateCodeFromTranslateUnit(TranslateUnitPtr translateUnit, const std::string &gen_file) {
-        opene::EmitLLVMIR emitter(translateUnit);
+    int tooling::GenerateCodeFromTranslateUnit(ProjectDB &projectDB) {
+        opene::EmitLLVMIR emitter(projectDB.GetTranslateUnit(), projectDB);
 //        emitter.WriteOutIR();
         opene::LLCodeGen ll_code_gen(emitter);
-        return ll_code_gen.WriteOutBC(gen_file);
+        return ll_code_gen.WriteOutBC(projectDB.GetObjectFilename());
     }
 
     int tooling::LinkExecuteFromObjects(ProjectDB &projectDB) {

@@ -93,8 +93,6 @@ namespace opene {
             for (auto &func_item : prog_file_item.second->function_decls_) {
                 this->analysis_context_.PushScope(func_item.second);
 
-                std::cout << u8"语义分析函数：" << func_item.first.str() << std::endl;
-
                 // 4.1.1. 明确函数定义局部变量的类型指针
 
                 if (this->SetupFunctionLocalVariableType(func_item.second) == false) {
