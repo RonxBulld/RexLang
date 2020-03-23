@@ -35,6 +35,14 @@ namespace opene {
         });
     }
 
+    void SetupHierarchyReferenceType(HierarchyIdentifier *hierarchyIdentifier, IdentifierUsage referenceType) {
+        hierarchyIdentifier->identifier_usage_ = referenceType;
+        for (NameComponent *name_component : hierarchyIdentifier->name_components_) {
+            name_component->identifier_usage_ = IdentifierUsage::kAsRightValue;
+        }
+        hierarchyIdentifier->name_components_.back()->identifier_usage_ = referenceType;
+    }
+
     bool SematicAnalysis::Run(TranslateUnit * translateUnitPtr) {
 
         // this->ast_builder_ = new ASTBuilder(*translateUnitPtr->ast_context_);
@@ -349,6 +357,7 @@ namespace opene {
 
             // 检查赋值语句左右子式类型是否匹配或兼容
 
+            SetupHierarchyReferenceType(assign_stmt->lhs_, IdentifierUsage::kAsLeftValue);
             TypeDeclPtr lhs_type = this->CheckExpression(assign_stmt->lhs_);
             TypeDeclPtr rhs_type = this->CheckExpression(assign_stmt->rhs_);
             ErrOr<Expression*> implicit_convert = this->MakeImplicitConvertIfNeccessary(lhs_type, assign_stmt->rhs_);
@@ -581,6 +590,7 @@ namespace opene {
     TypeDecl *SematicAnalysis::__CheckExpressionImpl__(Expression *expression) {
         TranslateUnitPtr translateUnit = this->translate_unit_;
         if (HierarchyIdentifier * hierarchy_identifier = expression->as<HierarchyIdentifier>()) {
+            SetupHierarchyReferenceType(hierarchy_identifier, IdentifierUsage::kAsRightValue);
 
             // 可能是直接名称、函数引用、数组组合的序列
 

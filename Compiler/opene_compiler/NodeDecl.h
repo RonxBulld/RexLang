@@ -676,6 +676,12 @@ namespace opene {
         TypeDeclPtr expression_type_ = nullptr;
     };
 
+    enum class IdentifierUsage {
+        kUnknown,
+        kAsLeftValue,
+        kAsRightValue,
+    };
+
     /**
      * @brief 多层名称序列
      * 该节点用于表示通过英文句点`.'连接的多层引用语法结构
@@ -688,6 +694,8 @@ namespace opene {
 
         // 该层次名称所指向的类型
         TypeDeclPtr qualified_type_ = nullptr;
+
+        IdentifierUsage identifier_usage_ = IdentifierUsage::kUnknown;
     };
 
     /**
@@ -695,6 +703,8 @@ namespace opene {
      */
     struct NameComponent : public Expression {
         static const NodeType node_type = NodeType::kNTyNameComponent;
+
+        IdentifierUsage identifier_usage_ = IdentifierUsage::kUnknown;
     };
 
     /**

@@ -724,7 +724,6 @@ namespace opene {
 
             // 生成判断条件
             llvm::Value *condition = Emit(condition_expr);
-            condition = LoadVariable(condition);
             assert(condition);
             assert(GetTrustType(condition)->getPrimitiveSizeInBits() == 1);
 
@@ -797,7 +796,6 @@ namespace opene {
             llvm::BasicBlock *after_block = llvm::BasicBlock::Create(TheContext, ".afterloop", TheFunction);
             // 循环条件
             llvm::Value *loop_condition = Emit(whileStmt->condition_);
-            loop_condition = LoadVariable(loop_condition);
             Builder.CreateCondBr(loop_condition, loop_block, after_block);
 
             controlable_struct_stack_.push({condition_block, loop_block, after_block, after_block});
@@ -881,7 +879,6 @@ namespace opene {
         bool Emit(RangeForStmt *rangeForStmt) {
             llvm::Value *start_value = CreateInt(1);
             llvm::Value *stop_value = Emit(rangeForStmt->range_size_);
-            stop_value = LoadVariable(stop_value);
             assert(stop_value);
             llvm::Value *step_value = CreateInt(1);
             llvm::Value *loop_vari = nullptr;
@@ -897,15 +894,12 @@ namespace opene {
         bool Emit(ForStmt *forStmt) {
             // 初始值
             llvm::Value *start_value = Emit(forStmt->start_value_);
-            start_value = LoadVariable(start_value);
             assert(start_value);
             // 结束值
             llvm::Value *stop_value = Emit(forStmt->stop_value_);
-            stop_value = LoadVariable(stop_value);
             assert(stop_value);
             // 步进值
             llvm::Value *step_value = Emit(forStmt->step_value_);
-            step_value = LoadVariable(step_value);
             assert(step_value);
             // 循环变量
             llvm::Value *loop_vari = nullptr;
@@ -939,7 +933,6 @@ namespace opene {
             Builder.SetInsertPoint(cond_block);
             // 条件判定，分支选择跳转
             llvm::Value *loop_condition = Emit(doWhileStmt->conditon_);
-            loop_condition = LoadVariable(loop_condition);
             Builder.CreateCondBr(loop_condition, loop_block, after_block);
             // 转到新的块中
             Builder.SetInsertPoint(after_block);
@@ -952,7 +945,6 @@ namespace opene {
             llvm::Value *rhs = Emit(assignStmt->rhs_);
             assert(rhs);
             llvm::Type *lhs_type = GetTrustType(lhs);
-            rhs = LoadVariable(rhs);
 
             // 区分数组、字节集、字符串、结构体和其它类型
 
@@ -1035,7 +1027,6 @@ namespace opene {
         bool Emit(ReturnStmt *returnStmt) {
             if (returnStmt->return_value_) {
                 llvm::Value *RV = Emit(returnStmt->return_value_);
-                RV = LoadVariable(RV);
                 Builder.CreateStore(RV, function_retptr_map_[this->TheFunction]);
                 Builder.CreateBr(function_retbb_map_[this->TheFunction]);
             } else {
@@ -1052,7 +1043,12 @@ namespace opene {
 
         llvm::Value *Emit(Expression *expression) {
             if (HierarchyIdentifier *hierarchy_identifier = expression->as<HierarchyIdentifier>()) {
-                return Emit(hierarchy_identifier);
+                bool request_load = hierarchy_identifier->identifier_usage_ != IdentifierUsage::kAsLeftValue;
+                llvm::Value *identifier_llvalue = Emit(hierarchy_identifier);
+                if (request_load) {
+                    identifier_llvalue = LoadVariable(identifier_llvalue);
+                }
+                return identifier_llvalue;
             } else if (TypeConvert *type_convert = expression->as<TypeConvert>()) {
                 return Emit(type_convert);
             } else if (UnaryExpression *unary_expression = expression->as<UnaryExpression>()) {
@@ -1074,7 +1070,6 @@ namespace opene {
             // TODO: 只处理了作为右值的情况
 
             llvm::Value *expr = Emit(typeConvert->from_expression_);
-            expr = LoadVariable(expr);
             llvm::Type *target_type = Emit(typeConvert->target_type_);
             llvm::Type *source_type = GetTrustType(expr);
             // 指针到指针
@@ -1129,6 +1124,9 @@ namespace opene {
 
                     if (llvm::Value *variable = variable_object_pool_[identifier->reference_]) {
                         assert(variable);
+                        if (identifier->identifier_usage_ != IdentifierUsage::kAsLeftValue) {
+                            variable = LoadVariable(variable);
+                        }
                         return variable;
                     } else if (llvm::Function *function = function_object_pool_[identifier->function_ref_]) {
                         assert(function);
@@ -1165,14 +1163,13 @@ namespace opene {
                 std::vector<llvm::Value *> indexes_ir;
                 for (Expression *index : indexes.Value()) {
                     llvm::Value *index_ir = Emit(index);
-                    index_ir = LoadVariable(index_ir);
                     assert(index_ir);
                     indexes_ir.push_back(index_ir);
                 }
 
                 // 取元素指针
 
-                return RTBuilder.GetArrayElementPointer(LoadVariable(arr_ptr), indexes_ir);
+                return RTBuilder.GetArrayElementPointer(arr_ptr, indexes_ir);
 
             }
 
@@ -1192,7 +1189,7 @@ namespace opene {
                 for (Expression *argument : function_call->arguments_) {
                     llvm::Value *argument_ir = Emit(argument);
                     assert(argument_ir);
-                    arguments_ir.push_back(LoadVariable(argument_ir));
+                    arguments_ir.push_back(argument_ir);
                 }
 
                 // 开始调用
@@ -1221,7 +1218,6 @@ namespace opene {
             }
             switch (unaryExpression->operator_type_) {
                 case _OperatorExpression::OperatorType::kOptSub: {
-                    V = LoadVariable(V);
                     return Builder.CreateNeg(V, "$.neg");
                 }
                 default: {
@@ -1238,8 +1234,6 @@ namespace opene {
                 assert(false);
                 return nullptr;
             }
-            L = LoadVariable(L);
-            R = LoadVariable(R);
 
             assert(GetTrustType(L) == GetTrustType(R));
             llvm::Type *opt_type = GetTrustType(L);
