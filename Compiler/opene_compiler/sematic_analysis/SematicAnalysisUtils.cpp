@@ -153,10 +153,10 @@ namespace opene {
         }
     }
 
-    TypeDecl * SematicAnalysis::QueryTypeDeclWithName(TranslateUnit *translateUnit, const StringRef &name, SematicAnalysisContext *context) {
+    TypeDecl * SematicAnalysis::QueryTypeDeclWithName(TranslateUnit *translateUnit, const StringRef &name, SematicAnalysisContext *context, BuiltinTypeDecl::EnumOfBuiltinType hint) {
         if (name.empty()) {
             // 类型默认为整数型
-            return this->QueryBuiltinTypeWithEnum(translateUnit, BuiltinTypeDecl::EnumOfBuiltinType::kBTypeInteger);
+            return this->QueryBuiltinTypeWithEnum(translateUnit, hint);
         }
         if (TagDecl *tag_decl = context->QueryTagDeclFromDynSymbolTableWithName(name)) {
             if (TypeDecl *type_decl = tag_decl->as<TypeDecl>()) {

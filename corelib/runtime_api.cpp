@@ -63,14 +63,23 @@ RTDynArrayTy create_array(int dims_n, ...) {
 }
 
 static int GetLinearIndex(RTDynArrayTy arrayPtr, int dims_n, va_list ap) {
-    if (dims_n == 1) { return va_arg(ap, int) - 1; }
-    if (dims_n != *ArrayDimNum_Ref(arrayPtr)) { return 0; }
-    int *dim_ptr = ArrayDims_Ref(arrayPtr);
-    int index = va_arg(ap, int) - 1;
-    for (int i = 1; i < dims_n; ++i) {
-        int _cidx = va_arg(ap, int) - 1;
-        index = (index * dim_ptr[i - 1]) + _cidx;
+    int index = 0;
+    if (dims_n == 1) {
+        index = va_arg(ap, int) - 1;
+    } else {
+        if (dims_n != *ArrayDimNum_Ref(arrayPtr)) {
+            assert(false);
+            index = 0;
+        } else {
+            int *dim_ptr = ArrayDims_Ref(arrayPtr);
+            index = va_arg(ap, int) - 1;
+            for (int i = 1; i < dims_n; ++i) {
+                int _cidx = va_arg(ap, int) - 1;
+                index = (index * dim_ptr[i - 1]) + _cidx;
+            }
+        }
     }
+    printf("idx: %d\n", index);
     return index;
 }
 

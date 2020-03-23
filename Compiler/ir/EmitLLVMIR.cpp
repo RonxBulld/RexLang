@@ -28,6 +28,7 @@
 #include "../opene_compiler/NodeDecl.h"
 #include "../opene_compiler/ASTUtility.h"
 #include "../support/ProjectDB.h"
+#include "../opene_compiler/TypeAssert.h"
 
 namespace opene {
 
@@ -497,6 +498,9 @@ namespace opene {
             }
 
             switch (builtinTypeDecl->built_in_type_) {
+                case BuiltinTypeDecl::EnumOfBuiltinType::kBTypeVoid:
+                    type = Builder.getVoidTy();
+                    break;
                 case BuiltinTypeDecl::EnumOfBuiltinType::kBTypeChar:
                     type = Builder.getInt8Ty();
                     break;
@@ -642,7 +646,7 @@ namespace opene {
             llvm::BasicBlock *ret_bb = llvm::BasicBlock::Create(TheContext, ".return", function);
             function_retbb_map_[function] = ret_bb;
             llvm::Value *return_value_ptr = nullptr;
-            if (functionDecl->return_type_) {
+            if (!TypeAssert::IsVoidType(functionDecl->return_type_)) {
                 llvm::Type *ret_type = GetType(functionDecl->return_type_);
                 return_value_ptr = Builder.CreateAlloca(ret_type, nullptr, ".ret");
             }
@@ -673,7 +677,7 @@ namespace opene {
                 }
             }
             Builder.SetInsertPoint(ret_bb);
-            if (functionDecl->return_type_) {
+            if (!TypeAssert::IsVoidType(functionDecl->return_type_)) {
                 llvm::Value *return_value = Builder.CreateLoad(return_value_ptr);
                 Builder.CreateRet(return_value);
             } else {

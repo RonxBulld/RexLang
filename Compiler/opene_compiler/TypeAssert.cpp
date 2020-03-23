@@ -8,6 +8,13 @@
 #include "ASTUtility.h"
 
 namespace opene {
+    bool TypeAssert::IsVoidType(const TypeDecl *typeDecl) {
+        if (const BuiltinTypeDecl * builtin_type_decl = typeDecl->as<BuiltinTypeDecl>()) {
+            return builtin_type_decl->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeVoid;
+        }
+        return false;
+    }
+
     bool TypeAssert::IsCharType(const TypeDecl * typeDecl) {
         if (const BuiltinTypeDecl * builtin_type_decl = typeDecl->as<BuiltinTypeDecl>()) {
             return builtin_type_decl->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeChar;

@@ -17,6 +17,13 @@ namespace opene {
         // === 基本类型断言 ===
 
         /**
+         * @brief 是否为空类型
+         * @param typeDecl 需要检查的类型
+         * @return 检查指定类型是否为空类型
+         */
+        static bool IsVoidType(const TypeDecl *typeDecl);
+
+        /**
          * @brief 是否为字节型
          * @param typeDecl 需要检查的类型
          * @return 检查指定类型是否为字节型

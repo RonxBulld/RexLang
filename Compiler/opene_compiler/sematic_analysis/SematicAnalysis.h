@@ -210,7 +210,7 @@ namespace opene {
          * 通过名称引用类型定义指针
          * 若找不到则返回空指针
          */
-        TypeDecl * QueryTypeDeclWithName(TranslateUnit *translateUnit, const StringRef &name, SematicAnalysisContext *context);
+        TypeDecl * QueryTypeDeclWithName(TranslateUnit *translateUnit, const StringRef &name, SematicAnalysisContext *context, BuiltinTypeDecl::EnumOfBuiltinType hint = BuiltinTypeDecl::EnumOfBuiltinType::kBTypeInteger);
 
     public:
         bool Run(TranslateUnit * translateUnitPtr);

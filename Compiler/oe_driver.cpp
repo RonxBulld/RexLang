@@ -79,7 +79,7 @@ namespace opene {
 
     int tooling::GenerateCodeFromTranslateUnit(ProjectDB &projectDB) {
         opene::EmitLLVMIR emitter(projectDB.GetTranslateUnit(), projectDB);
-//        emitter.WriteOutIR();
+        emitter.WriteOutIR();
         opene::LLCodeGen ll_code_gen(emitter);
         return ll_code_gen.WriteOutBC(projectDB.GetObjectFilename());
     }

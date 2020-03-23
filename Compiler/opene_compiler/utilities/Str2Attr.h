@@ -11,8 +11,11 @@
 
 namespace opene {
 
+    extern const std::map<std::string, BuiltinTypeDecl::EnumOfBuiltinType> builtin_type_map;
+
     class Str2Attr {
     public:
+
         static ErrOr<BuiltinTypeDecl::EnumOfBuiltinType> Name2BuiltinType(const StringRef &name);
 
         static ErrOr<std::string> BuiltinType2Name(BuiltinTypeDecl::EnumOfBuiltinType type);

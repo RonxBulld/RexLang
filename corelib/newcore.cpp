@@ -11,7 +11,7 @@
  * @param llval 长整数值
  * @return
  */
-int DebugTraceOutInt(long long llval) {
+void DebugTraceOutInt(long long llval) {
     printf("%lld\n", llval);
-    return 1;
+    return;
 }

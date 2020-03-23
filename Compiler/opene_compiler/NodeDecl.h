@@ -419,7 +419,8 @@ namespace opene {
         static const NodeType node_type = NodeType::kNTyBuiltinTypeDecl;
         // 内置类型枚举
         enum class EnumOfBuiltinType {
-            kBTypeChar,        // 字节型
+            kBTypeVoid,         // 空
+            kBTypeChar,         // 字节型
             kBTypeInteger,     // 整数型
             kBTypeFloat,       // 小数型
             kBTypeBool,        // 逻辑型

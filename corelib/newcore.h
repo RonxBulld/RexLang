@@ -7,7 +7,7 @@
 
 extern "C" {
 
-int DebugTraceOutInt(long long llval);
+void DebugTraceOutInt(long long llval);
 
 };
 

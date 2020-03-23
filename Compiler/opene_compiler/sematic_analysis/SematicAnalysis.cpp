@@ -132,28 +132,15 @@ namespace opene {
     }
 
     bool SematicAnalysis::CreateBuiltinType() {
-        BuiltinTypeDecl::EnumOfBuiltinType types[] = {
-                BuiltinTypeDecl::EnumOfBuiltinType::kBTypeChar,
-                BuiltinTypeDecl::EnumOfBuiltinType::kBTypeInteger,
-                BuiltinTypeDecl::EnumOfBuiltinType::kBTypeFloat,
-                BuiltinTypeDecl::EnumOfBuiltinType::kBTypeBool,
-                BuiltinTypeDecl::EnumOfBuiltinType::kBTypeString,
-                BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDataSet,
-                BuiltinTypeDecl::EnumOfBuiltinType::kBTypeShort,
-                BuiltinTypeDecl::EnumOfBuiltinType::kBTypeLong,
-                BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDatetime,
-                BuiltinTypeDecl::EnumOfBuiltinType::kBTypeFuncPtr,
-                BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDouble,
-        };
-        for (auto & type : types) {
-            ErrOr<std::string> type_name = Str2Attr::BuiltinType2Name(type);
+        for (auto & name_type_pair : builtin_type_map) {
+            ErrOr<std::string> type_name = Str2Attr::BuiltinType2Name(name_type_pair.second);
             if (type_name.NoError()) {
                 TString ts_tname;
                 ts_tname.string_ = this->translate_unit_->ast_context_->CreateString(type_name.Value());
                 ts_tname.location_ = 0;
                 BuiltinTypeDeclPtr builtin_type = CreateNode<BuiltinTypeDecl>(this->translate_unit_->ast_context_);
                 builtin_type->name_ = ts_tname;
-                builtin_type->built_in_type_ = type;
+                builtin_type->built_in_type_ = name_type_pair.second;
                 this->translate_unit_->global_type_[ts_tname.string_] = builtin_type;
             } else {
                 assert(false);
@@ -257,13 +244,17 @@ namespace opene {
     }
 
     bool SematicAnalysis::SetupFunctorVariableType(FunctorDecl *functorDecl) {
+
         // 3.1.1. 明确返回值类型
-        functorDecl->return_type_ = this->QueryTypeDeclWithName(this->translate_unit_, functorDecl->return_type_name_.string_, &this->analysis_context_);
+
+        functorDecl->return_type_ = this->QueryTypeDeclWithName(this->translate_unit_, functorDecl->return_type_name_.string_, &this->analysis_context_, BuiltinTypeDecl::EnumOfBuiltinType::kBTypeVoid);
         if (functorDecl->return_type_ == nullptr) {
             assert(false);
             return false;
         }
+
         // 3.1.2. 明确参数类型
+
         size_t param_idx = 0;
         for (ParameterDeclPtr parameter_decl : functorDecl->parameters_) {
             parameter_decl->type_decl_ptr_ = this->QueryTypeDeclWithName(this->translate_unit_, parameter_decl->type_name_.string_, &this->analysis_context_);
@@ -278,7 +269,9 @@ namespace opene {
     }
 
     bool SematicAnalysis::SetupFunctionLocalVariableType(FunctionDecl *functionDecl) {
+
         // 3.1.3. 明确局部变量类型
+
         for (auto & item : functionDecl->local_vari_) {
             LocalVariableDeclPtr local_vari = item.second;
             this->SetupLocalVariableType(local_vari);
@@ -370,24 +363,33 @@ namespace opene {
             return this->CheckExpression(expression) != nullptr;
 
         } else if (LoopControlStmt *loop_control_stmt = statement->as<LoopControlStmt>()) {
+
             // 检查是否在循环内
+
             loop_control_stmt->loop_statement_ = ASTUtility::FindSpecifyTypeParent<LoopStatement>(loop_control_stmt);
             return loop_control_stmt->loop_statement_ != nullptr;
 
         } else if (ReturnStmt *return_stmt = statement->as<ReturnStmt>()) {
+
             // 检查是否在函数定义内
+
             FunctionDecl *function_decl = ASTUtility::FindSpecifyTypeParent<FunctionDecl>(return_stmt);
             if (function_decl == nullptr) {
                 assert(false);
                 return false;
             }
+
             // 检查返回值表达式类型是否和函数返回值匹配
-            // 首先检查有无问题
+
+            // 首先检查是否存在
+
             if ((function_decl->return_type_ != nullptr) ^ (return_stmt->return_value_ != nullptr)) {
                 assert(false);
                 return false;
             }
+
             // 然后检查匹配问题
+
             if (return_stmt->return_value_) {
                 TypeDecl *act_ret_type = this->CheckExpression(return_stmt->return_value_);
                 TypeDecl *decl_ret_type = function_decl->return_type_;
