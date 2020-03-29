@@ -706,6 +706,10 @@ namespace opene {
         static const NodeType node_type = NodeType::kNTyNameComponent;
 
         IdentifierUsage identifier_usage_ = IdentifierUsage::kUnknown;
+
+        NameComponentPtr forward_name_component_ = nullptr;
+
+        NameComponentPtr backward_name_component_ = nullptr;
     };
 
     /**

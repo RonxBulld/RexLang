@@ -39,6 +39,15 @@ namespace opene {
         hierarchyIdentifier->identifier_usage_ = referenceType;
         for (NameComponent *name_component : hierarchyIdentifier->name_components_) {
             name_component->identifier_usage_ = IdentifierUsage::kAsRightValue;
+            if (ArrayIndex *array_index = name_component->as<ArrayIndex>()) {
+                array_index->base_->identifier_usage_ = IdentifierUsage::kAsRightValue;
+            } else if (FunctionCall *function_call = name_component->as<FunctionCall>()) {
+                function_call->function_name_->identifier_usage_ = IdentifierUsage::kAsRightValue;
+            } else if (Identifier *identifier = name_component->as<Identifier>()) {
+                (void) identifier;
+            } else {
+                assert(false);
+            }
         }
         hierarchyIdentifier->name_components_.back()->identifier_usage_ = referenceType;
     }
@@ -350,9 +359,9 @@ namespace opene {
 
             // 检查赋值语句左右子式类型是否匹配或兼容
 
-            SetupHierarchyReferenceType(assign_stmt->lhs_, IdentifierUsage::kAsLeftValue);
             TypeDeclPtr lhs_type = this->CheckExpression(assign_stmt->lhs_);
             TypeDeclPtr rhs_type = this->CheckExpression(assign_stmt->rhs_);
+            SetupHierarchyReferenceType(assign_stmt->lhs_, IdentifierUsage::kAsLeftValue);
             ErrOr<Expression*> implicit_convert = this->MakeImplicitConvertIfNeccessary(lhs_type, assign_stmt->rhs_);
             if (implicit_convert.HadError()) { return false; }
             assign_stmt->rhs_ = implicit_convert.Value();

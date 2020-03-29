@@ -18,7 +18,8 @@ namespace opene {
         assert(nameComponent);
 
         if (ArrayIndex *array_index = nameComponent->as<ArrayIndex>()) {
-            TypeDecl *index_target = EvalBaseNameComponentType(ASTUtility::GetArrayIndexBase(array_index), frontType);
+            NameComponent *array_base = ASTUtility::GetArrayIndexBase(array_index);
+            TypeDecl *index_target = EvalBaseNameComponentType(array_base, frontType);
             if (!index_target) {
                 assert(false);
                 return nullptr;

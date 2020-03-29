@@ -454,9 +454,17 @@ namespace opene {
 
     antlrcpp::Any CST2ASTConvert::visitHierarchy_identifier(openeLangParser::Hierarchy_identifierContext *context) {
         HierarchyIdentifierPtr hierarchy_identifier = CreateNode<HierarchyIdentifier>(context->getStart(), context->getStop());
+        NameComponentPtr forward_name_component_ = nullptr;
         for (auto *name_component_ctx : context->components) {
             NameComponentPtr name_component = GetFromCtxIfExist<NameComponentPtr, true>(name_component_ctx);
             hierarchy_identifier->name_components_.push_back(name_component);
+
+            if (forward_name_component_) {
+                forward_name_component_->backward_name_component_ = name_component;
+            }
+            name_component->forward_name_component_ = forward_name_component_;
+            forward_name_component_ = name_component;
+
         }
         return NodeWarp(hierarchy_identifier);
     }

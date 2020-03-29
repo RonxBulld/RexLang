@@ -133,6 +133,22 @@ namespace opene {
             return nullptr;
         }
 
+        void RegistVariableIR(BaseVariDecl *variable, llvm::Value *variable_ir) {
+            if (variable_object_pool_.find(variable) != variable_object_pool_.end()) {
+                assert(false);
+            }
+            variable_object_pool_[variable] = variable_ir;
+        }
+
+        llvm::Value *GetVariableIRIFExist(BaseVariDecl *variable) {
+            auto ir_found = variable_object_pool_.find(variable);
+            if (ir_found != variable_object_pool_.end()) {
+                return ir_found->second;
+            } else {
+                return nullptr;
+            }
+        }
+
     private:
         bool DefineMainEntryAndInitFunc() {
 
@@ -334,7 +350,7 @@ namespace opene {
                         FileVariableDecl *file_variable_decl = prog_vari_item.second;
                         llvm::GlobalVariable *fvari = Emit(file_variable_decl);
                         assert(fvari);
-                        variable_object_pool_[prog_vari_item.second] = fvari;
+                        RegistVariableIR(prog_vari_item.second, fvari);
                     }
                 }
             }
@@ -415,7 +431,7 @@ namespace opene {
 
         llvm::GlobalVariable *Emit(GlobalVariableDecl *globalVariableDecl) {
             llvm::GlobalVariable *global_variable = CreateGlobalVariableAndInit(globalVariableDecl->type_decl_ptr_, globalVariableDecl->name_.string_.str());
-            variable_object_pool_[globalVariableDecl] = global_variable;
+            RegistVariableIR(globalVariableDecl, global_variable);
             return global_variable;
         }
 
@@ -428,13 +444,13 @@ namespace opene {
             // 创建参数在栈内的空间
 
             llvm::AllocaInst *alloca_param = Builder.CreateAlloca(param_type, nullptr, parameterDecl->name_.string_.str());
-            variable_object_pool_[parameterDecl] = alloca_param;
+            RegistVariableIR(parameterDecl, alloca_param);
 
             // 将参数值加载到栈内存中
 
             llvm::Argument *argument = TheFunction->arg_begin() + parameterDecl->index_;
             StoreVariable(argument, alloca_param);
-            variable_object_pool_[parameterDecl] = alloca_param;
+            RegistVariableIR(parameterDecl, alloca_param);
             return alloca_param;
         }
 
@@ -445,7 +461,7 @@ namespace opene {
 
             llvm::GlobalVariable *file_vari = CreateGlobalVariableAndInit(fileVariableDecl->type_decl_ptr_, vari_name);
             file_vari->setLinkage(llvm::GlobalValue::LinkageTypes::InternalLinkage);
-            variable_object_pool_[fileVariableDecl] = file_vari;
+            RegistVariableIR(fileVariableDecl, file_vari);
             return file_vari;
         }
 
@@ -459,7 +475,7 @@ namespace opene {
                 llvm::AllocaInst *local_vari = Builder.CreateAlloca(vari_type, nullptr, vari_name);
                 local_vari->setAlignment(4);
                 CreateVariableInitialization(local_vari);
-                variable_object_pool_[localVariableDecl] = local_vari;
+                RegistVariableIR(localVariableDecl, local_vari);
                 return local_vari;
 
             } else {
@@ -469,7 +485,7 @@ namespace opene {
                 vari_name = TheASTFunction->super_set_->name_.string_.str() + "." + TheASTFunction->name_.string_.str() + "." + vari_name;
                 llvm::GlobalVariable *static_vari = CreateGlobalVariableAndInit(localVariableDecl->type_decl_ptr_, vari_name);
                 static_vari->setLinkage(llvm::GlobalValue::LinkageTypes::InternalLinkage);
-                variable_object_pool_[localVariableDecl] = static_vari;
+                RegistVariableIR(localVariableDecl, static_vari);
                 return static_vari;
 
             }
@@ -609,7 +625,7 @@ namespace opene {
             for (auto &param : function->args()) {
                 param.setName(functorDecl->parameters_[idx]->name_.string_.str());
                 // 注册参数
-                variable_object_pool_[functorDecl->parameters_[idx]] = &param;
+                RegistVariableIR(functorDecl->parameters_[idx], &param);
                 idx++;
             }
 
@@ -1047,12 +1063,9 @@ namespace opene {
 
         llvm::Value *Emit(Expression *expression) {
             if (HierarchyIdentifier *hierarchy_identifier = expression->as<HierarchyIdentifier>()) {
-                bool request_load = hierarchy_identifier->identifier_usage_ != IdentifierUsage::kAsLeftValue;
-                llvm::Value *identifier_llvalue = Emit(hierarchy_identifier);
-                if (request_load) {
-                    identifier_llvalue = LoadVariable(identifier_llvalue);
-                }
-                return identifier_llvalue;
+                return Emit(hierarchy_identifier);
+            } else if (NameComponent *name_component = expression->as<NameComponent>()) {
+                return Emit(name_component);
             } else if (TypeConvert *type_convert = expression->as<TypeConvert>()) {
                 return Emit(type_convert);
             } else if (UnaryExpression *unary_expression = expression->as<UnaryExpression>()) {
@@ -1109,32 +1122,31 @@ namespace opene {
         /*
          * 从结构体或者对象池中获得变量引用或者函数引用
          */
-        llvm::Value * GetRefFromStructOrPool(llvm::Value *structInstance, NameComponent *nameComponent) {
+        llvm::Value * GetFromStructOrPool(llvm::Value *forwardInstance, NameComponent *nameComponent) {
+
+            llvm::Value * ref = nullptr;
 
             // 目标类型是单名称组件
 
             if (Identifier *identifier = nameComponent->as<Identifier>()) {
-                if (structInstance) {
+                if (forwardInstance) {
 
                     // 作为成员解析
 
                     MemberVariableDecl *member_variable_decl = identifier->reference_->as<MemberVariableDecl>();
                     assert(member_variable_decl);
-                    return Builder.CreateStructGEP(structInstance, member_variable_decl->index_of_struct_);
+                    ref = Builder.CreateStructGEP(forwardInstance, member_variable_decl->index_of_struct_);
 
                 } else {
 
                     // 作为普通变量或者函数名解析
 
-                    if (llvm::Value *variable = variable_object_pool_[identifier->reference_]) {
+                    if (llvm::Value *variable = GetVariableIRIFExist(identifier->reference_)) {
                         assert(variable);
-                        if (identifier->identifier_usage_ != IdentifierUsage::kAsLeftValue) {
-                            variable = LoadVariable(variable);
-                        }
-                        return variable;
+                        ref = variable;
                     } else if (llvm::Function *function = function_object_pool_[identifier->function_ref_]) {
                         assert(function);
-                        return function;
+                        ref = function;
                     } else {
                         assert(false);
                         return nullptr;
@@ -1159,8 +1171,8 @@ namespace opene {
                 // 取数组指针
 
                 NameComponent *base = ASTUtility::GetArrayIndexBase(array_index);
-                llvm::Value *arr_ptr = GetRefFromStructOrPool(structInstance, base);
-                assert(arr_ptr);
+                llvm::Value *arr_ptr_variable = GetFromStructOrPool(forwardInstance, base);
+                assert(arr_ptr_variable);
 
                 // 取索引列表
 
@@ -1173,7 +1185,7 @@ namespace opene {
 
                 // 取元素指针
 
-                return RTBuilder.GetArrayElementPointer(arr_ptr, indexes_ir);
+                ref = RTBuilder.GetArrayElementPointer(arr_ptr_variable, indexes_ir);
 
             }
 
@@ -1183,7 +1195,7 @@ namespace opene {
 
                 // 获取调用目标
 
-                llvm::Function *func_ptr = llvm::dyn_cast<llvm::Function>(GetRefFromStructOrPool(structInstance, function_call->function_name_));
+                llvm::Function *func_ptr = llvm::dyn_cast<llvm::Function>(GetFromStructOrPool(forwardInstance, function_call->function_name_));
                 assert(func_ptr);
 
                 // 计算实参
@@ -1198,20 +1210,35 @@ namespace opene {
 
                 // 开始调用
 
-                return Builder.CreateCall(func_ptr, arguments_ir);
+                ref = Builder.CreateCall(func_ptr, arguments_ir);
             }
             else {
                 assert(false);
                 return nullptr;
             }
+
+            assert(nameComponent->identifier_usage_ != IdentifierUsage::kUnknown);
+            if (nameComponent->identifier_usage_ == IdentifierUsage::kAsRightValue) {
+                ref = LoadVariable(ref);
+            }
+
+            return ref;
         }
 
         llvm::Value *Emit(HierarchyIdentifier *hierarchyIdentifier) {
-            llvm::Value *previous_base = nullptr;
-            for (NameComponent *name_component : hierarchyIdentifier->name_components_) {
-                previous_base = GetRefFromStructOrPool(previous_base, name_component);
+            return Emit(hierarchyIdentifier->name_components_.back());
+        }
+
+        llvm::Value *Emit(NameComponent *nameComponent) {
+            llvm::Value *previous_value = nullptr;
+            if (nameComponent->forward_name_component_) {
+                previous_value = Emit(nameComponent->forward_name_component_);
             }
-            return previous_base;
+            llvm::Value *this_value = GetFromStructOrPool(previous_value, nameComponent);
+            if (nameComponent->identifier_usage_ == IdentifierUsage::kAsRightValue) {
+                this_value = LoadVariable(this_value);
+            }
+            return this_value;
         }
 
         llvm::Value *Emit(UnaryExpression *unaryExpression) {
