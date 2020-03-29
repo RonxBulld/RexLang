@@ -79,7 +79,6 @@ static int GetLinearIndex(RTDynArrayTy arrayPtr, int dims_n, va_list ap) {
             }
         }
     }
-    printf("idx: %d\n", index);
     return index;
 }
 
