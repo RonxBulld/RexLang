@@ -31,6 +31,9 @@ namespace opene {
                 assert(false);
                 return nullptr;
             }
+
+            this->CheckExpression(array_index->index_);
+
             return this->GetIndexableTypeElement(index_target);
 
         } else if (FunctionCall *function_call = nameComponent->as<FunctionCall>()) {
@@ -90,9 +93,11 @@ namespace opene {
                     assert(false);
                     return nullptr;
                 }
+
             } else if (BaseVariDecl *base_vari_decl = id_type->as<BaseVariDecl>()) {
                 identifier->reference_ = base_vari_decl;
                 return base_vari_decl->type_decl_ptr_;
+
             } else {
                 assert(false);
                 return nullptr;

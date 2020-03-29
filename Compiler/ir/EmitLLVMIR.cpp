@@ -960,10 +960,10 @@ namespace opene {
         }
 
         bool Emit(AssignStmt *assignStmt) {
-            llvm::Value *lhs = Emit(assignStmt->lhs_);
-            assert(lhs);
             llvm::Value *rhs = Emit(assignStmt->rhs_);
             assert(rhs);
+            llvm::Value *lhs = Emit(assignStmt->lhs_);
+            assert(lhs);
             llvm::Type *lhs_type = GetTrustType(lhs);
 
             // 区分数组、字节集、字符串、结构体和其它类型
