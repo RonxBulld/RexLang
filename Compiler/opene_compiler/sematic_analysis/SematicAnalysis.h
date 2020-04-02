@@ -36,6 +36,11 @@ namespace opene {
         bool MergeGlobal();
 
         /*
+         * 解释外部API的NameMangle含义
+         */
+        bool ExplainExternAPINameMangle();
+
+        /*
          * 创建局部变量并插入到符号表中
          * 函数会根据提供的名字创建一个局部变量，如果有命名冲突会做适当的调整。
          * 类型默认设置为整数型。

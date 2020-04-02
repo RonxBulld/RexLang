@@ -12,6 +12,7 @@
 #include "../ASTAssert.h"
 #include "../utilities/Diagnostic.h"
 #include "../utilities/Defer.h"
+#include "SematicAnalysisNameMangle.h"
 
 namespace opene {
     template <typename SrcMapContainer, typename TgtMapContainer, typename Pred>
@@ -75,7 +76,11 @@ namespace opene {
 
         this->MergeGlobal();
 
-        // 1.3. 用翻译单元初始化分析上下文
+        // 1.3. 解释外部API的引用名称
+
+        this->ExplainExternAPINameMangle();
+
+        // 1.4. 用翻译单元初始化分析上下文
 
         this->analysis_context_.PushScope(translateUnitPtr);
 
@@ -232,6 +237,28 @@ namespace opene {
                     return v->as<FunctorDecl>();
                 });
                 if (!success) { return false; }
+            }
+        }
+        return true;
+    }
+
+    bool SematicAnalysis::ExplainExternAPINameMangle() {
+        assert(translate_unit_);
+        for (auto &functor_decl_item : translate_unit_->functor_declares_) {
+
+            FunctorDecl *functor_decl = functor_decl_item.second;
+
+            if (APICommandDecl *api_command_decl = functor_decl->as<APICommandDecl>()) {
+
+                // 检查参数传递方面的修饰
+
+                if (SematicAnalysisNameMangle::IsRequireArgumentPack(api_command_decl)) {
+                    api_command_decl->argument_pass_model_ = ArgumentPassModel::kSimpleRTTIPack;
+                    SematicAnalysisNameMangle::RemoveArgumentPackRequire(api_command_decl);
+                }
+
+                // 检查调用方式方面的修饰
+
             }
         }
         return true;

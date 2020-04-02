@@ -493,14 +493,40 @@ namespace opene {
         ProgSetDeclPtr super_set_ = nullptr;
     };
 
-    /**
-     * @brief 内建函数声明
-     */
+//    /**
+//     * @brief 内建函数声明
+//     */
 //    struct BuiltinFunctionDecl : public FunctorDecl {
 //        static const NodeType node_type = NodeType::kNTyBuiltinFunctionDecl;
 //    };
 
-    enum LibraryType { kLTDynamic, kLTStatic };
+    /*!
+     * @brief 程序库类型
+     */
+    enum LibraryType {
+        /*!
+         * @brief 动态链接库函数
+         */
+        kLTDynamic,
+        /*!
+         * @brief 静态链接库函数
+         */
+        kLTStatic,
+    };
+
+    /*
+     * 参数传递模型
+     */
+    enum ArgumentPassModel {
+        /*!
+         * @brief 直接传递
+         */
+        kDirect,
+        /*!
+         * @brief 简单RTTI参数包
+         */
+        kSimpleRTTIPack,
+    };
 
     /**
      * @brief DLL函数声明
@@ -513,6 +539,8 @@ namespace opene {
         LibraryType library_type_ = LibraryType::kLTDynamic;
         // 原生函数名称
         TString api_name_;
+        // 参数传递方式
+        ArgumentPassModel argument_pass_model_ = ArgumentPassModel::kDirect;
         // 原生参数名称
         std::vector<StringRef> mapping_names_;
     };

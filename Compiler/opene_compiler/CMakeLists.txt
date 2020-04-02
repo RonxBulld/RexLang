@@ -72,7 +72,7 @@ SET(OECompilerParse-Source
         sematic_analysis/SematicAnalysisContext.cpp
         sematic_analysis/SematicAnalysisContext.h
         sematic_analysis/SematicAnalysisUtils.cpp
-        sematic_analysis/SematicAnalysisTypeAssert.cpp ASTBuilder.cpp ASTBuilder.h utilities/Defer.h)
+        sematic_analysis/SematicAnalysisTypeAssert.cpp ASTBuilder.cpp ASTBuilder.h utilities/Defer.h sematic_analysis/SematicAnalysisNameMangle.cpp sematic_analysis/SematicAnalysisNameMangle.h)
 
 if(NOT CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
     set (flags_1 "-Wno-overloaded-virtual")

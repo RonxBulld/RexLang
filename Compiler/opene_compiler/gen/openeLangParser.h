@@ -205,6 +205,8 @@ public:
     antlr4::Token *type = nullptr;;
     antlr4::Token *file = nullptr;;
     antlr4::Token *cmd = nullptr;;
+    antlr4::Token *identifierToken = nullptr;;
+    std::vector<antlr4::Token *> attributes;;
     Dll_commandContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     std::vector<antlr4::tree::TerminalNode *> NEWLINE();
@@ -232,6 +234,8 @@ public:
     antlr4::Token *type = nullptr;;
     antlr4::Token *file = nullptr;;
     antlr4::Token *cmd = nullptr;;
+    antlr4::Token *identifierToken = nullptr;;
+    std::vector<antlr4::Token *> attributes;;
     Lib_commandContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     std::vector<antlr4::tree::TerminalNode *> NEWLINE();
