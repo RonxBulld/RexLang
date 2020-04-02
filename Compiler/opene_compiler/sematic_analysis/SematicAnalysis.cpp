@@ -907,33 +907,58 @@ namespace opene {
     }
 
     bool SematicAnalysis::CheckIfArgumentMatch(std::vector<ExpressionPtr> &arguments, const std::vector<ParameterDeclPtr> &parameters) {
+
         // 1. 获取形参有效个数
+
+        // 1.1. 获取个数
+
         size_t argu_count = arguments.size();
         size_t param_count = parameters.size();
+
+        // 1.2. 略去不定参数部分
+
         bool dynamic_params = false;
         if (param_count > 0 && parameters.back()->name_.string_ == u8"...") {
             param_count -= 1;
             dynamic_params = true;
         }
+
         // 2. 根据形参有效个数用空指针扩展实参
+
         while (argu_count < param_count) {
             arguments.push_back(nullptr);
             argu_count++;
         }
+
         // 3. 如果形参长度不定则截取实参前N个进行计算
+
         if (dynamic_params) {
+
+            // 提前检查即将不被检查的部分
+
+            for (size_t idx = param_count; idx < argu_count; ++idx) {
+                this->CheckExpression(arguments[idx]);
+            }
+
             argu_count = param_count;
         }
+
         // 4. 检查形参和实参个数是否匹配
+
         if (argu_count != param_count) {
             assert(false);
             return false;
         }
+
         // 5. 针对每个实参/形参对
+
         for (size_t idx = 0; idx < argu_count; idx++) {
             if (arguments[idx] == nullptr) {
+
                 // 5.1. 如果实参为空指针
+
                 // 5.1.1. 检查形参可空属性
+
                 if (parameters[idx]->is_nullable == false) {
                     assert(false);
                     return false;
@@ -942,8 +967,10 @@ namespace opene {
                 }
 
             } else if (parameters[idx]->is_array) {
+
                 // 5.2. 如果形参数组属性为真，则实参必须为左值或左值引用（参考形参）数组变量，且元素类型严格一致
                 // 数组参数只能以引用方式传递
+
                 parameters[idx]->is_reference = true;
                 if (TypeAssert::ExpressionIsLValue(arguments[idx]) == false) {
                     assert(false);
@@ -968,7 +995,9 @@ namespace opene {
                 }
 
             } else if (parameters[idx]->is_reference) {
+
                 // 5.3. 如果形参参考属性为真，则实参必须为左值或左值引用（参考形参），并且变量类型严格一致
+
                 if (TypeAssert::ExpressionIsLValue(arguments[idx]) == false) {
                     assert(false);
                     return false;
@@ -985,7 +1014,9 @@ namespace opene {
                 }
 
             } else {
+
                 // 5.4. 如果形参不具备上述属性
+
                 TypeDecl *argu_type = this->CheckExpression(arguments[idx]);
                 TypeDecl *param_type = parameters[idx]->type_decl_ptr_;
                 ErrOr<Expression*> implicit_convert = this->MakeImplicitConvertIfNeccessary(param_type, arguments[idx]);
