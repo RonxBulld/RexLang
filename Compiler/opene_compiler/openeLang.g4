@@ -74,13 +74,13 @@ dll_define_file
 
 dll_command
     : '.DLL命令' name=IDENTIFIER ',' type=IDENTIFIER? ',' file=STRING_LITERAL? ',' cmd=STRING_LITERAL ',' (attributes+=IDENTIFIER)* (',' table_comment)? NEWLINE
-      parameter_decl*
+      params=parameter_decl_list
       NEWLINE*
     ;
 
 lib_command
     : '.LIB命令' name=IDENTIFIER ',' type=IDENTIFIER? ',' file=STRING_LITERAL? ',' cmd=STRING_LITERAL ',' (attributes+=IDENTIFIER)* (',' table_comment)? NEWLINE
-      parameter_decl*
+      params=parameter_decl_list
       NEWLINE*
     ;
 
@@ -126,7 +126,7 @@ file_vari_decl
 
 sub_program
     : '.子程序' name=IDENTIFIER (',' type=IDENTIFIER? (',' access=IDENTIFIER? (',' table_comment)?)?)? NEWLINE
-      (params+=parameter_decl)*
+      params=parameter_decl_list
       (local_vari+=local_variable_decl)*
       statement_list
     ;
@@ -135,8 +135,16 @@ local_variable_decl
     : '.局部变量' name=IDENTIFIER (',' type=IDENTIFIER? (',' attribute=IDENTIFIER? (',' dimension=STRING_LITERAL? (',' table_comment)?)?)?)? NEWLINE
     ;
 
+parameter_decl_list
+    : parameter_decl* vari_parameter_decl?
+    ;
+
 parameter_decl
     : '.参数' name=IDENTIFIER ',' type=IDENTIFIER (',' (attributes+=IDENTIFIER)* (',' table_comment)?)? NEWLINE
+    ;
+
+vari_parameter_decl
+    : '.参数' name='...' ',' type=IDENTIFIER (',' (attributes+=IDENTIFIER)* (',' table_comment)?)? NEWLINE
     ;
 
 statement_list

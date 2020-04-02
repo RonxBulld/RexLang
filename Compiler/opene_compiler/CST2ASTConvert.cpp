@@ -174,10 +174,9 @@ namespace opene {
         dll_command_decl->api_name_ = GetTextIfExist(context->cmd);
         RemoveRoundQuotes(dll_command_decl->api_name_);
         dll_command_decl->comment_ = GetFromCtxIfExist<TString>(context->table_comment());
-        for (openeLangParser::Parameter_declContext *param : context->parameter_decl()) {
-            ParameterDeclPtr parameter_decl = GetFromCtxIfExist<ParameterDeclPtr>(param);
-            dll_command_decl->parameters_.push_back(parameter_decl);
-            dll_command_decl->mapping_names_.push_back(parameter_decl->name_.string_);
+        dll_command_decl->parameters_ = GetFromCtxIfExist<std::vector<ParameterDeclPtr>>(context->params);
+        for (auto *parameter : dll_command_decl->parameters_) {
+            dll_command_decl->mapping_names_.emplace_back(parameter->name_.string_);
         }
         return NodeWarp(dll_command_decl);
     }
@@ -192,10 +191,9 @@ namespace opene {
         dll_command_decl->api_name_ = GetTextIfExist(context->cmd);
         RemoveRoundQuotes(dll_command_decl->api_name_);
         dll_command_decl->comment_ = GetFromCtxIfExist<TString>(context->table_comment());
-        for (openeLangParser::Parameter_declContext *param : context->parameter_decl()) {
-            ParameterDeclPtr parameter_decl = GetFromCtxIfExist<ParameterDeclPtr>(param);
-            dll_command_decl->parameters_.push_back(parameter_decl);
-            dll_command_decl->mapping_names_.push_back(parameter_decl->name_.string_);
+        dll_command_decl->parameters_ = GetFromCtxIfExist<std::vector<ParameterDeclPtr>>(context->params);
+        for (auto *parameter : dll_command_decl->parameters_) {
+            dll_command_decl->mapping_names_.emplace_back(parameter->name_.string_);
         }
         return NodeWarp(dll_command_decl);
     }
@@ -272,10 +270,7 @@ namespace opene {
         sub_prog_decl->return_type_name_ = GetTextIfExist(context->type);
         sub_prog_decl->access_ = GetTextIfExist(context->access);
         sub_prog_decl->comment_ = GetFromCtxIfExist<TString>(context->table_comment());
-        for (auto *param_vari_ctx : context->params) {
-            ParameterDeclPtr parameter_decl = GetFromCtxIfExist<ParameterDeclPtr>(param_vari_ctx);
-            sub_prog_decl->parameters_.emplace_back(parameter_decl);
-        }
+        sub_prog_decl->parameters_ = GetFromCtxIfExist<std::vector<ParameterDeclPtr>>(context->params);
         for (auto *local_vari_ctx : context->local_vari) {
             LocalVariableDeclPtr local_vari = GetFromCtxIfExist<LocalVariableDeclPtr>(local_vari_ctx);
             sub_prog_decl->local_vari_[local_vari->name_.string_] = local_vari;
@@ -293,7 +288,29 @@ namespace opene {
         return NodeWarp(local_variable_decl);
     }
 
+    antlrcpp::Any CST2ASTConvert::visitParameter_decl_list(openeLangParser::Parameter_decl_listContext *context) {
+        std::vector<ParameterDeclPtr> params;
+        for (auto *param_vari_ctx : context->parameter_decl()) {
+            ParameterDeclPtr parameter_decl = GetFromCtxIfExist<ParameterDeclPtr>(param_vari_ctx);
+            params.emplace_back(parameter_decl);
+        }
+        if (auto *vari_param_ctx = context->vari_parameter_decl()) {
+            ParameterDeclPtr vari_parameter_decl = GetFromCtxIfExist<ParameterDeclPtr>(vari_param_ctx);
+            params.emplace_back(vari_parameter_decl);
+        }
+        return params;
+    }
+
     antlrcpp::Any CST2ASTConvert::visitParameter_decl(openeLangParser::Parameter_declContext *context) {
+        ParameterDeclPtr parameter_decl = CreateNode<ParameterDecl>(context->getStart(), context->getStop());
+        parameter_decl->name_ = GetTextIfExist(context->name);
+        parameter_decl->type_name_ = GetTextIfExist(context->type);
+        parameter_decl->attributes_ = GetTextVecIfExist(context->attributes);
+        parameter_decl->comment_ = GetFromCtxIfExist<TString>(context->table_comment());
+        return NodeWarp(parameter_decl);
+    }
+
+    antlrcpp::Any CST2ASTConvert::visitVari_parameter_decl(openeLangParser::Vari_parameter_declContext *context) {
         ParameterDeclPtr parameter_decl = CreateNode<ParameterDecl>(context->getStart(), context->getStop());
         parameter_decl->name_ = GetTextIfExist(context->name);
         parameter_decl->type_name_ = GetTextIfExist(context->type);
@@ -701,4 +718,5 @@ namespace opene {
             return nullptr;
         }
     }
+
 }

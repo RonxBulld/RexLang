@@ -58,7 +58,11 @@ public:
 
     virtual antlrcpp::Any visitLocal_variable_decl(openeLangParser::Local_variable_declContext *context) = 0;
 
+    virtual antlrcpp::Any visitParameter_decl_list(openeLangParser::Parameter_decl_listContext *context) = 0;
+
     virtual antlrcpp::Any visitParameter_decl(openeLangParser::Parameter_declContext *context) = 0;
+
+    virtual antlrcpp::Any visitVari_parameter_decl(openeLangParser::Vari_parameter_declContext *context) = 0;
 
     virtual antlrcpp::Any visitStatement_list(openeLangParser::Statement_listContext *context) = 0;
 

@@ -93,7 +93,15 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual antlrcpp::Any visitParameter_decl_list(openeLangParser::Parameter_decl_listContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual antlrcpp::Any visitParameter_decl(openeLangParser::Parameter_declContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitVari_parameter_decl(openeLangParser::Vari_parameter_declContext *ctx) override {
     return visitChildren(ctx);
   }
 

@@ -73,8 +73,14 @@ public:
   virtual void enterLocal_variable_decl(openeLangParser::Local_variable_declContext *ctx) = 0;
   virtual void exitLocal_variable_decl(openeLangParser::Local_variable_declContext *ctx) = 0;
 
+  virtual void enterParameter_decl_list(openeLangParser::Parameter_decl_listContext *ctx) = 0;
+  virtual void exitParameter_decl_list(openeLangParser::Parameter_decl_listContext *ctx) = 0;
+
   virtual void enterParameter_decl(openeLangParser::Parameter_declContext *ctx) = 0;
   virtual void exitParameter_decl(openeLangParser::Parameter_declContext *ctx) = 0;
+
+  virtual void enterVari_parameter_decl(openeLangParser::Vari_parameter_declContext *ctx) = 0;
+  virtual void exitVari_parameter_decl(openeLangParser::Vari_parameter_declContext *ctx) = 0;
 
   virtual void enterStatement_list(openeLangParser::Statement_listContext *ctx) = 0;
   virtual void exitStatement_list(openeLangParser::Statement_listContext *ctx) = 0;

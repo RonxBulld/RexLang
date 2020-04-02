@@ -158,6 +158,10 @@ namespace opene {
 
         antlrcpp::Any visitLocal_variable_decl(openeLangParser::Local_variable_declContext *context) override;
 
+        antlrcpp::Any visitParameter_decl_list(openeLangParser::Parameter_decl_listContext *context) override;
+
+        antlrcpp::Any visitVari_parameter_decl(openeLangParser::Vari_parameter_declContext *context) override;
+
         antlrcpp::Any visitMember_vari_decl(openeLangParser::Member_vari_declContext *context) override;
 
         antlrcpp::Any visitFile_vari_decl(openeLangParser::File_vari_declContext *context) override;

@@ -589,6 +589,12 @@ namespace opene {
 
             // 构建形参声明
 
+            bool is_vari_arg = false;
+            if (!functorDecl->parameters_.empty() && functorDecl->parameters_.back()->name_.string_.str() == "...") {
+                is_vari_arg = true;
+                functorDecl->parameters_.pop_back();
+            }
+
             std::vector<llvm::Type*> parameter_types;
             for (ParameterDecl *parameter_decl : functorDecl->parameters_) {
                 llvm::Type *parameter_type = GetType(parameter_decl->type_decl_ptr_);
@@ -601,10 +607,6 @@ namespace opene {
 
             // 构建函数原型
 
-            bool is_vari_arg = false;
-            if (!functorDecl->parameters_.empty() && functorDecl->parameters_.back()->name_.string_.str() == "...") {
-                is_vari_arg = true;
-            }
             llvm::FunctionType *function_type = llvm::FunctionType::get(return_type, parameter_types, is_vari_arg);
             std::string function_name = functorDecl->name_.string_.str();
 

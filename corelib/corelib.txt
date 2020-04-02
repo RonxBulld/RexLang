@@ -2,3 +2,6 @@
 
 .LIB命令 调试输出整数值, , "newcore", "DebugTraceOutInt", , DebugTraceOutInt
     .参数 长整数值, 长整数型, , llval
+
+.LIB命令 调试输出, , "newcore", "DebugTraceOut#", , DebugTraceOut
+    .参数 ..., 通用型, , 欲输出的值

@@ -420,6 +420,7 @@ namespace opene {
         // 内置类型枚举
         enum class EnumOfBuiltinType {
             kBTypeVoid,         // 空
+            kBTTypeCommon,      // 通用型
             kBTypeChar,         // 字节型
             kBTypeInteger,     // 整数型
             kBTypeFloat,       // 小数型

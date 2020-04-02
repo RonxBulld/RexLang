@@ -10,6 +10,7 @@
 namespace opene {
     const std::map<std::string, BuiltinTypeDecl::EnumOfBuiltinType> builtin_type_map {
             {std::string(u8"<空类型>"),    BuiltinTypeDecl::EnumOfBuiltinType::kBTypeVoid},
+            {std::string(u8"通用型"),    BuiltinTypeDecl::EnumOfBuiltinType::kBTTypeCommon},
             {std::string(u8"字节型"),    BuiltinTypeDecl::EnumOfBuiltinType::kBTypeChar},
             {std::string(u8"整数型"),    BuiltinTypeDecl::EnumOfBuiltinType::kBTypeInteger},
             {std::string(u8"小数型"),    BuiltinTypeDecl::EnumOfBuiltinType::kBTypeFloat},
