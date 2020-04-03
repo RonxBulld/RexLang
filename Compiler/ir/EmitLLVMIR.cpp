@@ -1201,14 +1201,7 @@ namespace opene {
                 assert(func_ptr);
 
                 // 计算实参
-                // TODO: 处理引用属性和可空属性
-
-                std::vector<llvm::Value *> arguments_ir;
-                for (Expression *argument : function_call->arguments_) {
-                    llvm::Value *argument_ir = Emit(argument);
-                    assert(argument_ir);
-                    arguments_ir.push_back(argument_ir);
-                }
+                std::vector<llvm::Value *> arguments_ir = EmitArgumentList(function_call);
 
                 // 开始调用
 
@@ -1225,6 +1218,56 @@ namespace opene {
             }
 
             return ref;
+        }
+
+        std::vector<llvm::Value*> EmitArgumentList(FunctionCall *functionCall) {
+
+            // TODO: 处理引用属性和可空属性
+
+            std::vector<llvm::Value *> arguments_ir;
+            for (Expression *argument : functionCall->arguments_) {
+                llvm::Value *argument_ir = Emit(argument);
+                assert(argument_ir);
+                arguments_ir.push_back(argument_ir);
+            }
+
+            assert(functionCall->functor_declare_);
+            FunctorDecl *prototype = functionCall->functor_declare_;
+
+            // 处理不同的参数打包方式
+
+            if (APICommandDecl *api_command_decl = prototype->as<APICommandDecl>()) {
+                ArgumentPassModel argument_pass_model = api_command_decl->argument_pass_model_;
+                llvm::Value *argu_n = CreateInt(arguments_ir.size());
+                if (argument_pass_model == ArgumentPassModel::kSimpleRTTIPack) {
+                    llvm::StructType *arg_pack_ty = llvm::StructType::get(Builder.getInt8Ty(), Builder.getInt64Ty());
+                    llvm::Value *arg_pack_list_ptr = Builder.CreateAlloca(arg_pack_ty, argu_n);
+                    for (size_t idx = 0; idx < arguments_ir.size(); ++idx) {
+//                        llvm::Value *arg_pack_0_ptr = Builder.CreateGEP(arg_pack_list_ptr, {CreateInt(idx), CreateInt(0)});
+//                        llvm::Value *arg_pack_1_ptr = Builder.CreateGEP(arg_pack_list_ptr, {CreateInt(idx), CreateInt(1)});
+                        llvm::Value *arg_pack_ptr = Builder.CreateGEP(arg_pack_ty, arg_pack_list_ptr, CreateInt(idx));
+                        llvm::Value *arg_pack_0_ptr = Builder.CreateStructGEP(arg_pack_ptr, 0);
+                        llvm::Value *arg_pack_1_ptr = Builder.CreateStructGEP(arg_pack_ptr, 1);
+                        StoreVariable(CreateInt(idx, 8), arg_pack_0_ptr);
+                        llvm::Value *write_val = nullptr;
+                        if (arguments_ir[idx]->getType()->isIntegerTy()) {
+                            write_val = Builder.CreateIntCast(arguments_ir[idx], Builder.getInt64Ty(), true);
+                        } else if (arguments_ir[idx]->getType()->isFloatTy()) {
+                            write_val = Builder.CreateFPCast(arguments_ir[idx], Builder.getInt64Ty());
+                        } else if (arguments_ir[idx]->getType()->isPointerTy()) {
+                            write_val = Builder.CreatePtrToInt(arguments_ir[idx], Builder.getInt64Ty());
+                        } else {
+                            assert(false);
+                        }
+                        StoreVariable(write_val, arg_pack_1_ptr);
+                    }
+                    arguments_ir.clear();
+                    arguments_ir.emplace_back(argu_n);
+                    arguments_ir.emplace_back(arg_pack_list_ptr);
+                }
+            }
+
+            return arguments_ir;
         }
 
         llvm::Value *Emit(HierarchyIdentifier *hierarchyIdentifier) {

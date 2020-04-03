@@ -7,7 +7,7 @@
 
 extern "C" {
 
-enum ArguType : char {
+enum SimpleRTTI_ArguType : char {
     /* Integer */
     kInt8='c', kInt16='w', kInt32='d', kInt64='q',
     /* Float */
@@ -17,13 +17,13 @@ enum ArguType : char {
 };
 
 struct SimpleRTArguInfo {
-    ArguType argu_type;
+    SimpleRTTI_ArguType argu_type;
     long long argument_value;
 };
 
 void DebugTraceOutInt(long long llval);
 
-void DebugTraceOut(int n, SimpleRTArguInfo *arguInfoList);
+void DebugTraceOut(int n, SimpleRTArguInfo *arguments);
 
 };
 

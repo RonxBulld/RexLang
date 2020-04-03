@@ -16,8 +16,6 @@ add_definitions(${LLVM_DEFINITIONS})
 SET(IR-Source
         EmitLLVMIR.cpp
         EmitLLVMIR.h
-        EmitOEIR.cpp
-        EmitOEIR.h
         LLVMRTIRBuilder.cpp
         LLVMRTIRBuilder.h
         )

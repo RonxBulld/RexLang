@@ -27,7 +27,7 @@ namespace opene {
         auto lib_search_dirs_flag_str = StringUtil::Join(lib_search_dirs_flag, " ");
         auto libraries_link_flag = ContainerUtil::Map<std::vector, std::string>(dependenceLibs, [](const opene::StringRef &elem){ return "-l" + elem.str(); });
         auto libraries_link_flag_str = StringUtil::Join(libraries_link_flag, " ");
-        std::string link_exec = "clang";
+        std::string link_exec = "clang++";
         std::string target_triple = llvm::sys::getDefaultTargetTriple();
         std::string link_cmd = StringUtil::Sprintf(
                 "%s %s %s %s -o %s -target %s",
