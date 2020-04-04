@@ -128,6 +128,7 @@ sub_program
       params=parameter_decl_list
       (local_vari+=local_variable_decl)*
       statement_list
+      ('.子程序结束')?
     ;
 
 local_variable_decl

@@ -12,6 +12,7 @@ typedef char *RTDynStringTy;
 
 RTDynStringTy create_string(const char *stringLiteral);
 const char *string_data_ref(const RTDynStringTy dynString);
+RTDynStringTy clone_string(const RTDynStringTy dynString);
 
 };
 
