@@ -101,9 +101,10 @@ public:
     Opene_srcContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     Edition_specContext *edition_spec();
-    antlr4::tree::TerminalNode *NEWLINE();
     Src_contentContext *src_content();
     antlr4::tree::TerminalNode *EOF();
+    std::vector<antlr4::tree::TerminalNode *> NEWLINE();
+    antlr4::tree::TerminalNode* NEWLINE(size_t i);
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -304,6 +305,7 @@ public:
     Edition_specContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *INTEGER_LITERAL();
+    antlr4::tree::TerminalNode *NEWLINE();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;

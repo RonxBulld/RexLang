@@ -25,6 +25,9 @@ namespace opene {
         const std::vector<std::string> &GetExecutePath() const;
         const std::vector<std::string> &GetIncludePath() const;
         const std::vector<std::string> &GetLibraryPath() const;
+
+    public:
+        const char *GetLibraryHeadFileExt() const;
     };
 
     extern ProgramDB program_db;

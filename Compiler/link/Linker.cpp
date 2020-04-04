@@ -18,8 +18,11 @@
 namespace opene {
     int Linker::LinkProject(ProjectDB &projectDB) {
 
+        // 中间文件
         std::string objectFilename = projectDB.GetObjectFilename();
+        // 可执行文件
         std::string executeFilename = projectDB.GetExecuteFilename();
+        // 依赖库
         std::vector<opene::StringRef> dependenceLibs = projectDB.GetASTContext().GetDependenceLibraries();
 
         std::vector<std::string> libSearchDirs = program_db.GetLibraryPath();

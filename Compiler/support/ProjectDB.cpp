@@ -36,15 +36,23 @@ namespace opene {
     }
 
     bool ProjectDB::ApplyArgument(const ArgumentParser &argumentParser) {
+
         if (argumentParser.HadSwitch(ProjectDBModuleName, "project")) {
             auto args = argumentParser.GetSwitchArguments(ProjectDBModuleName, "project");
             SetProjectName(args.back());
         }
+
         if (argumentParser.HadSwitch(ProjectDBModuleName, "o")) {
             auto args = argumentParser.GetSwitchArguments(ProjectDBModuleName, "o");
             SetTargetBinName(args.back());
         }
-        SetFileList(argumentParser.GetFreeArguments(ProjectDBModuleName));
+
+        std::vector<std::string> parsing_files;
+        for (const std::string &file : argumentParser.GetFreeArguments(ProjectDBModuleName)) {
+            parsing_files.emplace_back(file);
+        }
+        SetFileList(parsing_files);
+
         return true;
     }
 
