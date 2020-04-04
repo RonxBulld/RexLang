@@ -18,20 +18,27 @@ namespace opene {
     template <typename SrcMapContainer, typename TgtMapContainer, typename Pred>
     bool MergeMap(SrcMapContainer &sourceMap, TgtMapContainer &targetMap, Pred && pred) {
         for (auto & item : sourceMap) {
+
             // 检查冲突
+
             auto found = targetMap.find(item.first);
             if (found != targetMap.end()) {
                 assert(false);
                 return false;
             }
+
             targetMap[item.first] = pred(item.second);
         }
         return true;
     }
 
-    template <typename MapContainer, typename ReturnType = std::remove_const_t<typename MapContainer::mapped_type>>
+    template<
+            typename MapContainer,
+            typename ReturnType = std::remove_const_t<typename MapContainer::mapped_type>,
+            typename ElementType = typename MapContainer::mapped_type
+    >
     bool MergeMap(MapContainer &sourceMap, MapContainer &targetMap) {
-        return MergeMap(sourceMap, targetMap, [](const typename MapContainer::mapped_type &value) -> ReturnType {
+        return MergeMap(sourceMap, targetMap, [](const ElementType &value) -> ReturnType {
             return const_cast<ReturnType>(value);
         });
     }
@@ -39,14 +46,19 @@ namespace opene {
     void SetupHierarchyReferenceType(HierarchyIdentifier *hierarchyIdentifier, IdentifierUsage referenceType) {
         hierarchyIdentifier->identifier_usage_ = referenceType;
         for (NameComponent *name_component : hierarchyIdentifier->name_components_) {
+
             name_component->identifier_usage_ = IdentifierUsage::kAsRightValue;
+
             if (ArrayIndex *array_index = name_component->as<ArrayIndex>()) {
                 array_index->base_->identifier_usage_ = IdentifierUsage::kAsRightValue;
-            } else if (FunctionCall *function_call = name_component->as<FunctionCall>()) {
+            }
+            else if (FunctionCall *function_call = name_component->as<FunctionCall>()) {
                 function_call->function_name_->identifier_usage_ = IdentifierUsage::kAsRightValue;
-            } else if (Identifier *identifier = name_component->as<Identifier>()) {
+            }
+            else if (Identifier *identifier = name_component->as<Identifier>()) {
                 (void) identifier;
-            } else {
+            }
+            else {
                 assert(false);
             }
         }
@@ -205,32 +217,48 @@ namespace opene {
         TranslateUnitPtr translateUnitPtr = this->translate_unit_;
         for (SourceFilePtr sfptr : translateUnitPtr->source_file_) {
             if (GlobalVariableFile *global_variable_file = sfptr->as<GlobalVariableFile>()) {
+
                 // 全局变量
+
                 bool success = MergeMap(global_variable_file->global_variable_map_, translateUnitPtr->global_variables_);
                 if (!success) { return false; }
+
             } else if (DataStructureFile *data_structure_file_ptr = sfptr->as<DataStructureFile>()) {
+
                 // 数据结构
+
                 bool success = MergeMap(data_structure_file_ptr->structure_decl_map_, translateUnitPtr->global_type_, [](StructureDeclPtr v) -> TypeDeclPtr {
                     return v->as<TypeDecl>();
                 });
                 if (!success) { return false; }
+
             } else if (ProgramSetFile *program_set_file = sfptr->as<ProgramSetFile>()) {
+
                 // 外部库引用
+
                 for (const TString &library_name : program_set_file->libraries_) {
                     translateUnitPtr->libraries_list_.insert(library_name.string_);
                 }
+
                 // 程序集
+
                 ProgSetDeclPtr prog_set_decl = program_set_file->program_set_declares_;
                 translateUnitPtr->program_sets_[prog_set_decl->name_.string_] = prog_set_decl;
+
                 // 函数定义
+
                 bool success = MergeMap(prog_set_decl->function_decls_, translateUnitPtr->function_decls_);
                 if (!success) { return false; }
+
                 success = MergeMap(prog_set_decl->function_decls_, translateUnitPtr->functor_declares_, [](FunctionDeclPtr v) -> FunctorDeclPtr {
                     return v->as<FunctorDecl>();
                 });
                 if (!success) { return false; }
+
             } else if (DllDefineFile *dll_define_file = sfptr->as<DllDefineFile>()) {
+
                 // DLL声明
+
                 bool success = MergeMap(dll_define_file->dll_declares_, translateUnitPtr->dll_declares_);
                 if (!success) { return success; }
                 success = MergeMap(dll_define_file->dll_declares_, translateUnitPtr->functor_declares_, [](APICommandDeclPtr v) -> FunctorDeclPtr {

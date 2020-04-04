@@ -41,9 +41,8 @@ OTHER_CHAR: .;
 
 
 opene_src
-    : edition_spec
-      NEWLINE
-      src_content
+    : edition_spec NEWLINE*
+      src_content NEWLINE*
       EOF
     ;
 
@@ -55,7 +54,7 @@ src_content
     ;
 
 program_set_file
-    : ('.支持库' libraries+=IDENTIFIER NEWLINE)*
+    : ('.支持库' libraries+=IDENTIFIER NEWLINE)* NEWLINE*
       prog_set
     ;
 
@@ -93,7 +92,7 @@ global_variable_item
     ;
 
 edition_spec
-    : '.版本' INTEGER_LITERAL
+    : '.版本' INTEGER_LITERAL NEWLINE
     ;
 
 struct_declare

@@ -8,6 +8,7 @@
 #include "opene_compiler/sematic_analysis/SematicAnalysis.h"
 #include "../lite_util/StringUtil.h"
 #include "../lite_util/ContainerUtil.h"
+#include "support/ProgramDB.h"
 
 namespace opene {
     FileEntry FileEntry::MakeFromFile(const std::string &filename) {
@@ -102,20 +103,42 @@ namespace opene {
     }
 
     TranslateUnitPtr OECompilerInstance::runParser() {
+
+        // 分析指定的源代码文件
+
         TranslateUnitPtr translate_unit = this->ast_generate_.BuildASTFromCode(this->parse_code_, "", this->instance_name_);
         this->translate_units_.push_back(translate_unit);
-        // 对于引入的外部库进行分析
+
+        // 对于源代码文件中引入的外部库进行分析
+
+        const std::vector<std::string> &include_dirs = program_db.GetIncludePath();
+
         if (!translate_unit->source_file_.empty()) {
             if (ProgramSetFile *program_set_file = translate_unit->source_file_.front()->as<ProgramSetFile>()) {
                 for (const TString &library : program_set_file->libraries_) {
+
                     StringRef library_name = library.string_;
-                    if (this->libraries_name.find(library_name) == this->libraries_name.end()) {
-                        this->libraries_name.insert(library_name);
-                        FileEntry file_entry = FileEntry::MakeFromFile("libraries/" + library_name.str() + ".elh");
-                        TranslateUnit *library_tu = this->parseOnFile(file_entry);
-                        assert(library_tu);
-                        this->translate_units_.push_back(library_tu);
+                    if (this->libraries_name.find(library_name) != this->libraries_name.end()) {
+                        continue;
                     }
+                    this->libraries_name.insert(library_name);
+
+                    // 尝试探测库的声明文件
+
+                    FileEntry file_entry;
+
+                    for (const std::string &include_dir : include_dirs) {
+                        FileEntry test_file_entry = FileEntry::MakeFromFile(include_dir + "/" + library_name.str() + "." + program_db.GetLibraryHeadFileExt());
+                        if (test_file_entry.Valid()) {
+                            file_entry = test_file_entry;
+                            break;
+                        }
+                    }
+                    assert(file_entry.Valid());
+
+                    TranslateUnit *library_tu = this->parseOnFile(file_entry);
+                    assert(library_tu);
+
                 }
             }
         }
@@ -123,12 +146,15 @@ namespace opene {
     }
 
     TranslateUnitPtr OECompilerInstance::parseOnFile(const FileEntry &fileEntry) {
+        std::cout << "分析文件：" << fileEntry.GetFilename() << std::endl;
         this->setParseCode(fileEntry.GetCode());
         return this->runParser();
     }
 
     bool OECompilerInstance::assembleTranslate() {
+
         // 将翻译单元列表中的项目进行依次组装
+
         if (this->translate_units_.empty()) { return true; }
         this->major_translate_unit_ = this->translate_units_[0];
         for (size_t idx = 1; idx < this->translate_units_.size(); idx++) {

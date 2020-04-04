@@ -56,4 +56,8 @@ namespace opene {
     const std::vector<std::string> &ProgramDB::GetLibraryPath() const {
         return library_path_;
     }
+
+    const char *ProgramDB::GetLibraryHeadFileExt() const {
+        return "txt";
+    }
 }
