@@ -150,6 +150,24 @@ namespace opene {
         }
     }
 
+    SimpleRTTI_ArguType LLVMRTIRBuilder::GetValueRTTIType(llvm::Value *value) {
+        return GetTypeRTTIType(value->getType());
+    }
+
+    SimpleRTTI_ArguType LLVMRTIRBuilder::GetTypeRTTIType(llvm::Type *type) {
+        SimpleRTTI_ArguType ty;
+        if (type->isIntegerTy(8))           ty = SimpleRTTI_ArguType::kInt8;
+        else if (type->isIntegerTy(16))     ty = SimpleRTTI_ArguType::kInt16;
+        else if (type->isIntegerTy(32))     ty = SimpleRTTI_ArguType::kInt32;
+        else if (type->isIntegerTy(64))     ty = SimpleRTTI_ArguType::kInt64;
+        else if (type->isFloatTy())                 ty = SimpleRTTI_ArguType::kFloat;
+        else if (type->isDoubleTy())                ty = SimpleRTTI_ArguType::kDouble;
+        else if (isArrayType(type))                 ty = SimpleRTTI_ArguType::kArray;
+        else if (isStringType(type))                ty = SimpleRTTI_ArguType::kString;
+        else if (isStructureType(type))             ty = SimpleRTTI_ArguType::kStruct;
+        else { assert(false); ty = SimpleRTTI_ArguType::kUnknow; }
+        return ty;
+    }
 }
 
 // 数组
@@ -199,13 +217,13 @@ namespace opene {
         // 准备维度信息
 
         llvm::Type *element_type = nullptr;
-        std::vector<llvm::Constant*> lldims;
+        std::vector<llvm::Constant*> dims_with_llconst;
         size_t element_count = 1;
         for (llvm::ArrayType *__array_type = arrayType; __array_type; __array_type = llvm::dyn_cast<llvm::ArrayType>(element_type)) {
             size_t dim_n = __array_type->getArrayNumElements();
             element_count *= dim_n;
             llvm::Constant *dim = CreateInt(dim_n);
-            lldims.push_back(dim);
+            dims_with_llconst.push_back(dim);
             element_type = __array_type->getElementType();
         }
         assert(element_type);
@@ -215,14 +233,17 @@ namespace opene {
         llvm::FunctionCallee create_array_fn = getRTAPIFunction(
                 DoNewCoreRTAPINameMangle("create_array"),
                 getRTAPIArrayType(),    // 数组数据指针
-                {Builder.getInt32Ty()},   // 维度数
+                {Builder.getInt8Ty(), Builder.getInt32Ty()},   // 维度数
                 true
         );
 
         // 执行调用
 
-        std::vector<llvm::Value*> args{CreateInt(lldims.size())};
-        args.insert(args.end(), lldims.begin(), lldims.end());
+        std::vector<llvm::Value*> args{
+            CreateInt(GetTypeRTTIType(arrayType->getElementType()), 8),
+            CreateInt(dims_with_llconst.size())
+        };
+        args.insert(args.end(), dims_with_llconst.begin(), dims_with_llconst.end());
         llvm::Value *ptr_to_array = Builder.CreateCall(create_array_fn, args);
 
         // 初始化数组
