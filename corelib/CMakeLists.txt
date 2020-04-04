@@ -5,7 +5,7 @@ PROJECT(newcore)
 
 SET(newcore-Source
         newcore.cpp
-        newcore.h runtime_api.cpp runtime_api.h)
+        newcore.h array_runtime_api.cpp array_runtime_api.h string_runtime_api.cpp string_runtime_api.h)
 
 ADD_LIBRARY(newcore STATIC
         ${newcore-Source}

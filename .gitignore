@@ -4,4 +4,5 @@ bin
 obj
 .idea
 CMakeFiles
-cmake-build-debug
+cmake-build-*
+sysroot
