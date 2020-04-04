@@ -18,5 +18,5 @@ ADD_LIBRARY(CodeGen SHARED
         ${CodeGen-Source}
         )
 
-llvm_map_components_to_libnames(llvm_libs support core irreader bitwriter)
-target_link_libraries(CodeGen ${llvm_libs})
+llvm_map_components_to_libnames(LLVM bitwriter)
+target_link_libraries(CodeGen LLVM)

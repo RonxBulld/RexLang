@@ -24,5 +24,5 @@ ADD_LIBRARY(IR SHARED
         ${IR-Source}
         )
 
-llvm_map_components_to_libnames(llvm_libs support core irreader bitwriter X86)
-target_link_libraries(IR ${llvm_libs})
+llvm_map_components_to_libnames(LLVM support core irreader X86)
+target_link_libraries(IR LLVM)
