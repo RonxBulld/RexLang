@@ -18,6 +18,7 @@ SET(IR-Source
         EmitLLVMIR.h
         LLVMRTIRBuilder.cpp
         LLVMRTIRBuilder.h
+        SimpleRTTI_ArguType.h
         )
 
 ADD_LIBRARY(IR SHARED
