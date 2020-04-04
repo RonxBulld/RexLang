@@ -6,6 +6,7 @@
 #define OPENELANGUAGE_SIMPLERTTI_ARGUTYPE_H
 
 enum SimpleRTTI_ArguType : char {
+    kUnknow = '\0',
     /* Integer */
     kInt8 = 'c', kInt16 = 'w', kInt32 = 'd', kInt64 = 'q',
     /* Float */
@@ -14,7 +15,7 @@ enum SimpleRTTI_ArguType : char {
     kArray = 'a', kString = 's', kStruct = 't',
 };
 
-unsigned GetTypeStorageSize(SimpleRTTI_ArguType ty) {
+inline unsigned GetTypeStorageSize(SimpleRTTI_ArguType ty) {
     switch (ty) {
         case SimpleRTTI_ArguType::kInt8:    return 1;
         case SimpleRTTI_ArguType::kInt16:   return 2;

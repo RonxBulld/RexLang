@@ -29,6 +29,7 @@
 #include "../opene_compiler/ASTUtility.h"
 #include "../support/ProjectDB.h"
 #include "../opene_compiler/TypeAssert.h"
+#include "SimpleRTTI_ArguType.h"
 
 namespace opene {
 
@@ -1251,35 +1252,25 @@ namespace opene {
                     // 打包参数
 
                     for (size_t idx = 0; idx < arguments_ir.size(); ++idx) {
+                        llvm::Value *argu_ir = arguments_ir[idx];
                         llvm::Value *arg_pack_ptr = Builder.CreateGEP(arg_pack_ty, arg_pack_list_ptr, CreateInt(idx));
                         llvm::Value *arg_pack_0_ptr = Builder.CreateStructGEP(arg_pack_ptr, 0);
                         llvm::Value *arg_pack_1_ptr = Builder.CreateStructGEP(arg_pack_ptr, 1);
 
                         // 写入类型
-                        // TODO: 当运行时库中的类型定义被改变时需要注意这里也要同步修改
 
-                        char ty = '\0';
-                        if (arguments_ir[idx]->getType()->isIntegerTy(8))           ty = 'c';
-                        else if (arguments_ir[idx]->getType()->isIntegerTy(16))     ty = 'w';
-                        else if (arguments_ir[idx]->getType()->isIntegerTy(32))     ty = 'd';
-                        else if (arguments_ir[idx]->getType()->isIntegerTy(64))     ty = 'q';
-                        else if (arguments_ir[idx]->getType()->isFloatTy())                 ty = 'f';
-                        else if (arguments_ir[idx]->getType()->isDoubleTy())                ty = 'e';
-                        else if (RTBuilder.isArrayType(arguments_ir[idx]->getType()))       ty = 'a';
-                        else if (RTBuilder.isStringType(arguments_ir[idx]->getType()))      ty = 's';
-                        else if (RTBuilder.isStructureType(arguments_ir[idx]->getType()))   ty = 't';
-                        else { assert(false); }
+                        char ty = RTBuilder.GetValueRTTIType(argu_ir);
                         StoreVariable(CreateInt(ty, 8), arg_pack_0_ptr);
 
                         // 写入值
 
                         llvm::Value *write_val = nullptr;
-                        if (arguments_ir[idx]->getType()->isIntegerTy()) {
-                            write_val = Builder.CreateIntCast(arguments_ir[idx], Builder.getInt64Ty(), true);
-                        } else if (arguments_ir[idx]->getType()->isFloatTy()) {
-                            write_val = Builder.CreateFPCast(arguments_ir[idx], Builder.getInt64Ty());
-                        } else if (arguments_ir[idx]->getType()->isPointerTy()) {
-                            write_val = Builder.CreatePtrToInt(arguments_ir[idx], Builder.getInt64Ty());
+                        if (argu_ir->getType()->isIntegerTy()) {
+                            write_val = Builder.CreateIntCast(argu_ir, Builder.getInt64Ty(), true);
+                        } else if (argu_ir->getType()->isFloatTy()) {
+                            write_val = Builder.CreateFPCast(argu_ir, Builder.getInt64Ty());
+                        } else if (argu_ir->getType()->isPointerTy()) {
+                            write_val = Builder.CreatePtrToInt(argu_ir, Builder.getInt64Ty());
                         } else {
                             assert(false);
                         }

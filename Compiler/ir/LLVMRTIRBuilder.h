@@ -20,7 +20,9 @@
 #include <llvm/IR/Verifier.h>
 #include <llvm/IR/DerivedTypes.h>
 #include <llvm/IR/GlobalVariable.h>
+
 #include "../opene_compiler/NodeDecl.h"
+#include "SimpleRTTI_ArguType.h"
 
 namespace opene {
     class LLVMRTIRBuilder;
@@ -68,11 +70,23 @@ namespace opene {
     class LLVMRTIRBuilder : public RuntimeAPICreator {
     private:
     public:
+        /*
+         * 创建聚合类型
+         * 如果非聚合类型则函数执行失败
+         */
         llvm::Value *CreateAggregateObject(llvm::Type *llType) override;
 
-    private:
-    public:
+        /*
+         * 创建指定类型的初始值
+         */
         llvm::Value *CreateInitializeValue(llvm::Type *llType) override;
+
+        /*
+         * 获得值的运行时类型标记
+         */
+        SimpleRTTI_ArguType GetValueRTTIType(llvm::Value *value);
+
+        SimpleRTTI_ArguType GetTypeRTTIType(llvm::Type *type);
 
     private:
         llvm::Value *CloneAggregateObject(llvm::Value *objectPtr) override;
@@ -81,13 +95,9 @@ namespace opene {
     public:
         LLVMRTIRBuilder(llvm::Module * Module, llvm::IRBuilder<> &Builder);
 
-        /*
-         * 数组的内存布局：
-         * 包含该字段在内的内存总长度 - 4字节
-         * 数组维度数量 - 4字节
-         * 数组维度列表 - 4*N字节
-         * 数组元素列表 - M字节
-         */
+        /*********************
+         * 数组
+         *********************/
 
         typedef llvm::PointerType DynamicArrayRTType;
         DynamicArrayRTType *getRTAPIArrayType();
@@ -119,6 +129,9 @@ namespace opene {
          * 获取数组元素类型
          */
         llvm::Type *GetArrayElementType(DynamicArrayRTType *arrayType);
+        /*
+         * 获取数组元素类型
+         */
         llvm::Type *GetArrayElementType(llvm::ArrayType *arrayType);
         /*
          * 获取数组指定元素指针
@@ -154,13 +167,9 @@ namespace opene {
         llvm::Value *ZeroArray(llvm::Value *arrayPtr);
 
 
-        /*
-         * 结构体的内存布局：
-         * 包含该字段在内的内存总长度 - 4字节
-         * 数组维度数量 - 4字节
-         * 数组维度列表 - 4*N字节
-         * 数组元素列表 - M字节
-         */
+        /*********************
+         * 结构体
+         *********************/
 
         typedef llvm::PointerType StructureType;
         StructureType *getStructureType(llvm::StructType *structType);
@@ -188,11 +197,9 @@ namespace opene {
         llvm::Value *CloneStructure(llvm::Value *structurePtr);
 
 
-        /*
-         * 字符串的内存布局：
-         * 字符串长度 - 4字节
-         * 字符串内容 - M字节
-         */
+        /*********************
+         * 字符串和字节集
+         *********************/
 
         typedef llvm::PointerType StringType;
         StringType *getStringType();
