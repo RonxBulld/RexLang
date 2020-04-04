@@ -1237,18 +1237,42 @@ namespace opene {
             // 处理不同的参数打包方式
 
             if (APICommandDecl *api_command_decl = prototype->as<APICommandDecl>()) {
+
                 ArgumentPassModel argument_pass_model = api_command_decl->argument_pass_model_;
                 llvm::Value *argu_n = CreateInt(arguments_ir.size());
+
                 if (argument_pass_model == ArgumentPassModel::kSimpleRTTIPack) {
+
+                    // 准备信息
+
                     llvm::StructType *arg_pack_ty = llvm::StructType::get(Builder.getInt8Ty(), Builder.getInt64Ty());
                     llvm::Value *arg_pack_list_ptr = Builder.CreateAlloca(arg_pack_ty, argu_n);
+
+                    // 打包参数
+
                     for (size_t idx = 0; idx < arguments_ir.size(); ++idx) {
-//                        llvm::Value *arg_pack_0_ptr = Builder.CreateGEP(arg_pack_list_ptr, {CreateInt(idx), CreateInt(0)});
-//                        llvm::Value *arg_pack_1_ptr = Builder.CreateGEP(arg_pack_list_ptr, {CreateInt(idx), CreateInt(1)});
                         llvm::Value *arg_pack_ptr = Builder.CreateGEP(arg_pack_ty, arg_pack_list_ptr, CreateInt(idx));
                         llvm::Value *arg_pack_0_ptr = Builder.CreateStructGEP(arg_pack_ptr, 0);
                         llvm::Value *arg_pack_1_ptr = Builder.CreateStructGEP(arg_pack_ptr, 1);
-                        StoreVariable(CreateInt(idx, 8), arg_pack_0_ptr);
+
+                        // 写入类型
+                        // TODO: 当运行时库中的类型定义被改变时需要注意这里也要同步修改
+
+                        char ty = '\0';
+                        if (arguments_ir[idx]->getType()->isIntegerTy(8))           ty = 'c';
+                        else if (arguments_ir[idx]->getType()->isIntegerTy(16))     ty = 'w';
+                        else if (arguments_ir[idx]->getType()->isIntegerTy(32))     ty = 'd';
+                        else if (arguments_ir[idx]->getType()->isIntegerTy(64))     ty = 'q';
+                        else if (arguments_ir[idx]->getType()->isFloatTy())                 ty = 'f';
+                        else if (arguments_ir[idx]->getType()->isDoubleTy())                ty = 'e';
+                        else if (RTBuilder.isArrayType(arguments_ir[idx]->getType()))       ty = 'a';
+                        else if (RTBuilder.isStringType(arguments_ir[idx]->getType()))      ty = 's';
+                        else if (RTBuilder.isStructureType(arguments_ir[idx]->getType()))   ty = 't';
+                        else { assert(false); }
+                        StoreVariable(CreateInt(ty, 8), arg_pack_0_ptr);
+
+                        // 写入值
+
                         llvm::Value *write_val = nullptr;
                         if (arguments_ir[idx]->getType()->isIntegerTy()) {
                             write_val = Builder.CreateIntCast(arguments_ir[idx], Builder.getInt64Ty(), true);
@@ -1609,8 +1633,12 @@ namespace opene {
         }
 
         llvm::Value *Emit(ValueOfString *valueOfString) {
+
             // 创建指向字符串常量值的对象，就不需要Load了
-            return Builder.CreateGlobalStringPtr(valueOfString->string_literal_.string_.str(), "$.pstr");
+
+            llvm::Value *strptr = Builder.CreateGlobalStringPtr(valueOfString->string_literal_.string_.str(), "$.pstr");
+            llvm::Value *str_rt_val = RTBuilder.CreateString(strptr);
+            return str_rt_val;
         }
 
     public:

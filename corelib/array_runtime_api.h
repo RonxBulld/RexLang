@@ -2,8 +2,8 @@
 // Created by rex on 2020/3/22.
 //
 
-#ifndef OPENELANGUAGE_RUNTIME_API_H
-#define OPENELANGUAGE_RUNTIME_API_H
+#ifndef OPENELANGUAGE_ARRAY_RUNTIME_API_H
+#define OPENELANGUAGE_ARRAY_RUNTIME_API_H
 
 extern "C" {
 
@@ -15,4 +15,4 @@ int *get_array_ep_32bit(RTDynArrayTy, int, ...);
 
 };
 
-#endif //OPENELANGUAGE_RUNTIME_API_H
+#endif //OPENELANGUAGE_ARRAY_RUNTIME_API_H

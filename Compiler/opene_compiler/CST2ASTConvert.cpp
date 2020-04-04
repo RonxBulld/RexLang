@@ -696,6 +696,7 @@ namespace opene {
     antlrcpp::Any CST2ASTConvert::visitString_value(openeLangParser::String_valueContext *context) {
         ValueOfStringPtr value_of_string = CreateNode<ValueOfString>(context->getStart(), context->getStop());
         value_of_string->string_literal_ = GetTextIfExist(context->STRING_LITERAL()->getSymbol());
+        RemoveRoundQuotes(value_of_string->string_literal_);
         return NodeWarp(value_of_string);
     }
 

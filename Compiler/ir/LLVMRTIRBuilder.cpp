@@ -98,7 +98,7 @@ namespace opene {
             return CreateStructureInst(llvm::dyn_cast<LLVMRTIRBuilder::StructureType>(llType));
 
         } else if (isStringType(llType)) {    // 最后字节集和字符串混为一谈
-            return CreateString();
+            return CreateString(nullptr);
 
         } else {
             assert(false);
@@ -556,13 +556,13 @@ namespace opene {
         return false;
     }
 
-    llvm::Value *LLVMRTIRBuilder::CreateString() {
+    llvm::Value *LLVMRTIRBuilder::CreateString(llvm::Value *stringLiteral) {
         llvm::FunctionCallee create_string_fn = getRTAPIFunction(
                 DoNewCoreRTAPINameMangle("create_string"),
                 getStringType(),
-                {}
+                {Builder.getInt8PtrTy()}
         );
-        return Builder.CreateCall(create_string_fn, {});
+        return Builder.CreateCall(create_string_fn, {stringLiteral});
     }
 
     llvm::Value *LLVMRTIRBuilder::CloneString(llvm::Value *stringPtr) {
