@@ -7,14 +7,7 @@
 
 extern "C" {
 
-enum SimpleRTTI_ArguType : char {
-    /* Integer */
-    kInt8='c', kInt16='w', kInt32='d', kInt64='q',
-    /* Float */
-    kFloat='f', kDouble='e',
-    /* Aggregates */
-    kArray='a', kString='s', kStruct='t',
-};
+#include "../Compiler/ir/SimpleRTTI_ArguType.h"
 
 struct SimpleRTArguInfo {
     SimpleRTTI_ArguType argu_type;

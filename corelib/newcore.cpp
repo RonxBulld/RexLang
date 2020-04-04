@@ -34,6 +34,7 @@ static std::string ValueToString(SimpleRTArguInfo *value) {
             return std::to_string(*(double*)(&value->argument_value));
         }
         case SimpleRTTI_ArguType::kArray: {
+
             return "[]";
         }
         case SimpleRTTI_ArguType::kString: {

@@ -11,19 +11,24 @@
 #include <math.h>
 #include <stdio.h>
 
-/*
+/*************************************
  * 动态数组的内存模型：
+ * 元素类型
  * 维度个数
  * 维度列表
  * 数据空间
- */
+ *************************************/
+
+static SimpleRTTI_ArguType *ArrayElementTy_Ref(RTDynArrayTy arrayPtr) {
+    return (SimpleRTTI_ArguType *)  ((unsigned long)arrayPtr + 0);
+}
 
 static int *ArrayDimNum_Ref(RTDynArrayTy arrayPtr) {
-    return &reinterpret_cast<int*>(arrayPtr)[0];
+    return (int *)                  ((unsigned long)arrayPtr + sizeof(SimpleRTTI_ArguType));
 }
 
 static int *ArrayDims_Ref(RTDynArrayTy arrayPtr) {
-    return &reinterpret_cast<int*>(arrayPtr)[1];
+    return (int *)                  ((unsigned long)arrayPtr + sizeof(SimpleRTTI_ArguType) + sizeof(int));
 }
 
 template <typename ElemTy>
@@ -31,6 +36,9 @@ static ElemTy *ArrayDatas_Ref(RTDynArrayTy arrayPtr) {
     return reinterpret_cast<ElemTy *>(ArrayDims_Ref(arrayPtr) + *ArrayDimNum_Ref(arrayPtr));
 }
 
+/*
+ * 获取数组容量
+ */
 static int ArrayCapacity(RTDynArrayTy arrayPtr) {
     int dims_n = *ArrayDimNum_Ref(arrayPtr);
     int *dim_ptr = ArrayDims_Ref(arrayPtr);
@@ -39,10 +47,12 @@ static int ArrayCapacity(RTDynArrayTy arrayPtr) {
     return size;
 }
 
-RTDynArrayTy create_array(int dims_n, ...) {
-    int mem_size = sizeof(int) + dims_n * sizeof(int);
+RTDynArrayTy create_array(SimpleRTTI_ArguType ety, int dims_n, ...) {
+    int mem_size = sizeof(SimpleRTTI_ArguType) + sizeof(int) + dims_n * sizeof(int);
     int *dims = (int*)alloca(dims_n * sizeof(int));
     int element_count = 1;
+
+    // 获取维度列表并计算元素总数
 
     va_list ap;
     va_start(ap, dims_n);
@@ -53,15 +63,20 @@ RTDynArrayTy create_array(int dims_n, ...) {
     }
     va_end(ap);
 
-    mem_size += element_count * sizeof(uint64_t);
-    int *p = (int*)malloc(mem_size);
+    mem_size += element_count * GetTypeStorageSize(ety);
+    RTDynArrayTy new_array = (RTDynArrayTy)malloc(mem_size);
 
-    p[0] = dims_n;
-    for (int i = 0; i < dims_n; ++i) { p[i + 1] = dims[0]; }
+    *ArrayElementTy_Ref(new_array) = ety;
+    *ArrayDimNum_Ref(new_array) = dims_n;
+    int *array_dims_ref = ArrayDims_Ref(new_array);
+    for (int i = 0; i < dims_n; ++i) { array_dims_ref[i] = dims[i]; }
 
-    return reinterpret_cast<RTDynArrayTy>(p);
+    return new_array;
 }
 
+/*
+ * 将多维索引转换为一维
+ */
 static int GetLinearIndex(RTDynArrayTy arrayPtr, int dims_n, va_list ap) {
     int index = 0;
     if (dims_n == 1) {
