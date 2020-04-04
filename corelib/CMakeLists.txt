@@ -11,6 +11,4 @@ ADD_LIBRARY(newcore STATIC
         ${newcore-Source}
         )
 
-target_link_libraries(newcore ${llvm_libs})
-
 file(COPY "corelib.txt" DESTINATION "${INSTALLROOT}/include/")

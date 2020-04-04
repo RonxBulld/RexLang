@@ -3,6 +3,15 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.7.2)
 
 PROJECT(Link)
 
+FIND_PROGRAM(CLANG++ NAMES clang++ clang++-9 clang++-*)
+IF("${CLANG++}" STREQUAL "CLANG++-NOTFOUND")
+    MESSAGE(FATAL_ERROR "Cannot found linker.")
+ELSE()
+    MESSAGE(STATUS "Using ${CLANG++} as linker.")
+ENDIF()
+
+ADD_DEFINITIONS(-DLINKER="${CLANG++}")
+
 FIND_PACKAGE(LLVM 9 REQUIRED CONFIG PATHS /mnt/d/DevCol/ NO_DEFAULT_PATH)
 MESSAGE(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 MESSAGE(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
@@ -18,5 +27,4 @@ ADD_LIBRARY(Link SHARED
         ${Link-Source}
         )
 
-llvm_map_components_to_libnames(llvm_libs support core bitreader bitwriter)
-target_link_libraries(Link ${llvm_libs} lite_util Support)
+target_link_libraries(Link lite_util Support)

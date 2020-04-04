@@ -1620,12 +1620,13 @@ namespace opene {
                   RTBuilder(TheModule, Builder) {
 
             // 初始化发出目标代码的所有目标
+            // TODO: 如需增加平台支持则修改此处
 
-            llvm::InitializeAllTargetInfos();
-            llvm::InitializeAllTargets();
-            llvm::InitializeAllTargetMCs();
-            llvm::InitializeAllAsmParsers();
-            llvm::InitializeAllAsmPrinters();
+            LLVMInitializeX86TargetInfo();
+            LLVMInitializeX86Target();
+            LLVMInitializeX86TargetMC();
+            LLVMInitializeX86AsmParser();
+            LLVMInitializeX86AsmPrinter();
 
             // 设置目标三元组
 
