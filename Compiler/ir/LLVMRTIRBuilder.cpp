@@ -562,6 +562,11 @@ namespace opene {
                 getStringType(),
                 {Builder.getInt8PtrTy()}
         );
+
+        if (!stringLiteral) {
+            stringLiteral = Builder.CreateIntToPtr(CreateInt(0, sizeof(void*)), Builder.getInt8PtrTy());
+        }
+
         return Builder.CreateCall(create_string_fn, {stringLiteral});
     }
 

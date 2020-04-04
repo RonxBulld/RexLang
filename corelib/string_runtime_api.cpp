@@ -13,7 +13,7 @@
  * 数据空间
  */
 
-static const char *empty_string_literal = "                                ";
+static const char *empty_string_literal = "";
 
 RTDynStringTy create_string(const char *stringLiteral) {
     if (!stringLiteral) {
@@ -29,4 +29,8 @@ RTDynStringTy create_string(const char *stringLiteral) {
 
 const char *string_data_ref(const RTDynStringTy dynString) {
     return dynString + sizeof(size_t);
+}
+
+RTDynStringTy clone_string(const RTDynStringTy dynString) {
+    return create_string(string_data_ref(dynString));
 }
