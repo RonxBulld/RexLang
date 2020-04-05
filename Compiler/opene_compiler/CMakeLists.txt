@@ -3,7 +3,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.7.2)
 
 PROJECT(OECompilerParse)
 
-set(antlr4-demo-GENERATED_SRC
+set(antlr4-GENERATED_SRC
         ${PROJECT_SOURCE_DIR}/gen/openeLangBaseListener.cpp
         ${PROJECT_SOURCE_DIR}/gen/openeLangBaseListener.h
         ${PROJECT_SOURCE_DIR}/gen/openeLangBaseVisitor.cpp
@@ -18,16 +18,16 @@ set(antlr4-demo-GENERATED_SRC
         ${PROJECT_SOURCE_DIR}/gen/openeLangVisitor.h
         )
 
-foreach(src_file ${antlr4-demo-GENERATED_SRC})
+foreach(src_file ${antlr4-GENERATED_SRC})
     set_source_files_properties(
             ${src_file}
             PROPERTIES
             GENERATED TRUE
     )
-endforeach(src_file ${antlr4-demo-GENERATED_SRC})
+endforeach(src_file ${antlr4-GENERATED_SRC})
 
-add_custom_target(GenerateParser DEPENDS ${antlr4-demo-GENERATED_SRC})
-add_custom_command(OUTPUT ${antlr4-demo-GENERATED_SRC}
+add_custom_target(GenerateParser DEPENDS ${antlr4-GENERATED_SRC})
+add_custom_command(OUTPUT ${antlr4-GENERATED_SRC}
         COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_SOURCE_DIR}/gen/
         COMMAND antlr4 -o ${PROJECT_SOURCE_DIR}/gen -lib ${PROJECT_SOURCE_DIR}/gen -encoding utf-8 -long-messages -listener -visitor -package opene -Dlanguage=Cpp ${PROJECT_SOURCE_DIR}/openeLang.g4
         WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
@@ -35,7 +35,7 @@ add_custom_command(OUTPUT ${antlr4-demo-GENERATED_SRC}
         )
 
 SET(OECompilerParse-Source
-        ${antlr4-demo-GENERATED_SRC}
+        ${antlr4-GENERATED_SRC}
         AstGenerate.cpp
         AstGenerate.h
         utilities/Diagnostic.cpp
