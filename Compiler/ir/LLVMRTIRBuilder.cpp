@@ -240,7 +240,7 @@ namespace opene {
         // 执行调用
 
         std::vector<llvm::Value*> args{
-            CreateInt(GetTypeRTTIType(arrayType->getElementType()), 8),
+            CreateInt(GetTypeRTTIType(GetArrayElementType(arrayType)), 8),
             CreateInt(dims_with_llconst.size())
         };
         args.insert(args.end(), dims_with_llconst.begin(), dims_with_llconst.end());
