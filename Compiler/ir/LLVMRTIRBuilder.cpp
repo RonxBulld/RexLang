@@ -73,7 +73,7 @@ namespace opene {
     size_t RuntimeAPICreator::getTypeByteWidth(llvm::Type *type) const {
         size_t bit_width = 0;
         if (type->isPointerTy()) {
-            bit_width = Builder.getInt8PtrTy()->getIntegerBitWidth();
+            bit_width = Module.getDataLayout().getPointerSizeInBits();
         } else if (type->isIntegerTy()) {
             bit_width = type->getIntegerBitWidth();
         } else if (type->isFloatTy()) {
