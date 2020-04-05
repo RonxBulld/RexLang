@@ -5,6 +5,9 @@
 #ifndef OPENELANGUAGE_ARRAY_RUNTIME_API_H
 #define OPENELANGUAGE_ARRAY_RUNTIME_API_H
 
+
+#include <stdint.h>
+
 extern "C" {
 
 #include "../Compiler/ir/SimpleRTTI_ArguType.h"
@@ -57,7 +60,11 @@ unsigned long long get_element_as_bit(RTDynArrayTy arrayPtr, int dims_n, ...);
 
 void init_array_32bit(RTDynArrayTy arrayPtr, int, ...);
 
-int *get_array_ep_32bit(RTDynArrayTy arrayPtr, int, ...);
+int32_t *get_array_ep_32bit(RTDynArrayTy arrayPtr, int, ...);
+
+void init_array_64bit(RTDynArrayTy arrayPtr, int, ...);
+
+int64_t *get_array_ep_64bit(RTDynArrayTy arrayPtr, int, ...);
 
 };
 
