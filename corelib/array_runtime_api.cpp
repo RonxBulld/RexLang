@@ -6,7 +6,6 @@
 
 #include <stdlib.h>
 #include <stdarg.h>
-#include <stdint.h>
 #include <assert.h>
 #include <math.h>
 #include <stdio.h>
@@ -154,5 +153,26 @@ int *get_array_ep_32bit(RTDynArrayTy arrayPtr, int dims_n, ...) {
     int index = GetLinearIndex(arrayPtr, dims_n, ap);
     va_end(ap);
     int32_t * elem_ptr = ArrayDatas_Ref<int32_t>(arrayPtr) + index;
+    return elem_ptr;
+}
+
+void init_array_64bit(RTDynArrayTy arrayPtr, int n, ...) {
+    va_list ap;
+    va_start(ap, n);
+    int64_t *data_ptr = ArrayDatas_Ref<int64_t>(arrayPtr);
+    int capacity = ArraySize(arrayPtr);
+    n = n > capacity ? capacity : n;
+    for (int i = 0; i < n; ++i) {
+        data_ptr[i] = va_arg(ap, int64_t);
+    }
+    va_end(ap);
+}
+
+int64_t *get_array_ep_64bit(RTDynArrayTy arrayPtr, int dims_n, ...) {
+    va_list ap;
+    va_start(ap, dims_n);
+    int index = GetLinearIndex(arrayPtr, dims_n, ap);
+    va_end(ap);
+    int64_t * elem_ptr = ArrayDatas_Ref<int64_t>(arrayPtr) + index;
     return elem_ptr;
 }
