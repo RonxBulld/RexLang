@@ -1,0 +1,38 @@
+
+SET(TEST_BIN_EXEC ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/oel)
+SET(TEST_WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/__test_tmp")
+FILE(MAKE_DIRECTORY ${TEST_WORKING_DIRECTORY})
+
+ADD_TEST(
+        NAME test_usage
+        COMMAND ${TEST_BIN_EXEC}
+        WORKING_DIRECTORY ${TEST_WORKING_DIRECTORY}
+)
+SET_TESTS_PROPERTIES(test_usage PROPERTIES
+        PASS_REGULAR_EXPRESSION "直译语言编译器命令行使用方式"
+        FAIL_REGULAR_EXPRESSION "[^a-z]Error;ERROR;Failed"
+        TIMEOUT 3
+        )
+
+ADD_TEST(
+        NAME test_array1
+        COMMAND ${TEST_BIN_EXEC} --project array1 ${TESTSUIT_SOURCES_DIRECTORY}array1.txt -o array1
+        WORKING_DIRECTORY ${TEST_WORKING_DIRECTORY}
+)
+SET_TESTS_PROPERTIES(test_array1 PROPERTIES
+        PASS_REGULAR_EXPRESSION "测试输出字符串"
+        PASS_REGULAR_EXPRESSION "这是另一个字符串"
+        FAIL_REGULAR_EXPRESSION "[^a-z]Error;ERROR;Failed"
+        TIMEOUT 3
+        )
+
+ADD_TEST(
+        NAME test_gcd_algorithm
+        COMMAND ${TEST_BIN_EXEC} --project gcd_algorithm ${TESTSUIT_SOURCES_DIRECTORY}gcd_algorithm.txt -o gcd_algorithm
+        WORKING_DIRECTORY ${TEST_WORKING_DIRECTORY}
+)
+SET_TESTS_PROPERTIES(test_gcd_algorithm PROPERTIES
+        PASS_REGULAR_EXPRESSION "6"
+        FAIL_REGULAR_EXPRESSION "[^a-z]Error;ERROR;Failed"
+        TIMEOUT 3
+        )

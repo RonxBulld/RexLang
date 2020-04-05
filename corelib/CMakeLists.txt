@@ -16,4 +16,4 @@ ADD_LIBRARY(newcore STATIC
         ${newcore-Source}
         )
 
-file(COPY "corelib.txt" DESTINATION "${INSTALLROOT}/include/")
+file(COPY "corelib.txt" DESTINATION "${OUTPUT_DIR}/include/")

@@ -451,7 +451,7 @@ namespace opene {
 
             llvm::Argument *argument = TheFunction->arg_begin() + parameterDecl->index_;
             StoreVariable(argument, alloca_param);
-            RegistVariableIR(parameterDecl, alloca_param);
+
             return alloca_param;
         }
 
@@ -618,7 +618,7 @@ namespace opene {
                 function_name = "_" + function_name;
             }
 
-            // 构建函数
+            // 构建函数声明
 
             llvm::Function *function = llvm::Function::Create(function_type, llvm::Function::ExternalLinkage, function_name, TheModule);
 
@@ -628,7 +628,7 @@ namespace opene {
             for (auto &param : function->args()) {
                 param.setName(functorDecl->parameters_[idx]->name_.string_.str());
                 // 注册参数
-                RegistVariableIR(functorDecl->parameters_[idx], &param);
+//                RegistVariableIR(functorDecl->parameters_[idx], &param);
                 idx++;
             }
 
