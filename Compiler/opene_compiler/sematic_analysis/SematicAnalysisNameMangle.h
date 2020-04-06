@@ -7,7 +7,7 @@
 
 namespace opene {
 
-    class APICommandDecl;
+    struct APICommandDecl;
 
     class SematicAnalysisNameMangle {
     private:

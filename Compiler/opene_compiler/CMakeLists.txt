@@ -1,7 +1,7 @@
 
 CMAKE_MINIMUM_REQUIRED(VERSION 3.7.2)
 
-PROJECT(OECompilerParse)
+PROJECT(OECompilerParse CXX)
 
 set(antlr4-GENERATED_SRC
         ${PROJECT_SOURCE_DIR}/gen/openeLangBaseListener.cpp
@@ -75,7 +75,6 @@ SET(OECompilerParse-Source
         sematic_analysis/SematicAnalysisTypeAssert.cpp
         ASTBuilder.cpp
         ASTBuilder.h
-        utilities/Defer.h
         sematic_analysis/SematicAnalysisNameMangle.cpp
         sematic_analysis/SematicAnalysisNameMangle.h
         )
@@ -94,7 +93,7 @@ foreach(src_file ${OECompilerParse-Source})
     )
 endforeach(src_file ${OECompilerParse-Source})
 
-ADD_LIBRARY(OECompilerParse SHARED
+ADD_LIBRARY(OECompilerParse
         ${OECompilerParse-Source}
         )
 

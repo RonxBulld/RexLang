@@ -7,6 +7,12 @@
 #include "../lite_util/ContainerUtil.h"
 #include "support/Command.h"
 #include "support/ProgramDB.h"
+#include "../lite_util/Defer.h"
+
+#if defined(MS_UTF8_REQUEST)
+#   include <windows.h>
+#endif
+
 
 void SetupArgumentParser(opene::ArgumentParser &argumentParser) {
     argumentParser.LoadGlobalParam();
@@ -16,6 +22,17 @@ void SetupArgumentParser(opene::ArgumentParser &argumentParser) {
 }
 
 int main(int argc, char *argv[]) {
+
+#if defined(MS_UTF8_REQUEST)
+    UINT current_code_page = GetConsoleCP();
+    UINT current_output_code_page = GetConsoleOutputCP();
+    SetConsoleCP(65001);
+	SetConsoleOutputCP(65001);
+    defer reset_cp([current_code_page, current_output_code_page]() {
+	    SetConsoleCP(current_code_page);
+		SetConsoleOutputCP(current_output_code_page);
+    });
+#endif
 
     // 解析参数
 

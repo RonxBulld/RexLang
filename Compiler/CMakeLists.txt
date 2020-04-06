@@ -1,7 +1,7 @@
 
 CMAKE_MINIMUM_REQUIRED(VERSION 3.7.2)
 
-PROJECT(oel)
+PROJECT(oel CXX)
 
 INCLUDE_DIRECTORIES(/usr/local/include/antlr4-runtime)
 LINK_DIRECTORIES(/usr/local/lib)
@@ -21,8 +21,8 @@ ADD_EXECUTABLE(oel
 
 TARGET_LINK_LIBRARIES(oel
         OECompilerParse
-        antlr4-runtime
         IR
+        antlr4-runtime
         CodeGen
         lite_util
         Link

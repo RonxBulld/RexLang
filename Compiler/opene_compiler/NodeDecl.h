@@ -418,22 +418,23 @@ namespace opene {
     struct BuiltinTypeDecl : public TypeDecl {
         static const NodeType node_type = NodeType::kNTyBuiltinTypeDecl;
         // 内置类型枚举
-        enum class EnumOfBuiltinType {
-            kBTypeVoid,         // 空
-            kBTTypeCommon,      // 通用型
-            kBTypeChar,         // 字节型
-            kBTypeInteger,     // 整数型
-            kBTypeFloat,       // 小数型
-            kBTypeBool,        // 逻辑型
-            kBTypeString,      // 文本型
-            kBTypeDataSet,     // 字节集
-            kBTypeShort,       // 短整型
-            kBTypeLong,        // 长整型
-            kBTypeDatetime,    // 日期时间型
-            kBTypeFuncPtr,     // 子程序指针
-            kBTypeDouble,      // 双精度小数型
-            kBTtypeEND,
-        } built_in_type_ = EnumOfBuiltinType::kBTypeInteger;
+		enum class EnumOfBuiltinType {
+			kBTypeVoid,         // 空
+			kBTTypeCommon,      // 通用型
+			kBTypeChar,         // 字节型
+			kBTypeInteger,     // 整数型
+			kBTypeFloat,       // 小数型
+			kBTypeBool,        // 逻辑型
+			kBTypeString,      // 文本型
+			kBTypeDataSet,     // 字节集
+			kBTypeShort,       // 短整型
+			kBTypeLong,        // 长整型
+			kBTypeDatetime,    // 日期时间型
+			kBTypeFuncPtr,     // 子程序指针
+			kBTypeDouble,      // 双精度小数型
+			kBTtypeEND,
+		};
+		EnumOfBuiltinType built_in_type_ = EnumOfBuiltinType::kBTypeInteger;
     };
 
     /*

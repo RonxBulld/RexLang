@@ -10,6 +10,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
+#include <malloc.h>
 
 /*************************************
  * 动态数组的内存模型：
