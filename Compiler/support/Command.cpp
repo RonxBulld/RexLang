@@ -70,7 +70,7 @@ namespace opene {
             }
             case ParamType::kSingleSelect:
             case ParamType::kMultSelect: {
-                return ContainerUtil::InSet(options_, parameter);
+                return ContainerUtil::InSet<std::vector, std::string>(options_, parameter);
             }
             default:{
                 assert(false);

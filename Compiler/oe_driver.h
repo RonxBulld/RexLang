@@ -15,7 +15,7 @@
 
 namespace opene {
 
-    class TranslateUnit;
+    struct TranslateUnit;
 
     class SourceManager {};
 

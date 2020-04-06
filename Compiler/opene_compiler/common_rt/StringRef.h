@@ -12,7 +12,7 @@ namespace opene {
 
     class StringRef {
         friend class StringPool;
-        friend class std::hash<opene::StringRef>;
+        friend struct std::hash<opene::StringRef>;
     private:
         const std::string *string_ = nullptr;
         class StringPool *pool_ = nullptr;

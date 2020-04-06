@@ -11,7 +11,7 @@
 #include "../ASTContext.h"
 #include "../ASTAssert.h"
 #include "../utilities/Diagnostic.h"
-#include "../utilities/Defer.h"
+#include "../../../lite_util/Defer.h"
 #include "SematicAnalysisNameMangle.h"
 
 namespace opene {

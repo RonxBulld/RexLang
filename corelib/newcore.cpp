@@ -99,6 +99,7 @@ static std::string ValueToString(SimpleRTTI_ArguType ty, long long val) {
         }
         default: {
             assert(false);
+            return "";
         }
     }
 }

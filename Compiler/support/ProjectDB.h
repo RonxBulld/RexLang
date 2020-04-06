@@ -10,8 +10,8 @@
 
 namespace opene {
 
-    class TranslateUnit;
-    class FunctorDecl;
+    struct TranslateUnit;
+    struct FunctorDecl;
     class ASTContext;
     class ArgumentParser;
 

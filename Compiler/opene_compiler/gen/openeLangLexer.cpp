@@ -1,5 +1,5 @@
 
-// Generated from /home/rexfield/Rex/OpenELanguage/Compiler/opene_compiler/openeLang.g4 by ANTLR 4.7.2
+// Generated from D:/Project/OpenELanguage/Compiler/opene_compiler/openeLang.g4 by ANTLR 4.7.2
 
 
 #include "openeLangLexer.h"

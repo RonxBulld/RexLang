@@ -1,7 +1,7 @@
 
 CMAKE_MINIMUM_REQUIRED(VERSION 3.7.2)
 
-PROJECT(newcore)
+PROJECT(newcore CXX)
 
 SET(newcore-Source
         newcore.cpp

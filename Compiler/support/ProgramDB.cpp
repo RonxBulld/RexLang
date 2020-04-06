@@ -40,9 +40,9 @@ namespace opene {
         root_path /= "..";
         root_path = std::filesystem::canonical(root_path);
 
-        execute_path_.push_back(root_path / "bin");
-        include_path_.push_back(root_path / "include");
-        library_path_.push_back(root_path / "lib");
+        execute_path_.push_back((root_path / "bin").string());
+        include_path_.push_back((root_path / "include").string());
+        library_path_.push_back((root_path / "lib").string());
     }
 
     const std::vector<std::string> &ProgramDB::GetExecutePath() const {
