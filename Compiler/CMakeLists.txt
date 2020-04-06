@@ -13,6 +13,11 @@ ADD_SUBDIRECTORY(link)
 ADD_SUBDIRECTORY(support)
 #ADD_SUBDIRECTORY(interpreter)
 
+IF("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
+    ADD_DEFINITIONS(-DMS_UTF8_REQUEST)
+    ADD_DEFINITIONS(-DWIN_STYLE_EXEC)
+ENDIF()
+
 ADD_EXECUTABLE(oel
         oe_driver.cpp
         oe_driver.h

@@ -83,7 +83,11 @@ int main(int argc, char *argv[]) {
     }
 
     std::cout << u8"执行程序..." << std::endl;
+#if defined(WIN_STYLE_EXEC)
+	int exec_ret = system((project_db.GetExecuteFilename()).c_str());
+#else
     int exec_ret = system(("./" + project_db.GetExecuteFilename()).c_str());
+#endif
     std::cout << u8"程序运行结束，返回值为 " << exec_ret << std::endl;
     return exec_ret;
 }

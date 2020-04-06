@@ -21,7 +21,7 @@
 
 项目地址：https://github.com/llvm/llvm-project
 
-引用版本：9.0.0
+引用版本：9.0.1
 
 开源许可证：Apache License Version 2.0
 
@@ -78,3 +78,7 @@
 ## 系统概述
 
 ![avatar](./doc/系统概述.png)
+
+## 构建安装
+
+参见 INSTALL.md 文件。
