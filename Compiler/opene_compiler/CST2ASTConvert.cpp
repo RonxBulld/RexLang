@@ -126,7 +126,9 @@ namespace opene {
     antlrcpp::Any CST2ASTConvert::visitProgram_set_file(openeLangParser::Program_set_fileContext *context) {
         auto program_set_file = CreateNode<ProgramSetFile>(context->getStart(), context->getStop());
         for (antlr4::Token *token : context->libraries) {
-            program_set_file->libraries_.push_back(GetTextIfExist(token));
+            TString library_name = GetTextIfExist(token);
+            program_set_file->libraries_.push_back(library_name);
+            program_set_file->ast_context_->AddDependenceLibrary(library_name.string_);
         }
         program_set_file->program_set_declares_ = GetFromCtxIfExist<ProgSetDeclPtr>(context->prog_set());
         program_set_file->file_type_ = SourceFile::FileType::kProgramSetFile;

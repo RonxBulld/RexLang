@@ -41,6 +41,9 @@ namespace opene {
                 executeFilename.c_str(),
                 target_triple.c_str()
         );
+#if defined(NO_MSVCRT_DEFAULT)
+        link_cmd += " -z /NODEFAULTLIB:libcmt.lib";
+#endif
         int link_ret = system(link_cmd.c_str());
         if (link_ret == 0) {
             remove(objectFilename.c_str());

@@ -13,11 +13,13 @@ public:
     template <typename IterTy>
     static std::string Join(IterTy begin, IterTy end, const std::string &separator) {
         std::stringstream ss;
-        ss << *begin++;
-        while (begin != end) {
-            ss << separator;
-            ss << *begin++;
-        }
+		if (begin != end) {
+			ss << *begin++;
+			while (begin != end) {
+				ss << separator;
+				ss << *begin++;
+			}
+		}
         return ss.str();
     }
 
