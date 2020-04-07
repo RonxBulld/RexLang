@@ -18,6 +18,10 @@ MESSAGE(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
 include_directories(${LLVM_INCLUDE_DIRS})
 add_definitions(${LLVM_DEFINITIONS})
 
+if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    ADD_DEFINITIONS(-DNO_MSVCRT_DEFAULT)
+endif()
+
 SET(Link-Source
         Linker.cpp
         Linker.h

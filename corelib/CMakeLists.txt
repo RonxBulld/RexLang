@@ -1,9 +1,9 @@
 
 CMAKE_MINIMUM_REQUIRED(VERSION 3.7.2)
 
-PROJECT(newcore CXX)
+PROJECT(corelib CXX)
 
-SET(newcore-Source
+SET(corelib-Source
         newcore.cpp
         newcore.h
         array_runtime_api.cpp
@@ -12,8 +12,8 @@ SET(newcore-Source
         string_runtime_api.h
         struct_runtime_api.cpp struct_runtime_api.h)
 
-ADD_LIBRARY(newcore STATIC
-        ${newcore-Source}
+ADD_LIBRARY(corelib STATIC
+        ${corelib-Source}
         )
 
 file(COPY "corelib.txt" DESTINATION "${OUTPUT_DIR}/include/")

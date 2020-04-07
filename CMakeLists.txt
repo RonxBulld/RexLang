@@ -71,7 +71,7 @@ ADD_SUBDIRECTORY(Compiler)
 ADD_SUBDIRECTORY(corelib)
 
 ADD_CUSTOM_TARGET(OpenELanguage)
-ADD_DEPENDENCIES(OpenELanguage oel newcore)
+ADD_DEPENDENCIES(OpenELanguage oel corelib)
 
 enable_testing()
 SET(TESTSUIT_SOURCES_DIRECTORY ${PROJECT_SOURCE_DIR}/oe_test/)
