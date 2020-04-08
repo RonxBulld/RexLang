@@ -166,6 +166,7 @@ namespace opene {
             SysEntryFunc = llvm::Function::Create(main_fn_ty, llvm::Function::ExternalLinkage, "main", TheModule);
             (SysEntryFunc->arg_begin() + 0)->setName("argc");
             (SysEntryFunc->arg_begin() + 1)->setName("argv");
+            SysEntryFunc->setDSOLocal(true);
 
             return true;
         }
