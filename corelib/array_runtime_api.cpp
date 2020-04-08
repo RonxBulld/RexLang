@@ -21,15 +21,15 @@
  *************************************/
 
 static SimpleRTTI_ArguType *ArrayElementTy_Ref(RTDynArrayTy arrayPtr) {
-    return (SimpleRTTI_ArguType *)  ((unsigned long)arrayPtr + 0);
+    return (SimpleRTTI_ArguType *)  ((char*)arrayPtr + 0);
 }
 
 static int *ArrayDimNum_Ref(RTDynArrayTy arrayPtr) {
-    return (int *)                  ((unsigned long)arrayPtr + sizeof(SimpleRTTI_ArguType));
+    return (int *)                  ((char*)arrayPtr + sizeof(SimpleRTTI_ArguType));
 }
 
 static int *ArrayDims_Ref(RTDynArrayTy arrayPtr) {
-    return (int *)                  ((unsigned long)arrayPtr + sizeof(SimpleRTTI_ArguType) + sizeof(int));
+    return (int *)                  ((char*)arrayPtr + sizeof(SimpleRTTI_ArguType) + sizeof(int));
 }
 
 template <typename ElemTy>
@@ -54,6 +54,7 @@ int get_array_size(RTDynArrayTy arrayPtr) {
 
 RTDynArrayTy create_array(SimpleRTTI_ArguType ety, int dims_n, ...) {
     int mem_size = sizeof(SimpleRTTI_ArguType) + sizeof(int) + dims_n * sizeof(int);
+
     int *dims = (int*)alloca(dims_n * sizeof(int));
     int element_count = 1;
 
@@ -67,8 +68,8 @@ RTDynArrayTy create_array(SimpleRTTI_ArguType ety, int dims_n, ...) {
         element_count *= dim;
     }
     va_end(ap);
-
     mem_size += element_count * GetTypeStorageSize(ety);
+
     RTDynArrayTy new_array = (RTDynArrayTy)malloc(mem_size);
 
     // 将元素类型、维度深度、维度列表写入对象

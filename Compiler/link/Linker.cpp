@@ -16,23 +16,39 @@
 #include "../support/ProgramDB.h"
 
 namespace opene {
-    int Linker::LinkProject(ProjectDB &projectDB) {
+    Linker::Linker() : libSearchDirs(program_db.GetLibraryPath()) {
+    }
 
-        // 中间文件
-        std::string objectFilename = projectDB.GetObjectFilename();
-        // 可执行文件
-        std::string executeFilename = projectDB.GetExecuteFilename();
-        // 依赖库
-        std::vector<opene::StringRef> dependenceLibs = projectDB.GetASTContext().GetDependenceLibraries();
+    std::string Linker::BuildLinkCommandLine() {
+        std::string link_exec = LINKER;
+        std::string link_cmd;
+        std::string target_triple = llvm::sys::getDefaultTargetTriple();
 
-        std::vector<std::string> libSearchDirs = program_db.GetLibraryPath();
+#if defined(MSVC_LINKER_STYLE)
+
+        auto lib_search_dirs_flag = ContainerUtil::Map<std::vector, std::string, std::vector, std::string>(libSearchDirs, [](const std::string &dir){ return "/LIBPATH:\"" + dir + "\""; });
+        auto lib_search_dirs_flag_str = StringUtil::Join<std::vector>(lib_search_dirs_flag, " ");
+        auto libraries_link_flag = ContainerUtil::Map<std::vector, std::string, std::vector, opene::StringRef>(dependenceLibs, [](const opene::StringRef &elem){ return "\"" + elem.str() + ".lib\""; });
+        auto libraries_link_flag_str = StringUtil::Join<std::vector>(libraries_link_flag, " ");
+        link_cmd = StringUtil::Sprintf(
+                "%s %s /link %s %s /OUT:%s",
+                link_exec.c_str(),
+                objectFilename.c_str(),
+                lib_search_dirs_flag_str.c_str(),
+                libraries_link_flag_str.c_str(),
+                executeFilename.c_str()
+        );
+#   if defined(NO_MSVCRT_DEFAULT)
+//        link_cmd += " /NODEFAULTLIB:MSVCRT";
+#   endif
+
+#elif defined(GNU_LINKER_STYLE)
+
         auto lib_search_dirs_flag = ContainerUtil::Map<std::vector, std::string, std::vector, std::string>(libSearchDirs, [](const std::string &dir){ return "-L" + dir; });
         auto lib_search_dirs_flag_str = StringUtil::Join<std::vector>(lib_search_dirs_flag, " ");
         auto libraries_link_flag = ContainerUtil::Map<std::vector, std::string, std::vector, opene::StringRef>(dependenceLibs, [](const opene::StringRef &elem){ return "-l" + elem.str(); });
         auto libraries_link_flag_str = StringUtil::Join<std::vector>(libraries_link_flag, " ");
-        std::string link_exec = LINKER;
-        std::string target_triple = llvm::sys::getDefaultTargetTriple();
-        std::string link_cmd = StringUtil::Sprintf(
+        link_cmd = StringUtil::Sprintf(
                 "%s %s %s %s -o %s -target %s",
                 link_exec.c_str(),
                 lib_search_dirs_flag_str.c_str(),
@@ -41,11 +57,25 @@ namespace opene {
                 executeFilename.c_str(),
                 target_triple.c_str()
         );
-#if defined(NO_MSVCRT_DEFAULT)
-        link_cmd += " -z /NODEFAULTLIB:libcmt.lib";
+
+#else
+
+#   error "Unknow what the linker switch style."
+
 #endif
+        return link_cmd;
+    }
+
+    int Linker::LinkProject(ProjectDB &projectDB) {
+
+        objectFilename = projectDB.GetObjectFilename();
+        executeFilename = projectDB.GetExecuteFilename();
+        dependenceLibs = projectDB.GetASTContext().GetDependenceLibraries();
+
+        std::string link_cmd = BuildLinkCommandLine();
         int link_ret = system(link_cmd.c_str());
         if (link_ret == 0) {
+            std::cout << link_cmd << std::endl;
             remove(objectFilename.c_str());
         } else {
             std::cerr << link_cmd << std::endl;
