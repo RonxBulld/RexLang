@@ -6,27 +6,15 @@
 
 1. 首先你需要确认已经正确的安装了 Antlr4 和 Clang/LLVM；
 
-2. 确保你安装了 make 和 CMake;
+2. 确保你安装了 Python3、make 和 CMake;
 
 3. 确保你正确安装了编译器。
 
 ## 构建第三方库
 
-1. 进入 3rdparty/antlr4-rt-cpp 目录，依次执行以下指令：
+1. 进入 3rdparty 目录，执行以下指令：
 
-Linux:
->
-> cmake -DCMAKE_INSTALL_PREFIX=../../../sysroot -DCMAKE_BUILD_TYPE=Release -G "CodeBlocks - Unix Makefiles" ..
->
-> make -j4
->
-> make install
-
-Windows:
->
-> cmake -DCMAKE_INSTALL_PREFIX=../../../sysroot -DCMAKE_BUILD_TYPE=Release -G "Visual Studio 15 2017 Win64" ..
->
-> 在 VisualStudio 中完成构建和安装
+> python3 build.py
 
 ## 构建 OpenELanguage
 
@@ -41,8 +29,6 @@ Linux:
 > cmake -DCMAKE_BUILD_TYPE=Release -G "CodeBlocks - Unix Makefiles" ..
 >
 > make -j4
->
-> make install
 
 Windows:
 >
