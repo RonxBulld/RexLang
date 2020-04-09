@@ -33,17 +33,31 @@ FILE(MAKE_DIRECTORY ${CMAKE_INCLUDE_OUTPUT_DIRECTORY})
 ######################################
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    ######################################
     # using Clang
+    ######################################
+    ADD_DEFINITIONS(-DANTLR4CPP_STATIC)
+    ADD_DEFINITIONS(-fPIC)
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ggdb -g -O0")
     SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath,'$$ORIGIN/../lib/:$ORIGIN/../lib/'" )
+
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    ######################################
     # using GCC
+    ######################################
+    ADD_DEFINITIONS(-DANTLR4CPP_STATIC)
+    ADD_DEFINITIONS(-fPIC)
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ggdb -g -O0")
     SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath,'$$ORIGIN/../lib/:$ORIGIN/../lib/'" )
+
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
-    # using Intel C++
+    MESSAGE(FATAL_ERROR "We don't know how to config with Intel compiler.")
+
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    ######################################
     # using Visual Studio C++
+    ######################################
+    ADD_DEFINITIONS(-DANTLR4CPP_STATIC)
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /utf-8")
 
     SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG            "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
@@ -60,6 +74,9 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE          "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
     SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELWITHDEBINFO   "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
     SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY_MINSIZEREL       "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
+
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+
 endif ()
 
 ######################################
@@ -73,6 +90,19 @@ ADD_SUBDIRECTORY(corelib)
 ADD_CUSTOM_TARGET(OpenELanguage)
 ADD_DEPENDENCIES(OpenELanguage oel corelib)
 
+######################################
+# 开启测试套件
+######################################
+
 enable_testing()
 SET(TESTSUIT_SOURCES_DIRECTORY ${PROJECT_SOURCE_DIR}/oe_test/)
 ADD_SUBDIRECTORY(oe_test)
+
+######################################
+# 输出所有变量
+######################################
+#get_cmake_property(_variableNames VARIABLES)
+#list(SORT _variableNames)
+#foreach(_variableName ${_variableNames})
+#    message(STATUS "${_variableName}=${${_variableName}}")
+#endforeach()
