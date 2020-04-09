@@ -3,8 +3,6 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.7.2)
 
 PROJECT(lite_util CXX)
 
-add_definitions(-fPIC)
-
 SET(lite_util-Source
         StringUtil.cpp
         StringUtil.h
