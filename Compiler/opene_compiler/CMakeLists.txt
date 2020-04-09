@@ -99,3 +99,6 @@ ADD_LIBRARY(OECompilerParse
 
 ADD_DEPENDENCIES(OECompilerParse GenerateParser)
 
+TARGET_LINK_LIBRARIES(OECompilerParse
+        antlr4-runtime
+        )
