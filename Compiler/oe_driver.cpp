@@ -102,11 +102,15 @@ namespace opene {
         return 0;
     }
 
+    int OECompilerInstance::setParseFilename(const std::string &filename) {
+        this->code_filename_ = filename;
+    }
+
     TranslateUnitPtr OECompilerInstance::runParser() {
 
         // 分析指定的源代码文件
 
-        TranslateUnitPtr translate_unit = this->ast_generate_.BuildASTFromCode(this->parse_code_, "", this->instance_name_);
+        TranslateUnitPtr translate_unit = this->ast_generate_.BuildASTFromCode(this->parse_code_, this->code_filename_, this->instance_name_);
         this->translate_units_.push_back(translate_unit);
 
         // 对于源代码文件中引入的外部库进行分析
@@ -147,6 +151,7 @@ namespace opene {
 
     TranslateUnitPtr OECompilerInstance::parseOnFile(const FileEntry &fileEntry) {
         std::cout << "分析文件：" << fileEntry.GetFilename() << std::endl;
+        this->setParseFilename(fileEntry.GetFilename());
         this->setParseCode(fileEntry.GetCode());
         return this->runParser();
     }

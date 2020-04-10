@@ -38,6 +38,7 @@ namespace opene {
     private:
         AstGenerate ast_generate_;
         std::string instance_name_;
+        std::string code_filename_;
         std::string parse_code_;
         std::vector<TranslateUnitPtr> translate_units_;
         TranslateUnitPtr major_translate_unit_ = nullptr;
@@ -50,6 +51,8 @@ namespace opene {
         int setInstanceName(const std::string &name);
 
         int setParseCode(const std::string &code);
+
+        int setParseFilename(const std::string &filename);
 
         SourceManager &getSourceManager();
 

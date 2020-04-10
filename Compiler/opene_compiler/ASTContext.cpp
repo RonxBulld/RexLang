@@ -2,6 +2,8 @@
 // Created by rex on 2020/1/21.
 //
 
+#include <filesystem>
+
 #include "ASTContext.h"
 #include "utilities/Diagnostic.h"
 
@@ -19,11 +21,12 @@ namespace opene {
     }
 
     size_t ASTContext::CreateLocation(const std::string &filename, size_t line, size_t column) {
-        return this->location_pool_.CreateLocation(this->string_pool_.Create(filename), line, column);
+        std::filesystem::path file_path = std::filesystem::canonical(filename);
+        return this->location_pool_.CreateLocation(this->string_pool_.Create(file_path.string()), line, column);
     }
 
     size_t ASTContext::CreateLocation(const StringRef &filename, size_t line, size_t column) {
-        return this->location_pool_.CreateLocation(filename, line, column);
+        return CreateLocation(filename.str(), line, column);
     }
 
     void ASTContext::SetDiagnostic(Diagnostic *diagnostic) {
