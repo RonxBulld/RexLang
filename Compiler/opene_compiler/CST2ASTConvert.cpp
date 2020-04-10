@@ -92,10 +92,16 @@ namespace opene {
     NodeTy *CST2ASTConvert::CreateNode(antlr4::Token *start_token, antlr4::Token *end_token, Args ... args) {
         NodeTy *node = opene::CreateNode<NodeTy>(this->ast_context_, args...);
         Node *base_node = node;
-        antlr4::TokenSource *sts = start_token->getTokenSource();
-        base_node->location_start_ = this->ast_context_->CreateLocation(sts->getSourceName(), sts->getLine(), sts->getCharPositionInLine());
-        antlr4::TokenSource *ets = end_token->getTokenSource();
-        base_node->location_end_ = this->ast_context_->CreateLocation(ets->getSourceName(), ets->getLine(), ets->getCharPositionInLine());
+        base_node->location_start_ = this->ast_context_->CreateLocation(
+                start_token->getTokenSource()->getSourceName(),
+                start_token->getLine(),
+                start_token->getCharPositionInLine()
+                );
+        base_node->location_end_ = this->ast_context_->CreateLocation(
+                end_token->getTokenSource()->getSourceName(),
+                end_token->getLine(),
+                end_token->getCharPositionInLine()
+                );
         return node;
     }
 
