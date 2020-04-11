@@ -104,6 +104,7 @@ namespace opene {
 
     int OECompilerInstance::setParseFilename(const std::string &filename) {
         this->code_filename_ = filename;
+        return 0;
     }
 
     TranslateUnitPtr OECompilerInstance::runParser() {
