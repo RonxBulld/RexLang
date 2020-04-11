@@ -2,12 +2,12 @@
 // Created by rex on 2020/3/20.
 //
 
-#ifndef OPENELANGUAGE_LINKER_H
-#define OPENELANGUAGE_LINKER_H
+#ifndef REXLANG_LINKER_H
+#define REXLANG_LINKER_H
 
-#include "../opene_compiler/common_rt/StringRef.h"
+#include "../rexlang_compiler/common_rt/StringRef.h"
 
-namespace opene {
+namespace rexlang {
 
     class ProjectDB;
 
@@ -18,7 +18,7 @@ namespace opene {
         // 可执行文件
         std::string executeFilename;
         // 依赖库
-        std::vector<opene::StringRef> dependenceLibs;
+        std::vector<rexlang::StringRef> dependenceLibs;
         // 库搜索路径
         std::vector<std::string> libSearchDirs;
     private:
@@ -30,4 +30,4 @@ namespace opene {
 
 }
 
-#endif //OPENELANGUAGE_LINKER_H
+#endif //REXLANG_LINKER_H

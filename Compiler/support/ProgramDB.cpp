@@ -7,7 +7,7 @@
 #include "ProgramDB.h"
 #include "Command.h"
 
-namespace opene {
+namespace rexlang {
 
     ProgramDB program_db;
 

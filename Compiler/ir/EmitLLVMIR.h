@@ -2,16 +2,16 @@
 // Created by rex on 2020/2/4.
 //
 
-#ifndef OPENELANGUAGE_EMITLLVMIR_H
-#define OPENELANGUAGE_EMITLLVMIR_H
+#ifndef REXLANG_EMITLLVMIR_H
+#define REXLANG_EMITLLVMIR_H
 
-#include "../opene_compiler/NodeDecl.h"
+#include "../rexlang_compiler/NodeDecl.h"
 
 namespace llvm {
     class Module;
 }
 
-namespace opene {
+namespace rexlang {
 
     class IREmit;
     class LLCodeGen;
@@ -33,4 +33,4 @@ namespace opene {
 
 }
 
-#endif //OPENELANGUAGE_EMITLLVMIR_H
+#endif //REXLANG_EMITLLVMIR_H

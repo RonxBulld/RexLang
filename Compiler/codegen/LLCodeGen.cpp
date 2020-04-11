@@ -14,7 +14,7 @@
 #include <llvm/Support/FileSystem.h>
 #include <llvm/IR/LegacyPassManager.h>
 
-namespace opene {
+namespace rexlang {
 
     LLCodeGen::LLCodeGen(EmitLLVMIR &llvmIREmitter) : emitter_(llvmIREmitter) {
     }

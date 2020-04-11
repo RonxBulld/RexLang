@@ -25,13 +25,13 @@
 
 #include "EmitLLVMIR.h"
 #include "LLVMRTIRBuilder.h"
-#include "../opene_compiler/NodeDecl.h"
-#include "../opene_compiler/ASTUtility.h"
+#include "../rexlang_compiler/NodeDecl.h"
+#include "../rexlang_compiler/ASTUtility.h"
 #include "../support/ProjectDB.h"
-#include "../opene_compiler/TypeAssert.h"
+#include "../rexlang_compiler/TypeAssert.h"
 #include "SimpleRTTI_ArguType.h"
 
-namespace opene {
+namespace rexlang {
 
     class IREmit {
     private:
@@ -1664,7 +1664,7 @@ namespace opene {
     };
 }
 
-namespace opene {
+namespace rexlang {
 
     EmitLLVMIR::EmitLLVMIR(TranslateUnit *translateUnit, ProjectDB &projectDB) {
         emitter = new IREmit;

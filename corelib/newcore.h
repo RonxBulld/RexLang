@@ -2,8 +2,8 @@
 // Created by rex on 2020/3/22.
 //
 
-#ifndef OPENELANGUAGE_NEWCORE_H
-#define OPENELANGUAGE_NEWCORE_H
+#ifndef REXLANG_NEWCORE_H
+#define REXLANG_NEWCORE_H
 
 extern "C" {
 
@@ -14,10 +14,19 @@ struct SimpleRTArguInfo {
     long long argument_value;
 };
 
+/*!
+ * @brief 调试输出整数值
+ * @param llval 长整数值
+ */
 void DebugTraceOutInt(long long llval);
 
+/*!
+ * @brief 调试输出
+ * @param n 不定参数个数
+ * @param arguments 不定参数序列
+ */
 void DebugTraceOut(int n, SimpleRTArguInfo *arguments);
 
 };
 
-#endif //OPENELANGUAGE_NEWCORE_H
+#endif //REXLANG_NEWCORE_H

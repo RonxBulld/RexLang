@@ -12,10 +12,10 @@
 #include "../../lite_util/StringUtil.h"
 #include "../../lite_util/ContainerUtil.h"
 #include "../support/ProjectDB.h"
-#include "../opene_compiler/ASTContext.h"
+#include "../rexlang_compiler/ASTContext.h"
 #include "../support/ProgramDB.h"
 
-namespace opene {
+namespace rexlang {
     Linker::Linker() : libSearchDirs(program_db.GetLibraryPath()) {
     }
 
@@ -28,7 +28,7 @@ namespace opene {
 
         auto lib_search_dirs_flag = ContainerUtil::Map<std::vector, std::string, std::vector, std::string>(libSearchDirs, [](const std::string &dir){ return "/LIBPATH:\"" + dir + "\""; });
         auto lib_search_dirs_flag_str = StringUtil::Join<std::vector>(lib_search_dirs_flag, " ");
-        auto libraries_link_flag = ContainerUtil::Map<std::vector, std::string, std::vector, opene::StringRef>(dependenceLibs, [](const opene::StringRef &elem){ return "\"" + elem.str() + ".lib\""; });
+        auto libraries_link_flag = ContainerUtil::Map<std::vector, std::string, std::vector, rexlang::StringRef>(dependenceLibs, [](const rexlang::StringRef &elem){ return "\"" + elem.str() + ".lib\""; });
         auto libraries_link_flag_str = StringUtil::Join<std::vector>(libraries_link_flag, " ");
         link_cmd = StringUtil::Sprintf(
                 "%s %s /link %s %s /OUT:%s",
@@ -46,7 +46,7 @@ namespace opene {
 
         auto lib_search_dirs_flag = ContainerUtil::Map<std::vector, std::string, std::vector, std::string>(libSearchDirs, [](const std::string &dir){ return "-L" + dir; });
         auto lib_search_dirs_flag_str = StringUtil::Join<std::vector>(lib_search_dirs_flag, " ");
-        auto libraries_link_flag = ContainerUtil::Map<std::vector, std::string, std::vector, opene::StringRef>(dependenceLibs, [](const opene::StringRef &elem){ return "-l" + elem.str(); });
+        auto libraries_link_flag = ContainerUtil::Map<std::vector, std::string, std::vector, rexlang::StringRef>(dependenceLibs, [](const rexlang::StringRef &elem){ return "-l" + elem.str(); });
         auto libraries_link_flag_str = StringUtil::Join<std::vector>(libraries_link_flag, " ");
         link_cmd = StringUtil::Sprintf(
                 "%s %s %s %s -o %s -target %s",

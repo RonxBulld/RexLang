@@ -2,8 +2,8 @@
 // Created by rexfield on 2020/4/4.
 //
 
-#ifndef OPENELANGUAGE_SIMPLERTTI_ARGUTYPE_H
-#define OPENELANGUAGE_SIMPLERTTI_ARGUTYPE_H
+#ifndef REXLANG_SIMPLERTTI_ARGUTYPE_H
+#define REXLANG_SIMPLERTTI_ARGUTYPE_H
 
 enum SimpleRTTI_ArguType : char {
     kUnknow = '\0',
@@ -30,4 +30,4 @@ inline unsigned GetTypeStorageSize(SimpleRTTI_ArguType ty) {
     }
 }
 
-#endif //OPENELANGUAGE_SIMPLERTTI_ARGUTYPE_H
+#endif //REXLANG_SIMPLERTTI_ARGUTYPE_H

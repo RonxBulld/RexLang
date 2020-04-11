@@ -2,13 +2,13 @@
 // Created by rex on 2020/2/7.
 //
 
-#ifndef OPENELANGUAGE_TREEINTERPRETER_H
-#define OPENELANGUAGE_TREEINTERPRETER_H
+#ifndef REXLANG_TREEINTERPRETER_H
+#define REXLANG_TREEINTERPRETER_H
 
-#include "../opene_compiler/NodeDecl.h"
-#include "../opene_compiler/common_rt/ErrOr.h"
+#include "../rexlang_compiler/NodeDecl.h"
+#include "../rexlang_compiler/common_rt/ErrOr.h"
 
-namespace opene {
+namespace rexlang {
 
     class TIValue {
     public: // 值分类断言
@@ -116,4 +116,4 @@ namespace opene {
 
 }
 
-#endif //OPENELANGUAGE_TREEINTERPRETER_H
+#endif //REXLANG_TREEINTERPRETER_H

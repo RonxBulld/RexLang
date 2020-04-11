@@ -3,10 +3,10 @@
 //
 
 #include "ProjectDB.h"
-#include "../opene_compiler/NodeDecl.h"
+#include "../rexlang_compiler/NodeDecl.h"
 #include "Command.h"
 
-namespace opene {
+namespace rexlang {
 
     const std::string ProjectDBModuleName;
 

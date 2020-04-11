@@ -1,5 +1,5 @@
 
-# OpenELanguage 自述文件
+# REXLang 自述文件
 
 ## 开源许可
 

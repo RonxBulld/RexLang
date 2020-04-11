@@ -5,14 +5,14 @@
 #include <llvm/Analysis/MemoryBuiltins.h>
 #include "LLVMRTIRBuilder.h"
 
-namespace opene {
+namespace rexlang {
     std::string DoNewCoreRTAPINameMangle(const std::string &rtApiName) {
         return rtApiName;
     }
 }
 
 // 公共功能和基础工具
-namespace opene {
+namespace rexlang {
 
     bool isOrdinaryType(TypeDecl *typeDecl) {
         bool is_ordinary = typeDecl->is<BuiltinTypeDecl>();
@@ -171,7 +171,7 @@ namespace opene {
 }
 
 // 数组
-namespace opene {
+namespace rexlang {
     LLVMRTIRBuilder::DynamicArrayRTType *LLVMRTIRBuilder::getRTAPIArrayType() {
         return llvm::ArrayType::get(Builder.getInt8PtrTy(), 1)->getPointerTo();
     }
@@ -439,7 +439,7 @@ namespace opene {
 }
 
 // 结构体
-namespace opene {
+namespace rexlang {
     LLVMRTIRBuilder::StructureType *LLVMRTIRBuilder::getStructureType(llvm::StructType *structType) {
         return structType->getPointerTo();
     }
@@ -565,7 +565,7 @@ namespace opene {
 }
 
 // 字符串
-namespace opene {
+namespace rexlang {
     LLVMRTIRBuilder::StringType *LLVMRTIRBuilder::getStringType() {
         return Builder.getInt8Ty()->getPointerTo();
     }

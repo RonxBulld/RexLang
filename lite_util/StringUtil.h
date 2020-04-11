@@ -2,8 +2,8 @@
 // Created by rex on 2020/3/20.
 //
 
-#ifndef OPENELANGUAGE_STRINGUTIL_H
-#define OPENELANGUAGE_STRINGUTIL_H
+#ifndef REXLANG_STRINGUTIL_H
+#define REXLANG_STRINGUTIL_H
 
 #include <string>
 #include <sstream>
@@ -32,4 +32,4 @@ public:
 };
 
 
-#endif //OPENELANGUAGE_STRINGUTIL_H
+#endif //REXLANG_STRINGUTIL_H

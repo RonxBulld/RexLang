@@ -2,13 +2,13 @@
 // Created by rex on 2020/3/20.
 //
 
-#ifndef OPENELANGUAGE_PROJECTDB_H
-#define OPENELANGUAGE_PROJECTDB_H
+#ifndef REXLANG_PROJECTDB_H
+#define REXLANG_PROJECTDB_H
 
 #include <string>
 #include <vector>
 
-namespace opene {
+namespace rexlang {
 
     struct TranslateUnit;
     struct FunctorDecl;
@@ -60,4 +60,4 @@ namespace opene {
     };
 
 }
-#endif //OPENELANGUAGE_PROJECTDB_H
+#endif //REXLANG_PROJECTDB_H

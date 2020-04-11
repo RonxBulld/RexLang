@@ -2,13 +2,13 @@
 // Created by rex on 2020/3/22.
 //
 
-#ifndef OPENELANGUAGE_PROGRAMDB_H
-#define OPENELANGUAGE_PROGRAMDB_H
+#ifndef REXLANG_PROGRAMDB_H
+#define REXLANG_PROGRAMDB_H
 
 #include <string>
 #include <vector>
 
-namespace opene {
+namespace rexlang {
 
     class ArgumentParser;
 
@@ -33,4 +33,4 @@ namespace opene {
     extern ProgramDB program_db;
 }
 
-#endif //OPENELANGUAGE_PROGRAMDB_H
+#endif //REXLANG_PROGRAMDB_H

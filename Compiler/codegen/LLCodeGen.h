@@ -2,12 +2,12 @@
 // Created by rex on 2020/3/20.
 //
 
-#ifndef OPENELANGUAGE_LLCODEGEN_H
-#define OPENELANGUAGE_LLCODEGEN_H
+#ifndef REXLANG_LLCODEGEN_H
+#define REXLANG_LLCODEGEN_H
 
 #include <string>
 
-namespace opene {
+namespace rexlang {
 
     class EmitLLVMIR;
 
@@ -27,4 +27,4 @@ namespace opene {
 
 }
 
-#endif //OPENELANGUAGE_LLCODEGEN_H
+#endif //REXLANG_LLCODEGEN_H

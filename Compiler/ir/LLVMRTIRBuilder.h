@@ -2,8 +2,8 @@
 // Created by rex on 2020/2/17.
 //
 
-#ifndef OPENELANGUAGE_LLVMRTIRBUILDER_H
-#define OPENELANGUAGE_LLVMRTIRBUILDER_H
+#ifndef REXLANG_LLVMRTIRBUILDER_H
+#define REXLANG_LLVMRTIRBUILDER_H
 
 #include <llvm/ADT/SmallVector.h>
 #include <llvm/ADT/APFloat.h>
@@ -21,10 +21,10 @@
 #include <llvm/IR/DerivedTypes.h>
 #include <llvm/IR/GlobalVariable.h>
 
-#include "../opene_compiler/NodeDecl.h"
+#include "../rexlang_compiler/NodeDecl.h"
 #include "SimpleRTTI_ArguType.h"
 
-namespace opene {
+namespace rexlang {
     class LLVMRTIRBuilder;
 
     enum ExtraType { DArrayTyID = llvm::Type::TypeID::VectorTyID + 32, DStringTyID, DDataSetTyID};
@@ -229,4 +229,4 @@ namespace opene {
 
 }
 
-#endif //OPENELANGUAGE_LLVMRTIRBUILDER_H
+#endif //REXLANG_LLVMRTIRBUILDER_H

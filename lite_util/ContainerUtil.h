@@ -2,8 +2,8 @@
 // Created by rex on 2020/3/20.
 //
 
-#ifndef OPENELANGUAGE_CONTAINERUTIL_H
-#define OPENELANGUAGE_CONTAINERUTIL_H
+#ifndef REXLANG_CONTAINERUTIL_H
+#define REXLANG_CONTAINERUTIL_H
 
 
 class ContainerUtil {
@@ -42,4 +42,4 @@ public:
 };
 
 
-#endif //OPENELANGUAGE_CONTAINERUTIL_H
+#endif //REXLANG_CONTAINERUTIL_H

@@ -2,8 +2,8 @@
 // Created by rex on 2020/3/22.
 //
 
-#ifndef OPENELANGUAGE_ARRAY_RUNTIME_API_H
-#define OPENELANGUAGE_ARRAY_RUNTIME_API_H
+#ifndef REXLANG_ARRAY_RUNTIME_API_H
+#define REXLANG_ARRAY_RUNTIME_API_H
 
 
 #include <stdint.h>
@@ -68,4 +68,4 @@ int64_t *get_array_ep_64bit(RTDynArrayTy arrayPtr, int, ...);
 
 };
 
-#endif //OPENELANGUAGE_ARRAY_RUNTIME_API_H
+#endif //REXLANG_ARRAY_RUNTIME_API_H

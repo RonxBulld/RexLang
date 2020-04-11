@@ -2,14 +2,14 @@
 // Created by rex on 2020/3/21.
 //
 
-#ifndef OPENELANGUAGE_COMMAND_H
-#define OPENELANGUAGE_COMMAND_H
+#ifndef REXLANG_COMMAND_H
+#define REXLANG_COMMAND_H
 
 #include <string>
 #include <vector>
 #include <map>
 
-namespace opene {
+namespace rexlang {
 
     enum class ParamType {
         kSwitch,         // 开关式
@@ -127,4 +127,4 @@ namespace opene {
 
 }
 
-#endif //OPENELANGUAGE_COMMAND_H
+#endif //REXLANG_COMMAND_H

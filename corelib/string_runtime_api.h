@@ -2,8 +2,8 @@
 // Created by rexfield on 2020/4/4.
 //
 
-#ifndef OPENELANGUAGE_STRING_RUNTIME_API_H
-#define OPENELANGUAGE_STRING_RUNTIME_API_H
+#ifndef REXLANG_STRING_RUNTIME_API_H
+#define REXLANG_STRING_RUNTIME_API_H
 
 
 extern "C" {
@@ -17,4 +17,4 @@ RTDynStringTy clone_string(const RTDynStringTy dynString);
 };
 
 
-#endif //OPENELANGUAGE_STRING_RUNTIME_API_H
+#endif //REXLANG_STRING_RUNTIME_API_H

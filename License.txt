@@ -1,5 +1,5 @@
 =========================================================================================
-The OpenELanguage Project is under the Apache License v2.0 with OpenELanguage Extensions:
+The REXLang Project is under the Apache License v2.0 with REXLang Extensions:
 =========================================================================================
 
                                  Apache License
@@ -204,7 +204,7 @@ The OpenELanguage Project is under the Apache License v2.0 with OpenELanguage Ex
    See the License for the specific language governing permissions and
    limitations under the License.
 
----- OpenELanguage Extensions to the Apache 2.0 License ----
+---- REXLang Extensions to the Apache 2.0 License ----
 
 Make sure to indicate the reference to the name of the project and the
 address of the source code repository in one of the readme file, license

@@ -1,6 +1,7 @@
 
 CMAKE_MINIMUM_REQUIRED(VERSION 3.7.2)
-PROJECT(OpenELanguage CXX)
+include(pre_build_check.cmake)
+PROJECT(REXLang CXX)
 SET(CMAKE_CXX_STANDARD 17)
 
 ######################################
@@ -11,6 +12,12 @@ SET(ANTLR4CPP_RUNTIME_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/sysroot/include/antlr4-
 INCLUDE_DIRECTORIES(${ANTLR4CPP_RUNTIME_INCLUDE_DIR})
 SET(ANTLR4CPP_RUNTIME_LIBRARIES_DIR "${PROJECT_SOURCE_DIR}/sysroot/lib")
 LINK_DIRECTORIES(${ANTLR4CPP_RUNTIME_LIBRARIES_DIR})
+
+######################################
+# 配置输出项
+######################################
+
+SET(COMPILER_EXECUTE_NAME rex)
 
 ######################################
 # 配置输出文件路径
@@ -87,8 +94,8 @@ ADD_SUBDIRECTORY(lite_util)
 ADD_SUBDIRECTORY(Compiler)
 ADD_SUBDIRECTORY(corelib)
 
-ADD_CUSTOM_TARGET(OpenELanguage)
-ADD_DEPENDENCIES(OpenELanguage oel corelib)
+ADD_CUSTOM_TARGET(REXLang)
+ADD_DEPENDENCIES(REXLang ${COMPILER_EXECUTE_NAME} corelib)
 
 ######################################
 # 开启测试套件

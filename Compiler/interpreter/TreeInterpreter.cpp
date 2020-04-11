@@ -6,7 +6,7 @@
 
 #include "TreeInterpreter.h"
 
-namespace opene {
+namespace rexlang {
     bool RuntimeContext::AddVariable(BaseVariDecl *variableDecl) {
         // TODO:
         return false;

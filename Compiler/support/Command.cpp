@@ -11,7 +11,7 @@
 #include "../../lite_util/StringUtil.h"
 #include "../../lite_util/ContainerUtil.h"
 
-namespace opene {
+namespace rexlang {
     CmdParameter::CmdParameter(
             const std::string &shortSwitch,
             const std::string &longSwitch,
@@ -80,7 +80,7 @@ namespace opene {
     }
 }
 
-namespace opene {
+namespace rexlang {
     const CmdParameter *ArgumentParser::GetParameterRef(const std::string &moduleName, const std::string &flag_str) const {
         if (!flag_str.empty()) {
             for (const CmdParameter &parameter : parameters_) {

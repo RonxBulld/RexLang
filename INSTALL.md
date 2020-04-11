@@ -1,6 +1,6 @@
 # 安装导引
 
-本文档将指引你从源码构建 OpenELanguage 系统。
+本文档将指引你从源码构建 REXLang 系统。
 
 ## 准备工作
 
@@ -16,7 +16,7 @@
 
 > python3 build.py
 
-## 构建 OpenELanguage
+## 构建 REXLang
 
 1. 进入源码根目录，依次执行以下指令：
 
