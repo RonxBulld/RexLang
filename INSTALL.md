@@ -6,7 +6,7 @@
 
 1. 首先你需要确认已经正确的安装了 Antlr4 和 Clang/LLVM；
 
-2. 确保你安装了 Python3、make 和 CMake;
+2. 确保你安装了 pkg-config、uuid、Python3、make 和 CMake;
 
 3. 确保你正确安装了编译器。
 
