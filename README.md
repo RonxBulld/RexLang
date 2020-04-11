@@ -1,6 +1,8 @@
 
 # REXLang 自述文件
 
+REXLang 即 快速表达扩展语言（Rapid Expression eXtension Language）。
+
 ## 开源许可
 
 本项目使用Apache License v2.0许可证进行发布，并在此基础上增加了扩展条例，以确保原作者和参与者的权利。详情请阅读根目录下的License.txt文件。
