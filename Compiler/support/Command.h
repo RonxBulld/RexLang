@@ -88,6 +88,7 @@ namespace rexlang {
          * 添加全局参数定义
          */
         static void AddGlobalParam(const CmdParameter &parameter);
+        static void AddGlobalParams(std::initializer_list<const CmdParameter> parameters);
         /*
          * 添加参数定义
          */

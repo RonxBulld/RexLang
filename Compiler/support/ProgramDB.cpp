@@ -16,7 +16,9 @@ namespace rexlang {
     class ProgramDBParamDef {
     public:
         ProgramDBParamDef() {
-            ArgumentParser::AddGlobalParam(CmdParameter("", "print-libdirs", "打印库搜索路径", true, ProgramDBModuleName).CfgAsSwitch());
+            ArgumentParser::AddGlobalParam(
+                    CmdParameter("", "print-libdirs", "打印库搜索路径", true, ProgramDBModuleName).CfgAsSwitch()
+            );
         }
     } programdb_param_def;
 

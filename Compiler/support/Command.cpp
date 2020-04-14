@@ -108,11 +108,18 @@ namespace rexlang {
     }
 
     static std::vector<CmdParameter> *global_parameters = nullptr;
+
     void ArgumentParser::AddGlobalParam(const CmdParameter &parameter) {
         if (!global_parameters) {
             global_parameters = new std::vector<CmdParameter>;
         }
         global_parameters->push_back(parameter);
+    }
+
+    void ArgumentParser::AddGlobalParams(std::initializer_list<const CmdParameter> parameters) {
+        for(const CmdParameter &parm : parameters) {
+            ArgumentParser::AddGlobalParam(parm);
+        }
     }
 
     bool ArgumentParser::AddParam(const CmdParameter &parameter) {
