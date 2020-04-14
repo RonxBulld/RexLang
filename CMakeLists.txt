@@ -1,7 +1,7 @@
 
 CMAKE_MINIMUM_REQUIRED(VERSION 3.7.2)
-include(pre_build_check.cmake)
 PROJECT(REXLang CXX)
+INCLUDE(pre_build_check.cmake)
 SET(CMAKE_CXX_STANDARD 17)
 
 ######################################
@@ -90,8 +90,16 @@ endif ()
 # 配置子模块
 ######################################
 
+# 通用的轻量级工具库
 ADD_SUBDIRECTORY(lite_util)
+
+# 编译器工具链
 ADD_SUBDIRECTORY(Compiler)
+
+# 库工具集
+ADD_SUBDIRECTORY(libtools)
+
+# 库函数和运行时API
 ADD_SUBDIRECTORY(corelib)
 
 ADD_CUSTOM_TARGET(REXLang)
