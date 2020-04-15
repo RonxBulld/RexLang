@@ -10,9 +10,9 @@
 #include <iostream>
 #include <assert.h>
 
-#include "llvm/Support/Casting.h"
 #include "pch.h"
 #include "cdecl.h"
+#include "../../lite_util/StringUtil.h"
 
 using namespace clang;
 using namespace ast_matchers;
@@ -72,14 +72,17 @@ public:
                             // 获取参数对应注释信息
 
                             comments::ParagraphComment *__paragraph_comment = __block_command_comment->getParagraph();
-                            std::stringstream __parameter_comment_sstr;
+                            std::vector<std::string> __parameter_comment_list;
                             for (auto iter = __paragraph_comment->child_begin(); iter != __paragraph_comment->child_end(); ++iter) {
                                 if (comments::TextComment *__text_comment = llvm::dyn_cast<comments::TextComment>(*iter)) {
-                                    __parameter_comment_sstr << __text_comment->getText().str();
+                                    std::string __comment = StringUtil::Trim(__text_comment->getText().str());
+                                    if (!__comment.empty()) {
+                                        __parameter_comment_list.emplace_back(__comment);
+                                    }
                                 }
                             }
 
-                            std::cout << __parameter_name << "->" << __parameter_comment_sstr.str() << std::endl;
+                            std::cout << __parameter_name << "->" << StringUtil::Join<std::vector, std::string>(__parameter_comment_list, " ") << std::endl;
                         }
                     }
                 }

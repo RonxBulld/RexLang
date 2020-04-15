@@ -26,6 +26,10 @@ target_link_libraries(CDecl
         )
 
 target_link_libraries(CDecl
+        lite_util
+        )
+
+target_link_libraries(CDecl
         clangBasic
         clangIndex
         clangLex
