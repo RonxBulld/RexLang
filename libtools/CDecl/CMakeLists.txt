@@ -17,7 +17,9 @@ ADD_DEFINITIONS(-fPIE)
 add_library(CDecl
         cdecl.cpp
         cdecl.h
-        pch.h)
+        pch.h
+        pch.cpp
+        )
 
 target_link_libraries(CDecl
         stdc++fs

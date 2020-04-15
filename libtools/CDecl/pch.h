@@ -5,6 +5,7 @@
 #ifndef REXLANG_PCH_H
 #define REXLANG_PCH_H
 
+#include <llvm/Support/Casting.h>
 #include <clang/AST/ASTConsumer.h>
 #include <clang/AST/ASTContext.h>
 #include <clang/AST/Comment.h>
