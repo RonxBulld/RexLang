@@ -12,10 +12,12 @@ INCLUDE_DIRECTORIES(${CLANG_INCLUDE_DIRS})
 FIND_PACKAGE(LLVM 9 REQUIRED QUIET CONFIG)
 INCLUDE_DIRECTORIES(${LLVM_INCLUDE_DIRS})
 
+ADD_DEFINITIONS(-fPIE)
+
 add_library(CDecl
         cdecl.cpp
         cdecl.h
-        )
+        pch.h)
 
 target_link_libraries(CDecl
         stdc++fs
@@ -36,3 +38,5 @@ target_link_libraries(CDecl
         clangFormat
         clangTooling
         )
+
+cotire(CDecl)

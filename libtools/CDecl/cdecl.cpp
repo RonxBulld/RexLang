@@ -10,19 +10,8 @@
 #include <iostream>
 #include <assert.h>
 
-#include <clang/AST/ASTConsumer.h>
-#include <clang/AST/ASTContext.h>
-#include <clang/AST/Comment.h>
-#include <clang/AST/RecursiveASTVisitor.h>
-#include <clang/Frontend/CompilerInstance.h>
-#include <clang/Frontend/FrontendAction.h>
-#include <clang/Tooling/Tooling.h>
-#include <clang/AST/ASTImporter.h>
-#include <clang/ASTMatchers/ASTMatchers.h>
-#include <clang/ASTMatchers/ASTMatchFinder.h>
-#include <clang/AST/Redeclarable.h>
-#include <clang/AST/AST.h>
-
+#include "llvm/Support/Casting.h"
+#include "pch.h"
 #include "cdecl.h"
 
 using namespace clang;
@@ -52,16 +41,28 @@ public:
                 std::string brief = __funcdecl_raw_comment->getBriefText(__func_ctx);
                 std::cout << functionDecl->getName().str() << "->" << brief << std::endl;
 
+                const comments::FullComment *__full_comment = functionDecl->getASTContext().getLocalCommentForDeclUncached(functionDecl);
+                auto __block_content_comments = __full_comment->getBlocks();
+
+                for (comments::BlockContentComment *__block_content_comment : __block_content_comments) {
+                    if (comments::BlockCommandComment *__block_command_comment = llvm::dyn_cast<comments::BlockCommandComment>(__block_content_comment)) {
+                        unsigned int __args_cnt = __block_command_comment->getNumArgs();
+                        for (unsigned int idx = 0; idx < __args_cnt; ++idx) {
+                            std::cout << __block_command_comment->getArgText(idx).str() << std::endl;
+                            std::cout << __block_command_comment->getParagraph()->child_count() << std::endl;
+                        }
+                    }
+                }
+
+                int k = 0;
+
             }
         }
     }
 };
 
 void MatchConstructorDeclWhichNotSetNodeType(MatchFinder &Finder, MatchFinder::MatchCallback &Handler) {
-    int k = 0;
-
     auto Matcher = functionDecl().bind("funcDecl");
-
     Finder.addMatcher(Matcher, &Handler);
 }
 

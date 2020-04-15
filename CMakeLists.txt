@@ -1,7 +1,8 @@
 
 CMAKE_MINIMUM_REQUIRED(VERSION 3.7.2)
 PROJECT(REXLang CXX)
-INCLUDE(pre_build_check.cmake)
+INCLUDE(cmake/pre_build_check.cmake)
+INCLUDE(cmake/load_3rdparty_cmake_module.cmake)
 SET(CMAKE_CXX_STANDARD 17)
 
 ######################################
