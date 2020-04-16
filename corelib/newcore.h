@@ -20,11 +20,11 @@ struct SimpleRTArguInfo {
  */
 void DebugTraceOutInt(long long llval);
 
-/*!
- * @brief 调试输出
- * @param n 不定参数个数
- * @param arguments 不定参数序列
- */
+ /**
+  * 调试输出
+  * @param n 不定参数个数
+  * @param arguments 不定参数序列
+  */
 void DebugTraceOut(int n, SimpleRTArguInfo *arguments);
 
 };
