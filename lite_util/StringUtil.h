@@ -24,8 +24,26 @@ public:
     }
 
     template<template<typename Key> typename Container, typename Elem>
-    static std::string Join(Container<Elem> &string_list, const std::string &separator) {
+    static std::string Join(const Container<Elem> &string_list, const std::string &separator) {
         return Join(string_list.begin(), string_list.end(), separator);
+    }
+
+    template<typename IterTy, typename ConvertPred>
+    static std::string Join(IterTy begin, IterTy end, const std::string &separator, ConvertPred && convert_pred) {
+        std::stringstream ss;
+        if (begin != end) {
+            ss << convert_pred(*begin++);
+            while (begin != end) {
+                ss << separator;
+                ss << convert_pred(*begin++);
+            }
+        }
+        return ss.str();
+    }
+
+    template<template<typename Key> typename Container, typename Elem, typename ConvertPred>
+    static std::string Join(const Container<Elem> &string_list, const std::string &separator, ConvertPred && convert_pred) {
+        return Join(string_list.begin(), string_list.end(), separator, convert_pred);
     }
 
     static std::string Sprintf(const char *fmt, ...);
