@@ -49,7 +49,76 @@ public:
         return interfaceDeclare.parameters.back();
     }
 
-    int runForParseType(struct TypeDesc &typeDesc, const QualType &qualType) {
+    /**
+     * 解析类型
+     * 目前仅支持有限的类型和组合
+     * @param typeDesc 转换后的类型描述结构
+     * 类型可能的名称：v,i<8/16/32/64>,f<32/64>,结构体名称
+     * @param clangTypePtr 需要转换的类型描述
+     * @return 执行状态结果
+     */
+    int runForParseType(struct TypeDesc &typeDesc, const Type *clangTypePtr) {
+        if (clangTypePtr->isIntegerType() || clangTypePtr->isEnumeralType() || clangTypePtr->isScopedEnumeralType()) {
+            size_t bitwide = 0;
+            if (clangTypePtr->isEnumeralType() || clangTypePtr->isScopedEnumeralType()) {
+                bitwide = 32;
+            } else {
+                const BuiltinType *__builtin_type = clangTypePtr->getAs<BuiltinType>();
+                if (!__builtin_type) {
+                    assert(false);
+                    return __LINE__;
+                }
+                switch (__builtin_type->getKind()) {
+                    case BuiltinType::Kind::Bool:       bitwide = 8; break;
+                    case BuiltinType::Kind::Char8:      bitwide = 8; break;
+                    case BuiltinType::Kind::Short:      bitwide = 16; break;
+                    case BuiltinType::Kind::Int:        bitwide = 32; break;
+                    case BuiltinType::Kind::Long:       bitwide = 64; break;
+                    case BuiltinType::Kind::LongLong:   bitwide = 64; break;
+                    default:                            assert(false); bitwide = 32;
+                }
+            }
+            typeDesc.base_typename = "i" + std::to_string(bitwide);
+
+        } else if (clangTypePtr->isFloatingType()) {
+            size_t bitwide = 0;
+            const BuiltinType *__builtin_type = clangTypePtr->getAs<BuiltinType>();
+            if (!__builtin_type) {
+                assert(false);
+                return __LINE__;
+            }
+            switch (__builtin_type->getKind()) {
+                case BuiltinType::Kind::Float:      bitwide = 32; break;
+                case BuiltinType::Kind::Double:     bitwide = 64; break;
+                default:                            assert(false); bitwide = 32;
+            }
+            typeDesc.base_typename = "f" + std::to_string(bitwide);
+
+        } else if (clangTypePtr->isVoidType()) {
+            typeDesc.base_typename = "v";
+
+        } else if (clangTypePtr->isPointerType()) {
+            runForParseType(typeDesc, clangTypePtr->getPointeeType().getTypePtr());
+            if (!typeDesc.is_reference) {
+                typeDesc.is_reference = true;
+            } else {
+                typeDesc.base_typename = "v";
+            }
+
+        } else if (clangTypePtr->isArrayType()) {
+            runForParseType(typeDesc, clangTypePtr->getArrayElementTypeNoTypeQual());
+            typeDesc.is_array = true;
+            // TODO: Collect array dimensions.
+
+        } else if (clangTypePtr->isRecordType()) {
+            typeDesc.base_typename = clangTypePtr->getAsRecordDecl()->getNameAsString();
+
+        } else {
+            std::cerr << "错误：无法解析的参数类型 " << clangTypePtr->getTypeClassName() << std::endl;
+            assert(false);
+            return __LINE__;
+
+        }
         return 0;
     }
 
@@ -72,7 +141,7 @@ public:
 
         // 分析返回值
 
-        if (int v = runForParseType(__interface_declare.return_type, functionDecl->getReturnType())) {
+        if (int v = runForParseType(__interface_declare.return_type, functionDecl->getReturnType().getTypePtr())) {
             return v;
         }
 
@@ -102,7 +171,7 @@ public:
 
                 // 分析形参声明类型
 
-                if (int v = runForParseType(__parameter_desc.type_desc, __parm_var_decl->getType())) {
+                if (int v = runForParseType(__parameter_desc.type_desc, __parm_var_decl->getType().getTypePtr())) {
                     return v;
                 }
             }
@@ -229,7 +298,7 @@ int ReadDeclFiles(std::string filePath, const std::vector<std::string> &args, st
 
     if (!std::filesystem::exists(filePath)) {
         assert(false);
-        return 1;
+        return __LINE__;
     }
     filePath = std::filesystem::canonical(filePath).string();
 
@@ -258,7 +327,7 @@ int ReadDeclFiles(std::string filePath, const std::vector<std::string> &args, st
 
     if (ASTUnitPtr == nullptr) {
         assert(false);
-        return 2;
+        return __LINE__;
 
     } else {
 

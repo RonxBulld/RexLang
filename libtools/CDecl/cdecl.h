@@ -13,13 +13,13 @@
 struct CommentList {
     std::vector<std::string> comments;
 
-    int printToString(std::stringstream &ss, const std::string& indent_str) const {
+    int printToString(std::stringstream &outs, const std::string& indentStr) const {
         auto quote_warp = [](const std::string &comment) -> std::string { return "\"" + comment + "\""; };
-        ss << indent_str << "Comments: [" << std::endl;
+        outs << indentStr << "Comments: [" << std::endl;
         for (const std::string &comment : comments) {
-            ss << indent_str << "  " << quote_warp(comment) << std::endl;
+            outs << indentStr << "  " << quote_warp(comment) << std::endl;
         }
-        ss << indent_str << "]" << std::endl;
+        outs << indentStr << "]" << std::endl;
         return 0;
     }
 };
@@ -31,14 +31,14 @@ struct TypeDesc {
     bool is_reference = false;
     bool is_nullable = false;
 
-    int printToString(std::stringstream &ss, const std::string& indent_str) const {
-        ss << (!base_typename.empty() ? base_typename : "<!unknow>" );
+    int printToString(std::ostream &outs, const std::string& indentStr) const {
+        outs << (!base_typename.empty() ? base_typename : "<!unknow>" );
         if (is_array) {
-            ss << StringUtil::Join(dimensions, "", [](unsigned dim)->std::string{ return "[" + std::to_string(dim) + "]"; });
+            outs << StringUtil::Join(dimensions, "", [](unsigned dim)->std::string{ return "[" + std::to_string(dim) + "]"; });
         }
-        ss << ", " << (is_reference ? "pass ref" : "pass value");
-        ss << ", " << (is_nullable ? "default" : "no default");
-        ss << std::endl;
+        outs << ", " << (is_reference ? "pass ref" : "pass value");
+        outs << ", " << (is_nullable ? "default" : "no default");
+        outs << std::endl;
         return 0;
     }
 };
@@ -49,10 +49,9 @@ struct ParameterDesc {
     std::string parameter_name;
     struct CommentList parameter_comments;
 
-    int printToString(std::stringstream &ss, const std::string& indent_str) const {
-        ss << indent_str << "[" << index << "] " << parameter_name << std::endl;
-        ss << indent_str << "TypeDesc: "; type_desc.printToString(ss, indent_str + "  ");
-        ss << indent_str << "ParameterComment:" << std::endl; parameter_comments.printToString(ss, indent_str + "  ");
+    int printToString(std::stringstream &outs, const std::string& indentStr) const {
+        outs << indentStr << "[" << index << "] " << parameter_name << " : "; type_desc.printToString(outs, indentStr + "  ");
+        parameter_comments.printToString(outs, indentStr + "  ");
         return 0;
     }
 };
@@ -65,17 +64,17 @@ struct InterfaceDeclare {
     std::vector<struct ParameterDesc> parameters;
     bool is_variadic = false;
 
-    int printToString(std::stringstream &ss, const std::string &indent_str) const {
-        ss << indent_str << "InterfaceAPIName: " << interface_api_name << std::endl;
-        ss << indent_str << "ReturnType:"; return_type.printToString(ss, indent_str + "  ");
-        ss << indent_str << "ReturnDescription: " << return_description << std::endl;
-        ss << indent_str << "InterfaceBreif:" << std::endl; interface_breif.printToString(ss, indent_str + "  ");
-        ss << indent_str << "isVariadic: " << is_variadic << std::endl;
-        ss << indent_str << "Parameters:" << std::endl;
+    int printToString(std::stringstream &outs, const std::string &indentStr) const {
+        outs << indentStr << "InterfaceAPIName: " << interface_api_name << std::endl;
+        outs << indentStr << "ReturnType:"; return_type.printToString(outs, indentStr + "  ");
+        outs << indentStr << "ReturnDescription: " << return_description << std::endl;
+        outs << indentStr << "InterfaceBreif:" << std::endl; interface_breif.printToString(outs, indentStr + "  ");
+        outs << indentStr << "isVariadic: " << is_variadic << std::endl;
+        outs << indentStr << "Parameters:" << std::endl;
         for (const struct ParameterDesc &parm_desc : parameters) {
-            parm_desc.printToString(ss, indent_str + "  ");
+            parm_desc.printToString(outs, indentStr + "  ");
         }
-        ss << std::endl;
+        outs << std::endl;
         return 0;
     }
 };
