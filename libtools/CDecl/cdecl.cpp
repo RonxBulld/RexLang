@@ -19,23 +19,24 @@ using namespace ast_matchers;
 
 class MatchResultHandler : public MatchFinder::MatchCallback {
 public:
-    std::vector<struct InterfaceDeclare> interface_declare_;
+    std::vector<struct InterfaceDeclare> &interface_declares_;
 
-    MatchResultHandler(SourceManager &SM, const LangOptions &LO) {
+    MatchResultHandler(SourceManager &SM, const LangOptions &LO, std::vector<struct InterfaceDeclare> &interfaceDeclares)
+            : interface_declares_(interfaceDeclares) {
     }
 
     ~MatchResultHandler() {
     }
 
     struct InterfaceDeclare &getOrInsertInterfaceDecl(const std::string &name) {
-        for (struct InterfaceDeclare &__interface_declare : interface_declare_) {
+        for (struct InterfaceDeclare &__interface_declare : interface_declares_) {
             if (__interface_declare.interface_api_name == name) {
                 return __interface_declare;
             }
         }
-        interface_declare_.emplace_back();
-        interface_declare_.back().interface_api_name = name;
-        return interface_declare_.back();
+        interface_declares_.emplace_back();
+        interface_declares_.back().interface_api_name = name;
+        return interface_declares_.back();
     }
 
     struct ParameterDesc &getOrInsertParameterDecl(struct InterfaceDeclare &interfaceDeclare, const std::string &name) {
@@ -221,7 +222,6 @@ public:
             std::string brief = __funcdecl_raw_comment->getBriefText(__func_ctx);
             __interface_declare.interface_api_name = functionDecl->getName().str();
             __interface_declare.interface_breif.comments.emplace_back(brief);
-            std::cout << __interface_declare.interface_api_name << "->" << brief << std::endl;
 
             // 分析剩余注释块列表
 
@@ -257,8 +257,6 @@ public:
                                 }
                             }
                         }
-
-                        std::cout << __parameter_name << "->" << StringUtil::Join<std::vector, std::string>(__parameter_comment_list, " ") << std::endl;
                     }
                 }
             }
@@ -294,7 +292,7 @@ void MatchConstructorDeclWhichNotSetNodeType(MatchFinder &Finder, MatchFinder::M
     Finder.addMatcher(Matcher, &Handler);
 }
 
-int ReadDeclFiles(std::string filePath, const std::vector<std::string> &args, struct InterfaceDeclare &interfaceDeclare) {
+int ReadDeclFiles(std::string filePath, const std::vector<std::string> &args, struct InterfaceDeclareList &interfaceDeclares) {
 
     if (!std::filesystem::exists(filePath)) {
         assert(false);
@@ -334,16 +332,10 @@ int ReadDeclFiles(std::string filePath, const std::vector<std::string> &args, st
         // 开始提取信息
 
         MatchFinder Finder;
-        MatchResultHandler Handler(ASTUnitPtr->getSourceManager(), ASTUnitPtr->getLangOpts());
+        MatchResultHandler Handler(ASTUnitPtr->getSourceManager(), ASTUnitPtr->getLangOpts(), interfaceDeclares.interface_declare_list);
         MatchConstructorDeclWhichNotSetNodeType(Finder, Handler);
         Finder.matchAST(ASTUnitPtr->getASTContext());
 
-        std::cout << "找到 " << Handler.interface_declare_.size() << " 个接口" << std::endl;
-        std::stringstream ss;
-        for (const struct InterfaceDeclare &__interface_declare : Handler.interface_declare_) {
-            __interface_declare.printToString(ss, "");
-        }
-        std::cout << ss.str() << std::endl;
     }
 
     return 0;

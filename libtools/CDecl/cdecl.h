@@ -13,7 +13,7 @@
 struct CommentList {
     std::vector<std::string> comments;
 
-    int printToString(std::stringstream &outs, const std::string& indentStr) const {
+    int printToString(std::ostream &outs, const std::string& indentStr) const {
         auto quote_warp = [](const std::string &comment) -> std::string { return "\"" + comment + "\""; };
         outs << indentStr << "Comments: [" << std::endl;
         for (const std::string &comment : comments) {
@@ -49,7 +49,7 @@ struct ParameterDesc {
     std::string parameter_name;
     struct CommentList parameter_comments;
 
-    int printToString(std::stringstream &outs, const std::string& indentStr) const {
+    int printToString(std::ostream &outs, const std::string& indentStr) const {
         outs << indentStr << "[" << index << "] " << parameter_name << " : "; type_desc.printToString(outs, indentStr + "  ");
         parameter_comments.printToString(outs, indentStr + "  ");
         return 0;
@@ -64,7 +64,7 @@ struct InterfaceDeclare {
     std::vector<struct ParameterDesc> parameters;
     bool is_variadic = false;
 
-    int printToString(std::stringstream &outs, const std::string &indentStr) const {
+    int printToString(std::ostream &outs, const std::string &indentStr) const {
         outs << indentStr << "InterfaceAPIName: " << interface_api_name << std::endl;
         outs << indentStr << "ReturnType:"; return_type.printToString(outs, indentStr + "  ");
         outs << indentStr << "ReturnDescription: " << return_description << std::endl;
@@ -79,12 +79,23 @@ struct InterfaceDeclare {
     }
 };
 
+struct InterfaceDeclareList {
+    std::vector<struct InterfaceDeclare> interface_declare_list;
+
+    int printToString(std::ostream &outs, const std::string &indentStr) const {
+        for (const struct InterfaceDeclare &__interface_declare : interface_declare_list) {
+            __interface_declare.printToString(outs, indentStr);
+        }
+        return 0;
+    }
+};
+
 /*!
  * 读取指定文件的接口定义
  * @param filePath C头文件路径
  * @param args 传递给C前端的选项
  * @return 成功返回0，失败返回非0
  */
-int ReadDeclFiles(std::string filePath, const std::vector<std::string> &args, struct InterfaceDeclare &interfaceDeclare);
+int ReadDeclFiles(std::string filePath, const std::vector<std::string> &args, struct InterfaceDeclareList &interfaceDeclares);
 
 #endif //__REXLANG_CDECL_H__
