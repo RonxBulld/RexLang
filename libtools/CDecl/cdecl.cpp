@@ -36,6 +36,7 @@ public:
         }
         interface_declares_.emplace_back();
         interface_declares_.back().interface_api_name = name;
+        interface_declares_.back().interface_reference_name = name;
         return interface_declares_.back();
     }
 
@@ -202,7 +203,7 @@ public:
      * @param functionDecl 需要解析的Clang函数声明
      * @return 执行状态结果
      */
-    int runForParseFuncCommen(const FunctionDecl *functionDecl) {
+    int runForParseFuncComment(const FunctionDecl *functionDecl) {
 
         std::string __func_name = functionDecl->getNameAsString();
 
@@ -220,7 +221,6 @@ public:
             // 分析接口注释
 
             std::string brief = __funcdecl_raw_comment->getBriefText(__func_ctx);
-            __interface_declare.interface_api_name = functionDecl->getName().str();
             __interface_declare.interface_breif.comments.emplace_back(brief);
 
             // 分析剩余注释块列表
@@ -281,7 +281,7 @@ public:
 
             runForParseFuncDecl(__function_decl);
 
-            runForParseFuncCommen(__function_decl);
+            runForParseFuncComment(__function_decl);
 
         }
     }
