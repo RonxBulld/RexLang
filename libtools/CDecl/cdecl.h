@@ -61,6 +61,7 @@ struct InterfaceDeclare {
     std::string return_description;
     std::string interface_reference_name;
     std::string interface_api_name;
+    std::string library_name;
     struct CommentList interface_breif;
     std::vector<struct ParameterDesc> parameters;
     bool is_variadic = false;

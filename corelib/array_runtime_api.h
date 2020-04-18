@@ -58,13 +58,13 @@ SimpleRTTI_ArguType get_array_rt_type(RTDynArrayTy arrayPtr);
  */
 unsigned long long get_element_as_bit(RTDynArrayTy arrayPtr, int dims_n, ...);
 
-void init_array_32bit(RTDynArrayTy arrayPtr, int, ...);
+void init_array_32bit(RTDynArrayTy arrayPtr, int n, ...);
 
-int32_t *get_array_ep_32bit(RTDynArrayTy arrayPtr, int, ...);
+int32_t *get_array_ep_32bit(RTDynArrayTy arrayPtr, int n, ...);
 
-void init_array_64bit(RTDynArrayTy arrayPtr, int, ...);
+void init_array_64bit(RTDynArrayTy arrayPtr, int n, ...);
 
-int64_t *get_array_ep_64bit(RTDynArrayTy arrayPtr, int, ...);
+int64_t *get_array_ep_64bit(RTDynArrayTy arrayPtr, int n, ...);
 
 };
 

@@ -5,7 +5,7 @@
 #include "elaborate.h"
 #include "../CDecl/cdecl.h"
 
-int ElaborateVariArgs(struct InterfaceDeclare &interfaceDeclare) {
+int Elaborate::ElaborateVariArgs(struct InterfaceDeclare &interfaceDeclare) {
     std::vector<struct ParameterDesc> &parameterList = interfaceDeclare.parameters;
     size_t parm_count = parameterList.size();
     if (parm_count < 2) {
@@ -32,9 +32,16 @@ int ElaborateVariArgs(struct InterfaceDeclare &interfaceDeclare) {
     return 0;
 }
 
+int Elaborate::ElaborateInterfaceNameReplace(struct InterfaceDeclare &interfaceDeclare) {
+    return 0;
+}
+
 int Elaborate::ElaborateInterface(struct InterfaceDeclare &interfaceDeclare) {
     auto &parameter_list = interfaceDeclare.parameters;
     if (int v = ElaborateVariArgs(interfaceDeclare)) {
+        return v;
+    }
+    if (int v = ElaborateInterfaceNameReplace(interfaceDeclare)) {
         return v;
     }
     return 0;

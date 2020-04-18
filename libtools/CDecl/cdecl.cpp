@@ -70,12 +70,21 @@ public:
                     assert(false);
                     return __LINE__;
                 }
+
                 switch (__builtin_type->getKind()) {
                     case BuiltinType::Kind::Bool:       bitwide = 8; break;
+                    case BuiltinType::Kind::SChar:
+                    case BuiltinType::Kind::Char_S:
+                    case BuiltinType::Kind::Char_U:
+                    case BuiltinType::Kind::UChar:
                     case BuiltinType::Kind::Char8:      bitwide = 8; break;
+                    case BuiltinType::Kind::UShort:
                     case BuiltinType::Kind::Short:      bitwide = 16; break;
+                    case BuiltinType::Kind::UInt:
                     case BuiltinType::Kind::Int:        bitwide = 32; break;
+                    case BuiltinType::Kind::ULong:
                     case BuiltinType::Kind::Long:       bitwide = 64; break;
+                    case BuiltinType::Kind::ULongLong:
                     case BuiltinType::Kind::LongLong:   bitwide = 64; break;
                     default:                            assert(false); bitwide = 32;
                 }
@@ -279,9 +288,10 @@ public:
                 return;
             }
 
-            runForParseFuncDecl(__function_decl);
-
-            runForParseFuncComment(__function_decl);
+            if (int v = runForParseFuncDecl(__function_decl)) {
+            } else {
+                runForParseFuncComment(__function_decl);
+            }
 
         }
     }
