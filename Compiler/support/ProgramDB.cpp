@@ -5,7 +5,7 @@
 #include <iostream>
 #include <filesystem>
 #include "ProgramDB.h"
-#include "Command.h"
+#include "../../lite_util/Command.h"
 
 namespace rexlang {
 

@@ -5,7 +5,7 @@
 #include "compile_driver.h"
 #include "../lite_util/StringUtil.h"
 #include "../lite_util/ContainerUtil.h"
-#include "support/Command.h"
+#include "../lite_util/Command.h"
 #include "support/ProgramDB.h"
 #include "../lite_util/Defer.h"
 

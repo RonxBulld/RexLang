@@ -8,8 +8,8 @@
 #include <iostream>
 
 #include "Command.h"
-#include "../../lite_util/StringUtil.h"
-#include "../../lite_util/ContainerUtil.h"
+#include "StringUtil.h"
+#include "ContainerUtil.h"
 
 namespace rexlang {
     CmdParameter::CmdParameter(

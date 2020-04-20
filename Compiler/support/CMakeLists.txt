@@ -8,11 +8,11 @@ LINK_DIRECTORIES(/usr/local/lib)
 ADD_LIBRARY(Support
         ProjectDB.h
         ProjectDB.cpp
-        Command.cpp
-        Command.h
         ProgramDB.cpp
         ProgramDB.h
         )
+
+TARGET_LINK_LIBRARIES(Support lite_util)
 
 if (NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     TARGET_LINK_LIBRARIES(Support stdc++fs)

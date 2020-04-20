@@ -4,7 +4,7 @@
 
 #include "ProjectDB.h"
 #include "../rexlang_compiler/NodeDecl.h"
-#include "Command.h"
+#include "../../lite_util/Command.h"
 
 namespace rexlang {
 
