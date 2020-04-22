@@ -1,7 +1,7 @@
 
-# REXLang 自述文件
+# RexLang 自述文件
 
-REXLang 即 快速表达扩展语言（Rapid Expression eXtension Language）。
+RexLang 即 快速表达扩展语言（Rapid Expression eXtension Language）。
 
 ## 开源许可
 
