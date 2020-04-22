@@ -10,7 +10,7 @@ ADD_LIBRARY(Support
         ProjectDB.cpp
         ProgramDB.cpp
         ProgramDB.h
-        )
+        DiagnosticBase.cpp DiagnosticBase.h)
 
 TARGET_LINK_LIBRARIES(Support lite_util)
 
