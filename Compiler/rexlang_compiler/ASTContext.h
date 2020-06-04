@@ -35,6 +35,12 @@ namespace rexlang {
 
         size_t CreateLocation(const StringRef &filename, size_t line, size_t column);
 
+        const StringRef &GetFileFromLocate(size_t locate);
+
+        size_t GetLineFromLocate(size_t locate);
+
+        size_t GetColumnFromLocate(size_t locate);
+
         void SetDiagnostic(Diagnostic *diagnostic);
 
         Diagnostic *GetDiagnostic();

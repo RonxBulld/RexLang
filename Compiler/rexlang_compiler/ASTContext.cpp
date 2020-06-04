@@ -29,6 +29,18 @@ namespace rexlang {
         return CreateLocation(filename.str(), line, column);
     }
 
+    const StringRef &ASTContext::GetFileFromLocate(size_t locate) {
+        return this->location_pool_.GetFilename(locate);
+    }
+
+    size_t ASTContext::GetLineFromLocate(size_t locate) {
+        return this->location_pool_.GetLineNumber(locate);
+    }
+
+    size_t ASTContext::GetColumnFromLocate(size_t locate) {
+        return this->location_pool_.GetColumnNumber(locate);
+    }
+
     void ASTContext::SetDiagnostic(Diagnostic *diagnostic) {
         this->diagnostic_ = diagnostic;
     }

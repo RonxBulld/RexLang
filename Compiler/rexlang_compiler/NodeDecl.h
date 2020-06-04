@@ -68,7 +68,6 @@ namespace rexlang {
     typedef struct FileVariableDecl* FileVariableDeclPtr;
     typedef struct FunctorDecl* FunctorDeclPtr;
     typedef struct FunctionDecl* FunctionDeclPtr;
-//    typedef struct BuiltinFunctionDecl *BuiltinFunctionDeclPtr;
     typedef struct ProgSetDecl* ProgSetDeclPtr;
     typedef struct APICommandDecl* APICommandDeclPtr;
 
@@ -140,7 +139,6 @@ namespace rexlang {
         kNTyStructureDecl,
         kNTyFunctorDecl,
         kNTyFunctionDecl,
-        kNTyBuiltinFunctionDecl,
         kNTyProgSetDecl,
         kNTyDllCommandDecl,
         kNTyStatement,

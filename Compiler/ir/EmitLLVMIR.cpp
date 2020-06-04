@@ -3,6 +3,8 @@
 //
 
 #include <iostream>
+#include <filesystem>
+
 #include <llvm/ADT/SmallVector.h>
 #include <llvm/ADT/APFloat.h>
 #include <llvm/ADT/APInt.h>
@@ -22,6 +24,7 @@
 #include <llvm/Bitcode/BitcodeWriter.h>
 #include <llvm/Support/ToolOutputFile.h>
 #include <llvm/Support/TargetSelect.h>
+#include <llvm/IR/DIBuilder.h>
 
 #include "EmitLLVMIR.h"
 #include "LLVMRTIRBuilder.h"
@@ -89,17 +92,78 @@ namespace rexlang {
     private:
         // 当前上下文(LLVM)
         llvm::LLVMContext TheContext;
-        // IR构造器
-        llvm::IRBuilder<> Builder;
         // 当前模块(LLVM)
         llvm::Module * TheModule = nullptr;
+        // IR构造器
+        llvm::IRBuilder<> Builder;
+        // 运行时IR构造器
+        LLVMRTIRBuilder RTBuilder;
+        // 调试信息构造器
+        llvm::DIBuilder DebInfoBuilder;
         // 当前函数(LLVM)
         llvm::Function * TheFunction = nullptr;
-        LLVMRTIRBuilder RTBuilder;
+        // 系统入口函数
         llvm::Function *SysEntryFunc = nullptr;
+        // 初始化函数
         llvm::Function *InitFunc = nullptr;
+        // 当前程序集
         ProgSetDecl *TheProgramSet = nullptr;
+        // 当前函数
         FunctionDecl *TheASTFunction = nullptr;
+
+    private:
+        class DebugInfoCache {
+        private:
+            llvm::DIBuilder &TheBuilder;
+            ordered_map<std::string, llvm::DICompileUnit *> TheDICUMap;
+            llvm::DICompileUnit *PresentDICompileUnit = nullptr;
+        public:
+
+            DebugInfoCache(llvm::DIBuilder &Builder) : TheBuilder(Builder) {}
+
+            llvm::DICompileUnit *getDICompileUnit(const StringRef &FilePath) {
+                std::filesystem::path dir(FilePath.str());
+                if (!dir.has_filename()) {
+                    // TODO:
+                    assert(false);
+                    return nullptr;
+                }
+                std::string filename = dir.filename();
+                std::string directory = dir.has_parent_path() ? dir.parent_path() : ".";
+
+                std::filesystem::path abs_dir = std::filesystem::absolute(dir);
+                llvm::DICompileUnit *cu = TheDICUMap[abs_dir.string()];
+                if (cu) { return cu; }
+
+                cu = TheBuilder.createCompileUnit(
+                        llvm::dwarf::DW_LANG_C,
+                        TheBuilder.createFile(filename, directory),
+                        "RexLang Compiler",
+                        0,
+                        "",
+                        0
+                );
+                TheDICUMap[abs_dir.string()] = cu;
+                return cu;
+            }
+
+            void SetPresentDICompileUnit(llvm::DICompileUnit *CU) { PresentDICompileUnit = CU; }
+            llvm::DICompileUnit *GetPresentDICompileUnit() { return PresentDICompileUnit; }
+
+            llvm::DISubprogram *CreateFunctionDI(const StringRef &Name, unsigned LineNo, unsigned ScopeLine) {
+                llvm::DISubprogram *FuncDI = TheBuilder.createFunction(
+                        PresentDICompileUnit,
+                        Name.str(),
+                        llvm::StringRef(),
+                        PresentDICompileUnit->getFile(),
+                        LineNo,
+                        nullptr,
+                        ScopeLine,
+                        llvm::DINode::FlagPrototyped,
+                        llvm::DISubprogram::DISPFlags::SPFlagDefinition
+                        );
+            }
+        } RexDbgCache;
 
         /*
          * 变量表
@@ -375,6 +439,7 @@ namespace rexlang {
             assert(user_entry);
             CreateEntryAndInit(translateUnit, user_entry);
             FinishInitBlockInsert();
+            DebInfoBuilder.finalize();
 
             return true;
         }
@@ -641,6 +706,12 @@ namespace rexlang {
 
         llvm::Function *Emit(FunctionDecl *functionDecl) {
             std::string function_name = functionDecl->name_.string_.str();
+            std::cout << functionDecl->ast_context_->GetFileFromLocate(functionDecl->location_start_).str() << ":"
+                    << functionDecl->ast_context_->GetLineFromLocate(functionDecl->location_start_) << ":"
+                    << functionDecl->ast_context_->GetColumnFromLocate(functionDecl->location_start_) << " ";
+
+            llvm::DICompileUnit *dicu = RexDbgCache.getDICompileUnit(functionDecl->ast_context_->GetFileFromLocate(functionDecl->location_start_));
+
             std::cout << "生成函数：" << function_name << std::endl;
             llvm::Function *function = function_object_pool_[functionDecl];
             if (!function) {
@@ -1637,7 +1708,9 @@ namespace rexlang {
         IREmit()
                 : TheModule(new llvm::Module("a.ll", TheContext)),
                   Builder(llvm::IRBuilder<>(TheContext)),
-                  RTBuilder(TheModule, Builder) {
+                  RTBuilder(TheModule, Builder),
+                  DebInfoBuilder(*TheModule),
+                  RexDbgCache(DebInfoBuilder) {
 
             // 初始化发出目标代码的所有目标
             // TODO: 如需增加平台支持则修改此处

@@ -45,4 +45,4 @@ target_link_libraries(CDecl
         clangTooling
         )
 
-cotire(CDecl)
+#cotire(CDecl)

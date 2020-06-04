@@ -27,6 +27,7 @@ namespace rexlang {
         template <typename Callable>
         int Subscribe(const Callable & callable) {
             this->slot_.emplace_back(callable);
+            return 0;
         }
 
         int Publish(const Event *event) {
