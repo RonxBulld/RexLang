@@ -8,3 +8,7 @@ add_executable(signgen
 target_link_libraries(signgen
         CDecl
         )
+
+INSTALL(PROGRAMS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/signgen
+        DESTINATION bin
+        )
