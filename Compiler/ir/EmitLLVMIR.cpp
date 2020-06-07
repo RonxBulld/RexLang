@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <filesystem>
+#include <assert.h>
 
 #include <llvm/ADT/SmallVector.h>
 #include <llvm/ADT/APFloat.h>
@@ -114,15 +115,18 @@ namespace rexlang {
     private:
         class DebugInfoCache {
         private:
-            llvm::DIBuilder &TheBuilder;
+            llvm::DIBuilder &TheDIBuilder;
             ordered_map<std::string, llvm::DICompileUnit *> TheDICUMap;
             llvm::DICompileUnit *PresentDICompileUnit = nullptr;
         public:
 
-            DebugInfoCache(llvm::DIBuilder &Builder) : TheBuilder(Builder) {}
+            explicit DebugInfoCache(llvm::DIBuilder &Builder) : TheDIBuilder(Builder) {}
 
             llvm::DICompileUnit *getDICompileUnit(const StringRef &FilePath) {
-                std::filesystem::path dir(FilePath.str());
+                return getDICompileUnit(FilePath.str());
+            }
+            llvm::DICompileUnit *getDICompileUnit(const std::string &FilePath) {
+                std::filesystem::path dir(FilePath);
                 if (!dir.has_filename()) {
                     // TODO:
                     assert(false);
@@ -135,9 +139,9 @@ namespace rexlang {
                 llvm::DICompileUnit *cu = TheDICUMap[abs_dir.string()];
                 if (cu) { return cu; }
 
-                cu = TheBuilder.createCompileUnit(
+                cu = TheDIBuilder.createCompileUnit(
                         llvm::dwarf::DW_LANG_C,
-                        TheBuilder.createFile(filename, directory),
+                        TheDIBuilder.createFile(filename, directory),
                         "RexLang Compiler",
                         0,
                         "",
@@ -150,18 +154,29 @@ namespace rexlang {
             void SetPresentDICompileUnit(llvm::DICompileUnit *CU) { PresentDICompileUnit = CU; }
             llvm::DICompileUnit *GetPresentDICompileUnit() { return PresentDICompileUnit; }
 
-            llvm::DISubprogram *CreateFunctionDI(const StringRef &Name, unsigned LineNo, unsigned ScopeLine) {
-                llvm::DISubprogram *FuncDI = TheBuilder.createFunction(
-                        PresentDICompileUnit,
-                        Name.str(),
-                        llvm::StringRef(),
-                        PresentDICompileUnit->getFile(),
-                        LineNo,
+            llvm::DISubprogram *CreateFunctionDI(FunctorDecl *functor, llvm::Function *func_ir) {
+                size_t func_loc = functor->location_start_;
+                std::filesystem::path file_name(functor->ast_context_->GetFileFromLocate(func_loc).str());
+                unsigned file_line = functor->ast_context_->GetLineNumber(file_line);
+                // TODO:有必要的话需要执行 Name Mangle
+                StringRef mangled_name = functor->name_.string_;
+
+                llvm::DIFile *Unit = TheDIBuilder.createFile(
+                        file_name.filename().c_str(),
+                        file_name.parent_path().c_str()
+                        );
+                llvm::DISubprogram *FuncDI = TheDIBuilder.createFunction(
+                        getDICompileUnit(file_name.string().c_str()),
+                        functor->name_.string_.str(),
+                        mangled_name.str(),
+                        Unit,
+                        file_line,
                         nullptr,
-                        ScopeLine,
+                        file_line,
                         llvm::DINode::FlagPrototyped,
                         llvm::DISubprogram::DISPFlags::SPFlagDefinition
                         );
+                return FuncDI;
             }
         } RexDbgCache;
 
@@ -558,6 +573,10 @@ namespace rexlang {
             }
         }
 
+        /******************************************
+         * 类型
+         ******************************************/
+
         llvm::Type *Emit(TypeDecl *typeDecl) {
             if (BuiltinTypeDecl *builtin_type_decl = typeDecl->as<BuiltinTypeDecl>()) {
                 return Emit(builtin_type_decl);
@@ -784,6 +803,8 @@ namespace rexlang {
 
             this->TheFunction = nullptr;
             this->TheASTFunction = nullptr;
+//            llvm::DISubprogram *subprogram_di = RexDbgCache.CreateFunctionDI(functionDecl, function);
+//            function->setSubprogram(subprogram_di);
             return function;
         }
 
@@ -1725,6 +1746,13 @@ namespace rexlang {
 
             auto TargetTriple = llvm::sys::getDefaultTargetTriple();
             TheModule->setTargetTriple(TargetTriple);
+
+            // 设置模块属性
+
+            TheModule->addModuleFlag(llvm::Module::Warning, "Debug Info Version", llvm::DEBUG_METADATA_VERSION);
+            if (llvm::Triple(llvm::sys::getProcessTriple()).isOSDarwin()) {
+                TheModule->addModuleFlag(llvm::Module::Warning, "Dwarf Version", 2);
+            }
         }
 
         ~IREmit() {
@@ -1742,7 +1770,9 @@ namespace rexlang {
     EmitLLVMIR::EmitLLVMIR(TranslateUnit *translateUnit, ProjectDB &projectDB) {
         emitter = new IREmit;
         emitter->Emit(translateUnit);
-        llvm::verifyModule(*emitter->GetModule());
+        llvm::Module *TheModule = GetModule();
+        assert(TheModule);
+        llvm::verifyModule(*TheModule);
     }
 
     void EmitLLVMIR::WriteOutIR() {

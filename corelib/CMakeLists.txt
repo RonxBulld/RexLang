@@ -17,3 +17,6 @@ ADD_LIBRARY(corelib STATIC
         )
 
 file(COPY "corelib.txt" DESTINATION "${OUTPUT_DIR}/include/")
+
+INSTALL(FILES corelib.txt DESTINATION include)
+INSTALL(TARGETS corelib DESTINATION lib)

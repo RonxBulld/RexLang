@@ -29,8 +29,5 @@ ADD_LIBRARY(IR
         )
 
 llvm_map_components_to_libnames(LLVM support core irreader X86)
-if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    target_link_libraries(IR ${LLVM})
-else()
-    target_link_libraries(IR LLVM)
-endif()
+MESSAGE(STATUS "Use LLVM components: ${LLVM}")
+target_link_libraries(IR ${LLVM})

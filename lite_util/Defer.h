@@ -19,4 +19,11 @@ public:
     }
 };
 
+#define DEFER(pred)                     \
+    defer __defer_##__FUNCTION__##__LINE__([&]() {    \
+        do {                            \
+            pred                        \
+        } while (0);                    \
+    });
+
 #endif //LITE_UTIL_DEFER_H

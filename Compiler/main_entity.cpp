@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) {
     rexlang::program_db.ApplyArgument(argument_parser);
 
     if (argument_parser.HadSwitch("", "help") || argc == 1) {
-        std::cout << "直译语言编译器命令行使用方式：" << std::endl;
+        std::cout << "快速表达扩展语言编译器命令行使用方式：" << std::endl;
         std::cout << argv[0] << " [后接下列可选参数] <需要编译的文件列表>" << std::endl;
         std::cout << argument_parser.GetHelpInfomation() << std::endl;
         return 0;

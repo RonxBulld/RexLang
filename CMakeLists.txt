@@ -122,3 +122,5 @@ ADD_SUBDIRECTORY(oe_test)
 #foreach(_variableName ${_variableNames})
 #    message(STATUS "${_variableName}=${${_variableName}}")
 #endforeach()
+
+INSTALL(CODE "MESSAGE(STATUS \"Install target: ${CMAKE_INSTALL_PREFIX}\")")
