@@ -19,7 +19,7 @@ namespace rexlang {
     LLCodeGen::LLCodeGen(EmitLLVMIR &llvmIREmitter) : emitter_(llvmIREmitter) {
     }
 
-    int LLCodeGen::WriteOutBC(const std::string &bc_filename) {
+    int LLCodeGen::WriteOutBitCode(const std::string &bc_filename) {
 
         std::error_code EC;
         llvm::raw_fd_ostream bc_file(bc_filename, EC);
@@ -32,40 +32,44 @@ namespace rexlang {
         return EC.value();
     }
 
-    void LLCodeGen::WriteOutObject(const std::string &bc_filename) {
+    int LLCodeGen::WriteOutObject(const std::string &obj_filename) {
+
+        // 获得目标机器三元组
 
         auto TargetTriple = llvm::sys::getDefaultTargetTriple();
+
         std::string Error;
         auto Target = llvm::TargetRegistry::lookupTarget(TargetTriple, Error);
 
         if (!Target) {
             llvm::errs() << Error;
             assert(false);
-            return;
+            return 1;
         }
+
+        // 目标机器设定
 
         auto CPU = "generic";
         auto Features = "";
 
         llvm::TargetOptions opt;
         auto RM = llvm::Optional<llvm::Reloc::Model>();
+        auto TargetMachine = Target->createTargetMachine(TargetTriple, CPU, Features, opt, RM);
 
-        // 将编译的机器信息录入
+        // 指定模块的数据布局和目标机器，以便于优化代码
 
-        auto TheTargetMachine = Target->createTargetMachine(TargetTriple, CPU, Features, opt, RM);
-
-        // 通过了解目标和数据布局，优化代码
-
-        emitter_.GetModule()->setDataLayout(TheTargetMachine->createDataLayout());
+        llvm::Module *TheModule = emitter_.GetModule();
+        TheModule->setDataLayout(TargetMachine->createDataLayout());
+        TheModule->setTargetTriple(TargetTriple);
 
         // 定义文件流
 
         std::error_code EC;
-        llvm::raw_fd_ostream dest(bc_filename, EC, llvm::sys::fs::F_None);
+        llvm::raw_fd_ostream dest(obj_filename, EC, llvm::sys::fs::F_None);
 
         if (EC) {
             llvm::errs() << "Could not open file: " << EC.message();
-            return;
+            return 1;
         }
 
         // 代码写入流中
@@ -73,14 +77,17 @@ namespace rexlang {
         llvm::legacy::PassManager pass;
         auto FileType = llvm::TargetMachine::CGFT_ObjectFile;
 
-        if (TheTargetMachine->addPassesToEmitFile(pass, dest, &dest, FileType)) {
+        if (TargetMachine->addPassesToEmitFile(pass, dest, nullptr, FileType)) {
             llvm::errs() << "TheTargetMachine can't emit a file of this type";
-            return;
+            return 1;
         }
+
+        pass.run(*TheModule);
 
         // 完成并清除流
 
         dest.flush();
 
+        return 0;
     }
 }

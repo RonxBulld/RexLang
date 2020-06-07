@@ -19,9 +19,9 @@ namespace rexlang {
         LLCodeGen(EmitLLVMIR &llvmIREmitter);
 
     public:
-        int WriteOutBC(const std::string &bc_filename);
+        int WriteOutBitCode(const std::string &bc_filename);
 
-        void WriteOutObject(const std::string &bc_filename);
+        int WriteOutObject(const std::string &obj_filename);
 
     };
 

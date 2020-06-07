@@ -12,14 +12,14 @@ std::string GenerateReturnType(const struct TypeDesc &type);
 std::string GenerateParameterType(const struct TypeDesc &type);
 std::string GenerateParameterTypeAttributes(const struct TypeDesc &type);
 
-const char *targetLanguageName =    "Rex语言";
-const char *int8Typename =          "字节型";
-const char *int16Typename =         "短整型";
-const char *int32Typename =         "整数型";
-const char *int64Typename =         "长整数型";
-const char *float32Typename =       "小数型";
-const char *float64Typename =       "双精度小数型";
-const char *pointerTypename =       int32Typename;
+const char *targetLanguageName  =   "Rex语言";
+const char *int8Typename        =   "字节型";
+const char *int16Typename       =   "短整型";
+const char *int32Typename       =   "整数型";
+const char *int64Typename       =   "长整数型";
+const char *float32Typename     =   "小数型";
+const char *float64Typename     =   "双精度小数型";
+const char *pointerTypename     =   int32Typename;
 
 const char *GetTargetLanguageName() {
     return targetLanguageName;

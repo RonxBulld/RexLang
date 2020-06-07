@@ -112,8 +112,12 @@ namespace rexlang {
         return *translate_unit_->ast_context_;
     }
 
-    std::string ProjectDB::GetObjectFilename() const {
+    std::string ProjectDB::GetBitCodeFilename() const {
         return GetProjectName() + ".bc";
+    }
+
+    std::string ProjectDB::GetObjectFilename() const {
+        return GetProjectName() + ".o";
     }
 
     std::string ProjectDB::GetExecuteFilename() const {

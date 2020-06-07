@@ -75,6 +75,7 @@ namespace rexlang {
         ASTContext &GetASTContext();
         const ASTContext &GetASTContext() const;
 
+        std::string GetBitCodeFilename() const;
         std::string GetObjectFilename() const;
         std::string GetExecuteFilename() const;
 
