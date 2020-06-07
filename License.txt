@@ -207,5 +207,5 @@ The REXLang Project is under the Apache License v2.0 with REXLang Extensions:
 ---- REXLang Extensions to the Apache 2.0 License ----
 
 Make sure to indicate the reference to the name of the project and the
-address of the source code repository in one of the readme file, license
-file, and reference declaration file.
+address of the original source code repository in one of the readme file,
+license file, and reference declaration file.
