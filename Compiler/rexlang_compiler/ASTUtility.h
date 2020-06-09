@@ -6,7 +6,7 @@
 #define REXLANG_ASTUTILITY_H
 
 #include "NodeDecl.h"
-#include "common_rt/ErrOr.h"
+#include "../../lite_util/ErrOr.h"
 #include "sematic_analysis/SematicAnalysisContext.h"
 
 namespace rexlang {

@@ -5,7 +5,7 @@
 #ifndef REXLANG_LINKER_H
 #define REXLANG_LINKER_H
 
-#include "../rexlang_compiler/common_rt/StringRef.h"
+#include "../../lite_util/StringRef.h"
 
 namespace rexlang {
 

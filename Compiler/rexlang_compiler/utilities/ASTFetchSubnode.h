@@ -8,7 +8,7 @@
 #include <set>
 
 #include "../NodeDecl.h"
-#include "../common_rt/ErrOr.h"
+#include "../../../lite_util/ErrOr.h"
 
 namespace rexlang {
 

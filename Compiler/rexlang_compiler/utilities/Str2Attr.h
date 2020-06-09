@@ -5,8 +5,8 @@
 #ifndef REXLANG_STR2ATTR_H
 #define REXLANG_STR2ATTR_H
 
-#include "../common_rt/ErrOr.h"
-#include "../common_rt/StringRef.h"
+#include "../../../lite_util/ErrOr.h"
+#include "../../../lite_util/StringRef.h"
 #include "../NodeDecl.h"
 
 namespace rexlang {

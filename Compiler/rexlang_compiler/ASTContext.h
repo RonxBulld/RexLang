@@ -7,7 +7,7 @@
 
 #include <set>
 #include <vector>
-#include "common_rt/StringRef.h"
+#include "../../lite_util/StringRef.h"
 #include "utilities/Location.h"
 
 namespace rexlang {

@@ -7,8 +7,8 @@
 
 #include <memory>
 
-#include "../common_rt/ErrOr.h"
-#include "../common_rt/StringRef.h"
+#include "../../../lite_util/ErrOr.h"
+#include "../../../lite_util/StringRef.h"
 #include "../NodeDecl.h"
 #include "SematicAnalysisContext.h"
 //#include "../ASTBuilder.h"

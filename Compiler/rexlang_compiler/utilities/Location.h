@@ -6,7 +6,7 @@
 #define REXLANG_LOCATION_H
 
 #include <map>
-#include "../common_rt/StringRef.h"
+#include "../../../lite_util/StringRef.h"
 
 namespace rexlang {
 

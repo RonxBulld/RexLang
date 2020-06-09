@@ -11,8 +11,8 @@
 #include <ctime>
 #include <set>
 
-#include "common_rt/TString.h"
-#include "common_rt/ordered_map/ordered_map.h"
+#include "../../lite_util/TString.h"
+#include "../../lite_util/ordered_map/ordered_map.h"
 #include "ASTContext.h"
 
 namespace rexlang {

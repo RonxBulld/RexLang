@@ -45,18 +45,12 @@ SET(REXCompilerParse-Source
         ASTContext.h
         utilities/Location.cpp
         utilities/Location.h
-        common_rt/StringRef.cpp
-        common_rt/StringRef.h
-        common_rt/TString.cpp
-        common_rt/TString.h
         dump/Dump.cpp
         dump/Dump.h
         CST2ASTConvert.cpp
         CST2ASTConvert.h
         sematic_analysis/SematicAnalysis.cpp
         sematic_analysis/SematicAnalysis.h
-        common_rt/ErrOr.cpp
-        common_rt/ErrOr.h
         utilities/Str2Attr.cpp
         utilities/Str2Attr.h
         TypeAssert.cpp

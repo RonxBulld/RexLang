@@ -11,4 +11,12 @@ ADD_LIBRARY(lite_util
         Defer.h
         Command.cpp
         Command.h
-        EventSlot.cpp EventSlot.h)
+        EventSlot.cpp
+        EventSlot.h
+        StringRef.cpp
+        StringRef.h
+        TString.cpp
+        TString.h
+        ErrOr.cpp
+        ErrOr.h
+        )
