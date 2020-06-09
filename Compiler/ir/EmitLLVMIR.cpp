@@ -126,7 +126,7 @@ namespace rexlang {
             }
 
             /* 通用功能 */
-            void EmitLocation(Node *node) {
+            llvm::DebugLoc EmitLocation(Node *node) {
                 llvm::DIScope *scope;
                 if (LexicalBlocks.empty()) {
                     scope = GetOrCreateDICompileUnit(node);
@@ -135,7 +135,9 @@ namespace rexlang {
                 }
                 size_t line = node->ast_context_->GetLineFromLocate(node->location_start_);
                 size_t column = node->ast_context_->GetColumnFromLocate(node->location_start_);
-                TheIRBuilder.SetCurrentDebugLocation(llvm::DebugLoc::get(line, column, scope));
+                llvm::DebugLoc debug_loc = llvm::DebugLoc::get(line, column, scope);
+                TheIRBuilder.SetCurrentDebugLocation(debug_loc);
+                return debug_loc;
             }
             /* 编译单元 */
             llvm::DICompileUnit *GetOrCreateDICompileUnit(const Node *node) {
@@ -444,6 +446,7 @@ namespace rexlang {
             // 全局变量
 
             for (auto &global_vari_item : translateUnit->global_variables_) {
+                RexDbgCache.GetOrCreateDICompileUnit(global_vari_item.second);
                 llvm::GlobalVariable *gvari = Emit(global_vari_item.second);
                 assert(gvari);
             }
@@ -452,6 +455,7 @@ namespace rexlang {
 
             for (auto &file_item : translateUnit->source_file_) {
                 if (ProgramSetFile *program_set_file = file_item->as<ProgramSetFile>()) {
+                    RexDbgCache.GetOrCreateDICompileUnit(program_set_file);
                     for (auto &prog_vari_item : program_set_file->program_set_declares_->file_static_variables_) {
                         FileVariableDecl *file_variable_decl = prog_vari_item.second;
                         llvm::GlobalVariable *fvari = Emit(file_variable_decl);
@@ -464,12 +468,14 @@ namespace rexlang {
             // 函数声明
 
             for (auto &functor_decl_item : translateUnit->functor_declares_) {
+                RexDbgCache.GetOrCreateDICompileUnit(functor_decl_item.second);
                 llvm::Function *functor_decl = Emit(functor_decl_item.second);
             }
 
             // 函数定义
 
             for (auto &function_def_item : translateUnit->function_decls_) {
+                RexDbgCache.GetOrCreateDICompileUnit(function_def_item.second);
                 this->TheProgramSet = function_def_item.second->parent_node_->as<ProgSetDecl>();
                 llvm::Function *function_def = Emit(function_def_item.second);
                 this->TheProgramSet = nullptr;
@@ -478,6 +484,18 @@ namespace rexlang {
             llvm::Function *user_entry = function_object_pool_[translateUnit->main_entry_];
             assert(user_entry);
             CreateEntryAndInit(translateUnit, user_entry);
+
+            // 检查所有函数
+
+            /*for (auto &function_object : function_object_pool_) {
+                llvm::Function *function = function_object.second;
+                if (llvm::verifyFunction(*function, &llvm::outs())) {
+                    TheModule->print(llvm::outs(), nullptr);
+                    assert(false);
+                    function->eraseFromParent();
+                }
+            }*/
+
             FinishInitBlockInsert();
             DebInfoBuilder.finalize();
 
@@ -823,12 +841,6 @@ namespace rexlang {
             }
 
             DebInfoBuilder.finalizeSubprogram(subprogram_di);
-            if (llvm::verifyFunction(*function, &llvm::outs())) {
-                TheModule->print(llvm::outs(), nullptr);
-                assert(false);
-                function->eraseFromParent();
-                function = nullptr;
-            }
 
             this->TheFunction = nullptr;
             this->TheASTFunction = nullptr;
@@ -1328,7 +1340,11 @@ namespace rexlang {
 
                 // 开始调用
 
-                ref = Builder.CreateCall(func_ptr, arguments_ir);
+                llvm::CallInst *caller = Builder.CreateCall(func_ptr, arguments_ir);
+
+                caller->setDebugLoc(RexDbgCache.EmitLocation(function_call));
+
+                ref = caller;
             }
             else {
                 assert(false);
