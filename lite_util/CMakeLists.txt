@@ -19,4 +19,7 @@ ADD_LIBRARY(lite_util
         TString.h
         ErrOr.cpp
         ErrOr.h
+        ordered_map/ordered_hash.h
+        ordered_map/ordered_map.h
+        ordered_map/ordered_set.h
         )
