@@ -52,12 +52,12 @@ namespace rexlang {
     void                IREmit::ControlableStructure::setTailBB (llvm::BasicBlock *tailBB)          { tail_bb = tailBB;   }
 
     int IREmit::OnEmitBegin(Node *astNode) {
-        RexDbgCache.OnEmitBegin(astNode);
+        RexDbgMgr.OnEmitBegin(astNode);
         return 0;
     }
 
     int IREmit::OnEmitEnd(Node *astNode) {
-        RexDbgCache.OnEmitEnd(astNode);
+        RexDbgMgr.OnEmitEnd(astNode);
         return 0;
     }
 
@@ -276,7 +276,7 @@ namespace rexlang {
         // 全局变量
 
         for (auto &global_vari_item : translateUnit->global_variables_) {
-            RexDbgCache.GetOrCreateDICompileUnit(global_vari_item.second);
+            RexDbgMgr.GetOrCreateDICompileUnit(global_vari_item.second);
             llvm::GlobalVariable *gvari = Emit(global_vari_item.second);
             assert(gvari);
         }
@@ -285,7 +285,7 @@ namespace rexlang {
 
         for (auto &file_item : translateUnit->source_file_) {
             if (ProgramSetFile *program_set_file = file_item->as<ProgramSetFile>()) {
-                RexDbgCache.GetOrCreateDICompileUnit(program_set_file);
+                RexDbgMgr.GetOrCreateDICompileUnit(program_set_file);
                 for (auto &prog_vari_item : program_set_file->program_set_declares_->file_static_variables_) {
                     FileVariableDecl *file_variable_decl = prog_vari_item.second;
                     llvm::GlobalVariable *fvari = Emit(file_variable_decl);
@@ -298,14 +298,14 @@ namespace rexlang {
         // 函数声明
 
         for (auto &functor_decl_item : translateUnit->functor_declares_) {
-            RexDbgCache.GetOrCreateDICompileUnit(functor_decl_item.second);
+            RexDbgMgr.GetOrCreateDICompileUnit(functor_decl_item.second);
             llvm::Function *functor_decl = Emit(functor_decl_item.second);
         }
 
         // 函数定义
 
         for (auto &function_def_item : translateUnit->function_decls_) {
-            RexDbgCache.GetOrCreateDICompileUnit(function_def_item.second);
+            RexDbgMgr.GetOrCreateDICompileUnit(function_def_item.second);
             this->TheProgramSet = function_def_item.second->parent_node_->as<ProgSetDecl>();
             llvm::Function *function_def = Emit(function_def_item.second);
             this->TheProgramSet = nullptr;
@@ -600,9 +600,9 @@ namespace rexlang {
         }
         this->TheFunction = function;
         this->TheASTFunction = functionDecl;
-        llvm::DISubprogram *subprogram_di = RexDbgCache.CreateFunctionDI(functionDecl, function);
+        llvm::DISubprogram *subprogram_di = RexDbgMgr.CreateFunctionDI(functionDecl, function);
         function->setSubprogram(subprogram_di);
-        RexDbgCache.PushLexicalScope(subprogram_di);
+        RexDbgMgr.PushLexicalScope(subprogram_di);
 
         // 开始创建函数体
 
@@ -611,12 +611,12 @@ namespace rexlang {
 
         // 创建返回值栈空间
 
-        llvm::BasicBlock *ret_bb = llvm::BasicBlock::Create(TheContext, ".return", function);
+        llvm::BasicBlock *ret_bb = llvm::BasicBlock::Create(TheContext, "return", function);
         function_retbb_map_[function] = ret_bb;
         llvm::Value *return_value_ptr = nullptr;
         if (!TypeAssert::IsVoidType(functionDecl->return_type_)) {
             llvm::Type *ret_type = GetType(functionDecl->return_type_);
-            return_value_ptr = Builder.CreateAlloca(ret_type, nullptr, ".ret");
+            return_value_ptr = Builder.CreateAlloca(ret_type, nullptr, "ret");
         }
         function_retptr_map_[function] = return_value_ptr;
 
@@ -656,7 +656,7 @@ namespace rexlang {
 
         this->TheFunction = nullptr;
         this->TheASTFunction = nullptr;
-        RexDbgCache.PopLexicalScope();
+        RexDbgMgr.PopLexicalScope();
         return function;
     }
 
@@ -1576,7 +1576,7 @@ namespace rexlang {
               Builder(llvm::IRBuilder<>(TheContext)),
               RTBuilder(TheModule, Builder),
               DebInfoBuilder(*TheModule),
-              RexDbgCache(Builder, DebInfoBuilder) {
+              RexDbgMgr(Builder, DebInfoBuilder) {
 
         // 初始化发出目标代码的所有目标
         // TODO: 如需增加平台支持则修改此处

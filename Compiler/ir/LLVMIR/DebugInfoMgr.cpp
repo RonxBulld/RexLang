@@ -50,6 +50,8 @@ namespace rexlang {
         // 判定是否生成调试信息的标准就是看这个节点是否在Subprogram或者Function中
         if (dynamic_cast<Statement*>(astNode)) {
             return true;
+        } else if (dynamic_cast<FunctionDecl*>(astNode)) {
+            return true;
         } else if (dynamic_cast<FunctorDecl*>(astNode)) {
             return true;
         } else {

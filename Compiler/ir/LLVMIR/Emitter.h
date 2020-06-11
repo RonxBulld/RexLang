@@ -49,7 +49,7 @@ namespace rexlang {
         FunctionDecl *      TheASTFunction      = nullptr;      /* 当前函数 */
 
     private:
-        DebugInfoMgr RexDbgCache;
+        DebugInfoMgr RexDbgMgr;
 
         /*************************************************************************
          * 变量表
@@ -112,6 +112,47 @@ namespace rexlang {
         std::vector<llvm::Value*>   EmitArgumentList(FunctionCall *functionCall);
         llvm::Constant *            MakeGlobalConstantByteSet   (const std::vector<llvm::Constant*> &elements);
 
+    private:
+        bool                    _EmitImpl_(TranslateUnit *        translateUnit);
+        llvm::GlobalVariable *  _EmitImpl_(GlobalVariableDecl *   globalVariableDecl);
+        llvm::Value *           _EmitImpl_(ParameterDecl *        parameterDecl);
+        llvm::GlobalVariable *  _EmitImpl_(FileVariableDecl *     fileVariableDecl);
+        llvm::Value *           _EmitImpl_(LocalVariableDecl *    localVariableDecl);
+        llvm::Type *            _EmitImpl_(TypeDecl *             typeDecl);
+        llvm::Type *            _EmitImpl_(BuiltinTypeDecl *      builtinTypeDecl);
+        llvm::PointerType *     _EmitImpl_(ArrayDecl *            arrayDecl);
+        llvm::PointerType *     _EmitImpl_(StructureDecl *        structureDecl);
+        llvm::Function *        _EmitImpl_(FunctorDecl *          functorDecl);
+        llvm::Function *        _EmitImpl_(FunctionDecl *         functionDecl);
+        bool                    _EmitImpl_(Statement *            statement);
+        bool                    _EmitImpl_(IfStmt *               ifStmt);
+        bool                    _EmitImpl_(StatementBlock *       statementBlock);
+        bool                    _EmitImpl_(LoopStatement *        loopStatement);
+        bool                    _EmitImpl_(WhileStmt *            whileStmt);
+        bool                    _EmitImpl_(RangeForStmt *         rangeForStmt);
+        bool                    _EmitImpl_(ForStmt *              forStmt);
+        bool                    _EmitImpl_(DoWhileStmt *          doWhileStmt);
+        bool                    _EmitImpl_(AssignStmt *           assignStmt);
+        bool                    _EmitImpl_(ControlStmt *          controlStmt);
+        bool                    _EmitImpl_(LoopControlStmt *      loopControlStmt);
+        bool                    _EmitImpl_(ContinueStmt *         continueStmt);
+        bool                    _EmitImpl_(BreakStmt *            breakStmt);
+        bool                    _EmitImpl_(ReturnStmt *           returnStmt);
+        bool                    _EmitImpl_(ExitStmt *             exitStmt);
+        llvm::Value *           _EmitImpl_(Expression *           expression);
+        llvm::Value *           _EmitImpl_(TypeConvert *          typeConvert);
+        llvm::Value *           _EmitImpl_(HierarchyIdentifier *  hierarchyIdentifier);
+        llvm::Value *           _EmitImpl_(NameComponent *        nameComponent);
+        llvm::Value *           _EmitImpl_(UnaryExpression *      unaryExpression);
+        llvm::Value *           _EmitImpl_(BinaryExpression *     binaryExpression);
+        llvm::Value *           _EmitImpl_(Value *                value);
+        llvm::Value *           _EmitImpl_(ValueOfDataSet *       valueOfDataSet);
+        llvm::Value *           _EmitImpl_(ValueOfDatetime *      valueOfDatetime);
+        llvm::Value *           _EmitImpl_(FuncAddrExpression *   funcAddrExpression);
+        llvm::Value *           _EmitImpl_(ValueOfBool *          valueOfBool);
+        llvm::Value *           _EmitImpl_(ValueOfDecimal *       valueOfDecimal);
+        llvm::Value *           _EmitImpl_(ValueOfString *        valueOfString);
+
     public:
         bool                    Emit(TranslateUnit *        translateUnit);         //
 //        llvm::Value *           Emit(SourceFile *           sourceFile);
@@ -167,47 +208,6 @@ namespace rexlang {
         llvm::Value *           Emit(ValueOfBool *          valueOfBool);           //
         llvm::Value *           Emit(ValueOfDecimal *       valueOfDecimal);        //
         llvm::Value *           Emit(ValueOfString *        valueOfString);         //
-
-    private:
-        bool                    _EmitImpl_(TranslateUnit *        translateUnit);
-        llvm::GlobalVariable *  _EmitImpl_(GlobalVariableDecl *   globalVariableDecl);
-        llvm::Value *           _EmitImpl_(ParameterDecl *        parameterDecl);
-        llvm::GlobalVariable *  _EmitImpl_(FileVariableDecl *     fileVariableDecl);
-        llvm::Value *           _EmitImpl_(LocalVariableDecl *    localVariableDecl);
-        llvm::Type *            _EmitImpl_(TypeDecl *             typeDecl);
-        llvm::Type *            _EmitImpl_(BuiltinTypeDecl *      builtinTypeDecl);
-        llvm::PointerType *     _EmitImpl_(ArrayDecl *            arrayDecl);
-        llvm::PointerType *     _EmitImpl_(StructureDecl *        structureDecl);
-        llvm::Function *        _EmitImpl_(FunctorDecl *          functorDecl);
-        llvm::Function *        _EmitImpl_(FunctionDecl *         functionDecl);
-        bool                    _EmitImpl_(Statement *            statement);
-        bool                    _EmitImpl_(IfStmt *               ifStmt);
-        bool                    _EmitImpl_(StatementBlock *       statementBlock);
-        bool                    _EmitImpl_(LoopStatement *        loopStatement);
-        bool                    _EmitImpl_(WhileStmt *            whileStmt);
-        bool                    _EmitImpl_(RangeForStmt *         rangeForStmt);
-        bool                    _EmitImpl_(ForStmt *              forStmt);
-        bool                    _EmitImpl_(DoWhileStmt *          doWhileStmt);
-        bool                    _EmitImpl_(AssignStmt *           assignStmt);
-        bool                    _EmitImpl_(ControlStmt *          controlStmt);
-        bool                    _EmitImpl_(LoopControlStmt *      loopControlStmt);
-        bool                    _EmitImpl_(ContinueStmt *         continueStmt);
-        bool                    _EmitImpl_(BreakStmt *            breakStmt);
-        bool                    _EmitImpl_(ReturnStmt *           returnStmt);
-        bool                    _EmitImpl_(ExitStmt *             exitStmt);
-        llvm::Value *           _EmitImpl_(Expression *           expression);
-        llvm::Value *           _EmitImpl_(TypeConvert *          typeConvert);
-        llvm::Value *           _EmitImpl_(HierarchyIdentifier *  hierarchyIdentifier);
-        llvm::Value *           _EmitImpl_(NameComponent *        nameComponent);
-        llvm::Value *           _EmitImpl_(UnaryExpression *      unaryExpression);
-        llvm::Value *           _EmitImpl_(BinaryExpression *     binaryExpression);
-        llvm::Value *           _EmitImpl_(Value *                value);
-        llvm::Value *           _EmitImpl_(ValueOfDataSet *       valueOfDataSet);
-        llvm::Value *           _EmitImpl_(ValueOfDatetime *      valueOfDatetime);
-        llvm::Value *           _EmitImpl_(FuncAddrExpression *   funcAddrExpression);
-        llvm::Value *           _EmitImpl_(ValueOfBool *          valueOfBool);
-        llvm::Value *           _EmitImpl_(ValueOfDecimal *       valueOfDecimal);
-        llvm::Value *           _EmitImpl_(ValueOfString *        valueOfString);
 
     public:
         IREmit();
