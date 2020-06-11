@@ -5,7 +5,7 @@
 #ifndef REXLANG_EMITLLVMIR_H
 #define REXLANG_EMITLLVMIR_H
 
-#include "../rexlang_compiler/NodeDecl.h"
+#include "../../rexlang_compiler/NodeDecl.h"
 
 namespace llvm {
     class Module;

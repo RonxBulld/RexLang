@@ -8,3 +8,6 @@ cmake-build-*
 sysroot
 build
 release
+_install
+*.ll
+*.bc

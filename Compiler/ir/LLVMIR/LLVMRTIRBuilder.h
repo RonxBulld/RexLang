@@ -21,8 +21,8 @@
 #include <llvm/IR/DerivedTypes.h>
 #include <llvm/IR/GlobalVariable.h>
 
-#include "../rexlang_compiler/NodeDecl.h"
-#include "SimpleRTTI_ArguType.h"
+#include "../../rexlang_compiler/NodeDecl.h"
+#include "../SimpleRTTI_ArguType.h"
 
 namespace rexlang {
     class LLVMRTIRBuilder;

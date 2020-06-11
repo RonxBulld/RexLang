@@ -5,7 +5,7 @@
 #include <iostream>
 
 #include "LLCodeGen.h"
-#include "../ir/EmitLLVMIR.h"
+#include "../ir/LLVMIR/EmitLLVMIR.h"
 
 #include <llvm/IR/Module.h>
 #include <llvm/Bitcode/BitcodeWriter.h>

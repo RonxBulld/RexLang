@@ -16,16 +16,16 @@ include_directories(${LLVM_INCLUDE_DIRS})
 include_directories(${REAL_LLVM_INCLUDE_DIRS})
 add_definitions(${LLVM_DEFINITIONS})
 
-SET(IR-Source
-        EmitLLVMIR.cpp
-        EmitLLVMIR.h
-        LLVMRTIRBuilder.cpp
-        LLVMRTIRBuilder.h
-        SimpleRTTI_ArguType.h
-        )
-
 ADD_LIBRARY(IR
-        ${IR-Source}
+        SimpleRTTI_ArguType.h
+        LLVMIR/EmitLLVMIR.cpp
+        LLVMIR/EmitLLVMIR.h
+        LLVMIR/LLVMRTIRBuilder.cpp
+        LLVMIR/LLVMRTIRBuilder.h
+        LLVMIR/Emitter.cpp
+        LLVMIR/Emitter.h
+        LLVMIR/DebugInfoMgr.cpp
+        LLVMIR/DebugInfoMgr.h
         )
 
 llvm_map_components_to_libnames(LLVM support core irreader X86)
