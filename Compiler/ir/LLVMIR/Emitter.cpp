@@ -51,6 +51,16 @@ namespace rexlang {
     void                IREmit::ControlableStructure::setFalseBb(llvm::BasicBlock *falseBB)         { false_bb = falseBB; }
     void                IREmit::ControlableStructure::setTailBB (llvm::BasicBlock *tailBB)          { tail_bb = tailBB;   }
 
+    int IREmit::OnEmitBegin(Node *astNode) {
+        RexDbgCache.OnEmitBegin(astNode);
+        return 0;
+    }
+
+    int IREmit::OnEmitEnd(Node *astNode) {
+        RexDbgCache.OnEmitEnd(astNode);
+        return 0;
+    }
+
     llvm::Type *IREmit::GetType(TypeDecl *typeDecl) {
         auto found = type_object_pool_.find(typeDecl);
         if (found != type_object_pool_.end()) {
@@ -259,7 +269,7 @@ namespace rexlang {
         return llvm::ConstantInt::get(TheContext, llvm::APInt(nBits, intValue, isSigned));
     }
 
-    bool IREmit::Emit(TranslateUnit *translateUnit) {
+    bool IREmit::_EmitImpl_(TranslateUnit *translateUnit) {
 
         DefineMainEntryAndInitFunc();
 
@@ -322,15 +332,15 @@ namespace rexlang {
         return true;
     }
 
-//        llvm::Value *IREmit::Emit(SourceFile *sourceFile);
-//        llvm::Value *IREmit::Emit(ProgramSetFile *programSetFile);
-//        llvm::Value *IREmit::Emit(GlobalVariableFile *globalVariableFile);
-//        llvm::Value *IREmit::Emit(DataStructureFile *dataStructureFile);
-//        llvm::Value *IREmit::Emit(DllDefineFile *dllDefineFile);
-//        llvm::Value *IREmit::Emit(Decl *decl);
-//        llvm::Value *IREmit::Emit(TagDecl *tagDecl);
-//        llvm::Value *IREmit::Emit(VariableDecl *variableDecl);
-//        llvm::Value *IREmit::Emit(BaseVariDecl *baseVariDecl);
+//        llvm::Value *IREmit::_EmitImpl_(SourceFile *sourceFile);
+//        llvm::Value *IREmit::_EmitImpl_(ProgramSetFile *programSetFile);
+//        llvm::Value *IREmit::_EmitImpl_(GlobalVariableFile *globalVariableFile);
+//        llvm::Value *IREmit::_EmitImpl_(DataStructureFile *dataStructureFile);
+//        llvm::Value *IREmit::_EmitImpl_(DllDefineFile *dllDefineFile);
+//        llvm::Value *IREmit::_EmitImpl_(Decl *decl);
+//        llvm::Value *IREmit::_EmitImpl_(TagDecl *tagDecl);
+//        llvm::Value *IREmit::_EmitImpl_(VariableDecl *variableDecl);
+//        llvm::Value *IREmit::_EmitImpl_(BaseVariDecl *baseVariDecl);
 
     void IREmit::CreateVariableInitialization(llvm::Value *variable) {
         if (llvm::GlobalVariable *gvari = llvm::dyn_cast<llvm::GlobalVariable>(variable)) {
@@ -374,13 +384,13 @@ namespace rexlang {
         return gvari;
     }
 
-    llvm::GlobalVariable *IREmit::Emit(GlobalVariableDecl *globalVariableDecl) {
+    llvm::GlobalVariable *IREmit::_EmitImpl_(GlobalVariableDecl *globalVariableDecl) {
         llvm::GlobalVariable *global_variable = CreateGlobalVariableAndInit(globalVariableDecl->type_decl_ptr_, globalVariableDecl->name_.string_.str());
         RegistVariableIR(globalVariableDecl, global_variable);
         return global_variable;
     }
 
-    llvm::Value *IREmit::Emit(ParameterDecl *parameterDecl) {
+    llvm::Value *IREmit::_EmitImpl_(ParameterDecl *parameterDecl) {
         llvm::Type *param_type = GetType(parameterDecl->type_decl_ptr_);
         if (parameterDecl->is_reference && !param_type->isPointerTy()) {
             param_type = param_type->getPointerTo();
@@ -399,7 +409,7 @@ namespace rexlang {
         return alloca_param;
     }
 
-    llvm::GlobalVariable *IREmit::Emit(FileVariableDecl *fileVariableDecl) {
+    llvm::GlobalVariable *IREmit::_EmitImpl_(FileVariableDecl *fileVariableDecl) {
         // 文件变量需要重命名以免名称冲突
         std::string vari_name = fileVariableDecl->name_.string_.str();
         vari_name = TheProgramSet->name_.string_.str() + "." + vari_name;
@@ -410,7 +420,7 @@ namespace rexlang {
         return file_vari;
     }
 
-    llvm::Value *IREmit::Emit(LocalVariableDecl *localVariableDecl) {
+    llvm::Value *IREmit::_EmitImpl_(LocalVariableDecl *localVariableDecl) {
         llvm::Type *vari_type = GetType(localVariableDecl->type_decl_ptr_);
         std::string vari_name = localVariableDecl->name_.string_.str();
         if (!localVariableDecl->is_static_) {
@@ -436,7 +446,7 @@ namespace rexlang {
         }
     }
 
-    llvm::Type *IREmit::Emit(TypeDecl *typeDecl) {
+    llvm::Type *IREmit::_EmitImpl_(TypeDecl *typeDecl) {
         if (BuiltinTypeDecl *builtin_type_decl = typeDecl->as<BuiltinTypeDecl>()) {
             return Emit(builtin_type_decl);
         } else if (ArrayDecl *array_decl = typeDecl->as<ArrayDecl>()) {
@@ -449,7 +459,7 @@ namespace rexlang {
         }
     }
 
-    llvm::Type *IREmit::Emit(BuiltinTypeDecl *builtinTypeDecl) {
+    llvm::Type *IREmit::_EmitImpl_(BuiltinTypeDecl *builtinTypeDecl) {
         auto type_found = type_object_pool_.find(builtinTypeDecl);
         llvm::Type *type = nullptr;
         if (type_found != type_object_pool_.end()) {
@@ -503,12 +513,12 @@ namespace rexlang {
         return type;
     }
 
-    llvm::PointerType *IREmit::Emit(ArrayDecl *arrayDecl) {
+    llvm::PointerType *IREmit::_EmitImpl_(ArrayDecl *arrayDecl) {
         llvm::Type *element_type = GetType(arrayDecl->base_type_);
         return RTBuilder.CreateArrayType(element_type, arrayDecl->dimensions_);
     }
 
-    llvm::PointerType *IREmit::Emit(StructureDecl *structureDecl) {
+    llvm::PointerType *IREmit::_EmitImpl_(StructureDecl *structureDecl) {
         std::vector<llvm::Type *> members_type;
         for (auto &member_item : structureDecl->members_) {
             // TODO: 需要处理引用问题
@@ -518,7 +528,7 @@ namespace rexlang {
         return RTBuilder.CreateStructureType(structureDecl->name_.string_.str(), members_type);
     }
 
-    llvm::Function *IREmit::Emit(FunctorDecl *functorDecl) {
+    llvm::Function *IREmit::_EmitImpl_(FunctorDecl *functorDecl) {
 
         // 构建形参声明
 
@@ -570,13 +580,11 @@ namespace rexlang {
         return function;
     }
 
-    llvm::Function *IREmit::Emit(FunctionDecl *functionDecl) {
+    llvm::Function *IREmit::_EmitImpl_(FunctionDecl *functionDecl) {
         std::string function_name = functionDecl->name_.string_.str();
         std::cout << functionDecl->ast_context_->GetFileFromLocate(functionDecl->location_start_).str() << ":"
                   << functionDecl->ast_context_->GetLineFromLocate(functionDecl->location_start_) << ":"
                   << functionDecl->ast_context_->GetColumnFromLocate(functionDecl->location_start_) << " ";
-
-        llvm::DICompileUnit *dicu = RexDbgCache.GetOrCreateDICompileUnit(functionDecl->ast_context_->GetFileFromLocate(functionDecl->location_start_));
 
         std::cout << "生成函数：" << function_name << std::endl;
         llvm::Function *function = function_object_pool_[functionDecl];
@@ -654,7 +662,7 @@ namespace rexlang {
 
 //        llvm::Function *Emit(DllCommandDecl *dllCommandDecl)；
 
-    bool IREmit::Emit(Statement *statement) {
+    bool IREmit::_EmitImpl_(Statement *statement) {
         if (AssignStmt *assign_stmt = statement->as<AssignStmt>()) {
             return Emit(assign_stmt);
         } else if (ControlStmt *control_stmt = statement->as<ControlStmt>()) {
@@ -673,7 +681,7 @@ namespace rexlang {
         }
     }
 
-    bool IREmit::Emit(IfStmt *ifStmt) {
+    bool IREmit::_EmitImpl_(IfStmt *ifStmt) {
         assert(ifStmt->switches_.size() == 1);
 
         llvm::BasicBlock *prehead_block = Builder.GetInsertBlock();
@@ -719,7 +727,7 @@ namespace rexlang {
         return true;
     }
 
-    bool IREmit::Emit(StatementBlock *statementBlock) {
+    bool IREmit::_EmitImpl_(StatementBlock *statementBlock) {
         bool success = true;
         for (Statement *statement : statementBlock->statements_) {
             success &= Emit(statement);
@@ -727,7 +735,7 @@ namespace rexlang {
         return success;
     }
 
-    bool IREmit::Emit(LoopStatement *loopStatement) {
+    bool IREmit::_EmitImpl_(LoopStatement *loopStatement) {
         bool success = false;
         if (WhileStmt *whileStmt = loopStatement->as<WhileStmt>()) {
             success = Emit(whileStmt);
@@ -743,7 +751,7 @@ namespace rexlang {
         return success;
     }
 
-    bool IREmit::Emit(WhileStmt *whileStmt) {
+    bool IREmit::_EmitImpl_(WhileStmt *whileStmt) {
         // 当前块
         llvm::BasicBlock *preheader_block = Builder.GetInsertBlock();
         // 循环条件块
@@ -836,7 +844,7 @@ namespace rexlang {
         return true;
     }
 
-    bool IREmit::Emit(RangeForStmt *rangeForStmt) {
+    bool IREmit::_EmitImpl_(RangeForStmt *rangeForStmt) {
         llvm::Value *start_value = CreateInt(1);
         llvm::Value *stop_value = Emit(rangeForStmt->range_size_);
         assert(stop_value);
@@ -851,7 +859,7 @@ namespace rexlang {
         return build_range_success;
     }
 
-    bool IREmit::Emit(ForStmt *forStmt) {
+    bool IREmit::_EmitImpl_(ForStmt *forStmt) {
         // 初始值
         llvm::Value *start_value = Emit(forStmt->start_value_);
         assert(start_value);
@@ -872,7 +880,7 @@ namespace rexlang {
         return build_range_success;
     }
 
-    bool IREmit::Emit(DoWhileStmt *doWhileStmt) {
+    bool IREmit::_EmitImpl_(DoWhileStmt *doWhileStmt) {
         // 当前块
         llvm::BasicBlock *preheader_block = Builder.GetInsertBlock();
         // 循环体块
@@ -899,13 +907,12 @@ namespace rexlang {
         return true;
     }
 
-    bool IREmit::Emit(AssignStmt *assignStmt) {
+    bool IREmit::_EmitImpl_(AssignStmt *assignStmt) {
         llvm::Value *rhs = Emit(assignStmt->rhs_);
         assert(rhs);
         llvm::Value *lhs = Emit(assignStmt->lhs_);
         assert(lhs);
         llvm::Type *lhs_type = GetTrustType(lhs);
-        RexDbgCache.EmitLocation(assignStmt);
 
         // 区分数组、字节集、字符串、结构体和其它类型
 
@@ -933,7 +940,7 @@ namespace rexlang {
         return true;
     }
 
-    bool IREmit::Emit(ControlStmt *controlStmt) {
+    bool IREmit::_EmitImpl_(ControlStmt *controlStmt) {
         if (LoopControlStmt *loopControlStmt = controlStmt->as<LoopControlStmt>()) {
             return Emit(loopControlStmt);
         } else if (ReturnStmt *returnStmt = controlStmt->as<ReturnStmt>()) {
@@ -946,7 +953,7 @@ namespace rexlang {
         }
     }
 
-    bool IREmit::Emit(LoopControlStmt *loopControlStmt) {
+    bool IREmit::_EmitImpl_(LoopControlStmt *loopControlStmt) {
         if (ContinueStmt *continueStmt = loopControlStmt->as<ContinueStmt>()) {
             return Emit(continueStmt);
         } else if (BreakStmt *breakStmt = loopControlStmt->as<BreakStmt>()) {
@@ -957,7 +964,7 @@ namespace rexlang {
         }
     }
 
-    bool IREmit::Emit(ContinueStmt *continueStmt) {
+    bool IREmit::_EmitImpl_(ContinueStmt *continueStmt) {
         if (controlable_struct_stack_.empty()) {
             assert(false);
             return false;
@@ -971,7 +978,7 @@ namespace rexlang {
         }
     }
 
-    bool IREmit::Emit(BreakStmt *breakStmt) {
+    bool IREmit::_EmitImpl_(BreakStmt *breakStmt) {
         if (controlable_struct_stack_.empty()) {
             assert(false);
             return false;
@@ -985,7 +992,7 @@ namespace rexlang {
         }
     }
 
-    bool IREmit::Emit(ReturnStmt *returnStmt) {
+    bool IREmit::_EmitImpl_(ReturnStmt *returnStmt) {
         if (returnStmt->return_value_) {
             llvm::Value *RV = Emit(returnStmt->return_value_);
             Builder.CreateStore(RV, function_retptr_map_[this->TheFunction]);
@@ -996,13 +1003,13 @@ namespace rexlang {
         return true;
     }
 
-    bool IREmit::Emit(ExitStmt *exitStmt) {
+    bool IREmit::_EmitImpl_(ExitStmt *exitStmt) {
         llvm::FunctionCallee exit_fn = RTBuilder.getRTAPIFunction("$exit", Builder.getVoidTy(), {});
         Builder.CreateCall(exit_fn);
         return true;
     }
 
-    llvm::Value *IREmit::Emit(Expression *expression) {
+    llvm::Value *IREmit::_EmitImpl_(Expression *expression) {
         if (HierarchyIdentifier *hierarchy_identifier = expression->as<HierarchyIdentifier>()) {
             return Emit(hierarchy_identifier);
         } else if (NameComponent *name_component = expression->as<NameComponent>()) {
@@ -1023,7 +1030,7 @@ namespace rexlang {
         }
     }
 
-    llvm::Value *IREmit::Emit(TypeConvert *typeConvert) {
+    llvm::Value *IREmit::_EmitImpl_(TypeConvert *typeConvert) {
 
         // TODO: 只处理了作为右值的情况
 
@@ -1133,21 +1140,13 @@ namespace rexlang {
 
         else if (FunctionCall *function_call = nameComponent->as<FunctionCall>()) {
 
-            // 获取调用目标
+            // 获取调用目标-计算实参-调用
 
             llvm::Function *func_ptr = llvm::dyn_cast<llvm::Function>(GetFromStructOrPool(forwardInstance, function_call->function_name_));
             assert(func_ptr);
-
-            // 计算实参
             std::vector<llvm::Value *> arguments_ir = EmitArgumentList(function_call);
+            ref = Builder.CreateCall(func_ptr, arguments_ir);
 
-            // 开始调用
-
-            llvm::CallInst *caller = Builder.CreateCall(func_ptr, arguments_ir);
-
-            caller->setDebugLoc(RexDbgCache.EmitLocation(function_call));
-
-            ref = caller;
         } else {
             assert(false);
             return nullptr;
@@ -1225,11 +1224,11 @@ namespace rexlang {
         return arguments_ir;
     }
 
-    llvm::Value *IREmit::Emit(HierarchyIdentifier *hierarchyIdentifier) {
+    llvm::Value *IREmit::_EmitImpl_(HierarchyIdentifier *hierarchyIdentifier) {
         return Emit(hierarchyIdentifier->name_components_.back());
     }
 
-    llvm::Value *IREmit::Emit(NameComponent *nameComponent) {
+    llvm::Value *IREmit::_EmitImpl_(NameComponent *nameComponent) {
         llvm::Value *previous_value = nullptr;
         if (nameComponent->forward_name_component_) {
             previous_value = Emit(nameComponent->forward_name_component_);
@@ -1241,7 +1240,7 @@ namespace rexlang {
         return this_value;
     }
 
-    llvm::Value *IREmit::Emit(UnaryExpression *unaryExpression) {
+    llvm::Value *IREmit::_EmitImpl_(UnaryExpression *unaryExpression) {
         llvm::Value *V = Emit(unaryExpression->operand_value_);
         if (!V) {
             assert(false);
@@ -1258,7 +1257,7 @@ namespace rexlang {
         }
     }
 
-    llvm::Value *IREmit::Emit(BinaryExpression *binaryExpression) {
+    llvm::Value *IREmit::_EmitImpl_(BinaryExpression *binaryExpression) {
         llvm::Value *L = Emit(binaryExpression->lhs_);
         llvm::Value *R = Emit(binaryExpression->rhs_);
         if (!L || !R) {
@@ -1491,7 +1490,7 @@ namespace rexlang {
         }
     }
 
-    llvm::Value *IREmit::Emit(Value *value) {
+    llvm::Value *IREmit::_EmitImpl_(Value *value) {
         if (ValueOfDataSet *value_of_dataset = value->as<ValueOfDataSet>()) {
             return Emit(value_of_dataset);
         } else if (ValueOfDatetime *value_of_datetime = value->as<ValueOfDatetime>()) {
@@ -1523,7 +1522,7 @@ namespace rexlang {
         return init_val;
     }
 
-    llvm::Value *IREmit::Emit(ValueOfDataSet *valueOfDataSet) {
+    llvm::Value *IREmit::_EmitImpl_(ValueOfDataSet *valueOfDataSet) {
         std::vector<llvm::Constant *> elements;
         for (Expression *element_expr : valueOfDataSet->elements_) {
             llvm::Constant *e = llvm::dyn_cast<llvm::Constant>(Emit(element_expr));
@@ -1532,23 +1531,23 @@ namespace rexlang {
         return MakeGlobalConstantByteSet(elements);
     }
 
-    llvm::Value *IREmit::Emit(ValueOfDatetime *valueOfDatetime) {
+    llvm::Value *IREmit::_EmitImpl_(ValueOfDatetime *valueOfDatetime) {
         llvm::Type *type = type_object_pool_[valueOfDatetime->expression_type_];
         assert(type);
         return CreateInt(valueOfDatetime->time_, type->getScalarSizeInBits());
     }
 
-    llvm::Value *IREmit::Emit(FuncAddrExpression *funcAddrExpression) {
+    llvm::Value *IREmit::_EmitImpl_(FuncAddrExpression *funcAddrExpression) {
         llvm::Function *func = function_object_pool_[funcAddrExpression->functor_declare_];
         assert(func);
         return llvm::ConstantExpr::getPtrToInt(func, Builder.getInt32Ty());
     }
 
-    llvm::Value *IREmit::Emit(ValueOfBool *valueOfBool) {
+    llvm::Value *IREmit::_EmitImpl_(ValueOfBool *valueOfBool) {
         return CreateInt((int) valueOfBool->value_, 1, false);
     }
 
-    llvm::Value *IREmit::Emit(ValueOfDecimal *valueOfDecimal) {
+    llvm::Value *IREmit::_EmitImpl_(ValueOfDecimal *valueOfDecimal) {
         switch (valueOfDecimal->type_) {
             case ValueOfDecimal::type::kInt: {
                 return CreateInt(valueOfDecimal->int_val_, 32, true);
@@ -1563,7 +1562,7 @@ namespace rexlang {
         }
     }
 
-    llvm::Value *IREmit::Emit(ValueOfString *valueOfString) {
+    llvm::Value *IREmit::_EmitImpl_(ValueOfString *valueOfString) {
 
         // 创建指向字符串常量值的对象，就不需要Load了
 
@@ -1600,6 +1599,45 @@ namespace rexlang {
             TheModule->addModuleFlag(llvm::Module::Warning, "Dwarf Version", 2);
         }
     }
+    bool                    IREmit::Emit(TranslateUnit *        astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    llvm::GlobalVariable *  IREmit::Emit(GlobalVariableDecl *   astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    llvm::Value *           IREmit::Emit(ParameterDecl *        astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    llvm::GlobalVariable *  IREmit::Emit(FileVariableDecl *     astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    llvm::Value *           IREmit::Emit(LocalVariableDecl *    astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    llvm::Type *            IREmit::Emit(TypeDecl *             astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    llvm::Type *            IREmit::Emit(BuiltinTypeDecl *      astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    llvm::PointerType *     IREmit::Emit(ArrayDecl *            astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    llvm::PointerType *     IREmit::Emit(StructureDecl *        astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    llvm::Function *        IREmit::Emit(FunctorDecl *          astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    llvm::Function *        IREmit::Emit(FunctionDecl *         astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    bool                    IREmit::Emit(Statement *            astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    bool                    IREmit::Emit(IfStmt *               astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    bool                    IREmit::Emit(StatementBlock *       astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    bool                    IREmit::Emit(LoopStatement *        astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    bool                    IREmit::Emit(WhileStmt *            astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    bool                    IREmit::Emit(RangeForStmt *         astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    bool                    IREmit::Emit(ForStmt *              astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    bool                    IREmit::Emit(DoWhileStmt *          astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    bool                    IREmit::Emit(AssignStmt *           astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    bool                    IREmit::Emit(ControlStmt *          astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    bool                    IREmit::Emit(LoopControlStmt *      astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    bool                    IREmit::Emit(ContinueStmt *         astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    bool                    IREmit::Emit(BreakStmt *            astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    bool                    IREmit::Emit(ReturnStmt *           astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    bool                    IREmit::Emit(ExitStmt *             astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    llvm::Value *           IREmit::Emit(Expression *           astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    llvm::Value *           IREmit::Emit(TypeConvert *          astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    llvm::Value *           IREmit::Emit(HierarchyIdentifier *  astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    llvm::Value *           IREmit::Emit(NameComponent *        astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    llvm::Value *           IREmit::Emit(UnaryExpression *      astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    llvm::Value *           IREmit::Emit(BinaryExpression *     astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    llvm::Value *           IREmit::Emit(Value *                astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    llvm::Value *           IREmit::Emit(ValueOfDataSet *       astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    llvm::Value *           IREmit::Emit(ValueOfDatetime *      astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    llvm::Value *           IREmit::Emit(FuncAddrExpression *   astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    llvm::Value *           IREmit::Emit(ValueOfBool *          astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    llvm::Value *           IREmit::Emit(ValueOfDecimal *       astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    llvm::Value *           IREmit::Emit(ValueOfString *        astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
 
     IREmit::~IREmit() {
         delete TheModule;

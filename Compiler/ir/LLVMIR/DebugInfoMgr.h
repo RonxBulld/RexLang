@@ -7,6 +7,7 @@
 
 #include <string>
 #include <vector>
+#include <stack>
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/DIBuilder.h>
 #include "../../rexlang_compiler/NodeDecl.h"
@@ -19,19 +20,30 @@ namespace rexlang {
         llvm::DIBuilder &                               TheDIBuilder;
         ordered_map<std::string, llvm::DICompileUnit *> TheDICUMap;
         std::vector<llvm::DIScope *>                    LexicalBlocks;
+        std::stack<llvm::DebugLoc>                      DebugLocateStack;
     public:
 
         DebugInfoMgr(llvm::IRBuilder<> &IRBuilder, llvm::DIBuilder &DIBuilder);
 
+    public:
+
+        /****** 触发事件 *******/
+
+        int OnEmitBegin (Node *astNode);
+        int OnEmitEnd   (Node *astNode);
+
+    public:
+
         /****** 通用功能 *******/
 
-        llvm::DebugLoc EmitLocation(Node *node);
+        llvm::DebugLoc  GetDebugLocation    (Node *astNode);
+        bool            ShouldBeGenerateDI  (Node *astNode);
 
         /******* 编译单元 *******/
 
-        llvm::DICompileUnit *GetOrCreateDICompileUnit(const Node *node);
-        llvm::DICompileUnit *GetOrCreateDICompileUnit(const StringRef &FilePath);
-        llvm::DICompileUnit *GetOrCreateDICompileUnit(const std::string &FilePath);
+        void                    SetPresentCompileUnitFromNode   (const Node *node);
+        llvm::DICompileUnit *   GetOrCreateDICompileUnit        (const Node *node);
+        llvm::DICompileUnit *   GetOrCreateDICompileUnit        (const std::string &FilePath);
 
         /******* 类型相关 *******/
 

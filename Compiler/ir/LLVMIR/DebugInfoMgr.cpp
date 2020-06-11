@@ -12,42 +12,70 @@ namespace rexlang {
             : TheIRBuilder(IRBuilder), TheDIBuilder(DIBuilder) {
     }
 
-    llvm::DebugLoc DebugInfoMgr::EmitLocation(Node *node) {
+    int DebugInfoMgr::OnEmitBegin(Node *astNode) {
+        if (ShouldBeGenerateDI(astNode)) {
+            llvm::DebugLoc debug_loc = GetDebugLocation(astNode);
+            TheIRBuilder.SetCurrentDebugLocation(debug_loc);
+            DebugLocateStack.push(debug_loc);
+        }
+        return 0;
+    }
+
+    int DebugInfoMgr::OnEmitEnd(Node *astNode) {
+        if (ShouldBeGenerateDI(astNode)) {
+            DebugLocateStack.pop();
+            if (!DebugLocateStack.empty()) {
+                llvm::DebugLoc debug_loc = DebugLocateStack.top();
+                TheIRBuilder.SetCurrentDebugLocation(debug_loc);
+            }
+        }
+        return 0;
+    }
+
+    llvm::DebugLoc DebugInfoMgr::GetDebugLocation(Node *astNode) {
         llvm::DIScope *scope;
         if (LexicalBlocks.empty()) {
-            scope = GetOrCreateDICompileUnit(node);
+//            scope = GetOrCreateDICompileUnit(astNode);
+            return llvm::DebugLoc();
         } else {
             scope = LexicalBlocks.back();
         }
-        size_t line = node->ast_context_->GetLineFromLocate(node->location_start_);
-        size_t column = node->ast_context_->GetColumnFromLocate(node->location_start_);
+        size_t line = astNode->ast_context_->GetLineFromLocate(astNode->location_start_);
+        size_t column = astNode->ast_context_->GetColumnFromLocate(astNode->location_start_);
         llvm::DebugLoc debug_loc = llvm::DebugLoc::get(line, column, scope);
-//        TheIRBuilder.SetCurrentDebugLocation(debug_loc);
         return debug_loc;
+    }
+
+    bool DebugInfoMgr::ShouldBeGenerateDI(Node *astNode) {
+        // 判定是否生成调试信息的标准就是看这个节点是否在Subprogram或者Function中
+        if (dynamic_cast<Statement*>(astNode)) {
+            return true;
+        } else if (dynamic_cast<FunctorDecl*>(astNode)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     llvm::DICompileUnit *DebugInfoMgr::GetOrCreateDICompileUnit(const Node *node) {
         if (node) {
             const StringRef &file_path = node->ast_context_->GetFileFromLocate(node->location_start_);
-            return GetOrCreateDICompileUnit(file_path);
+            return GetOrCreateDICompileUnit(file_path.str());
         } else {
             return nullptr;
         }
     }
 
-    llvm::DICompileUnit *DebugInfoMgr::GetOrCreateDICompileUnit(const StringRef &FilePath) {
-        return GetOrCreateDICompileUnit(FilePath.str());
-    }
-
     llvm::DICompileUnit *DebugInfoMgr::GetOrCreateDICompileUnit(const std::string &FilePath) {
         std::filesystem::path dir(FilePath);
+        std::string filename;
+        std::string directory;
         if (!dir.has_filename()) {
-            // TODO:
             assert(false);
             return nullptr;
         }
-        std::string filename = dir.filename();
-        std::string directory = dir.has_parent_path() ? dir.parent_path() : ".";
+        filename = dir.filename();
+        directory = dir.has_parent_path() ? dir.parent_path() : ".";
 
         std::filesystem::path abs_dir = std::filesystem::absolute(dir);
         llvm::DICompileUnit *cu = TheDICUMap[abs_dir.string()];
