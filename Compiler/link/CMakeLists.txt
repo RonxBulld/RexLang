@@ -13,7 +13,8 @@ ADD_DEFINITIONS(${LLVM_DEFINITIONS})
 
 IF (${REX_USE_EMBED_LINKER} STREQUAL "ON")
     MESSAGE(STATUS "Using embeded linker.")
-    ADD_DEFINITIONS(-DLINKER="*")
+    ADD_DEFINITIONS(-DLINKER="lld")
+    ADD_DEFINITIONS(-DREX_USE_EMBED_LINKER)
 ELSE ()
     FIND_PROGRAM(LINKER NAMES clang++ clang++-9 clang++-*)
     IF ("${LINKER}" STREQUAL "LINKER-NOTFOUND")
@@ -39,3 +40,16 @@ ADD_LIBRARY(Link
         )
 
 target_link_libraries(Link lite_util Support)
+
+IF (${REX_USE_EMBED_LINKER} STREQUAL "ON")
+    FIND_PACKAGE(Clang REQUIRED QUIET CONFIG)
+    target_link_libraries(Link
+            clang-cpp
+#            clangBasic
+#            clangCodeGen
+#            clangDriver
+#            clangFrontend
+#            clangFrontendTool
+#            clangSerialization
+            )
+ENDIF ()

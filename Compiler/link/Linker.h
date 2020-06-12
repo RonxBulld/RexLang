@@ -22,7 +22,7 @@ namespace rexlang {
         // 库搜索路径
         std::vector<std::string> libSearchDirs;
     private:
-        std::string BuildLinkCommandLine();
+        std::vector<std::string> BuildUserLevelLinkCommandArgs();
     public:
         Linker();
         int LinkProject(ProjectDB &projectDB);

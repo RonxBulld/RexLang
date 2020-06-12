@@ -35,6 +35,7 @@ namespace rexlang {
         execute_path_.clear();
         include_path_.clear();
         library_path_.clear();
+        program_path_ = programPath;
 
         std::filesystem::path root_path(programPath);
         root_path = std::filesystem::canonical(root_path);
@@ -45,6 +46,10 @@ namespace rexlang {
         execute_path_.push_back((root_path / "bin").string());
         include_path_.push_back((root_path / "include").string());
         library_path_.push_back((root_path / "lib").string());
+    }
+
+    const std::string &ProgramDB::GetProgramPath() const {
+        return program_path_;
     }
 
     const std::vector<std::string> &ProgramDB::GetExecutePath() const {
