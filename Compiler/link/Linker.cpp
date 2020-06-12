@@ -119,6 +119,7 @@ namespace rexlang {
         clang::driver::Driver TheDriver(program_db.GetProgramPath(), llvm::sys::getDefaultTargetTriple(), Diags);
         std::unique_ptr<clang::driver::Compilation> Link(TheDriver.BuildCompilation(TheClangStyleArgs));
 
+        std::string link_cmdline = link_exec + " " + link_args_str;
         int link_ret = 0;
 #else
         std::string link_cmdline = link_exec + " " + link_args_str;

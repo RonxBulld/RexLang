@@ -44,12 +44,11 @@ target_link_libraries(Link lite_util Support)
 IF (${REX_USE_EMBED_LINKER} STREQUAL "ON")
     FIND_PACKAGE(Clang REQUIRED QUIET CONFIG)
     target_link_libraries(Link
-            clang-cpp
-#            clangBasic
-#            clangCodeGen
-#            clangDriver
-#            clangFrontend
-#            clangFrontendTool
-#            clangSerialization
+            clangBasic
+            clangCodeGen
+            clangDriver
+            clangFrontend
+            clangFrontendTool
+            clangSerialization
             )
 ENDIF ()

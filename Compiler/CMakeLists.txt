@@ -25,11 +25,11 @@ ADD_EXECUTABLE(${COMPILER_EXECUTE_NAME}
 
 TARGET_LINK_LIBRARIES(${COMPILER_EXECUTE_NAME}
         REXCompilerParse
-        IR
         antlr4-runtime
         CodeGen
-        lite_util
         Link
+        IR
+        lite_util
         Support
         )
 
