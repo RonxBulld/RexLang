@@ -3,6 +3,8 @@
 
 RexLang 即 快速表达扩展语言（Rapid Expression eXtension Language）。
 
+在您开始使用本软件之前，请完整的阅读使用说明及协议。
+
 ## 引用的开源库
 
 ### ANTLR
