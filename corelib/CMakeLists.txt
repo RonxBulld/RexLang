@@ -16,7 +16,13 @@ ADD_LIBRARY(corelib STATIC
         ${corelib-Source}
         )
 
-file(COPY "corelib.txt" DESTINATION "${OUTPUT_DIR}/include/")
+file(COPY "corelib.txt" DESTINATION "${CMAKE_INCLUDE_OUTPUT_DIRECTORY}")
 
-INSTALL(FILES corelib.txt DESTINATION include)
-INSTALL(TARGETS corelib DESTINATION lib)
+INSTALL(FILES
+        corelib.txt
+        DESTINATION include/rex
+        )
+INSTALL(TARGETS
+        corelib
+        DESTINATION lib/rex
+        )

@@ -52,17 +52,16 @@ namespace rexlang {
 #elif defined(GNU_LINKER_STYLE)
 
         auto lib_search_dirs_flag = ContainerUtil::Map<std::vector, std::string, std::vector, std::string>(libSearchDirs, [](const std::string &dir){ return "-L" + dir; });
-        auto lib_search_dirs_flag_str = StringUtil::Join<std::vector>(lib_search_dirs_flag, " ");
+//        auto lib_search_dirs_flag_str = StringUtil::Join<std::vector>(lib_search_dirs_flag, " ");
         auto libraries_link_flag = ContainerUtil::Map<std::vector, std::string, std::vector, rexlang::StringRef>(dependenceLibs, [](const rexlang::StringRef &elem){ return "-l" + elem.str(); });
-        auto libraries_link_flag_str = StringUtil::Join<std::vector>(libraries_link_flag, " ");
-        std::vector<std::string> user_level_args = {
-                lib_search_dirs_flag_str,
-                objectFilename,
-                libraries_link_flag_str,
-                "-o",       executeFilename,
-                "-target",  target_triple,
-                "-lstdc++",
-        };
+//        auto libraries_link_flag_str = StringUtil::Join<std::vector>(libraries_link_flag, " ");
+        std::vector<std::string> user_level_args;
+        user_level_args.insert(user_level_args.end(), lib_search_dirs_flag.begin(), lib_search_dirs_flag.end());
+        user_level_args.insert(user_level_args.end(), objectFilename);
+        user_level_args.insert(user_level_args.end(), libraries_link_flag.begin(), libraries_link_flag.end());
+        user_level_args.insert(user_level_args.end(), { "-o",       executeFilename });
+        user_level_args.insert(user_level_args.end(), { "-target",  target_triple });
+        user_level_args.insert(user_level_args.end(), { "-lstdc++" });
 
 #else
 

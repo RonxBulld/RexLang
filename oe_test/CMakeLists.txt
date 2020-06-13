@@ -50,3 +50,9 @@ SET_TESTS_PROPERTIES(test_gcd_algorithm PROPERTIES
         FAIL_REGULAR_EXPRESSION "[^a-z]Error;ERROR;Failed"
         TIMEOUT ${TEST_TIMEOUT}
         )
+
+INSTALL(FILES
+        array1.txt
+        gcd_algorithm.txt
+        DESTINATION share/rex/example
+        )
