@@ -13,6 +13,7 @@
 #include <clang/Frontend/TextDiagnosticPrinter.h>
 #include <clang/Frontend/SerializedDiagnosticPrinter.h>
 #include <clang/Frontend/ChainedDiagnosticConsumer.h>
+#include <clang/Basic/DiagnosticFrontend.h>
 #include <llvm/Support/Path.h>
 #include <llvm/Support/VirtualFileSystem.h>
 
@@ -59,6 +60,7 @@ namespace rexlang {
                 libraries_link_flag_str,
                 "-o",       executeFilename,
                 "-target",  target_triple,
+                "-lstdc++",
         };
 
 #else
@@ -85,6 +87,10 @@ namespace rexlang {
         executeFilename = projectDB.GetExecuteFilename();
         dependenceLibs = projectDB.GetASTContext().GetDependenceLibraries();
 
+        // 移除目标文件
+
+        std::filesystem::remove(projectDB.GetTargetBinName());
+
         // 构建用户级参数列表
 
         std::string link_exec = LINKER;
@@ -95,7 +101,7 @@ namespace rexlang {
 
 #if defined(REX_USE_EMBED_LINKER)
 
-        // 构建系统级参数列表
+        // 构建工具级参数列表
 
         clang::SmallVector<const char *, 256> TheClangStyleArgs;
         for (const std::string &argu : user_level_args) {
@@ -119,8 +125,26 @@ namespace rexlang {
         clang::driver::Driver TheDriver(program_db.GetProgramPath(), llvm::sys::getDefaultTargetTriple(), Diags);
         std::unique_ptr<clang::driver::Compilation> Link(TheDriver.BuildCompilation(TheClangStyleArgs));
 
+        const clang::driver::JobList &Jobs = Link->getJobs();
+        if (Jobs.size() != 1 || !llvm::isa<clang::driver::Command>(*Jobs.begin())) {
+            llvm::SmallString<256> Msg;
+            llvm::raw_svector_ostream OS(Msg);
+            Jobs.Print(OS, "; ", true);
+            Diags.Report(clang::diag::err_fe_expected_compiler_job) << OS.str();
+            return 1;
+        }
+
+        std::vector<std::string> ld_program_args;
+        for (const auto &Job : Jobs) {
+            const llvm::opt::ArgStringList &arg_string_list = Job.getArguments();
+            for (const char *arg : arg_string_list) {
+                ld_program_args.push_back(arg);
+            }
+        }
+
+        link_args_str = StringUtil::Join<std::vector, std::string>(ld_program_args, " ");
         std::string link_cmdline = link_exec + " " + link_args_str;
-        int link_ret = 0;
+        int link_ret = system(link_cmdline.c_str());
 #else
         std::string link_cmdline = link_exec + " " + link_args_str;
         int link_ret = system(link_cmdline.c_str());
