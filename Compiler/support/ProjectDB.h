@@ -55,37 +55,37 @@ namespace rexlang {
 
     public:
         ProjectDB();
-        bool ApplyArgument(const ArgumentParser &argumentParser);
+        bool                                ApplyArgument       (const ArgumentParser &argumentParser);
 
-        void SetProjectName(const std::string &project_name);
-        const std::string & GetProjectName() const;
-        std::string GetProjectName();
+        void                                SetProjectName      (const std::string &project_name);
+        const std::string &                 GetProjectName      () const;
+        std::string                         GetProjectName      ();
 
-        void SetFileList(const std::vector<std::string> &filelist);
-        const std::vector<std::string> &GetFileList() const;
-        std::vector<std::string> GetFileList();
+        void                                SetFileList         (const std::vector<std::string> &filelist);
+        const std::vector<std::string> &    GetFileList         () const;
+        std::vector<std::string>            GetFileList         ();
 
-        void SetTargetBinName(const std::string &targetBinName);
-        const std::string & GetTargetBinName() const;
-        std::string GetTargetBinName();
+        void                                SetTargetBinName    (const std::string &targetBinName);
+        const std::string &                 GetTargetBinName    () const;
+        std::string                         GetTargetBinName    ();
 
-        void SetTranslateUnit(TranslateUnit *translateUnit);
-        TranslateUnit * GetTranslateUnit();
-        const TranslateUnit * GetTranslateUnit() const;
-        ASTContext &GetASTContext();
-        const ASTContext &GetASTContext() const;
+        void                                SetTranslateUnit    (TranslateUnit *translateUnit);
+        TranslateUnit *                     GetTranslateUnit    ();
+        const TranslateUnit *               GetTranslateUnit    () const;
+        ASTContext &                        GetASTContext       ();
+        const ASTContext &                  GetASTContext       () const;
 
-        std::string GetBitCodeFilename() const;
-        std::string GetObjectFilename() const;
-        std::string GetExecuteFilename() const;
+        std::string                         GetBitCodeFilename  () const;
+        std::string                         GetObjectFilename   () const;
+        std::string                         GetExecuteFilename  () const;
 
-        void SetMainEntryName(const std::string &main_entry_name);
-        std::string &GetMainEntryName();
-        const std::string &GetMainEntryName() const;
+        void                                SetMainEntryName    (const std::string &main_entry_name);
+        std::string &                       GetMainEntryName    ();
+        const std::string &                 GetMainEntryName    () const;
 
-        void SetMainEntry(FunctorDecl *main_entry);
-        FunctorDecl *GetMainEntry();
-        const FunctorDecl *GetMainEntry() const;
+        void                                SetMainEntry        (FunctorDecl *main_entry);
+        FunctorDecl *                       GetMainEntry        ();
+        const FunctorDecl *                 GetMainEntry        () const;
     };
 
 }

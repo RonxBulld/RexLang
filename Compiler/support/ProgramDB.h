@@ -28,7 +28,7 @@ namespace rexlang {
         const std::vector<std::string> &    GetLibraryPath  ()                                      const;
 
     public:
-        const char *GetLibraryHeadFileExt() const;
+        const char *GetDefaultLibraryHeadFileExt() const;
     };
 
     extern ProgramDB program_db;

@@ -10,7 +10,9 @@ SET(corelib-Source
         array_runtime_api.h
         string_runtime_api.cpp
         string_runtime_api.h
-        struct_runtime_api.cpp struct_runtime_api.h)
+        struct_runtime_api.cpp
+        struct_runtime_api.h
+        )
 
 ADD_LIBRARY(corelib STATIC
         ${corelib-Source}

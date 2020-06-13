@@ -82,7 +82,7 @@ namespace rexlang {
         rexlang::EmitLLVMIR emitter(projectDB.GetTranslateUnit(), projectDB);
         emitter.WriteOutIR();
         rexlang::LLCodeGen ll_code_gen(emitter);
-        if (int EC = ll_code_gen.WriteOutBitCode(projectDB.GetBitCodeFilename())) { return EC; }
+//        if (int EC = ll_code_gen.WriteOutBitCode(projectDB.GetBitCodeFilename())) { return EC; }
         if (int EC = ll_code_gen.WriteOutObject (projectDB.GetObjectFilename()))  { return EC; }
         return 0;
     }
@@ -135,7 +135,7 @@ namespace rexlang {
                     FileEntry file_entry;
 
                     for (const std::string &include_dir : include_dirs) {
-                        FileEntry test_file_entry = FileEntry::MakeFromFile(include_dir + "/" + library_name.str() + "." + program_db.GetLibraryHeadFileExt());
+                        FileEntry test_file_entry = FileEntry::MakeFromFile(include_dir + "/" + library_name.str() + "." + program_db.GetDefaultLibraryHeadFileExt());
                         if (test_file_entry.Valid()) {
                             file_entry = test_file_entry;
                             break;

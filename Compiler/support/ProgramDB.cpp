@@ -43,12 +43,12 @@ namespace rexlang {
         root_path /= "..";
         root_path = std::filesystem::canonical(root_path);
 
-        execute_path_.push_back((root_path / "bin").string());
-        execute_path_.push_back((root_path / "bin" / "rex").string());
-        include_path_.push_back((root_path / "include").string());
+        execute_path_.push_back((root_path / "bin")            .string());
+        execute_path_.push_back((root_path / "bin" / "rex")    .string());
+        include_path_.push_back((root_path / "include")        .string());
         include_path_.push_back((root_path / "include" / "rex").string());
-        library_path_.push_back((root_path / "lib").string());
-        library_path_.push_back((root_path / "lib" / "rex").string());
+        library_path_.push_back((root_path / "lib")            .string());
+        library_path_.push_back((root_path / "lib" / "rex")    .string());
     }
 
     const std::string &ProgramDB::GetProgramPath() const {
@@ -67,7 +67,7 @@ namespace rexlang {
         return library_path_;
     }
 
-    const char *ProgramDB::GetLibraryHeadFileExt() const {
+    const char *ProgramDB::GetDefaultLibraryHeadFileExt() const {
         return "txt";
     }
 }

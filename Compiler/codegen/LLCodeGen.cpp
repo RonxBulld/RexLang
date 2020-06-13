@@ -87,6 +87,7 @@ namespace rexlang {
         // 完成并清除流
 
         dest.flush();
+        dest.close();
 
         return 0;
     }

@@ -15,8 +15,8 @@ namespace rexlang {
     private:
         // 中间文件
         std::string objectFilename;
-        // 可执行文件
-        std::string executeFilename;
+        // 目标文件
+        std::string targetFilename;
         // 依赖库
         std::vector<rexlang::StringRef> dependenceLibs;
         // 库搜索路径

@@ -43,7 +43,7 @@ namespace rexlang {
                 objectFilename.c_str(),
                 lib_search_dirs_flag_str.c_str(),
                 libraries_link_flag_str.c_str(),
-                executeFilename.c_str()
+                targetFilename.c_str()
         );
 #   if defined(NO_MSVCRT_DEFAULT)
 //        link_cmd += " /NODEFAULTLIB:MSVCRT";
@@ -59,7 +59,7 @@ namespace rexlang {
         user_level_args.insert(user_level_args.end(), lib_search_dirs_flag.begin(), lib_search_dirs_flag.end());
         user_level_args.insert(user_level_args.end(), objectFilename);
         user_level_args.insert(user_level_args.end(), libraries_link_flag.begin(), libraries_link_flag.end());
-        user_level_args.insert(user_level_args.end(), { "-o",       executeFilename });
+        user_level_args.insert(user_level_args.end(), { "-o",       targetFilename });
         user_level_args.insert(user_level_args.end(), { "-target",  target_triple });
         user_level_args.insert(user_level_args.end(), { "-lstdc++" });
 
@@ -71,8 +71,7 @@ namespace rexlang {
         return user_level_args;
     }
 
-    static void FixupDiagPrefixExeName(clang::TextDiagnosticPrinter *DiagClient,
-                                       const std::string &Path) {
+    static void FixupDiagPrefixExeName(clang::TextDiagnosticPrinter *DiagClient, const std::string &Path) {
         // If the clang binary happens to be named cl.exe for compatibility reasons,
         // use clang-cl.exe as the prefix to avoid confusion between clang and MSVC.
         llvm::StringRef ExeBasename(llvm::sys::path::stem(Path));
@@ -84,12 +83,12 @@ namespace rexlang {
     int Linker::LinkProject(ProjectDB &projectDB) {
 
         objectFilename = projectDB.GetObjectFilename();
-        executeFilename = projectDB.GetExecuteFilename();
+        targetFilename = projectDB.GetTargetBinName();
         dependenceLibs = projectDB.GetASTContext().GetDependenceLibraries();
 
         // 移除目标文件
 
-        std::filesystem::remove(projectDB.GetTargetBinName());
+        std::filesystem::remove(targetFilename);
 
         // 构建用户级参数列表
 
