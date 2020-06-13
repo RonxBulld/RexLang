@@ -20,8 +20,4 @@ ADD_LIBRARY(CodeGen
         )
 
 llvm_map_components_to_libnames(LLVM bitwriter)
-if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    target_link_libraries(CodeGen ${LLVM})
-else()
-    target_link_libraries(CodeGen LLVM)
-endif()
+target_link_libraries(CodeGen ${LLVM})

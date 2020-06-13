@@ -71,4 +71,5 @@ IF (${REX_USE_EMBED_LINKER} STREQUAL "ON")
             lldYAML.a
             lldCore.a
             )
+
 ENDIF ()
