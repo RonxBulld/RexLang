@@ -23,6 +23,7 @@
 #include "../support/ProjectDB.h"
 #include "../rexlang_compiler/ASTContext.h"
 #include "../support/ProgramDB.h"
+#include "lld-driver.h"
 
 namespace rexlang {
     Linker::Linker() : libSearchDirs(program_db.GetLibraryPath()) {
@@ -142,16 +143,20 @@ namespace rexlang {
             }
         }
 
+        std::string flavor = "ld";
+        ld_program_args.insert(ld_program_args.begin(), flavor);
+        ld_program_args.insert(ld_program_args.begin(), "-flavor");
+
         link_args_str = StringUtil::Join<std::vector, std::string>(ld_program_args, " ");
         std::string link_cmdline = link_exec + " " + link_args_str;
-        int link_ret = system(link_cmdline.c_str());
+        int link_ret = linker_main(ld_program_args);
 #else
         std::string link_cmdline = link_exec + " " + link_args_str;
         int link_ret = system(link_cmdline.c_str());
 #endif
 
         if (link_ret == 0) {
-            std::cout << link_cmdline << std::endl;
+//            std::cout << link_cmdline << std::endl;
             remove(objectFilename.c_str());
             std::cout << "连接成功" << std::endl;
         } else {

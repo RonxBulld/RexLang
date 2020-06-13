@@ -36,13 +36,22 @@ ENDIF()
 ADD_LIBRARY(Link
         Linker.cpp
         Linker.h
-        #        lld.cpp
+        lld-driver.cpp
+        lld-driver.h
         )
 
 target_link_libraries(Link lite_util Support)
 
 IF (${REX_USE_EMBED_LINKER} STREQUAL "ON")
     FIND_PACKAGE(Clang REQUIRED QUIET CONFIG)
+
+#    get_cmake_property(_variableNames VARIABLES)
+#    foreach (_variableName ${_variableNames})
+#        message(STATUS "${_variableName}=${${_variableName}}")
+#    endforeach()
+
+    TARGET_LINK_DIRECTORIES(Link PUBLIC ${LLVM_LIBRARY_DIRS})
+
     target_link_libraries(Link
             clangBasic
             clangCodeGen
@@ -50,5 +59,16 @@ IF (${REX_USE_EMBED_LINKER} STREQUAL "ON")
             clangFrontend
             clangFrontendTool
             clangSerialization
+
+            lldCOFF.a
+            lldCommon.a
+            lldDriver.a
+            lldELF.a
+            lldMachO.a
+            lldMinGW.a
+            lldReaderWriter.a
+            lldWasm.a
+            lldYAML.a
+            lldCore.a
             )
 ENDIF ()

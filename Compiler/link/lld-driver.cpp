@@ -49,9 +49,9 @@ enum Flavor {
     Wasm,    // -flavor wasm
 };
 
-LLVM_ATTRIBUTE_NORETURN static void die(const Twine &s) {
+static int die(const Twine &s) {
     errs() << s << "\n";
-    exit(1);
+    return 1;
 }
 
 static Flavor getFlavor(StringRef s) {
@@ -142,25 +142,34 @@ static bool canExitEarly() { return StringRef(getenv("LLD_IN_TEST")) != "1"; }
 
 /// Universal linker main(). This linker emulates the gnu, darwin, or
 /// windows linker based on the argv[0] or -flavor option.
-int main(int argc, const char **argv) {
+int linker_main(int argc, const char **argv) {
     InitLLVM x(argc, argv);
 
     std::vector<const char *> args(argv, argv + argc);
     switch (parseFlavor(args)) {
         case Gnu:
             if (isPETarget(args))
-                return !mingw::link(args);
-            return !elf::link(args, canExitEarly());
-        case WinLink:
-            return !coff::link(args, canExitEarly());
-        case Darwin:
-            return !mach_o::link(args, canExitEarly());
-        case Wasm:
-            return !wasm::link(args, canExitEarly());
+                                        return !mingw::link  (args);
+            else                        return !elf::link    (args, /*canExitEarly()*/ false);
+        case WinLink:                   return !coff::link   (args, /*canExitEarly()*/ false);
+        case Darwin:                    return !mach_o::link (args, /*canExitEarly()*/ false);
+        case Wasm:                      return !wasm::link   (args, /*canExitEarly()*/ false);
         default:
-            die("lld is a generic driver.\n"
+            return die("lld is a generic driver.\n"
                 "Invoke ld.lld (Unix), ld64.lld (macOS), lld-link (Windows), wasm-ld"
                 " (WebAssembly) instead");
+    }
+}
+
+namespace rexlang {
+    int linker_main(std::vector<std::string> linker_args) {
+        linker_args.insert(linker_args.begin(), "lld");
+        const char **argv = (const char **) malloc(sizeof(void *) * (linker_args.size() + 1));
+        int argc = linker_args.size();
+        for (size_t idx = 0; idx < argc; idx++) {
+            argv[idx] = linker_args[idx].c_str();
+        }
+        return ::linker_main(argc, argv);
     }
 }
 
