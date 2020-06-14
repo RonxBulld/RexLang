@@ -56,7 +56,7 @@ namespace rexlang {
                 function_call->function_name_->identifier_usage_ = IdentifierUsage::kAsRightValue;
             }
             else if (Identifier *identifier = name_component->as<Identifier>()) {
-                (void) identifier;
+                identifier->identifier_usage_ = IdentifierUsage::kAsRightValue;
             }
             else {
                 assert(false);
@@ -556,7 +556,7 @@ namespace rexlang {
         }
         for (const TString &attr : parameter->attributes_) {
             if (attr.string_ == u8"参考" || attr.string_ == u8"传址") {
-                parameter->is_reference = true;
+                parameter->is_reference_ = true;
             } else if (attr.string_ == u8"可空") {
                 parameter->is_nullable = true;
             } else if (attr.string_ == u8"数组") {
@@ -936,6 +936,12 @@ namespace rexlang {
 
     bool SematicAnalysis::CheckIfArgumentMatch(std::vector<ExpressionPtr> &arguments, const std::vector<ParameterDeclPtr> &parameters) {
 
+        // 检查所有实参表达式
+
+        for (Expression *argument : arguments) {
+            this->CheckExpression(argument);
+        }
+
         // 1. 获取形参有效个数
 
         // 1.1. 获取个数
@@ -943,7 +949,7 @@ namespace rexlang {
         size_t argu_count = arguments.size();
         size_t param_count = parameters.size();
 
-        // 1.2. 略去不定参数部分
+        // 1.2. 检查是否有不定参数
 
         bool dynamic_params = false;
         if (param_count > 0 && parameters.back()->name_.string_ == u8"...") {
@@ -961,13 +967,6 @@ namespace rexlang {
         // 3. 如果形参长度不定则截取实参前N个进行计算
 
         if (dynamic_params) {
-
-            // 提前检查即将不被检查的部分
-
-            for (size_t idx = param_count; idx < argu_count; ++idx) {
-                this->CheckExpression(arguments[idx]);
-            }
-
             argu_count = param_count;
         }
 
@@ -981,6 +980,7 @@ namespace rexlang {
         // 5. 针对每个实参/形参对
 
         for (size_t idx = 0; idx < argu_count; idx++) {
+
             if (arguments[idx] == nullptr) {
 
                 // 5.1. 如果实参为空指针
@@ -999,7 +999,7 @@ namespace rexlang {
                 // 5.2. 如果形参数组属性为真，则实参必须为左值或左值引用（参考形参）数组变量，且元素类型严格一致
                 // 数组参数只能以引用方式传递
 
-                parameters[idx]->is_reference = true;
+                parameters[idx]->is_reference_ = true;
                 if (TypeAssert::ExpressionIsLValue(arguments[idx]) == false) {
                     assert(false);
                     return false;
@@ -1022,7 +1022,7 @@ namespace rexlang {
                     return false;
                 }
 
-            } else if (parameters[idx]->is_reference) {
+            } else if (parameters[idx]->is_reference_) {
 
                 // 5.3. 如果形参参考属性为真，则实参必须为左值或左值引用（参考形参），并且变量类型严格一致
 
@@ -1044,8 +1044,8 @@ namespace rexlang {
             } else {
 
                 // 5.4. 如果形参不具备上述属性
-
-                TypeDecl *argu_type = this->CheckExpression(arguments[idx]);
+                TypeDecl *argu_type = arguments[idx]->expression_type_;
+                assert(argu_type);
                 TypeDecl *param_type = parameters[idx]->type_decl_ptr_;
                 ErrOr<Expression*> implicit_convert = this->MakeImplicitConvertIfNeccessary(param_type, arguments[idx]);
                 if (implicit_convert.NoError()) {
@@ -1084,11 +1084,11 @@ namespace rexlang {
             stmts = { stmt };
         }
         for (Statement *stmt : stmts) {
-            if (stmt->is<AssignStmt>()) { continue; }
-            else if (stmt->is<Expression>()) { continue; }
+            if (stmt->is<AssignStmt>())         { continue; }
+            else if (stmt->is<Expression>())    { continue; }
             else if (stmt->is<LoopStatement>()) { continue; }
-            else if (stmt->is<ReturnStmt>()) { return true; }
-            else if (stmt->is<ExitStmt>()) { return true; }
+            else if (stmt->is<ReturnStmt>())    { return true; }
+            else if (stmt->is<ExitStmt>())      { return true; }
             else if (IfStmt *if_stmt = stmt->as<IfStmt>()) {
                 bool ok = true;
                 for (auto & branch : if_stmt->switches_) {
@@ -1099,11 +1099,11 @@ namespace rexlang {
             }
             return !need_return;
         }
-        return false;
+        return !need_return;
     }
 
     bool SematicAnalysis::CheckAllBranchesReturnCorrectly(FunctionDecl *functionDecl) {
-        if (!CheckFullReturn(functionDecl->statement_list_, functionDecl->return_type_ != nullptr)) {
+        if (!CheckFullReturn(functionDecl->statement_list_, !TypeAssert::IsVoidType(functionDecl->return_type_))) {
             assert(false);
             return false;
         } else {

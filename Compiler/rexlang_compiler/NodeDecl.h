@@ -324,7 +324,7 @@ namespace rexlang {
         /*
          * 是否引用类型
          */
-        bool is_reference = false;
+        bool is_reference_ = false;
 
         /*
          * 是否可空
@@ -713,7 +713,7 @@ namespace rexlang {
 
     /**
      * @brief 多层名称序列
-     * 该节点用于表示通过英文句点`.'连接的多层引用语法结构
+     * 该节点用于表示通过英文句点`.'连接的多层引用结构
      */
     struct HierarchyIdentifier : public Expression {
         static const NodeType node_type = NodeType::kNTyHierarchyIdentifier;

@@ -29,5 +29,4 @@ ADD_LIBRARY(IR
         )
 
 llvm_map_components_to_libnames(LLVM support core irreader X86)
-MESSAGE(STATUS "Use LLVM components: ${LLVM}")
 target_link_libraries(IR ${LLVM})

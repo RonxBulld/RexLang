@@ -15,7 +15,7 @@ namespace rexlang {
         parameter_decl->name_.string_ = context_.CreateString(name);
         parameter_decl->type_decl_ptr_ = paramType;
         parameter_decl->type_name_ = paramType->name_;
-        parameter_decl->is_reference = isReference;
+        parameter_decl->is_reference_ = isReference;
         parameter_decl->is_nullable = isNullable;
         parameter_decl->is_array = isArray;
         return parameter_decl;

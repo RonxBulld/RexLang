@@ -18,6 +18,7 @@ namespace rexlang {
         // 可控结构
         class ControlableStructure {
         private:
+            // continue
             llvm::BasicBlock *head_bb   = nullptr;
             llvm::BasicBlock *true_bb   = nullptr;
             llvm::BasicBlock *false_bb  = nullptr;
@@ -102,7 +103,7 @@ namespace rexlang {
         llvm::ConstantInt *         CreateInt                       (int intValue, unsigned int nBits = 32, bool isSigned = false);
         void                        CreateVariableInitialization    (llvm::Value *variable);
         llvm::GlobalVariable *      CreateGlobalVariableAndInit     (TypeDecl *vari_type, const std::string &vari_name);
-        bool                        BuildRangeFor                   (llvm::Value *startValue, llvm::Value *stopValue, llvm::Value *stepValue, llvm::Value *loopVari, Statement *loopBody);
+        llvm::BasicBlock *          BuildConditionFirstLoop         (llvm::Value *startValue, llvm::Value *stopValue, llvm::Value *stepValue, llvm::Value *loopVari, Statement *loopBody);
 
         /*************************************************************************
          * 从结构体或者对象池中获得变量引用或者函数引用
@@ -124,21 +125,21 @@ namespace rexlang {
         llvm::PointerType *     _EmitImpl_(StructureDecl *        structureDecl);
         llvm::Function *        _EmitImpl_(FunctorDecl *          functorDecl);
         llvm::Function *        _EmitImpl_(FunctionDecl *         functionDecl);
-        bool                    _EmitImpl_(Statement *            statement);
-        bool                    _EmitImpl_(IfStmt *               ifStmt);
-        bool                    _EmitImpl_(StatementBlock *       statementBlock);
-        bool                    _EmitImpl_(LoopStatement *        loopStatement);
-        bool                    _EmitImpl_(WhileStmt *            whileStmt);
-        bool                    _EmitImpl_(RangeForStmt *         rangeForStmt);
-        bool                    _EmitImpl_(ForStmt *              forStmt);
-        bool                    _EmitImpl_(DoWhileStmt *          doWhileStmt);
-        bool                    _EmitImpl_(AssignStmt *           assignStmt);
-        bool                    _EmitImpl_(ControlStmt *          controlStmt);
-        bool                    _EmitImpl_(LoopControlStmt *      loopControlStmt);
-        bool                    _EmitImpl_(ContinueStmt *         continueStmt);
-        bool                    _EmitImpl_(BreakStmt *            breakStmt);
-        bool                    _EmitImpl_(ReturnStmt *           returnStmt);
-        bool                    _EmitImpl_(ExitStmt *             exitStmt);
+        llvm::BasicBlock *      _EmitImpl_(Statement *            statement);
+        llvm::BasicBlock *      _EmitImpl_(IfStmt *               ifStmt);
+        llvm::BasicBlock *      _EmitImpl_(StatementBlock *       statementBlock);
+        llvm::BasicBlock *      _EmitImpl_(LoopStatement *        loopStatement);
+        llvm::BasicBlock *      _EmitImpl_(WhileStmt *            whileStmt);
+        llvm::BasicBlock *      _EmitImpl_(RangeForStmt *         rangeForStmt);
+        llvm::BasicBlock *      _EmitImpl_(ForStmt *              forStmt);
+        llvm::BasicBlock *      _EmitImpl_(DoWhileStmt *          doWhileStmt);
+        llvm::BasicBlock *      _EmitImpl_(AssignStmt *           assignStmt);
+        llvm::BasicBlock *      _EmitImpl_(ControlStmt *          controlStmt);
+        llvm::BasicBlock *      _EmitImpl_(LoopControlStmt *      loopControlStmt);
+        llvm::BasicBlock *      _EmitImpl_(ContinueStmt *         continueStmt);
+        llvm::BasicBlock *      _EmitImpl_(BreakStmt *            breakStmt);
+        llvm::BasicBlock *      _EmitImpl_(ReturnStmt *           returnStmt);
+        llvm::BasicBlock *      _EmitImpl_(ExitStmt *             exitStmt);
         llvm::Value *           _EmitImpl_(Expression *           expression);
         llvm::Value *           _EmitImpl_(TypeConvert *          typeConvert);
         llvm::Value *           _EmitImpl_(HierarchyIdentifier *  hierarchyIdentifier);
@@ -180,21 +181,21 @@ namespace rexlang {
         llvm::Function *        Emit(FunctorDecl *          functorDecl);           // 可调用对象声明 仅声明原型不定义内容
         llvm::Function *        Emit(FunctionDecl *         functionDecl);          //
 //        llvm::Function *        Emit(DllCommandDecl *       dllCommandDecl);        //
-        bool                    Emit(Statement *            statement);             //
-        bool                    Emit(IfStmt *               ifStmt);                //
-        bool                    Emit(StatementBlock *       statementBlock);        //
-        bool                    Emit(LoopStatement *        loopStatement);         //
-        bool                    Emit(WhileStmt *            whileStmt);             //
-        bool                    Emit(RangeForStmt *         rangeForStmt);          //
-        bool                    Emit(ForStmt *              forStmt);               //
-        bool                    Emit(DoWhileStmt *          doWhileStmt);           //
-        bool                    Emit(AssignStmt *           assignStmt);            //
-        bool                    Emit(ControlStmt *          controlStmt);           //
-        bool                    Emit(LoopControlStmt *      loopControlStmt);       //
-        bool                    Emit(ContinueStmt *         continueStmt);          //
-        bool                    Emit(BreakStmt *            breakStmt);             //
-        bool                    Emit(ReturnStmt *           returnStmt);            //
-        bool                    Emit(ExitStmt *             exitStmt);              //
+        llvm::BasicBlock *      Emit(Statement *            statement);             //
+        llvm::BasicBlock *      Emit(IfStmt *               ifStmt);                //
+        llvm::BasicBlock *      Emit(StatementBlock *       statementBlock);        //
+        llvm::BasicBlock *      Emit(LoopStatement *        loopStatement);         //
+        llvm::BasicBlock *      Emit(WhileStmt *            whileStmt);             //
+        llvm::BasicBlock *      Emit(RangeForStmt *         rangeForStmt);          //
+        llvm::BasicBlock *      Emit(ForStmt *              forStmt);               //
+        llvm::BasicBlock *      Emit(DoWhileStmt *          doWhileStmt);           //
+        llvm::BasicBlock *      Emit(AssignStmt *           assignStmt);            //
+        llvm::BasicBlock *      Emit(ControlStmt *          controlStmt);           //
+        llvm::BasicBlock *      Emit(LoopControlStmt *      loopControlStmt);       //
+        llvm::BasicBlock *      Emit(ContinueStmt *         continueStmt);          //
+        llvm::BasicBlock *      Emit(BreakStmt *            breakStmt);             //
+        llvm::BasicBlock *      Emit(ReturnStmt *           returnStmt);            //
+        llvm::BasicBlock *      Emit(ExitStmt *             exitStmt);              //
         llvm::Value *           Emit(Expression *           expression);            //
         llvm::Value *           Emit(TypeConvert *          typeConvert);           //
         llvm::Value *           Emit(HierarchyIdentifier *  hierarchyIdentifier);   //

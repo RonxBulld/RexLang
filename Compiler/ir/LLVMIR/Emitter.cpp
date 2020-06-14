@@ -26,6 +26,7 @@
 #include <llvm/Support/ToolOutputFile.h>
 #include <llvm/Support/TargetSelect.h>
 #include <llvm/IR/DIBuilder.h>
+#include <llvm/IR/CFG.h>
 
 #include "Emitter.h"
 
@@ -392,7 +393,7 @@ namespace rexlang {
 
     llvm::Value *IREmit::_EmitImpl_(ParameterDecl *parameterDecl) {
         llvm::Type *param_type = GetType(parameterDecl->type_decl_ptr_);
-        if (parameterDecl->is_reference && !param_type->isPointerTy()) {
+        if (parameterDecl->is_reference_ && !param_type->isPointerTy()) {
             param_type = param_type->getPointerTo();
         }
 
@@ -634,16 +635,20 @@ namespace rexlang {
 
         // 处理语句
 
-        Emit(functionDecl->statement_list_);
+        llvm::BasicBlock *latest_block = Emit(functionDecl->statement_list_);
 
         // 插入真实返回语句
 
         for (llvm::BasicBlock &bb : function->getBasicBlockList()) {
-            if (bb.getNextNode() == nullptr && &bb != ret_bb) {
+            if (llvm::succ_size(&bb) == 0 && &bb != ret_bb) {
                 Builder.SetInsertPoint(&bb);
                 Builder.CreateBr(ret_bb);
             }
         }
+//        if (llvm::succ_size(&function->getEntryBlock()) == 0) {
+//            Builder.SetInsertPoint(&function->getEntryBlock());
+//            Builder.CreateBr(ret_bb);
+//        }
         Builder.SetInsertPoint(ret_bb);
         if (!TypeAssert::IsVoidType(functionDecl->return_type_)) {
             llvm::Value *return_value = Builder.CreateLoad(return_value_ptr);
@@ -662,7 +667,7 @@ namespace rexlang {
 
 //        llvm::Function *Emit(DllCommandDecl *dllCommandDecl)；
 
-    bool IREmit::_EmitImpl_(Statement *statement) {
+    llvm::BasicBlock *IREmit::_EmitImpl_(Statement *statement) {
         if (AssignStmt *assign_stmt = statement->as<AssignStmt>()) {
             return Emit(assign_stmt);
         } else if (ControlStmt *control_stmt = statement->as<ControlStmt>()) {
@@ -674,14 +679,14 @@ namespace rexlang {
         } else if (StatementBlock *statement_block = statement->as<StatementBlock>()) {
             return Emit(statement_block);
         } else if (Expression *expression = statement->as<Expression>()) {
-            return Emit(expression);
+            return ((bool) Emit(expression)) ? Builder.GetInsertBlock() : nullptr;
         } else {
             assert(false);
-            return false;
+            return nullptr;
         }
     }
 
-    bool IREmit::_EmitImpl_(IfStmt *ifStmt) {
+    llvm::BasicBlock *IREmit::_EmitImpl_(IfStmt *ifStmt) {
         assert(ifStmt->switches_.size() == 1);
 
         llvm::BasicBlock *prehead_block = Builder.GetInsertBlock();
@@ -707,16 +712,16 @@ namespace rexlang {
 
         // 生成Then块
         Builder.SetInsertPoint(then_block);
-        Emit(then_stmt);
-        if (then_block->getNextNode() == nullptr) {
+        then_block = Emit(then_stmt);           // <---- 必须更新块指针
+        if (llvm::succ_size(then_block) == 0) {
             Builder.SetInsertPoint(then_block);
             Builder.CreateBr(merge_block);
         }
 
         // 处理Else块
         Builder.SetInsertPoint(else_block);
-        Emit(else_stmt);
-        if (else_block->getNextNode() == nullptr) {
+        else_block = Emit(else_stmt);           // <---- 必须更新块指针
+        if (llvm::succ_size(else_block) == 0) {
             Builder.SetInsertPoint(else_block);
             Builder.CreateBr(merge_block);
         }
@@ -724,34 +729,36 @@ namespace rexlang {
         // 处理Merge块
         Builder.SetInsertPoint(merge_block);
 
-        return true;
+        return merge_block;
     }
 
-    bool IREmit::_EmitImpl_(StatementBlock *statementBlock) {
-        bool success = true;
+    llvm::BasicBlock *IREmit::_EmitImpl_(StatementBlock *statementBlock) {
+        llvm::BasicBlock *latest_block = Builder.GetInsertBlock();
         for (Statement *statement : statementBlock->statements_) {
-            success &= Emit(statement);
+            latest_block = Emit(statement);
+            assert(latest_block);
         }
-        return success;
+        return latest_block;
     }
 
-    bool IREmit::_EmitImpl_(LoopStatement *loopStatement) {
-        bool success = false;
+    llvm::BasicBlock *IREmit::_EmitImpl_(LoopStatement *loopStatement) {
+        llvm::BasicBlock *latest_block = Builder.GetInsertBlock();
         if (WhileStmt *whileStmt = loopStatement->as<WhileStmt>()) {
-            success = Emit(whileStmt);
+            latest_block = Emit(whileStmt);
         } else if (RangeForStmt *rangeForStmt = loopStatement->as<RangeForStmt>()) {
-            success = Emit(rangeForStmt);
+            latest_block = Emit(rangeForStmt);
         } else if (ForStmt *forStmt = loopStatement->as<ForStmt>()) {
-            success = Emit(forStmt);
+            latest_block = Emit(forStmt);
         } else if (DoWhileStmt *doWhileStmt = loopStatement->as<DoWhileStmt>()) {
-            success = Emit(doWhileStmt);
+            latest_block = Emit(doWhileStmt);
         } else {
             assert(false);
         }
-        return success;
+        assert(latest_block);
+        return latest_block;
     }
 
-    bool IREmit::_EmitImpl_(WhileStmt *whileStmt) {
+    llvm::BasicBlock *IREmit::_EmitImpl_(WhileStmt *whileStmt) {
         // 当前块
         llvm::BasicBlock *preheader_block = Builder.GetInsertBlock();
         // 循环条件块
@@ -769,17 +776,17 @@ namespace rexlang {
         controlable_struct_stack_.push({condition_block, loop_block, after_block, after_block});
         // 开始生成循环体
         Builder.SetInsertPoint(loop_block);
-        Emit(whileStmt->loop_body_);
+        loop_block = Emit(whileStmt->loop_body_);       // <---- 必须更新块指针
         controlable_struct_stack_.pop();
 
         // 直接跳到循环条件块
         Builder.CreateBr(condition_block);
         // 转到新的块中
         Builder.SetInsertPoint(after_block);
-        return true;
+        return after_block;
     }
 
-    bool IREmit::BuildRangeFor(llvm::Value *startValue, llvm::Value *stopValue, llvm::Value *stepValue, llvm::Value *loopVari, Statement *loopBody) {
+    llvm::BasicBlock *IREmit::BuildConditionFirstLoop(llvm::Value *startValue, llvm::Value *stopValue, llvm::Value *stepValue, llvm::Value *loopVari, Statement *loopBody) {
         // 当前块
         llvm::BasicBlock *prehead_block = Builder.GetInsertBlock();
         // 真实循环变量
@@ -823,7 +830,7 @@ namespace rexlang {
             // 更新循环值到名义循环变量
             Builder.CreateAlignedStore(Builder.CreateAlignedLoad(llvm::Type::getInt32Ty(TheContext), real_loop_vari, 4), loopVari, 4);
         }
-        Emit(loopBody);
+        loop_body_block = Emit(loopBody);       // <---- 必须更新块指针
         Builder.CreateBr(step_block);
         controlable_struct_stack_.pop();
 
@@ -841,10 +848,10 @@ namespace rexlang {
         // 转到新的块中
         Builder.SetInsertPoint(loop_after_block);
 
-        return true;
+        return loop_after_block;
     }
 
-    bool IREmit::_EmitImpl_(RangeForStmt *rangeForStmt) {
+    llvm::BasicBlock *IREmit::_EmitImpl_(RangeForStmt *rangeForStmt) {
         llvm::Value *start_value = CreateInt(1);
         llvm::Value *stop_value = Emit(rangeForStmt->range_size_);
         assert(stop_value);
@@ -854,12 +861,12 @@ namespace rexlang {
             loop_vari = Emit(rangeForStmt->loop_vari_);
             assert(loop_vari);
         }
-        bool build_range_success = BuildRangeFor(start_value, stop_value, step_value, loop_vari, rangeForStmt->loop_body_);
-        assert(build_range_success);
-        return build_range_success;
+        llvm::BasicBlock *loop_after_block = BuildConditionFirstLoop(start_value, stop_value, step_value, loop_vari, rangeForStmt->loop_body_);
+        assert(loop_after_block);
+        return loop_after_block;
     }
 
-    bool IREmit::_EmitImpl_(ForStmt *forStmt) {
+    llvm::BasicBlock *IREmit::_EmitImpl_(ForStmt *forStmt) {
         // 初始值
         llvm::Value *start_value = Emit(forStmt->start_value_);
         assert(start_value);
@@ -875,14 +882,18 @@ namespace rexlang {
             loop_vari = Emit(forStmt->loop_vari_);
             assert(loop_vari);
         }
-        bool build_range_success = BuildRangeFor(start_value, stop_value, step_value, loop_vari, forStmt->loop_body_);
-        assert(build_range_success);
-        return build_range_success;
+        llvm::BasicBlock *loop_after_block = BuildConditionFirstLoop(start_value, stop_value, step_value, loop_vari, forStmt->loop_body_);
+        assert(loop_after_block);
+        return loop_after_block;
     }
 
-    bool IREmit::_EmitImpl_(DoWhileStmt *doWhileStmt) {
+    llvm::BasicBlock *IREmit::_EmitImpl_(DoWhileStmt *doWhileStmt) {
         // 当前块
         llvm::BasicBlock *preheader_block = Builder.GetInsertBlock();
+        // 循环体前导块
+        llvm::BasicBlock *prev_loop_block = llvm::BasicBlock::Create(TheContext, ".prev_loop", TheFunction);
+        Builder.CreateBr(prev_loop_block);
+        Builder.SetInsertPoint(prev_loop_block);
         // 循环体块
         llvm::BasicBlock *loop_block = llvm::BasicBlock::Create(TheContext, ".loop", TheFunction);
         Builder.CreateBr(loop_block);
@@ -891,23 +902,23 @@ namespace rexlang {
         // 循环块下一个块
         llvm::BasicBlock *after_block = llvm::BasicBlock::Create(TheContext, ".afterloop", TheFunction);
 
-        controlable_struct_stack_.push({cond_block, loop_block, after_block, after_block});
+        controlable_struct_stack_.push({cond_block, prev_loop_block, after_block, after_block});
         Builder.SetInsertPoint(loop_block);
         // 循环体
-        Emit(doWhileStmt->loop_body_);
+        loop_block = Emit(doWhileStmt->loop_body_);     // <---- 必须更新块指针
         controlable_struct_stack_.pop();
         Builder.CreateBr(cond_block);
 
         Builder.SetInsertPoint(cond_block);
         // 条件判定，分支选择跳转
         llvm::Value *loop_condition = Emit(doWhileStmt->conditon_);
-        Builder.CreateCondBr(loop_condition, loop_block, after_block);
+        Builder.CreateCondBr(loop_condition, prev_loop_block, after_block);
         // 转到新的块中
         Builder.SetInsertPoint(after_block);
-        return true;
+        return after_block;
     }
 
-    bool IREmit::_EmitImpl_(AssignStmt *assignStmt) {
+    llvm::BasicBlock *IREmit::_EmitImpl_(AssignStmt *assignStmt) {
         llvm::Value *rhs = Emit(assignStmt->rhs_);
         assert(rhs);
         llvm::Value *lhs = Emit(assignStmt->lhs_);
@@ -937,10 +948,10 @@ namespace rexlang {
         }
         bool assign_success = StoreVariable(rhs, lhs);
         assert(assign_success);
-        return true;
+        return Builder.GetInsertBlock();
     }
 
-    bool IREmit::_EmitImpl_(ControlStmt *controlStmt) {
+    llvm::BasicBlock *IREmit::_EmitImpl_(ControlStmt *controlStmt) {
         if (LoopControlStmt *loopControlStmt = controlStmt->as<LoopControlStmt>()) {
             return Emit(loopControlStmt);
         } else if (ReturnStmt *returnStmt = controlStmt->as<ReturnStmt>()) {
@@ -949,50 +960,50 @@ namespace rexlang {
             return Emit(exitStmt);
         } else {
             assert(false);
-            return false;
+            return nullptr;
         }
     }
 
-    bool IREmit::_EmitImpl_(LoopControlStmt *loopControlStmt) {
+    llvm::BasicBlock *IREmit::_EmitImpl_(LoopControlStmt *loopControlStmt) {
         if (ContinueStmt *continueStmt = loopControlStmt->as<ContinueStmt>()) {
             return Emit(continueStmt);
         } else if (BreakStmt *breakStmt = loopControlStmt->as<BreakStmt>()) {
             return Emit(breakStmt);
         } else {
             assert(false);
-            return false;
+            return nullptr;
         }
     }
 
-    bool IREmit::_EmitImpl_(ContinueStmt *continueStmt) {
+    llvm::BasicBlock *IREmit::_EmitImpl_(ContinueStmt *continueStmt) {
         if (controlable_struct_stack_.empty()) {
             assert(false);
-            return false;
+            return nullptr;
         }
         if (llvm::BasicBlock *head_block = controlable_struct_stack_.top().getHeadBB()) {
             Builder.CreateBr(head_block);
-            return true;
+            return nullptr;
         } else {
             assert(false);
-            return false;
+            return nullptr;
         }
     }
 
-    bool IREmit::_EmitImpl_(BreakStmt *breakStmt) {
+    llvm::BasicBlock *IREmit::_EmitImpl_(BreakStmt *breakStmt) {
         if (controlable_struct_stack_.empty()) {
             assert(false);
-            return false;
+            return nullptr;
         }
         if (llvm::BasicBlock *head_block = controlable_struct_stack_.top().getTailBB()) {
             Builder.CreateBr(head_block);
-            return true;
+            return nullptr;
         } else {
             assert(false);
-            return false;
+            return nullptr;
         }
     }
 
-    bool IREmit::_EmitImpl_(ReturnStmt *returnStmt) {
+    llvm::BasicBlock *IREmit::_EmitImpl_(ReturnStmt *returnStmt) {
         if (returnStmt->return_value_) {
             llvm::Value *RV = Emit(returnStmt->return_value_);
             Builder.CreateStore(RV, function_retptr_map_[this->TheFunction]);
@@ -1000,13 +1011,13 @@ namespace rexlang {
         } else {
             Builder.CreateBr(function_retbb_map_[this->TheFunction]);
         }
-        return true;
+        return Builder.GetInsertBlock();
     }
 
-    bool IREmit::_EmitImpl_(ExitStmt *exitStmt) {
+    llvm::BasicBlock *IREmit::_EmitImpl_(ExitStmt *exitStmt) {
         llvm::FunctionCallee exit_fn = RTBuilder.getRTAPIFunction("$exit", Builder.getVoidTy(), {});
         Builder.CreateCall(exit_fn);
-        return true;
+        return Builder.GetInsertBlock();
     }
 
     llvm::Value *IREmit::_EmitImpl_(Expression *expression) {
@@ -1610,21 +1621,21 @@ namespace rexlang {
     llvm::PointerType *     IREmit::Emit(StructureDecl *        astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
     llvm::Function *        IREmit::Emit(FunctorDecl *          astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
     llvm::Function *        IREmit::Emit(FunctionDecl *         astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
-    bool                    IREmit::Emit(Statement *            astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
-    bool                    IREmit::Emit(IfStmt *               astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
-    bool                    IREmit::Emit(StatementBlock *       astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
-    bool                    IREmit::Emit(LoopStatement *        astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
-    bool                    IREmit::Emit(WhileStmt *            astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
-    bool                    IREmit::Emit(RangeForStmt *         astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
-    bool                    IREmit::Emit(ForStmt *              astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
-    bool                    IREmit::Emit(DoWhileStmt *          astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
-    bool                    IREmit::Emit(AssignStmt *           astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
-    bool                    IREmit::Emit(ControlStmt *          astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
-    bool                    IREmit::Emit(LoopControlStmt *      astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
-    bool                    IREmit::Emit(ContinueStmt *         astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
-    bool                    IREmit::Emit(BreakStmt *            astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
-    bool                    IREmit::Emit(ReturnStmt *           astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
-    bool                    IREmit::Emit(ExitStmt *             astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    llvm::BasicBlock *      IREmit::Emit(Statement *            astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    llvm::BasicBlock *      IREmit::Emit(IfStmt *               astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    llvm::BasicBlock *      IREmit::Emit(StatementBlock *       astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    llvm::BasicBlock *      IREmit::Emit(LoopStatement *        astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    llvm::BasicBlock *      IREmit::Emit(WhileStmt *            astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    llvm::BasicBlock *      IREmit::Emit(RangeForStmt *         astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    llvm::BasicBlock *      IREmit::Emit(ForStmt *              astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    llvm::BasicBlock *      IREmit::Emit(DoWhileStmt *          astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    llvm::BasicBlock *      IREmit::Emit(AssignStmt *           astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    llvm::BasicBlock *      IREmit::Emit(ControlStmt *          astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    llvm::BasicBlock *      IREmit::Emit(LoopControlStmt *      astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    llvm::BasicBlock *      IREmit::Emit(ContinueStmt *         astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    llvm::BasicBlock *      IREmit::Emit(BreakStmt *            astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    llvm::BasicBlock *      IREmit::Emit(ReturnStmt *           astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    llvm::BasicBlock *      IREmit::Emit(ExitStmt *             astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
     llvm::Value *           IREmit::Emit(Expression *           astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
     llvm::Value *           IREmit::Emit(TypeConvert *          astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
     llvm::Value *           IREmit::Emit(HierarchyIdentifier *  astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
