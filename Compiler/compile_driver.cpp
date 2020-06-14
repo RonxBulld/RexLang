@@ -80,7 +80,7 @@ namespace rexlang {
 
     int tooling::GenerateCodeFromTranslateUnit(ProjectDB &projectDB) {
         rexlang::EmitLLVMIR emitter(projectDB.GetTranslateUnit(), projectDB);
-        emitter.WriteOutIR();
+//        emitter.WriteOutIR();
         rexlang::LLCodeGen ll_code_gen(emitter);
 //        if (int EC = ll_code_gen.WriteOutBitCode(projectDB.GetBitCodeFilename())) { return EC; }
         if (int EC = ll_code_gen.WriteOutObject (projectDB.GetObjectFilename()))  { return EC; }

@@ -27,6 +27,7 @@ namespace rexlang {
          * 当项目名称和生成目标名称未指定时使用此字符串替代
          */
         std::string random_string_;
+        std::string temp_directory_path_;
         /*!
          * 项目名称
          * 如果未指定则使用随机字符串替代
@@ -75,7 +76,7 @@ namespace rexlang {
         ASTContext &                        GetASTContext       ();
         const ASTContext &                  GetASTContext       () const;
 
-        std::string                         GetBitCodeFilename  () const;
+        std::string                         GetByteCodeFilename  () const;
         std::string                         GetObjectFilename   () const;
         std::string                         GetExecuteFilename  () const;
 

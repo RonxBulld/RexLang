@@ -51,23 +51,13 @@ namespace rexlang {
         library_path_.push_back((root_path / "lib" / "rex")    .string());
     }
 
-    const std::string &ProgramDB::GetProgramPath() const {
-        return program_path_;
-    }
+    const std::string &             ProgramDB::GetProgramPath() const { return program_path_; }
+    const std::vector<std::string> &ProgramDB::GetExecutePath() const { return execute_path_; }
+    const std::vector<std::string> &ProgramDB::GetIncludePath() const { return include_path_; }
+    const std::vector<std::string> &ProgramDB::GetLibraryPath() const { return library_path_; }
 
-    const std::vector<std::string> &ProgramDB::GetExecutePath() const {
-        return execute_path_;
-    }
-
-    const std::vector<std::string> &ProgramDB::GetIncludePath() const {
-        return include_path_;
-    }
-
-    const std::vector<std::string> &ProgramDB::GetLibraryPath() const {
-        return library_path_;
-    }
-
-    const char *ProgramDB::GetDefaultLibraryHeadFileExt() const {
-        return "txt";
-    }
+    std::string                 ProgramDB::GetDefaultLibraryHeadFileExt () const    { return "txt"; }
+    std::vector<std::string>    ProgramDB::GetSourceFileExts            () const    { return { ProgramDB::GetDefaultLibraryHeadFileExt() }; }
+    std::string                 ProgramDB::GetObjectFileExt             () const    { return "o";  }
+    std::string                 ProgramDB::GetByteCodeFileExt           () const    { return "bc"; }
 }
