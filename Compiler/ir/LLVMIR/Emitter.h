@@ -89,16 +89,25 @@ namespace rexlang {
         /*************************************************************************
          * 获取值/变量的正确类型
          *************************************************************************/
-        llvm::Type *        GetTrustType(llvm::Value *value);
+        llvm::Type *        GetTrustType        (llvm::Value *value);
+        llvm::Type *        GetParameterType    (ParameterDecl *parameterDecl);
 
         /*************************************************************************
          * 根据请求的变量不同执行不同的操作
+         * 注意引用类型的变量的加载需要在函数外处理
          * 参数 - 直接
          * 全局变量 - Builder.CreateLoad
          * 局部变量 - Builder.CreateLoad
          *************************************************************************/
         llvm::Value *       LoadVariable(llvm::Value *variable);
 
+        /*************************************************************************
+         * 根据请求的变量不同执行不同的操作
+         * 注意引用类型的变量的写入需要在函数外处理
+         * 参数 - 直接
+         * 全局变量 - Builder.CreateLoad
+         * 局部变量 - Builder.CreateLoad
+         *************************************************************************/
         bool                        StoreVariable                   (llvm::Value *value, llvm::Value *variable);
         llvm::ConstantInt *         CreateInt                       (int intValue, unsigned int nBits = 32, bool isSigned = false);
         void                        CreateVariableInitialization    (llvm::Value *variable);

@@ -215,6 +215,14 @@ namespace rexlang {
         }
     }
 
+    llvm::Type *IREmit::GetParameterType(ParameterDecl *parameterDecl) {
+        llvm::Type *param_type = GetType(parameterDecl->type_decl_ptr_);
+        if (parameterDecl->is_reference_ && !param_type->isPointerTy()) {
+            param_type = param_type->getPointerTo();
+        }
+        return param_type;
+    }
+
     llvm::Value *IREmit::LoadVariable(llvm::Value *variable) {
         if (llvm::GlobalVariable *global_variable = llvm::dyn_cast<llvm::GlobalVariable>(variable)) {
             return Builder.CreateLoad(global_variable->getValueType(), global_variable);
@@ -324,6 +332,7 @@ namespace rexlang {
         for (auto &function_object : function_object_pool_) {
             llvm::Function *function = function_object.second;
             if (llvm::verifyFunction(*function, &llvm::outs())) {
+                llvm::outs() << "\n\n";
                 TheModule->print(llvm::outs(), nullptr);
                 assert(false);
                 function->eraseFromParent();
@@ -392,10 +401,7 @@ namespace rexlang {
     }
 
     llvm::Value *IREmit::_EmitImpl_(ParameterDecl *parameterDecl) {
-        llvm::Type *param_type = GetType(parameterDecl->type_decl_ptr_);
-        if (parameterDecl->is_reference_ && !param_type->isPointerTy()) {
-            param_type = param_type->getPointerTo();
-        }
+        llvm::Type *param_type = GetParameterType(parameterDecl);
 
         // 创建参数在栈内的空间
 
@@ -541,7 +547,7 @@ namespace rexlang {
 
         std::vector<llvm::Type *> parameter_types;
         for (ParameterDecl *parameter_decl : functorDecl->parameters_) {
-            llvm::Type *parameter_type = GetType(parameter_decl->type_decl_ptr_);
+            llvm::Type *parameter_type = GetParameterType(parameter_decl);
             parameter_types.push_back(parameter_type);
         }
 
@@ -946,6 +952,7 @@ namespace rexlang {
             assert(rhs);
             assert(GetTrustType(rhs)->isPointerTy());
         }
+
         bool assign_success = StoreVariable(rhs, lhs);
         assert(assign_success);
         return Builder.GetInsertBlock();
