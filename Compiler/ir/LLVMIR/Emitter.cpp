@@ -1255,6 +1255,14 @@ namespace rexlang {
         if (nameComponent->identifier_usage_ == IdentifierUsage::kAsRightValue) {
             this_value = LoadVariable(this_value);
         }
+        if (Identifier *identifier = nameComponent->as<Identifier>()) {
+            if (ParameterDecl *parameter_decl = identifier->reference_->as<ParameterDecl>()) {
+                if (parameter_decl->is_reference_) {
+                    // FIXME: 这里处理得并不完美
+                    this_value = LoadVariable(this_value);
+                }
+            }
+        }
         return this_value;
     }
 
@@ -1266,7 +1274,7 @@ namespace rexlang {
         }
         switch (unaryExpression->operator_type_) {
             case _OperatorExpression::OperatorType::kOptSub: {
-                return Builder.CreateNeg(V, "$.neg");
+                return Builder.CreateNeg(V, ".neg");
             }
             default: {
                 assert(false);

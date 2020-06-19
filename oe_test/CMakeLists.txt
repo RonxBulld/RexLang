@@ -51,8 +51,19 @@ SET_TESTS_PROPERTIES(test_gcd_algorithm PROPERTIES
         TIMEOUT ${TEST_TIMEOUT}
         )
 
+ADD_TEST(
+        NAME test_ref_param
+        COMMAND ${TEST_BIN_EXEC} --project ref_param ${TESTSUIT_SOURCES_DIRECTORY}ref_param.txt -o ${EXE_FILE_PREFIX}ref_param${EXE_FILE_SUFFIX}
+)
+SET_TESTS_PROPERTIES(test_gcd_algorithm PROPERTIES
+        PASS_REGULAR_EXPRESSION "0;10"
+        FAIL_REGULAR_EXPRESSION "[^a-z]Error;ERROR;Failed"
+        TIMEOUT ${TEST_TIMEOUT}
+        )
+
 INSTALL(FILES
         array1.txt
         gcd_algorithm.txt
+        ref_param.txt
         DESTINATION share/rex/example
         )

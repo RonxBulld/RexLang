@@ -994,7 +994,8 @@ namespace rexlang {
                     continue;
                 }
 
-            } else if (parameters[idx]->is_array) {
+            }
+            /*else*/ if (parameters[idx]->is_array && arguments[idx] != nullptr) {
 
                 // 5.2. 如果形参数组属性为真，则实参必须为左值或左值引用（参考形参）数组变量，且元素类型严格一致
                 // 数组参数只能以引用方式传递
@@ -1004,6 +1005,9 @@ namespace rexlang {
                     assert(false);
                     return false;
                 }
+
+                // 检查数组的元素类型是否匹配
+
                 if (HierarchyIdentifier *hierarchy_identifier = arguments[idx]->as<HierarchyIdentifier>()) {
                     TypeDecl *argu_type = this->GetHierarchyIdentifierQualifiedType(hierarchy_identifier);
                     if (argu_type->is<ArrayDecl>()) {
@@ -1022,7 +1026,8 @@ namespace rexlang {
                     return false;
                 }
 
-            } else if (parameters[idx]->is_reference_) {
+            }
+            /*else*/ if (parameters[idx]->is_reference_ && arguments[idx] != nullptr) {
 
                 // 5.3. 如果形参参考属性为真，则实参必须为左值或左值引用（参考形参），并且变量类型严格一致
 
@@ -1032,6 +1037,7 @@ namespace rexlang {
                 }
                 if (HierarchyIdentifier *hierarchy_identifier = arguments[idx]->as<HierarchyIdentifier>()) {
                     TypeDecl *argu_type = this->GetHierarchyIdentifierQualifiedType(hierarchy_identifier);
+                    SetupHierarchyReferenceType(hierarchy_identifier, IdentifierUsage::kAsLeftValue);
                     if (argu_type != parameters[idx]->type_decl_ptr_) {
                         assert(false);
                         return false;
@@ -1041,7 +1047,8 @@ namespace rexlang {
                     return false;
                 }
 
-            } else {
+            }
+            /*else*/ if (arguments[idx] != nullptr) {
 
                 // 5.4. 如果形参不具备上述属性
                 TypeDecl *argu_type = arguments[idx]->expression_type_;
