@@ -1252,14 +1252,19 @@ namespace rexlang {
             previous_value = Emit(nameComponent->forward_name_component_);
         }
         llvm::Value *this_value = GetFromStructOrPool(previous_value, nameComponent);
+
         if (nameComponent->identifier_usage_ == IdentifierUsage::kAsRightValue) {
+//            std::cout << nameComponent->ast_context_->GetLineFromLocate(nameComponent->location_start_) << std::endl;
+            // 将名称组件当右值使用
             this_value = LoadVariable(this_value);
+        } else if (nameComponent->identifier_usage_ == IdentifierUsage::kAsLeftValue) {
+            // 将名称组件当左值使用
         }
+        // 如果是一个引用参数则需要加载它实际的内存地址
         if (Identifier *identifier = nameComponent->as<Identifier>()) {
             if (ParameterDecl *parameter_decl = identifier->reference_->as<ParameterDecl>()) {
                 if (parameter_decl->is_reference_) {
-                    // FIXME: 这里处理得并不完美
-                    this_value = LoadVariable(this_value);
+                    this_value = Builder.CreateLoad(this_value->getType()->getPointerElementType(), this_value);
                 }
             }
         }
