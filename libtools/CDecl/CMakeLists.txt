@@ -5,12 +5,8 @@
 
 PROJECT(CDecl)
 
-FIND_PACKAGE(Clang REQUIRED QUIET CONFIG)
-MESSAGE(STATUS "Found Clang ${Clang_PACKAGE_VERSION}")
-MESSAGE(STATUS "Using ClangConfig.cmake in: ${Clang_DIR}")
-INCLUDE_DIRECTORIES(${CLANG_INCLUDE_DIRS})
-FIND_PACKAGE(LLVM 9 REQUIRED QUIET CONFIG)
-INCLUDE_DIRECTORIES(${LLVM_INCLUDE_DIRS})
+INCLUDE(ref_clang_pkg)
+INCLUDE(ref_llvm_pkg)
 
 ADD_DEFINITIONS(-fPIE)
 
@@ -29,20 +25,23 @@ target_link_libraries(CDecl
         lite_util
         )
 
-target_link_libraries(CDecl
-        clangBasic
-        clangIndex
-        clangLex
-        clangParse
-        clangSema
-        clangAST
-        clangEdit
-        clangFrontend
-        clangSerialization
-        clangAnalysis
-        clangDriver
-        clangFormat
-        clangTooling
+MAP_Clang_COMPONENTS(Clang-Libs
+        Basic
+        Index
+        Lex
+        Parse
+        Sema
+        AST
+        Edit
+        Frontend
+        Serialization
+        Analysis
+        Driver
+        Format
+        Tooling
+        ASTMatchers
         )
+
+target_link_libraries(CDecl ${Clang-Libs})
 
 #cotire(CDecl)

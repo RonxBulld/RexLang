@@ -3,12 +3,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.7.2)
 
 PROJECT(CodeGen CXX)
 
-FIND_PACKAGE(LLVM 9 REQUIRED QUIET CONFIG)
-FILE(READ_SYMLINK "${LLVM_INCLUDE_DIRS}/llvm" REAL_LLVM_INCLUDE_DIRS)
-SET(REAL_LLVM_INCLUDE_DIRS "${LLVM_INCLUDE_DIRS}/${REAL_LLVM_INCLUDE_DIRS}/../")
-INCLUDE_DIRECTORIES(${LLVM_INCLUDE_DIRS})
-INCLUDE_DIRECTORIES(${REAL_LLVM_INCLUDE_DIRS})
-ADD_DEFINITIONS(${LLVM_DEFINITIONS})
+INCLUDE(ref_llvm_pkg)
 
 SET(CodeGen-Source
         LLCodeGen.cpp
@@ -19,5 +14,5 @@ ADD_LIBRARY(CodeGen
         ${CodeGen-Source}
         )
 
-llvm_map_components_to_libnames(LLVM bitwriter)
-target_link_libraries(CodeGen ${LLVM})
+MAP_LLVM_COMPONENTS(LLVM-Libs bitwriter)
+target_link_libraries(CodeGen ${LLVM-Libs})

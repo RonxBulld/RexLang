@@ -19,16 +19,16 @@ def remove_file_if_exist(path):
 BuildArgs = {
     'Windows': {
         'Sysroot': os.path.realpath(os.getcwd() + '/../sysroot'),
-        'BuildType': 'Release',
-        'ConfigTypes': 'Release',
+        'BuildType': 'Debug',
+        'ConfigTypes': 'Debug',
         'ToolchainSpecify': '-A x64 -Thost=x64',
         'ParallelJobs': '',
         'BuildDir': 'build-Windows',
     },
     'Linux': {
         'Sysroot': os.path.realpath(os.getcwd() + '/../sysroot'),
-        'BuildType': 'Release',
-        'ConfigTypes': 'Release',
+        'BuildType': 'Debug',
+        'ConfigTypes': 'Debug',
         'ToolchainSpecify': '',
         'ParallelJobs': '8',
         'BuildDir': 'build-Linux',
@@ -66,4 +66,5 @@ os.chdir(rootdir)
 remove_file_if_exist('../sysroot/lib/libantlr4-runtime.so')
 remove_file_if_exist('../sysroot/lib/libantlr4-runtime.so.4.8')
 remove_file_if_exist('../sysroot/lib/antlr4-runtime.dll')
-if os.path.isfile('../sysroot/lib/antlr4-runtime-static.lib'): shutil.copy2('../sysroot/lib/antlr4-runtime-static.lib', '../sysroot/lib/antlr4-runtime.lib')
+if os.path.isfile('../sysroot/lib/antlr4-runtime-static.lib'):
+    shutil.copy2('../sysroot/lib/antlr4-runtime-static.lib', '../sysroot/lib/antlr4-runtime.lib')

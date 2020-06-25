@@ -34,7 +34,7 @@ struct TypeDesc {
     int printToString(std::ostream &outs, const std::string& indentStr) const {
         outs << (!base_typename.empty() ? base_typename : "<!unknow>" );
         if (is_array) {
-            outs << StringUtil::Join(dimensions, "", [](unsigned dim)->std::string{ return "[" + std::to_string(dim) + "]"; });
+            outs << StringUtil::Join<std::vector, unsigned>(dimensions, "", [](unsigned dim)->std::string{ return "[" + std::to_string(dim) + "]"; });
         }
         outs << ", " << (is_reference ? "pass ref" : "pass value");
         outs << ", " << (is_nullable ? "default" : "no default");

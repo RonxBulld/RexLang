@@ -76,22 +76,32 @@ namespace rexlang {
             assert(false);
             return nullptr;
         }
-        filename = dir.filename();
-        directory = dir.has_parent_path() ? dir.parent_path() : ".";
+        filename = dir.filename().string();
+        directory = dir.has_parent_path() ? dir.parent_path().string() : ".";
 
         std::filesystem::path abs_dir = std::filesystem::absolute(dir);
-        llvm::DICompileUnit *cu = TheDICUMap[abs_dir.string()];
-        if (cu) { return cu; }
 
-        cu = TheDIBuilder.createCompileUnit(
-                llvm::dwarf::DW_LANG_C,
-                TheDIBuilder.createFile(filename, directory),
-                "RexLang Compiler",
-                0,
-                "",
-                0
-        );
-        TheDICUMap[abs_dir.string()] = cu;
+        llvm::DICompileUnit *cu = nullptr;
+        auto found_di_cu = TheDICUMap.find(abs_dir.string());
+        if (found_di_cu != TheDICUMap.end()) {
+            return found_di_cu->second;
+        }
+
+        // 一个DIBuilder实例只能创建一个编译单元
+        if (TheDICUMap.empty()) {
+            cu = TheDIBuilder.createCompileUnit(
+                    llvm::dwarf::DW_LANG_C,
+                    TheDIBuilder.createFile(filename, directory),
+                    "RexLang Compiler",
+                    0,
+                    "",
+                    0
+            );
+            TheDICUMap[abs_dir.string()] = cu;
+        } else {
+            cu = TheDICUMap.begin()->second;
+        }
+
         return cu;
     }
 
@@ -109,13 +119,13 @@ namespace rexlang {
     llvm::DISubprogram *DebugInfoMgr::CreateFunctionDI(FunctorDecl *functor, llvm::Function *func_ir) {
         size_t func_loc = functor->location_start_;
         std::filesystem::path file_name(functor->ast_context_->GetFileFromLocate(func_loc).str());
-        unsigned file_line = functor->ast_context_->GetLineNumber(file_line);
+        unsigned file_line = functor->ast_context_->GetLineNumber(functor->location_start_);
         // TODO:有必要的话需要执行 Name Mangle
         StringRef mangled_name = functor->name_.string_;
 
         llvm::DIFile *Unit = TheDIBuilder.createFile(
-                file_name.filename().c_str(),
-                file_name.parent_path().c_str()
+                file_name.filename().string(),
+                file_name.parent_path().string()
         );
         llvm::DISubprogram *FuncDI = TheDIBuilder.createFunction(
                 GetOrCreateDICompileUnit(file_name.string().c_str()),

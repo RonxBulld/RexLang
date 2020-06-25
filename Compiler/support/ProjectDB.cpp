@@ -36,9 +36,9 @@ namespace rexlang {
         gen_random(rnd_str, sizeof(rnd_str) - 1);
         random_string_ = rnd_str;
         std::error_code EC;
-        temp_directory_path_ = std::filesystem::temp_directory_path(EC) / "rex" / random_string_;
+        temp_directory_path_ = (std::filesystem::temp_directory_path(EC) / "rex" / random_string_).string();
         if (!EC) {
-            temp_directory_path_ = std::filesystem::current_path() / "rex_temp" / random_string_;
+            temp_directory_path_ = (std::filesystem::current_path() / "rex_temp" / random_string_).string();
         }
         std::filesystem::remove(temp_directory_path_);
         std::filesystem::create_directories(temp_directory_path_);

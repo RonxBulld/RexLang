@@ -280,12 +280,16 @@ namespace rexlang {
 
     bool IREmit::_EmitImpl_(TranslateUnit *translateUnit) {
 
+        RexDbgMgr.GetOrCreateDICompileUnit(
+                translateUnit->ast_context_->GetFileFromLocate(
+                        translateUnit->location_start_).c_str()
+                        );
         DefineMainEntryAndInitFunc();
 
         // 全局变量
 
         for (auto &global_vari_item : translateUnit->global_variables_) {
-            RexDbgMgr.GetOrCreateDICompileUnit(global_vari_item.second);
+//            RexDbgMgr.GetOrCreateDICompileUnit(global_vari_item.second);
             llvm::GlobalVariable *gvari = Emit(global_vari_item.second);
             assert(gvari);
         }
@@ -294,7 +298,7 @@ namespace rexlang {
 
         for (auto &file_item : translateUnit->source_file_) {
             if (ProgramSetFile *program_set_file = file_item->as<ProgramSetFile>()) {
-                RexDbgMgr.GetOrCreateDICompileUnit(program_set_file);
+//                RexDbgMgr.GetOrCreateDICompileUnit(program_set_file);
                 for (auto &prog_vari_item : program_set_file->program_set_declares_->file_static_variables_) {
                     FileVariableDecl *file_variable_decl = prog_vari_item.second;
                     llvm::GlobalVariable *fvari = Emit(file_variable_decl);
@@ -307,14 +311,14 @@ namespace rexlang {
         // 函数声明
 
         for (auto &functor_decl_item : translateUnit->functor_declares_) {
-            RexDbgMgr.GetOrCreateDICompileUnit(functor_decl_item.second);
+//            RexDbgMgr.GetOrCreateDICompileUnit(functor_decl_item.second);
             llvm::Function *functor_decl = Emit(functor_decl_item.second);
         }
 
         // 函数定义
 
         for (auto &function_def_item : translateUnit->function_decls_) {
-            RexDbgMgr.GetOrCreateDICompileUnit(function_def_item.second);
+//            RexDbgMgr.GetOrCreateDICompileUnit(function_def_item.second);
             this->TheProgramSet = function_def_item.second->parent_node_->as<ProgSetDecl>();
             llvm::Function *function_def = Emit(function_def_item.second);
             this->TheProgramSet = nullptr;

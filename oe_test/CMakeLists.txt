@@ -3,7 +3,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.7.2)
 
 ADD_CUSTOM_TARGET(CTest
         COMMAND ctest
-        DEPENDS REXLang
+        DEPENDS ${COMPILER_EXECUTE_NAME} corelib
         COMMENT Run CTest ...
         )
 
