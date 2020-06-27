@@ -35,32 +35,19 @@ namespace rexlang {
 
 #if defined(MSVC_LINKER_STYLE)
 
-        auto lib_search_dirs_flag = ContainerUtil::Map<std::vector, std::string, std::vector, std::string>(libSearchDirs, [](const std::string &dir){ return "/LIBPATH:\"" + dir + "\""; });
-//        auto lib_search_dirs_flag_str = StringUtil::Join<std::vector>(lib_search_dirs_flag, " ");
-        auto libraries_link_flag = ContainerUtil::Map<std::vector, std::string, std::vector, rexlang::StringRef>(dependenceLibs, [](const rexlang::StringRef &elem){ return "\"" + elem.str() + ".lib\""; });
-//        auto libraries_link_flag_str = StringUtil::Join<std::vector>(libraries_link_flag, " ");
-//        link_cmd = StringUtil::Sprintf(
-//                "%s /link %s %s /OUT:%s",
-//                objectFilename.c_str(),
-//                lib_search_dirs_flag_str.c_str(),
-//                libraries_link_flag_str.c_str(),
-//                targetFilename.c_str()
-//        );
+        auto lib_search_dirs_flag = ContainerUtil::Map<std::vector, std::string, std::vector, std::string>(libSearchDirs, [](const std::string &dir){ return "-L" + dir + ""; });
+        auto libraries_link_flag = ContainerUtil::Map<std::vector, std::string, std::vector, rexlang::StringRef>(dependenceLibs, [](const rexlang::StringRef &elem){ return "-l" + elem.str(); });
         user_level_args.insert(user_level_args.end(), lib_search_dirs_flag.begin(), lib_search_dirs_flag.end());
         user_level_args.insert(user_level_args.end(), objectFilename);
         user_level_args.insert(user_level_args.end(), libraries_link_flag.begin(), libraries_link_flag.end());
         user_level_args.insert(user_level_args.end(), { "-o",       targetFilename });
         user_level_args.insert(user_level_args.end(), { "-target",  target_triple });
-        user_level_args.insert(user_level_args.end(), { "-lstdc++" });
-#   if defined(NO_MSVCRT_DEFAULT)
-//        link_cmd += " /NODEFAULTLIB:MSVCRT";
-#   endif
+        user_level_args.insert(user_level_args.end(), { "-lmsvcrtd" });
+
 #elif defined(GNU_LINKER_STYLE)
 
-        auto lib_search_dirs_flag = ContainerUtil::Map<std::vector, std::string, std::vector, std::string>(libSearchDirs, [](const std::string &dir){ return "-L" + dir; });
-//        auto lib_search_dirs_flag_str = StringUtil::Join<std::vector>(lib_search_dirs_flag, " ");
+        auto lib_search_dirs_flag = ContainerUtil::Map<std::vector, std::string, std::vector, std::string>(libSearchDirs, [](const std::string &dir){ return "-L" + dir + ""; });
         auto libraries_link_flag = ContainerUtil::Map<std::vector, std::string, std::vector, rexlang::StringRef>(dependenceLibs, [](const rexlang::StringRef &elem){ return "-l" + elem.str(); });
-//        auto libraries_link_flag_str = StringUtil::Join<std::vector>(libraries_link_flag, " ");
         user_level_args.insert(user_level_args.end(), lib_search_dirs_flag.begin(), lib_search_dirs_flag.end());
         user_level_args.insert(user_level_args.end(), objectFilename);
         user_level_args.insert(user_level_args.end(), libraries_link_flag.begin(), libraries_link_flag.end());
@@ -146,10 +133,14 @@ namespace rexlang {
             }
         }
 
-        std::string flavor = "ld";
-        ld_program_args.insert(ld_program_args.begin(), flavor);
-        ld_program_args.insert(ld_program_args.begin(), "-flavor");
-
+#if defined(MSVC_LINKER_STYLE)
+        ld_program_args.insert(ld_program_args.begin(), {"-flavor", "link"});
+#elif defined(GNU_LINKER_STYLE)
+        ld_program_args.insert(ld_program_args.begin(), {"-flavor", "ld"});
+#else
+#       error "Unknow what the linker switch style."
+#endif
+		link_args_str = "";
         link_args_str = StringUtil::Join<std::vector, std::string>(ld_program_args, " ");
         std::string link_cmdline = link_exec + " " + link_args_str;
         int link_ret = linker_main(ld_program_args);
@@ -164,7 +155,12 @@ namespace rexlang {
             std::cout << "连接成功" << std::endl;
         } else {
             std::cerr << link_cmdline << std::endl;
+            llvm::SmallString<256> Msg;
+            llvm::raw_svector_ostream OS(Msg);
             std::cerr << "连接失败" << std::endl;
+            Diags.dump();
+            Jobs.Print(OS, "; ", true);
+            llvm::errs() << OS.str() << "\n";
         }
         return link_ret;
     }

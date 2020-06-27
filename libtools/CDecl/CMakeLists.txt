@@ -17,9 +17,9 @@ add_library(CDecl
         pch.cpp
         )
 
-target_link_libraries(CDecl
-        stdc++fs
-        )
+if (NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    target_link_libraries(CDecl stdc++fs)
+endif ()
 
 target_link_libraries(CDecl
         lite_util
@@ -40,6 +40,7 @@ MAP_Clang_COMPONENTS(Clang-Libs
         Format
         Tooling
         ASTMatchers
+        DynamicASTMatchers
         )
 
 target_link_libraries(CDecl ${Clang-Libs})

@@ -143,7 +143,13 @@ static bool canExitEarly() { return StringRef(getenv("LLD_IN_TEST")) != "1"; }
 /// Universal linker main(). This linker emulates the gnu, darwin, or
 /// windows linker based on the argv[0] or -flavor option.
 int linker_main(int argc, const char **argv) {
+#if defined(_WIN32) || defined(_WIN64) || defined(MSVC)
+	int fake_argc = 0;
+	const char **fake_argv = argv;
+	InitLLVM x(fake_argc, fake_argv);
+#else
     InitLLVM x(argc, argv);
+#endif
 
     std::vector<const char *> args(argv, argv + argc);
     switch (parseFlavor(args)) {

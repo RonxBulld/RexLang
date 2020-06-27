@@ -41,7 +41,7 @@ IF (${REX_USE_EMBED_LINKER} STREQUAL "ON")
     INCLUDE(ref_clang_pkg)
 
     TARGET_LINK_DIRECTORIES(Link PUBLIC ${LLVM_LIBRARY_DIRS})
-    MAP_LLVM_COMPONENTS(LLVM-Libs ${LLVM_ALL_TARGETS})
+    MAP_LLVM_COMPONENTS(LLVM-Libs ${LLVM_TARGETS_TO_BUILD})
     MAP_Clang_COMPONENTS(Clang-Libs Basic CodeGen Driver Frontend FrontendTool Serialization)
     MAP_lld_COMPONENTS(lld-Libs COFF Common Driver ELF MachO MinGW ReaderWriter Wasm YAML Core)
 
@@ -55,7 +55,6 @@ IF (${REX_USE_EMBED_LINKER} STREQUAL "ON")
             LLVMDebugInfoPDB
 
             ${LLVM-Libs}
-            pthread
             )
 
 ENDIF ()
