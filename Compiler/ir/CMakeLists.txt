@@ -17,5 +17,4 @@ ADD_LIBRARY(IR
         LLVMIR/DebugInfoMgr.h
         )
 
-MAP_LLVM_COMPONENTS(LLVM-Libs support core irreader X86)
-target_link_libraries(IR ${LLVM-Libs})
+target_link_libraries(IR LLVM)

@@ -25,24 +25,6 @@ target_link_libraries(CDecl
         lite_util
         )
 
-MAP_Clang_COMPONENTS(Clang-Libs
-        Basic
-        Index
-        Lex
-        Parse
-        Sema
-        AST
-        Edit
-        Frontend
-        Serialization
-        Analysis
-        Driver
-        Format
-        Tooling
-        ASTMatchers
-        DynamicASTMatchers
-        )
-
-target_link_libraries(CDecl ${Clang-Libs})
+target_link_libraries(CDecl clang clang-cpp LLVM)
 
 #cotire(CDecl)

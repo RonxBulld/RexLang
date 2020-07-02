@@ -25,6 +25,8 @@
 #include "../support/ProgramDB.h"
 #include "lld-driver.h"
 
+#define TSTR(t) #t
+
 namespace rexlang {
     Linker::Linker() : libSearchDirs(program_db.GetLibraryPath()) {
     }
@@ -84,13 +86,12 @@ namespace rexlang {
 
         // 构建用户级参数列表
 
-        std::string link_exec = LINKER;
+        std::filesystem::path link_exec = program_db.GetProgramPath();
+        link_exec = link_exec.parent_path() / LINKER;
         std::vector<std::string> user_level_args = BuildUserLevelLinkCommandArgs();
         std::string link_args_str = StringUtil::Join<std::vector, std::string>(user_level_args, " ");
 
         // 执行连接
-
-#if defined(REX_USE_EMBED_LINKER)
 
         // 构建工具级参数列表
 
@@ -133,21 +134,17 @@ namespace rexlang {
             }
         }
 
-#if defined(MSVC_LINKER_STYLE)
+#   if defined(MSVC_LINKER_STYLE)
         ld_program_args.insert(ld_program_args.begin(), {"-flavor", "link"});
-#elif defined(GNU_LINKER_STYLE)
+#   elif defined(GNU_LINKER_STYLE)
         ld_program_args.insert(ld_program_args.begin(), {"-flavor", "ld"});
-#else
+#   else
 #       error "Unknow what the linker switch style."
-#endif
+#   endif
 		link_args_str = "";
         link_args_str = StringUtil::Join<std::vector, std::string>(ld_program_args, " ");
-        std::string link_cmdline = link_exec + " " + link_args_str;
-        int link_ret = linker_main(ld_program_args);
-#else
-        std::string link_cmdline = link_exec + " " + link_args_str;
+        std::string link_cmdline = link_exec.string() + " " + link_args_str;
         int link_ret = system(link_cmdline.c_str());
-#endif
 
         if (link_ret == 0) {
 //            std::cout << link_cmdline << std::endl;

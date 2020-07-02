@@ -1,24 +1,12 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.7.2)
 
-PROJECT(Link CXX)
+#################################################
+# 外部连接器工具
+#################################################
 
-OPTION(REX_USE_EMBED_LINKER "Use internal embeded linker instead of outside tools." ON)
-
+PROJECT(Linker CXX)
 INCLUDE(ref_llvm_pkg)
-
-IF (${REX_USE_EMBED_LINKER} STREQUAL "ON")
-    MESSAGE(STATUS "Using embeded linker.")
-    ADD_DEFINITIONS(-DLINKER="lld")
-    ADD_DEFINITIONS(-DREX_USE_EMBED_LINKER)
-ELSE ()
-    FIND_PROGRAM(LINKER NAMES clang++ clang++-9 clang++-*)
-    IF ("${LINKER}" STREQUAL "LINKER-NOTFOUND")
-        MESSAGE(FATAL_ERROR "Cannot found linker.")
-    ELSE ()
-        MESSAGE(STATUS "Using ${LINKER} as linker.")
-    ENDIF ()
-    ADD_DEFINITIONS(-DLINKER="${LINKER}")
-ENDIF ()
+INCLUDE(ref_clang_pkg)
 
 IF (MSVC)
     ADD_DEFINITIONS(-DMSVC_LINKER_STYLE)
@@ -28,33 +16,41 @@ ELSE()
     MESSAGE(FATAL_ERROR "Unknow system.")
 ENDIF()
 
-ADD_LIBRARY(Link
-        Linker.cpp
-        Linker.h
+ADD_EXECUTABLE(Linker
         lld-driver.cpp
         lld-driver.h
         )
 
-target_link_libraries(Link lite_util Support)
+TARGET_LINK_DIRECTORIES(Linker PUBLIC ${LLVM_LIBRARY_DIRS})
 
-IF (${REX_USE_EMBED_LINKER} STREQUAL "ON")
-    INCLUDE(ref_clang_pkg)
+TARGET_LINK_LIBRARIES(Linker
+        PRIVATE
+        lldCOFF
+        lldDriver
+        lldELF
+        lldMinGW
+        lldWasm
+        lldReaderWriter
+        lldMachO
+        lldYAML
+        lldCommon
+        lldCore
 
-    TARGET_LINK_DIRECTORIES(Link PUBLIC ${LLVM_LIBRARY_DIRS})
-    MAP_LLVM_COMPONENTS(LLVM-Libs ${LLVM_TARGETS_TO_BUILD})
-    MAP_Clang_COMPONENTS(Clang-Libs Basic CodeGen Driver Frontend FrontendTool Serialization)
-    MAP_lld_COMPONENTS(lld-Libs COFF Common Driver ELF MachO MinGW ReaderWriter Wasm YAML Core)
+        clang
+        LLVM
 
-    target_link_libraries(Link
-            ${Clang-Libs}
-            ${lld-Libs}
+        pthread
+        )
 
-            LLVMLTO
-            LLVMLibDriver
-            LLVMWindowsManifest
-            LLVMDebugInfoPDB
+#################################################
+# 外部连接器调用接口
+#################################################
 
-            ${LLVM-Libs}
-            )
-
-ENDIF ()
+PROJECT(LinkerAPI CXX)
+ADD_DEFINITIONS(-DLINKER="Linker")
+ADD_LIBRARY(LinkerAPI
+        Linker.h
+        Linker.cpp
+        )
+TARGET_LINK_LIBRARIES(LinkerAPI lite_util Support)
+TARGET_LINK_LIBRARIES(LinkerAPI clang clang-cpp LLVM)

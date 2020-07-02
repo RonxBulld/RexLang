@@ -14,5 +14,4 @@ ADD_LIBRARY(CodeGen
         ${CodeGen-Source}
         )
 
-MAP_LLVM_COMPONENTS(LLVM-Libs bitwriter)
-target_link_libraries(CodeGen ${LLVM-Libs})
+target_link_libraries(CodeGen LLVM)

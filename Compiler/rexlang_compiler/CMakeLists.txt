@@ -80,7 +80,7 @@ else()
 endif()
 
 foreach(src_file ${REXCompilerParse-Source})
-    set_source_files_properties(
+    SET_SOURCE_FILES_PROPERTIES(
             ${src_file}
             PROPERTIES
             COMPILE_FLAGS "${COMPILE_FLAGS} ${flags_1}"

@@ -17,8 +17,6 @@ IF("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
     ADD_DEFINITIONS(-DWIN_STYLE_EXEC)
 ENDIF()
 
-SET(CMAKE_VERBOSE_MAKEFILE ON)
-
 ADD_EXECUTABLE(${COMPILER_EXECUTE_NAME}
         compile_driver.cpp
         compile_driver.h
@@ -28,8 +26,8 @@ ADD_EXECUTABLE(${COMPILER_EXECUTE_NAME}
 TARGET_LINK_LIBRARIES(${COMPILER_EXECUTE_NAME}
         REXCompilerParse
         antlr4-runtime
-        Link
         IR
+        LinkerAPI
         CodeGen
         lite_util
         Support

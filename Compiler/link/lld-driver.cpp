@@ -25,16 +25,16 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "lld/Common/Driver.h"
-#include "lld/Common/Memory.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/ADT/SmallVector.h"
-#include "llvm/ADT/StringSwitch.h"
-#include "llvm/ADT/Triple.h"
-#include "llvm/ADT/Twine.h"
-#include "llvm/Support/CommandLine.h"
-#include "llvm/Support/InitLLVM.h"
-#include "llvm/Support/Path.h"
+#include <lld/Common/Driver.h>
+#include <lld/Common/Memory.h>
+#include <llvm/ADT/STLExtras.h>
+#include <llvm/ADT/SmallVector.h>
+#include <llvm/ADT/StringSwitch.h>
+#include <llvm/ADT/Triple.h>
+#include <llvm/ADT/Twine.h>
+#include <llvm/Support/CommandLine.h>
+#include <llvm/Support/InitLLVM.h>
+#include <llvm/Support/Path.h>
 #include <cstdlib>
 
 using namespace lld;
@@ -142,7 +142,7 @@ static bool canExitEarly() { return StringRef(getenv("LLD_IN_TEST")) != "1"; }
 
 /// Universal linker main(). This linker emulates the gnu, darwin, or
 /// windows linker based on the argv[0] or -flavor option.
-int linker_main(int argc, const char **argv) {
+int main(int argc, const char **argv) {
 #if defined(_WIN32) || defined(_WIN64) || defined(MSVC)
 	int fake_argc = 0;
 	const char **fake_argv = argv;
@@ -156,10 +156,10 @@ int linker_main(int argc, const char **argv) {
         case Gnu:
             if (isPETarget(args))
                                         return !mingw::link  (args);
-            else                        return !elf::link    (args, /*canExitEarly()*/ false);
-        case WinLink:                   return !coff::link   (args, /*canExitEarly()*/ false);
-        case Darwin:                    return !mach_o::link (args, /*canExitEarly()*/ false);
-        case Wasm:                      return !wasm::link   (args, /*canExitEarly()*/ false);
+            else                        return !elf::link    (args, canExitEarly());
+        case WinLink:                   return !coff::link   (args, canExitEarly());
+        case Darwin:                    return !mach_o::link (args, canExitEarly());
+        case Wasm:                      return !wasm::link   (args, canExitEarly());
         default:
             return die("lld is a generic driver.\n"
                 "Invoke ld.lld (Unix), ld64.lld (macOS), lld-link (Windows), wasm-ld"
@@ -167,17 +167,17 @@ int linker_main(int argc, const char **argv) {
     }
 }
 
-namespace rexlang {
-    int linker_main(std::vector<std::string> linker_args) {
-        linker_args.insert(linker_args.begin(), "lld");
-        const char **argv = (const char **) malloc(sizeof(void *) * (linker_args.size() + 1));
-        int argc = linker_args.size();
-        for (size_t idx = 0; idx < argc; idx++) {
-            argv[idx] = linker_args[idx].c_str();
-        }
-        return ::linker_main(argc, argv);
-    }
-}
+//namespace rexlang {
+//    int linker_main(std::vector<std::string> linker_args) {
+//        linker_args.insert(linker_args.begin(), "lld");
+//        const char **argv = (const char **) malloc(sizeof(void *) * (linker_args.size() + 1));
+//        int argc = linker_args.size();
+//        for (size_t idx = 0; idx < argc; idx++) {
+//            argv[idx] = linker_args[idx].c_str();
+//        }
+//        return ::linker_main(argc, argv);
+//    }
+//}
 
 /*
  * 连接器命令行示意：
