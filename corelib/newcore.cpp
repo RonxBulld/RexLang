@@ -114,3 +114,10 @@ void DebugTraceOut(int n, SimpleRTArguInfo *arguments) {
     printf("%s\n", ss.str().c_str());
     return;
 }
+
+void Assert(bool condition) {
+    printf("检查结果为：");
+    if (condition) printf("真"); else printf("假");
+    printf("\n");
+    assert(condition);
+}

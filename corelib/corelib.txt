@@ -5,3 +5,6 @@
 
 .LIB命令 调试输出, , "corelib", "DebugTraceOut#", , DebugTraceOut
     .参数 ..., 通用型, , 欲输出的值
+
+.LIB命令 检查, , "corelib", "Assert", , Assert
+    .参数 条件, 逻辑型, , 检查条件是否为真，为假则暂停程序

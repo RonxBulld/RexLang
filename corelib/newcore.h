@@ -28,6 +28,12 @@ void DebugTraceOutInt(long long llval);
   */
 void DebugTraceOut(int n, SimpleRTArguInfo *arguments);
 
+/**
+ * 检查断言
+ * @param condition 断言条件
+ */
+void Assert(bool condition);
+
 };
 
 #endif //REXLANG_NEWCORE_H
