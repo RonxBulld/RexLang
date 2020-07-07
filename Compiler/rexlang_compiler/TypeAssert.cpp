@@ -258,4 +258,19 @@ namespace rexlang {
     bool TypeAssert::ExpressionIsLValue(Expression *expression) {
         return expression->is<HierarchyIdentifier>();
     }
+
+    bool TypeAssert::IsCompareOperator(_OperatorExpression::OperatorType operatorType) {
+        switch (operatorType) {
+            case _OperatorExpression::OperatorType::kOptEqual:
+            case _OperatorExpression::OperatorType::kOptNotEqual:
+            case _OperatorExpression::OperatorType::kOptGreatThan:
+            case _OperatorExpression::OperatorType::kOptLessThan:
+            case _OperatorExpression::OperatorType::kOptGreatEqual:
+            case _OperatorExpression::OperatorType::kOptLessEqual:
+            case _OperatorExpression::OperatorType::kOptLikeEqual:
+                return true;
+            default:
+                return false;
+        }
+    }
 }

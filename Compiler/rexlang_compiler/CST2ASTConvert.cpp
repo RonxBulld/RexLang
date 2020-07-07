@@ -546,7 +546,7 @@ namespace rexlang {
             case rexLangParser::K_LIKE_EQU_OPT:   binary_expression->operator_type_ = BinaryExpression::OperatorType::kOptLikeEqual;  break;
             case rexLangParser::K_AND_OPT:        binary_expression->operator_type_ = BinaryExpression::OperatorType::kOptAnd;        break;
             case rexLangParser::K_OR_OPT:         binary_expression->operator_type_ = BinaryExpression::OperatorType::kOptOr;         break;
-            default: assert(false);                 binary_expression->operator_type_ = BinaryExpression::OperatorType::kOptNone;       break;
+            default: assert(false);               binary_expression->operator_type_ = BinaryExpression::OperatorType::kOptNone;       break;
         }
         binary_expression->lhs_ = GetFromCtxIfExist<ExpressionPtr>(context->lval);
         binary_expression->rhs_ = GetFromCtxIfExist<ExpressionPtr>(context->rval);

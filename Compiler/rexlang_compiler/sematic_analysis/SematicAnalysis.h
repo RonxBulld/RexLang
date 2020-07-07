@@ -141,10 +141,10 @@ namespace rexlang {
         bool CheckIfArgumentMatch(std::vector<ExpressionPtr> &arguments, const std::vector<ParameterDeclPtr> &parameters);
 
         /*
-         * 获取二元表达式运算结果的类型
+         * 获取二元表达式提升后的类型
          * 返回的类型是提升后的类型
          */
-        TypeDecl *GetBinaryOperationType(TypeDecl *lhsType, TypeDecl *rhsType, _OperatorExpression::OperatorType operatorType);
+        TypeDecl *GetBinaryOperationUpgradedType(TypeDecl *lhsType, TypeDecl *rhsType, _OperatorExpression::OperatorType operatorType);
 
         /**
          * @brief 视情况创建隐式转换

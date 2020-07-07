@@ -150,7 +150,7 @@ namespace rexlang {
         } else if (const ArrayDecl *array_decl = typeDecl->as<ArrayDecl>()) {
             do {
                 typeDecl = array_decl->base_type_;
-            } while (array_decl = typeDecl->as<ArrayDecl>());
+            } while ((array_decl = typeDecl->as<ArrayDecl>()));
             return typeDecl;
 
         } else {

@@ -735,23 +735,22 @@ namespace rexlang {
 
             // 根据运算类型返回类型
 
-            TypeDecl *result_type = this->GetBinaryOperationType(lhs_operand_type, rhs_operand_type, binary_expression->operator_type_);
-            ErrOr<Expression*> implicit_conv_lhs = this->MakeImplicitConvertIfNeccessary(result_type, binary_expression->lhs_);
-            ErrOr<Expression*> implicit_conv_rhs = this->MakeImplicitConvertIfNeccessary(result_type, binary_expression->rhs_);
+            TypeDecl *upgraded_type = this->GetBinaryOperationUpgradedType(lhs_operand_type, rhs_operand_type, binary_expression->operator_type_);
+            assert(upgraded_type);
+
+            ErrOr<Expression*> implicit_conv_lhs = this->MakeImplicitConvertIfNeccessary(upgraded_type, binary_expression->lhs_);
+            ErrOr<Expression*> implicit_conv_rhs = this->MakeImplicitConvertIfNeccessary(upgraded_type, binary_expression->rhs_);
             if (implicit_conv_lhs.NoError()) { binary_expression->lhs_ = implicit_conv_lhs.Value(); }
             if (implicit_conv_rhs.NoError()) { binary_expression->rhs_ = implicit_conv_rhs.Value(); }
 
             if (binary_expression->operator_type_ == _OperatorExpression::OperatorType::kOptDiv) {
-
                 return this->QueryBuiltinTypeWithEnum(this->translate_unit_, BuiltinTypeDecl::EnumOfBuiltinType::kBTypeFloat);
-
             } else if (binary_expression->operator_type_ == _OperatorExpression::OperatorType::kOptFullDiv) {
-
                 return this->QueryBuiltinTypeWithEnum(this->translate_unit_, BuiltinTypeDecl::EnumOfBuiltinType::kBTypeInteger);
-
+            } else if (TypeAssert::IsCompareOperator(binary_expression->operator_type_)) {
+                return this->QueryBuiltinTypeWithEnum(this->translate_unit_, BuiltinTypeDecl::EnumOfBuiltinType::kBTypeBool);
             } else {
-
-                return result_type;
+                return upgraded_type;
             }
 
         } else if (FuncAddrExpression * func_addr_expression = expression->as<FuncAddrExpression>()) {
@@ -855,7 +854,7 @@ namespace rexlang {
         }
     }
 
-    TypeDecl *SematicAnalysis::GetBinaryOperationType(TypeDecl *lhsType, TypeDecl *rhsType, _OperatorExpression::OperatorType operatorType) {
+    TypeDecl *SematicAnalysis::GetBinaryOperationUpgradedType(TypeDecl *lhsType, TypeDecl *rhsType, _OperatorExpression::OperatorType operatorType) {
         // 首先保证可进行二元计算
         bool binary_opt_valid = TypeAssert::IsBinaryOperationValid(lhsType, rhsType, operatorType);
         if (binary_opt_valid == false) {
@@ -888,16 +887,20 @@ namespace rexlang {
                                 return lhs_builtin;
 
                             } else if (lhs_builtin->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeString) {
+
                                 return lhs_builtin;
 
                             } else if (lhs_builtin->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDataSet) {
+
                                 return lhs_builtin;
 
                             } else if (lhs_builtin->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDatetime) {
+
                                 assert(false);
                                 return nullptr;
 
                             } else if (lhs_builtin->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeFuncPtr) {
+
                                 assert(false);
                                 return nullptr;
 

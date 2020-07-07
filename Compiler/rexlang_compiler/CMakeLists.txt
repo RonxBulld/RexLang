@@ -27,12 +27,14 @@ foreach(src_file ${antlr4-GENERATED_SRC})
 endforeach(src_file ${antlr4-GENERATED_SRC})
 
 add_custom_target(GenerateParser DEPENDS ${antlr4-GENERATED_SRC})
-add_custom_command(OUTPUT ${antlr4-GENERATED_SRC}
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_SOURCE_DIR}/gen/
-        COMMAND antlr4 -o ${PROJECT_SOURCE_DIR}/gen -lib ${PROJECT_SOURCE_DIR}/gen -encoding utf-8 -long-messages -listener -visitor -package rexlang -Dlanguage=Cpp ${PROJECT_SOURCE_DIR}/rexLang.g4
-        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
-        DEPENDS ${PROJECT_SOURCE_DIR}/rexLang.g4
-        )
+IF(EXISTS ${PROJECT_SOURCE_DIR}/rexLang.g4)
+    add_custom_command(OUTPUT ${antlr4-GENERATED_SRC}
+            COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_SOURCE_DIR}/gen/
+            COMMAND antlr4 -o ${PROJECT_SOURCE_DIR}/gen -lib ${PROJECT_SOURCE_DIR}/gen -encoding utf-8 -long-messages -listener -visitor -package rexlang -Dlanguage=Cpp ${PROJECT_SOURCE_DIR}/rexLang.g4
+            WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
+            DEPENDS ${PROJECT_SOURCE_DIR}/rexLang.g4
+            )
+ENDIF()
 
 SET(REXCompilerParse-Source
         ${antlr4-GENERATED_SRC}
