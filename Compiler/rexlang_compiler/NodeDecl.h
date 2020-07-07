@@ -237,7 +237,7 @@ namespace rexlang {
      * @brief 资源文件基类
      */
     struct SourceFile : public Node {
-        static const NodeType node_type = NodeType::kNTySourceFile;
+        static const NodeType GetClassId() { return NodeType::kNTySourceFile; }
         enum FileType {kProgramSetFile, kGlobalVariableFile, kDataStructureFile, kDllDefineFile} file_type_;
     };
 
@@ -245,7 +245,7 @@ namespace rexlang {
      * @brief 函数声明文件
      */
     struct ProgramSetFile : public SourceFile {
-        static const NodeType node_type = NodeType::kNTyProgramSetFile;
+        static const NodeType GetClassId() { return NodeType::kNTyProgramSetFile; }
         std::vector<TString> libraries_;
         ProgSetDeclPtr program_set_declares_ = nullptr;
     };
@@ -254,7 +254,7 @@ namespace rexlang {
      * @brief 全局变量声明文件
      */
     struct GlobalVariableFile : public SourceFile {
-        static const NodeType node_type = NodeType::kNTyGlobalVariableFile;
+        static const NodeType GetClassId() { return NodeType::kNTyGlobalVariableFile; }
         ordered_map<StringRef, GlobalVariableDeclPtr> global_variable_map_;
     };
 
@@ -262,7 +262,7 @@ namespace rexlang {
      * @brief 数据结构定义文件
      */
     struct DataStructureFile : public SourceFile {
-        static const NodeType node_type = NodeType::kNTyDataStructureFile;
+        static const NodeType GetClassId() { return NodeType::kNTyDataStructureFile; }
         ordered_map<StringRef, StructureDeclPtr> structure_decl_map_;
     };
 
@@ -270,7 +270,7 @@ namespace rexlang {
      * @brief DLL函数接口声明文件
      */
     struct DllDefineFile : public SourceFile {
-        static const NodeType node_type = NodeType::kNTyDllDefineFile;
+        static const NodeType GetClassId() { return NodeType::kNTyDllDefineFile; }
         ordered_map<StringRef, APICommandDeclPtr> dll_declares_;
     };
 
@@ -278,14 +278,14 @@ namespace rexlang {
      * @brief 定义基类
      */
     struct Decl : public Node {
-        static const NodeType node_type = NodeType::kNTyDecl;
+        static const NodeType GetClassId() { return NodeType::kNTyDecl; }
     };
 
     /*
      * 带有名称和注释的命名定义基本结构
      */
     struct TagDecl : public Decl {
-        static const NodeType node_type = NodeType::kNTyTagDecl;
+        static const NodeType GetClassId() { return NodeType::kNTyTagDecl; }
         // 定义名称
         TString name_;
         // 注释
@@ -296,7 +296,7 @@ namespace rexlang {
      * 描述成员变量、全局变量、局部变量、参数等带有类型的基本结构
      */
     struct BaseVariDecl : public TagDecl {
-        static const NodeType node_type = NodeType::kNTyBaseVariDecl;
+        static const NodeType GetClassId() { return NodeType::kNTyBaseVariDecl; }
         // 类型名称
         TString type_name_;
 
@@ -310,7 +310,7 @@ namespace rexlang {
      * 描述参数
      */
     struct ParameterDecl : public BaseVariDecl {
-        static const NodeType node_type = NodeType::kNTyParameterDecl;
+        static const NodeType GetClassId() { return NodeType::kNTyParameterDecl; }
         // 可选参数为：参考、可空、数组
         std::vector<TString> attributes_;
 
@@ -342,7 +342,7 @@ namespace rexlang {
      * 描述成员变量、全局变量、局部变量、文件变量
      */
     struct VariableDecl : public BaseVariDecl {
-        static const NodeType node_type = NodeType::kNTyVariableDecl;
+        static const NodeType GetClassId() { return NodeType::kNTyVariableDecl; }
 
         // 变量属性
         std::vector<TString> attributes_;
@@ -355,7 +355,7 @@ namespace rexlang {
      * 描述全局变量
      */
     struct GlobalVariableDecl : public VariableDecl {
-        static const NodeType node_type = NodeType::kNTyGlobalVariableDecl;
+        static const NodeType GetClassId() { return NodeType::kNTyGlobalVariableDecl; }
 
         // 访问级别的文本描述
         TString access_;
@@ -372,7 +372,7 @@ namespace rexlang {
      * 描述成员变量
      */
     struct MemberVariableDecl : public VariableDecl {
-        static const NodeType node_type = NodeType::kNTyMemberVariableDecl;
+        static const NodeType GetClassId() { return NodeType::kNTyMemberVariableDecl; }
 
         // === 下面是经过语义分析后的数据 ===
 
@@ -386,14 +386,14 @@ namespace rexlang {
      * 描述文件变量
      */
     struct FileVariableDecl : public VariableDecl {
-        static const NodeType node_type = NodeType::kNTyFileVariableDecl;
+        static const NodeType GetClassId() { return NodeType::kNTyFileVariableDecl; }
     };
 
     /*
      * 描述局部变量
      */
     struct LocalVariableDecl : public VariableDecl {
-        static const NodeType node_type = NodeType::kNTyLocalVariableDecl;
+        static const NodeType GetClassId() { return NodeType::kNTyLocalVariableDecl; }
 
         // === 下面是经过语义分析后的数据 ===
 
@@ -407,19 +407,19 @@ namespace rexlang {
      * 类型定义分支
      */
     struct TypeDecl : public TagDecl {
-        static const NodeType node_type = NodeType::kNTyTypeDecl;
+        static const NodeType GetClassId() { return NodeType::kNTyTypeDecl; }
     };
 
     /*
      * 内置类型定义
      */
     struct BuiltinTypeDecl : public TypeDecl {
-        static const NodeType node_type = NodeType::kNTyBuiltinTypeDecl;
+        static const NodeType GetClassId() { return NodeType::kNTyBuiltinTypeDecl; }
         // 内置类型枚举
 		enum class EnumOfBuiltinType {
-			kBTypeVoid,         // 空
-			kBTTypeCommon,      // 通用型
-			kBTypeChar,         // 字节型
+			kBTypeVoid,        // 空
+			kBTTypeCommon,     // 通用型
+			kBTypeChar,        // 字节型
 			kBTypeInteger,     // 整数型
 			kBTypeFloat,       // 小数型
 			kBTypeBool,        // 逻辑型
@@ -439,7 +439,7 @@ namespace rexlang {
      * 数据结构定义
      */
     struct StructureDecl : public TypeDecl {
-        static const NodeType node_type = NodeType::kNTyStructureDecl;
+        static const NodeType GetClassId() { return NodeType::kNTyStructureDecl; }
         TString access_;
         ordered_map<StringRef, MemberVariableDeclPtr> members_;
     };
@@ -448,7 +448,7 @@ namespace rexlang {
      * 数组类型
      */
     struct ArrayDecl : public TypeDecl {
-        static const NodeType node_type = NodeType::kNTyArrayDecl;
+        static const NodeType GetClassId() { return NodeType::kNTyArrayDecl; }
         TString base_type_str;
 
         // === 下面是经过语义分析后的数据 ===
@@ -463,7 +463,7 @@ namespace rexlang {
      * 包含子函数定义和DLL函数定义
      */
     struct FunctorDecl : public TypeDecl {
-        static const NodeType node_type = NodeType::kNTyFunctorDecl;
+        static const NodeType GetClassId() { return NodeType::kNTyFunctorDecl; }
         // 返回值类型名
         TString return_type_name_;
         // 参数列表
@@ -479,7 +479,7 @@ namespace rexlang {
      * @brief 子程序/函数定义
      */
     struct FunctionDecl : public FunctorDecl {
-        static const NodeType node_type = NodeType::kNTyFunctionDecl;
+        static const NodeType GetClassId() { return NodeType::kNTyFunctionDecl; }
         // 访问级别
         TString access_;
         // 局部变量列表
@@ -497,7 +497,7 @@ namespace rexlang {
 //     * @brief 内建函数声明
 //     */
 //    struct BuiltinFunctionDecl : public FunctorDecl {
-//        static const NodeType node_type = NodeType::kNTyBuiltinFunctionDecl;
+//        static const NodeType GetClassId() { return NodeType::kNTyBuiltinFunctionDecl; }
 //    };
 
     /*!
@@ -532,7 +532,7 @@ namespace rexlang {
      * @brief DLL函数声明
      */
     struct APICommandDecl : public FunctorDecl {
-        static const NodeType node_type = NodeType::kNTyDllCommandDecl;
+        static const NodeType GetClassId() { return NodeType::kNTyDllCommandDecl; }
         // API库文件名
         TString library_file_;
         // API库类型
@@ -549,7 +549,7 @@ namespace rexlang {
      * @brief 程序集定义
      */
     struct ProgSetDecl : public TagDecl {
-        static const NodeType node_type = NodeType::kNTyProgSetDecl;
+        static const NodeType GetClassId() { return NodeType::kNTyProgSetDecl; }
         TString base_;
         TString access_;
         ordered_map<StringRef, FileVariableDeclPtr> file_static_variables_;
@@ -560,14 +560,14 @@ namespace rexlang {
      * @brief 语句基类
      */
     struct Statement : public Node {
-        static const NodeType node_type = NodeType::kNTyStatement;
+        static const NodeType GetClassId() { return NodeType::kNTyStatement; }
     };
 
     /**
      * @brief 赋值语句
      */
     struct AssignStmt : public Statement {
-        static const NodeType node_type = NodeType::kNTyAssignStmt;
+        static const NodeType GetClassId() { return NodeType::kNTyAssignStmt; }
         HierarchyIdentifierPtr lhs_ = nullptr;
         ExpressionPtr rhs_ = nullptr;
     };
@@ -576,14 +576,14 @@ namespace rexlang {
      * @brief 控制语句
      */
     struct ControlStmt : public Statement {
-        static const NodeType node_type = NodeType::kNTyControlStmt;
+        static const NodeType GetClassId() { return NodeType::kNTyControlStmt; }
     };
 
     /**
      * @brief 循环控制语句
      */
     struct LoopControlStmt : public ControlStmt {
-        static const NodeType node_type = NodeType::kNTyLoopControlStmt;
+        static const NodeType GetClassId() { return NodeType::kNTyLoopControlStmt; }
 
         // === 下面是经过语义分析后的数据 ===
 
@@ -595,21 +595,21 @@ namespace rexlang {
      * @brief 到循环尾
      */
     struct ContinueStmt : public LoopControlStmt {
-        static const NodeType node_type = NodeType::kNTyContinueStmt;
+        static const NodeType GetClassId() { return NodeType::kNTyContinueStmt; }
     };
 
     /**
      * @brief 跳出循环
      */
     struct BreakStmt : public LoopControlStmt {
-        static const NodeType node_type = NodeType::kNTyBreakStmt;
+        static const NodeType GetClassId() { return NodeType::kNTyBreakStmt; }
     };
 
     /**
      * @brief 返回
      */
     struct ReturnStmt : public ControlStmt {
-        static const NodeType node_type = NodeType::kNTyReturnStmt;
+        static const NodeType GetClassId() { return NodeType::kNTyReturnStmt; }
         ExpressionPtr return_value_ = nullptr;
 
         // === 下面是经过语义分析后的数据 ===
@@ -620,7 +620,7 @@ namespace rexlang {
      * @brief 结束
      */
     struct ExitStmt : public ControlStmt {
-        static const NodeType node_type = NodeType::kNTyExitStmt;
+        static const NodeType GetClassId() { return NodeType::kNTyExitStmt; }
     };
 
     /**
@@ -628,7 +628,7 @@ namespace rexlang {
      * 如果、如果真、判断
      */
     struct IfStmt : public Statement {
-        static const NodeType node_type = NodeType::kNTyIfStmt;
+        static const NodeType GetClassId() { return NodeType::kNTyIfStmt; }
         // 选择分支，每个pair第一个元素为测试表达式，第二个元素为相应的语句块
         std::vector<std::pair<ExpressionPtr, StatementPtr>> switches_;
         // 默认分支
@@ -646,7 +646,7 @@ namespace rexlang {
      * @brief 描述先判断后执行的While-Loop结构
      */
     struct WhileStmt : public LoopStatement {
-        static const NodeType node_type = NodeType::kNTyWhileStmt;
+        static const NodeType GetClassId() { return NodeType::kNTyWhileStmt; }
         ExpressionPtr condition_ = nullptr;
     };
 
@@ -654,7 +654,7 @@ namespace rexlang {
      * @brief 描述计次循环的范围迭代循环结构
      */
     struct RangeForStmt : public LoopStatement {
-        static const NodeType node_type = NodeType::kNTyRangeForStmt;
+        static const NodeType GetClassId() { return NodeType::kNTyRangeForStmt; }
         ExpressionPtr range_size_ = nullptr;
         HierarchyIdentifierPtr loop_vari_ = nullptr;
 
@@ -666,7 +666,7 @@ namespace rexlang {
      * @brief 描述计步循环的范围迭代循环结构
      */
     struct ForStmt : public LoopStatement {
-        static const NodeType node_type = NodeType::kNTyForStmt;
+        static const NodeType GetClassId() { return NodeType::kNTyForStmt; }
         ExpressionPtr start_value_ = nullptr;
         ExpressionPtr stop_value_ = nullptr;
         ExpressionPtr step_value_ = nullptr;
@@ -680,7 +680,7 @@ namespace rexlang {
      * @brief 描述先执行后判断的Do-While循环结构
      */
     struct DoWhileStmt : public LoopStatement {
-        static const NodeType node_type = NodeType::kNTyDoWhileStmt;
+        static const NodeType GetClassId() { return NodeType::kNTyDoWhileStmt; }
         ExpressionPtr conditon_ = nullptr;
     };
 
@@ -688,7 +688,7 @@ namespace rexlang {
      * @brief 语句块
      */
     struct StatementBlock : public Statement {
-        static const NodeType node_type = NodeType::kNTyStatementBlock;
+        static const NodeType GetClassId() { return NodeType::kNTyStatementBlock; }
         std::vector<StatementPtr> statements_;
     };
 
@@ -697,7 +697,7 @@ namespace rexlang {
      * 在这里，表达式被视作一种特殊的语句。
      */
     struct Expression : public Statement {
-        static const NodeType node_type = NodeType::kNTyExpression;
+        static const NodeType GetClassId() { return NodeType::kNTyExpression; }
 
         // === 下面是经过语义分析后的数据 ===
 
@@ -716,7 +716,7 @@ namespace rexlang {
      * 该节点用于表示通过英文句点`.'连接的多层引用结构
      */
     struct HierarchyIdentifier : public Expression {
-        static const NodeType node_type = NodeType::kNTyHierarchyIdentifier;
+        static const NodeType GetClassId() { return NodeType::kNTyHierarchyIdentifier; }
         std::vector<NameComponentPtr> name_components_;
 
         // === 下面是经过语义分析后的数据 ===
@@ -731,7 +731,7 @@ namespace rexlang {
      * @brief 单个命名组件
      */
     struct NameComponent : public Expression {
-        static const NodeType node_type = NodeType::kNTyNameComponent;
+        static const NodeType GetClassId() { return NodeType::kNTyNameComponent; }
 
         IdentifierUsage identifier_usage_ = IdentifierUsage::kUnknown;
 
@@ -744,7 +744,7 @@ namespace rexlang {
      * @brief 普通名称组件
      */
     struct Identifier : public NameComponent {
-        static const NodeType node_type = NodeType::kNTyIdentifier;
+        static const NodeType GetClassId() { return NodeType::kNTyIdentifier; }
         // 引用名
         TString name_;
 
@@ -758,7 +758,7 @@ namespace rexlang {
      * @brief 数组引用组件
      */
     struct ArrayIndex : public NameComponent {
-        static const NodeType node_type = NodeType::kNTyArrayIndex;
+        static const NodeType GetClassId() { return NodeType::kNTyArrayIndex; }
         // 索引对象
         NameComponentPtr base_ = nullptr;
         // 索引表达式
@@ -769,7 +769,7 @@ namespace rexlang {
      * @brief 函数调用组件
      */
     struct FunctionCall : public NameComponent {
-        static const NodeType node_type = NodeType::kNTyFunctionCall;
+        static const NodeType GetClassId() { return NodeType::kNTyFunctionCall; }
         NameComponentPtr function_name_ = nullptr;
         std::vector<ExpressionPtr> arguments_;
 
@@ -782,7 +782,7 @@ namespace rexlang {
      * 类型转换
      */
     struct TypeConvert : public Expression {
-        static const NodeType node_type = NodeType::kNTyTypeConvert;
+        static const NodeType GetClassId() { return NodeType::kNTyTypeConvert; }
 
         enum ConvertType { kCTImplicit, kCTExplicit };
         ConvertType convert_type_ = ConvertType::kCTImplicit;
@@ -805,7 +805,7 @@ namespace rexlang {
      * 有运算符的表达式
      */
     struct _OperatorExpression : public Expression {
-        static const NodeType node_type = NodeType::kNTy_OperatorExpression;
+        static const NodeType GetClassId() { return NodeType::kNTy_OperatorExpression; }
         enum class OperatorType {
             kOptNone,
             kOptAdd, kOptSub, kOptMul, kOptDiv, kOptFullDiv, kOptMod,
@@ -823,12 +823,12 @@ namespace rexlang {
     };
 
     struct UnaryExpression : public _OperatorExpression {
-        static const NodeType node_type = NodeType::kNTyUnaryExpression;
+        static const NodeType GetClassId() { return NodeType::kNTyUnaryExpression; }
         ExpressionPtr operand_value_ = nullptr;
     };
 
     struct BinaryExpression : public _OperatorExpression {
-        static const NodeType node_type = NodeType::kNTyBinaryExpression;
+        static const NodeType GetClassId() { return NodeType::kNTyBinaryExpression; }
         ExpressionPtr lhs_ = nullptr;
         ExpressionPtr rhs_ = nullptr;
     };
@@ -838,26 +838,26 @@ namespace rexlang {
      * 值基类可以表示所有的常量
      */
     struct Value : public Expression {
-        static const NodeType node_type = NodeType::kNTyValue;
+        static const NodeType GetClassId() { return NodeType::kNTyValue; }
     };
 
     struct ValueOfDataSet : public Value {
-        static const NodeType node_type = NodeType::kNTyValueOfDataSet;
+        static const NodeType GetClassId() { return NodeType::kNTyValueOfDataSet; }
         std::vector<ExpressionPtr> elements_;
     };
 
     struct ValueOfDatetime : public Value {
-        static const NodeType node_type = NodeType::kNTyValueOfDatetime;
+        static const NodeType GetClassId() { return NodeType::kNTyValueOfDatetime; }
         time_t time_ = 0;
     };
 
     struct ResourceRefExpression : public Expression {
-        static const NodeType node_type = NodeType::kNTyResourceRefExpression;
+        static const NodeType GetClassId() { return NodeType::kNTyResourceRefExpression; }
         TString resource_name_;
     };
 
     struct FuncAddrExpression : public Expression {
-        static const NodeType node_type = NodeType::kNTyFuncAddrExpression;
+        static const NodeType GetClassId() { return NodeType::kNTyFuncAddrExpression; }
         TString function_name_;
 
         // === 下面是经过语义分析后的数据 ===
@@ -866,12 +866,12 @@ namespace rexlang {
     };
 
     struct ValueOfBool : public Value {
-        static const NodeType node_type = NodeType::kNTyValueOfBool;
+        static const NodeType GetClassId() { return NodeType::kNTyValueOfBool; }
         bool value_ = false;
     };
 
     struct ValueOfDecimal : public Value {
-        static const NodeType node_type = NodeType::kNTyValueOfDecimal;
+        static const NodeType GetClassId() { return NodeType::kNTyValueOfDecimal; }
         union {
             int int_val_ = 0;
             float float_val_;
@@ -880,7 +880,7 @@ namespace rexlang {
     };
 
     struct ValueOfString : public Value {
-        static const NodeType node_type = NodeType::kNTyValueOfString;
+        static const NodeType GetClassId() { return NodeType::kNTyValueOfString; }
         TString string_literal_;
     };
 
@@ -889,7 +889,7 @@ namespace rexlang {
      * 翻译单元结构将所有可编译数据打包，提供一致的索引方式，同时应对可能的名称冲突。
      */
     struct TranslateUnit : public Node {
-        static const NodeType node_type = NodeType::kNTyTranslateUnit;
+        static const NodeType GetClassId() { return NodeType::kNTyTranslateUnit; }
         // 语法版本号
         unsigned int edition_ = 0;
         // 资源文件列表（包括全局变量定义、数据结构定义、类模块定义、DLL接口定义、子程序集合）
@@ -933,7 +933,7 @@ namespace rexlang {
         NodeTy *node = new NodeTy(args...);
         Node *base_node = node;
         base_node->node_id_ = ast_context->GetNodeIndex();
-        base_node->node_type_ = NodeTy::node_type;
+        base_node->node_type_ = NodeTy::GetClassId();
         base_node->ast_context_ = ast_context;
         return node;
     }
