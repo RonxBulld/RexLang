@@ -23,8 +23,8 @@ public:
         return ss.str();
     }
 
-    template<template<typename Key> typename Container, typename Elem>
-    static std::string Join(const Container<Elem> &string_list, const std::string &separator) {
+    template<typename ContainerTy, typename Elem>
+    static std::string Join(const ContainerTy &string_list, const std::string &separator) {
         return Join(string_list.begin(), string_list.end(), separator);
     }
 
@@ -41,8 +41,8 @@ public:
         return ss.str();
     }
 
-    template<template<typename Key> typename Container, typename Elem, typename ConvertPred>
-    static std::string Join(const Container<Elem> &string_list, const std::string &separator, ConvertPred && convert_pred) {
+    template<typename ContainerTy, typename ConvertPred>
+    static std::string Join(const ContainerTy &string_list, const std::string &separator, ConvertPred && convert_pred) {
         return Join(string_list.begin(), string_list.end(), separator, convert_pred);
     }
 

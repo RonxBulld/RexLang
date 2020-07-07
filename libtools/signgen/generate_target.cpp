@@ -116,7 +116,7 @@ std::string GenerateParameterTypeAttributes(const struct TypeDesc &type) {
     if (type.is_nullable) {
         type_attribute_list.emplace_back("可空");
     }
-    return StringUtil::Join<std::vector, std::string>(type_attribute_list, " ");
+    return StringUtil::Join<std::vector<std::string>, std::string>(type_attribute_list, " ");
 }
 
 int GenerateInterface(std::ostream &outs, const struct InterfaceDeclare &interfaceDeclare) {
@@ -126,7 +126,7 @@ int GenerateInterface(std::ostream &outs, const struct InterfaceDeclare &interfa
             << " \"" << interfaceDeclare.library_name << "\","
             << " \"" << interfaceDeclare.interface_api_name << "\","
             << " " /* 此处应填写属性列表 */ ","
-            << " " << StringUtil::Join<std::vector, std::string>(interfaceDeclare.interface_breif.comments, " ")
+            << " " << StringUtil::Join<std::vector<std::string>, std::string>(interfaceDeclare.interface_breif.comments, " ")
             << std::endl;
 
     for (const struct ParameterDesc &__parameter_desc : interfaceDeclare.parameters) {
@@ -135,7 +135,7 @@ int GenerateInterface(std::ostream &outs, const struct InterfaceDeclare &interfa
                 << " " << __parameter_desc.parameter_name << ","
                 << " " << GenerateParameterType(__parameter_desc.type_desc) << ","
                 << " " << GenerateParameterTypeAttributes(__parameter_desc.type_desc) << ","
-                << " " << StringUtil::Join<std::vector, std::string>(__parameter_desc.parameter_comments.comments, " ")
+                << " " << StringUtil::Join<std::vector<std::string>, std::string>(__parameter_desc.parameter_comments.comments, " ")
                 << std::endl;
     }
 

@@ -37,8 +37,8 @@ namespace rexlang {
 
 #if defined(MSVC_LINKER_STYLE)
 
-        auto lib_search_dirs_flag = ContainerUtil::Map<std::vector, std::string, std::vector, std::string>(libSearchDirs, [](const std::string &dir){ return "-L" + dir + ""; });
-        auto libraries_link_flag = ContainerUtil::Map<std::vector, std::string, std::vector, rexlang::StringRef>(dependenceLibs, [](const rexlang::StringRef &elem){ return "-l" + elem.str(); });
+        auto lib_search_dirs_flag = ContainerUtil::Map<std::vector<std::string>, std::vector<std::string>>(libSearchDirs, [](const std::string &dir){ return "-L" + dir + ""; });
+        auto libraries_link_flag = ContainerUtil::Map<std::vector<std::string>, std::vector<rexlang::StringRef>>(dependenceLibs, [](const rexlang::StringRef &elem){ return "-l" + elem.str(); });
         user_level_args.insert(user_level_args.end(), lib_search_dirs_flag.begin(), lib_search_dirs_flag.end());
         user_level_args.insert(user_level_args.end(), objectFilename);
         user_level_args.insert(user_level_args.end(), libraries_link_flag.begin(), libraries_link_flag.end());
@@ -48,8 +48,8 @@ namespace rexlang {
 
 #elif defined(GNU_LINKER_STYLE)
 
-        auto lib_search_dirs_flag = ContainerUtil::Map<std::vector, std::string, std::vector, std::string>(libSearchDirs, [](const std::string &dir){ return "-L" + dir + ""; });
-        auto libraries_link_flag = ContainerUtil::Map<std::vector, std::string, std::vector, rexlang::StringRef>(dependenceLibs, [](const rexlang::StringRef &elem){ return "-l" + elem.str(); });
+        auto lib_search_dirs_flag = ContainerUtil::Map<std::vector<std::string>, std::vector<std::string>>(libSearchDirs, [](const std::string &dir){ return "-L" + dir + ""; });
+        auto libraries_link_flag = ContainerUtil::Map<std::vector<std::string>, std::vector<rexlang::StringRef>>(dependenceLibs, [](const rexlang::StringRef &elem){ return "-l" + elem.str(); });
         user_level_args.insert(user_level_args.end(), lib_search_dirs_flag.begin(), lib_search_dirs_flag.end());
         user_level_args.insert(user_level_args.end(), objectFilename);
         user_level_args.insert(user_level_args.end(), libraries_link_flag.begin(), libraries_link_flag.end());
@@ -89,7 +89,7 @@ namespace rexlang {
         std::filesystem::path link_exec = program_db.GetProgramPath();
         link_exec = link_exec.parent_path() / LINKER;
         std::vector<std::string> user_level_args = BuildUserLevelLinkCommandArgs();
-        std::string link_args_str = StringUtil::Join<std::vector, std::string>(user_level_args, " ");
+        std::string link_args_str = StringUtil::Join<std::vector<std::string>, std::string>(user_level_args, " ");
 
         // 执行连接
 
@@ -142,7 +142,7 @@ namespace rexlang {
 #       error "Unknow what the linker switch style."
 #   endif
 		link_args_str = "";
-        link_args_str = StringUtil::Join<std::vector, std::string>(ld_program_args, " ");
+        link_args_str = StringUtil::Join<std::vector<std::string>, std::string>(ld_program_args, " ");
         std::string link_cmdline = link_exec.string() + " " + link_args_str;
         int link_ret = system(link_cmdline.c_str());
 

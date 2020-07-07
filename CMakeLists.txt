@@ -45,6 +45,11 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     ######################################
     # using Clang
     ######################################
+    SET(CLANG_EXPECTED_VERSION 9.0.0)
+    IF(CMAKE_CXX_COMPILER_VERSION VERSION_LESS CLANG_EXPECTED_VERSION)
+        MESSAGE(FATAL_ERROR "Clang: REXLang requires version ${CLANG_EXPECTED_VERSION} to build but found ${CMAKE_CXX_COMPILER_VERSION}")
+    ENDIF()
+    
     ADD_DEFINITIONS(-DANTLR4CPP_STATIC)
     ADD_DEFINITIONS(-fPIC)
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ggdb -g -O0")
@@ -54,6 +59,11 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     ######################################
     # using GCC
     ######################################
+    SET(GCC_EXPECTED_VERSION 9.2.0)
+    IF(CMAKE_CXX_COMPILER_VERSION VERSION_LESS GCC_EXPECTED_VERSION)
+        MESSAGE(FATAL_ERROR "GCC: REXLang requires version ${GCC_EXPECTED_VERSION} to build but found ${CMAKE_CXX_COMPILER_VERSION}")
+    ENDIF()
+
     ADD_DEFINITIONS(-DANTLR4CPP_STATIC)
     ADD_DEFINITIONS(-fPIC)
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ggdb -g -O0")

@@ -25,6 +25,10 @@ target_link_libraries(CDecl
         lite_util
         )
 
-target_link_libraries(CDecl clang clang-cpp LLVM)
+target_link_libraries(CDecl
+        clang
+        clang-cpp
+        LLVM
+        )
 
 #cotire(CDecl)

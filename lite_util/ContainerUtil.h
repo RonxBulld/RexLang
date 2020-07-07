@@ -15,23 +15,17 @@ public:
         }
     }
 
-    template <
-            template <typename> typename DstContainerTy,
-            typename DstElemTy,
-            template <typename> typename SrcContainerTy,
-            typename SrcElemTy,
-            typename Pred
-            >
-    static DstContainerTy<DstElemTy> Map(SrcContainerTy<SrcElemTy> &container, const Pred & pred) {
-        DstContainerTy<DstElemTy> __dest;
-        for (SrcElemTy &elem : container) {
+    template <typename DstContainerTy, typename SrcContainerTy, typename Pred>
+    static DstContainerTy Map(SrcContainerTy &container, const Pred & pred) {
+        DstContainerTy __dest;
+        for (auto &elem : container) {
             __dest.push_back(pred(elem));
         }
         return __dest;
     }
 
-    template <template <typename> typename ContainerTy, typename ElemTy>
-    static bool InSet(const ContainerTy<ElemTy> &container, const ElemTy &findElem) {
+    template <typename ContainerTy, typename ElemTy>
+    static bool InSet(const ContainerTy &container, const ElemTy &findElem) {
         for (const ElemTy &elem : container) {
             if (elem == findElem) {
                 return true;

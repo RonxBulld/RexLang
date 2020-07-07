@@ -75,7 +75,7 @@ namespace rexlang {
         // 代码写入流中
 
         llvm::legacy::PassManager pass;
-        auto FileType = llvm::TargetMachine::CGFT_ObjectFile;
+        llvm::TargetMachine::CodeGenFileType FileType = llvm::TargetMachine::CGFT_ObjectFile;
 
         if (TargetMachine->addPassesToEmitFile(pass, dest, nullptr, FileType)) {
             llvm::errs() << "TheTargetMachine can't emit a file of this type";

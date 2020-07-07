@@ -114,7 +114,7 @@ namespace rexlang {
         NameComponent *base = nullptr;
         do{
             base = arrayIndex->base_;
-        } while (arrayIndex = base->as<ArrayIndex>());
+        } while ((arrayIndex = base->as<ArrayIndex>()));
         return base;
     }
 
