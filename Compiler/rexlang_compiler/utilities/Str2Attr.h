@@ -11,14 +11,14 @@
 
 namespace rexlang {
 
-    extern const std::map<std::string, BuiltinTypeDecl::EnumOfBuiltinType> builtin_type_map;
+//    extern const std::map<std::string, EnumOfBuiltinType> builtin_type_map;
 
     class Str2Attr {
     public:
 
-        static ErrOr<BuiltinTypeDecl::EnumOfBuiltinType> Name2BuiltinType(const StringRef &name);
+//        static ErrOr<EnumOfBuiltinType> Name2BuiltinType(const StringRef &name);
 
-        static ErrOr<std::string> BuiltinType2Name(BuiltinTypeDecl::EnumOfBuiltinType type);
+//        static ErrOr<std::string> BuiltinType2Name(EnumOfBuiltinType type);
 
         static ErrOr<AccessLevel> Name2AccessLevel(const StringRef &name);
 

@@ -43,28 +43,6 @@ namespace rexlang {
         });
     }
 
-    void SetupHierarchyReferenceType(HierarchyIdentifier *hierarchyIdentifier, IdentifierUsage referenceType) {
-        hierarchyIdentifier->identifier_usage_ = referenceType;
-        for (NameComponent *name_component : hierarchyIdentifier->name_components_) {
-
-            name_component->identifier_usage_ = IdentifierUsage::kAsRightValue;
-
-            if (ArrayIndex *array_index = name_component->as<ArrayIndex>()) {
-                array_index->base_->identifier_usage_ = IdentifierUsage::kAsRightValue;
-            }
-            else if (FunctionCall *function_call = name_component->as<FunctionCall>()) {
-                function_call->function_name_->identifier_usage_ = IdentifierUsage::kAsRightValue;
-            }
-            else if (Identifier *identifier = name_component->as<Identifier>()) {
-                identifier->identifier_usage_ = IdentifierUsage::kAsRightValue;
-            }
-            else {
-                assert(false);
-            }
-        }
-        hierarchyIdentifier->name_components_.back()->identifier_usage_ = referenceType;
-    }
-
     bool SematicAnalysis::Run(TranslateUnit * translateUnitPtr) {
 
         // this->ast_builder_ = new ASTBuilder(*translateUnitPtr->ast_context_);
@@ -74,7 +52,7 @@ namespace rexlang {
             translateUnitPtr->ast_context_->GetDiagnostic()->EditionWrong(translateUnitPtr->edition_);
             return false;
         }
-        this->translate_unit_ = translateUnitPtr;
+        TU = translateUnitPtr;
 
         // 1. 初始化动作
 
@@ -108,7 +86,7 @@ namespace rexlang {
 
         // 3. 针对可调用声明
 
-        for (auto & func_item : this->translate_unit_->functor_declares_) {
+        for (auto & func_item : TU->functor_declares_) {
 
             // 3.1. 明确每一个可调用对象的参数和返回值的类型指针
 
@@ -119,7 +97,7 @@ namespace rexlang {
 
         // 4. 针对每一个程序集
 
-        for (auto & prog_file_item : this->translate_unit_->program_sets_) {
+        for (auto & prog_file_item : TU->program_sets_) {
             this->analysis_context_.PushScope(prog_file_item.second);
 
             // 4.1 针对每一个函数定义
@@ -158,26 +136,11 @@ namespace rexlang {
     }
 
     bool SematicAnalysis::CreateBuiltinType() {
-        for (auto & name_type_pair : builtin_type_map) {
-            ErrOr<std::string> type_name = Str2Attr::BuiltinType2Name(name_type_pair.second);
-            if (type_name.NoError()) {
-                TString ts_tname;
-                ts_tname.string_ = this->translate_unit_->ast_context_->CreateString(type_name.Value());
-                ts_tname.location_ = 0;
-                BuiltinTypeDeclPtr builtin_type = CreateNode<BuiltinTypeDecl>(this->translate_unit_->ast_context_);
-                builtin_type->name_ = ts_tname;
-                builtin_type->built_in_type_ = name_type_pair.second;
-                this->translate_unit_->global_type_[ts_tname.string_] = builtin_type;
-            } else {
-                assert(false);
-                return false;
-            }
-        }
-        return true;
+        return TU->InitBuiltinTypes();
     }
 
     bool SematicAnalysis::SetupAllStructMemberType() {
-        for (auto & item: this->translate_unit_->global_type_) {
+        for (auto & item: TU->global_type_) {
             if (StructureDeclPtr structure_decl = item.second->as<StructureDecl>()) {
                 size_t idx = 0;
                 for (auto & member_item : structure_decl->members_) {
@@ -195,14 +158,14 @@ namespace rexlang {
 
     bool SematicAnalysis::SetupGlobalAndFileStaticVariableType() {
         // 1. 全局变量
-        for (auto & item : this->translate_unit_->global_variables_) {
+        for (auto & item : TU->global_variables_) {
             this->SetupGlobalVariableType(item.second);
             if (item.second->type_decl_ptr_ == nullptr) {
                 return false;
             }
         }
         // 2. 程序集变量
-        for (auto & prog_set_item : this->translate_unit_->program_sets_) {
+        for (auto & prog_set_item : TU->program_sets_) {
             for (auto & prog_set_vari_item : prog_set_item.second->file_static_variables_) {
                 this->SetupFileVariableType(prog_set_vari_item.second);
                 if (prog_set_vari_item.second->type_decl_ptr_ == nullptr) {
@@ -214,7 +177,7 @@ namespace rexlang {
     }
 
     bool SematicAnalysis::MergeGlobal() {
-        TranslateUnitPtr translateUnitPtr = this->translate_unit_;
+        TranslateUnit * translateUnitPtr = TU;
         for (SourceFilePtr sfptr : translateUnitPtr->source_file_) {
             if (GlobalVariableFile *global_variable_file = sfptr->as<GlobalVariableFile>()) {
 
@@ -271,8 +234,8 @@ namespace rexlang {
     }
 
     bool SematicAnalysis::ExplainExternAPINameMangle() {
-        assert(translate_unit_);
-        for (auto &functor_decl_item : translate_unit_->functor_declares_) {
+        assert(TU);
+        for (auto &functor_decl_item : TU->functor_declares_) {
 
             FunctorDecl *functor_decl = functor_decl_item.second;
 
@@ -301,7 +264,7 @@ namespace rexlang {
         LocalVariableDecl *implicit_local_vari = CreateNode<LocalVariableDecl>(astContext);
         implicit_local_vari->parent_node_ = parentFunction;
         implicit_local_vari->name_.string_ = referenceName;
-        implicit_local_vari->type_decl_ptr_ = this->QueryBuiltinTypeWithEnum(this->translate_unit_, BuiltinTypeDecl::EnumOfBuiltinType::kBTypeInteger);
+        implicit_local_vari->type_decl_ptr_ = TU->getIntegerTy();
         parentFunction->local_vari_[referenceName] = implicit_local_vari;
         this->analysis_context_.AddNamedSymbol(implicit_local_vari);
         return implicit_local_vari;
@@ -311,7 +274,7 @@ namespace rexlang {
 
         // 3.1.1. 明确返回值类型
 
-        functorDecl->return_type_ = this->QueryTypeDeclWithName(this->translate_unit_, functorDecl->return_type_name_.string_, &this->analysis_context_, BuiltinTypeDecl::EnumOfBuiltinType::kBTypeVoid);
+        functorDecl->return_type_ = this->QueryTypeDeclWithName(TU, functorDecl->return_type_name_.string_, &this->analysis_context_, TU->getVoidTy());
         if (functorDecl->return_type_ == nullptr) {
             assert(false);
             return false;
@@ -321,7 +284,7 @@ namespace rexlang {
 
         size_t param_idx = 0;
         for (ParameterDeclPtr parameter_decl : functorDecl->parameters_) {
-            parameter_decl->type_decl_ptr_ = this->QueryTypeDeclWithName(this->translate_unit_, parameter_decl->type_name_.string_, &this->analysis_context_);
+            parameter_decl->type_decl_ptr_ = this->QueryTypeDeclWithName(TU, parameter_decl->type_name_.string_, &this->analysis_context_);
             this->SetupParameterType(parameter_decl);
             parameter_decl->index_ = param_idx++;
             if (parameter_decl->type_decl_ptr_ == nullptr) {
@@ -364,7 +327,7 @@ namespace rexlang {
 
             for (auto & branch : if_stmt->switches_) {
                 TypeDeclPtr switch_expr_type = this->CheckExpression(branch.first);
-                if (TypeAssert::IsExternBooleanType(switch_expr_type) == false) {
+                if (switch_expr_type->IsExternBooleanType() == false) {
                     assert(false);
                     return false;
                 }
@@ -396,7 +359,7 @@ namespace rexlang {
             // 检查循环条件语句的条件表达式是否为扩展布尔类型
 
             TypeDeclPtr while_expr_type = this->CheckExpression(while_stmt->condition_);
-            if (TypeAssert::IsExternBooleanType(while_expr_type) == false) {
+            if (while_expr_type->IsExternBooleanType() == false) {
                 assert(false);
                 return false;
             }
@@ -416,7 +379,7 @@ namespace rexlang {
 
             TypeDeclPtr lhs_type = this->CheckExpression(assign_stmt->lhs_);
             TypeDeclPtr rhs_type = this->CheckExpression(assign_stmt->rhs_);
-            SetupHierarchyReferenceType(assign_stmt->lhs_, IdentifierUsage::kAsLeftValue);
+            SetupHierarchyReferenceType(assign_stmt->lhs_, ExprUsage::kAsLeftValue);
             ErrOr<Expression*> implicit_convert = this->MakeImplicitConvertIfNeccessary(lhs_type, assign_stmt->rhs_);
             if (implicit_convert.HadError()) { return false; }
             assign_stmt->rhs_ = implicit_convert.Value();
@@ -489,7 +452,7 @@ namespace rexlang {
             assert(false);
             return false;
         }
-        bool is_integer_class = TypeAssert::IsIntegerClass(expr_type);
+        bool is_integer_class = expr_type->IsIntegerClass();
         if (is_integer_class == false) {
             assert(false);
             return false;
@@ -504,7 +467,7 @@ namespace rexlang {
             // 如果循环变量存在则检查变量类型是否为整数族
             if (range_for_stmt->loop_vari_) {
                 TypeDecl *loop_vari_type = this->GetHierarchyIdentifierQualifiedType(range_for_stmt->loop_vari_);
-                if (TypeAssert::IsIntegerClass(loop_vari_type) == false) {
+                if (loop_vari_type->IsIntegerClass() == false) {
                     assert(false);
                     return false;
                 }
@@ -517,7 +480,7 @@ namespace rexlang {
             if (for_stmt->loop_vari_) {
                 // 如果循环变量存在则检查变量类型是否为整数族
                 TypeDecl *loop_vari_type = this->GetHierarchyIdentifierQualifiedType(for_stmt->loop_vari_);
-                if (TypeAssert::IsIntegerClass(loop_vari_type) == false) {
+                if (loop_vari_type->IsIntegerClass() == false) {
                     assert(false);
                     return false;
                 }
@@ -537,7 +500,7 @@ namespace rexlang {
         } else if (DoWhileStmtPtr do_while_stmt = loopStatement->as<DoWhileStmt>()) {
             // 检查条件表达式类型是否为布尔类型
             TypeDecl *condition_expr_type = this->CheckExpression(do_while_stmt->conditon_);
-            bool is_boolean = TypeAssert::IsBoolType(condition_expr_type);
+            bool is_boolean = condition_expr_type->IsBoolType();
             if (is_boolean == false) {
                 assert(false);
                 return false;
@@ -640,7 +603,7 @@ namespace rexlang {
 
     bool SematicAnalysis::SetupBaseVariableType(BaseVariDecl *baseVariDecl) {
         StringRef name = baseVariDecl->type_name_.string_;
-        baseVariDecl->type_decl_ptr_ = this->QueryTypeDeclWithName(this->translate_unit_, name, &this->analysis_context_)->as<TypeDecl>();
+        baseVariDecl->type_decl_ptr_ = this->QueryTypeDeclWithName(TU, name, &this->analysis_context_)->as<TypeDecl>();
         if (baseVariDecl->type_decl_ptr_ == nullptr) {
             assert(false);
             return false;
@@ -649,291 +612,206 @@ namespace rexlang {
     }
 
     TypeDecl *SematicAnalysis::CheckExpression(Expression *expression) {
-        expression->expression_type_ = this->__CheckExpressionImpl__(expression);
-        return expression->expression_type_;
+        return expression->CheckExpression();
     }
 
-    TypeDecl *SematicAnalysis::__CheckExpressionImpl__(Expression *expression) {
-        TranslateUnitPtr translateUnit = this->translate_unit_;
-        if (HierarchyIdentifier * hierarchy_identifier = expression->as<HierarchyIdentifier>()) {
-            SetupHierarchyReferenceType(hierarchy_identifier, IdentifierUsage::kAsRightValue);
+    TypeDecl *Expression::CheckExpression() {
+        this->expression_type_ = this->CheckExpressionInternal();
+        return this->expression_type_;
+    }
 
-            // 可能是直接名称、函数引用、数组组合的序列
+    TypeDecl *Expression::GetExpressionTy() const {
+        assert(this->expression_type_);
+        return this->expression_type_;
+    }
 
-            TypeDecl *qualified_type = this->GetHierarchyIdentifierQualifiedType(hierarchy_identifier);
-            if (qualified_type == nullptr) {
-                assert(false);
-                return nullptr;
-            }
-            return qualified_type;
+    TypeDecl *HierarchyIdentifier::CheckExpressionInternal() {
+        SetupHierarchyReferenceType(this, ExprUsage::kAsRightValue);
 
-        } else if (TypeConvert * type_convert = expression->as<TypeConvert>()) {
-            TypeDecl *expr_type = this->CheckExpression(type_convert->from_expression_);
-            type_convert->source_type_ = expr_type;
+        // 可能是直接名称、函数引用、数组组合的序列
 
-            // 检查从源类型到目标类型是否可行
-
-            if (!this->IsAssignableBetweenType(type_convert->target_type_, type_convert->source_type_)) {
-                assert(false);
-                return nullptr;
-            }
-            return type_convert->target_type_;
-
-        } else if (FunctionCall * function_call = expression->as<FunctionCall>()) {
-
-            // 检查函数实参是否符合形参定义
-
-            std::vector<ExpressionPtr> &arguments = function_call->arguments_;
-            FunctorDecl *functor_decl = ASTUtility::GetFunctionDeclare(function_call);
-            if (functor_decl == nullptr) {
-                assert(false);
-                return nullptr;
-            }
-            std::vector<ParameterDeclPtr> &parameters = functor_decl->parameters_;
-            if (this->CheckIfArgumentMatch(arguments, parameters) == false) {
-                assert(false);
-                return nullptr;
-            }
-
-            // 将函数返回值类型作为返回类型
-
-            assert(functor_decl->return_type_);
-            return functor_decl->return_type_;
-
-        } else if (UnaryExpression * unary_expression = expression->as<UnaryExpression>()) {
-
-            // 检查一元表达式是否合法
-
-            if (unary_expression->operator_type_ == UnaryExpression::OperatorType::kOptNone) { return nullptr; }
-            TypeDecl *operand_type = this->CheckExpression(unary_expression->operand_value_);
-            if (operand_type == nullptr) { return nullptr; }
-
-            // 由于一元运算只支持符号求反，故只检查其数值性
-
-            bool is_numerical = TypeAssert::IsNumerical(operand_type);
-            if (is_numerical == false) {
-                assert(false);
-                return nullptr;
-            }
-
-            // 根据运算类型返回类型
-
-            return operand_type;
-
-        } else if (BinaryExpression * binary_expression = expression->as<BinaryExpression>()) {
-
-            // 检查二元表达式是否可结合
-
-            if (binary_expression->operator_type_ == UnaryExpression::OperatorType::kOptNone) { return nullptr; }
-            TypeDecl *lhs_operand_type = this->CheckExpression(binary_expression->lhs_);
-            TypeDecl *rhs_operand_type = this->CheckExpression(binary_expression->rhs_);
-            bool operand_valid = TypeAssert::IsBinaryOperationValid(lhs_operand_type, rhs_operand_type, binary_expression->operator_type_);
-            if (operand_valid == false) {
-                assert(false);
-                return nullptr;
-            }
-
-            // 根据运算类型返回类型
-
-            TypeDecl *upgraded_type = this->GetBinaryOperationUpgradedType(lhs_operand_type, rhs_operand_type, binary_expression->operator_type_);
-            assert(upgraded_type);
-
-            ErrOr<Expression*> implicit_conv_lhs = this->MakeImplicitConvertIfNeccessary(upgraded_type, binary_expression->lhs_);
-            ErrOr<Expression*> implicit_conv_rhs = this->MakeImplicitConvertIfNeccessary(upgraded_type, binary_expression->rhs_);
-            if (implicit_conv_lhs.NoError()) { binary_expression->lhs_ = implicit_conv_lhs.Value(); }
-            if (implicit_conv_rhs.NoError()) { binary_expression->rhs_ = implicit_conv_rhs.Value(); }
-
-            if (binary_expression->operator_type_ == _OperatorExpression::OperatorType::kOptDiv) {
-                return this->QueryBuiltinTypeWithEnum(this->translate_unit_, BuiltinTypeDecl::EnumOfBuiltinType::kBTypeFloat);
-            } else if (binary_expression->operator_type_ == _OperatorExpression::OperatorType::kOptFullDiv) {
-                return this->QueryBuiltinTypeWithEnum(this->translate_unit_, BuiltinTypeDecl::EnumOfBuiltinType::kBTypeInteger);
-            } else if (TypeAssert::IsCompareOperator(binary_expression->operator_type_)) {
-                return this->QueryBuiltinTypeWithEnum(this->translate_unit_, BuiltinTypeDecl::EnumOfBuiltinType::kBTypeBool);
-            } else {
-                return upgraded_type;
-            }
-
-        } else if (FuncAddrExpression * func_addr_expression = expression->as<FuncAddrExpression>()) {
-            TypeDecl *type_decl = this->QueryBuiltinTypeWithEnum(this->translate_unit_, BuiltinTypeDecl::EnumOfBuiltinType::kBTypeFuncPtr);
-            assert(type_decl);
-            FunctorDecl * functor_decl = ASTUtility::GetFunctionDeclare(func_addr_expression);
-            if (functor_decl == nullptr) {
-                assert(false);
-                return nullptr;
-            }
-            return type_decl;
-
-        } else if (ResourceRefExpression * resource_ref_expression_ptr = expression->as<ResourceRefExpression>()) {
-
-            // TODO: 需要通过查找常量表来确定类型
-
-            assert(false);
-            return nullptr;
-
-        } else if (Value *value = expression->as<Value>()) {
-            return this->CheckValue(value);
-
-        } else {
+        TypeDecl *qualified_type = this->GetHierarchyIdentifierQualifiedType(this);
+        if (qualified_type == nullptr) {
             assert(false);
             return nullptr;
         }
+        return qualified_type;
+
     }
 
-    TypeDecl *SematicAnalysis::CheckValue(Value *value) {
-        if (ValueOfDataSet * value_of_data_set = value->as<ValueOfDataSet>()) {
+    TypeDecl *TypeConvert::CheckExpressionInternal() {
+        TypeDecl *expr_type = this->CheckExpression(type_convert->from_expression_);
+        type_convert->source_type_ = expr_type;
 
-            // 当前版本只允许字节集中的元素全为整数常量
+        // 检查从源类型到目标类型是否可行
 
-            for (Expression *element : value_of_data_set->elements_) {
-                if (ValueOfDecimal *value_of_decimal = element->as<ValueOfDecimal>()) {
-                    if (value_of_decimal->type_ != ValueOfDecimal::type::kInt) {
-                        assert(false);
-                        return nullptr;
-                    }
-                } else if (ResourceRefExpression *resource_ref_expr = element->as<ResourceRefExpression>()) {
+        if (!this->IsAssignableBetweenType(type_convert->target_type_, type_convert->source_type_)) {
+            assert(false);
+            return nullptr;
+        }
+        return type_convert->target_type_;
+    }
 
-                    // TODO: 检查值
+    TypeDecl *FunctionCall::CheckExpressionInternal() {
 
-                } else {
+        // 检查函数实参是否符合形参定义
+
+        std::vector<ExpressionPtr> &arguments = function_call->arguments_;
+        FunctorDecl *functor_decl = ASTUtility::GetFunctionDeclare(function_call);
+        if (functor_decl == nullptr) {
+            assert(false);
+            return nullptr;
+        }
+        std::vector<ParameterDeclPtr> &parameters = functor_decl->parameters_;
+        if (this->CheckIfArgumentMatch(arguments, parameters) == false) {
+            assert(false);
+            return nullptr;
+        }
+
+        // 将函数返回值类型作为返回类型
+
+        assert(functor_decl->return_type_);
+        return functor_decl->return_type_;
+    }
+
+    TypeDecl *UnaryExpression::CheckExpressionInternal() {
+
+        // 检查一元表达式是否合法
+
+        if (unary_expression->operator_type_ == UnaryExpression::OperatorType::kOptNone) { return nullptr; }
+        TypeDecl *operand_type = this->CheckExpression(unary_expression->operand_value_);
+        if (operand_type == nullptr) { return nullptr; }
+
+        // 由于一元运算只支持符号求反，故只检查其数值性
+
+        bool is_numerical = operand_type->IsNumerical();
+        if (is_numerical == false) {
+            assert(false);
+            return nullptr;
+        }
+
+        // 根据运算类型返回类型
+
+        return operand_type;
+
+    }
+
+    TypeDecl *BinaryExpression::CheckExpressionInternal() {
+
+        // 检查二元表达式是否可结合
+
+        if (binary_expression->operator_type_ == UnaryExpression::OperatorType::kOptNone) { return nullptr; }
+        TypeDecl *lhs_operand_type = this->CheckExpression(binary_expression->lhs_);
+        TypeDecl *rhs_operand_type = this->CheckExpression(binary_expression->rhs_);
+        bool operand_valid = binary_expression->IsBinaryOperateValid();
+        if (operand_valid == false) {
+            assert(false);
+            return nullptr;
+        }
+
+        // 根据运算类型返回类型
+
+        TypeDecl *upgraded_type = binary_expression->GetBinaryOperateUpgradeType();
+        assert(upgraded_type);
+
+        ErrOr<Expression*> implicit_conv_lhs = this->MakeImplicitConvertIfNeccessary(upgraded_type, binary_expression->lhs_);
+        ErrOr<Expression*> implicit_conv_rhs = this->MakeImplicitConvertIfNeccessary(upgraded_type, binary_expression->rhs_);
+        if (implicit_conv_lhs.NoError()) { binary_expression->lhs_ = implicit_conv_lhs.Value(); }
+        if (implicit_conv_rhs.NoError()) { binary_expression->rhs_ = implicit_conv_rhs.Value(); }
+
+        if (binary_expression->operator_type_ == OperatorType::kOptDiv) {
+            return TU->getFloatTy();
+        } else if (binary_expression->operator_type_ == OperatorType::kOptFullDiv) {
+            return TU->getIntegerTy();
+        } else if (TypeAssert::IsCompareOperator(binary_expression->operator_type_)) {
+            return TU->getBoolTy();
+        } else {
+            return upgraded_type;
+        }
+
+    }
+
+    TypeDecl *FuncAddrExpression::CheckExpressionInternal() {
+        TypeDecl *type_decl = TU->getFuncPtrTy();
+        assert(type_decl);
+        FunctorDecl * functor_decl = ASTUtility::GetFunctionDeclare(func_addr_expression);
+        if (functor_decl == nullptr) {
+            assert(false);
+            return nullptr;
+        }
+        return type_decl;
+
+    }
+
+    TypeDecl *ResourceRefExpression::CheckExpressionInternal() {
+
+        // TODO: 需要通过查找常量表来确定类型
+
+        assert(false);
+        return nullptr;
+
+    }
+
+    TypeDecl *ValueOfDataSet::CheckExpressionInternal() {
+
+        // 当前版本只允许字节集中的元素全为整数常量
+
+        for (Expression *element : this->elements_) {
+            if (ValueOfDecimal *value_of_decimal = element->as<ValueOfDecimal>()) {
+                if (value_of_decimal->type_ != ValueOfDecimal::type::kInt) {
                     assert(false);
                     return nullptr;
                 }
+            } else if (ResourceRefExpression *resource_ref_expr = element->as<ResourceRefExpression>()) {
+
+                // TODO: 检查值
+
+            } else {
+                assert(false);
+                return nullptr;
             }
-            TypeDecl *type_decl = this->QueryBuiltinTypeWithEnum(this->translate_unit_, BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDataSet);
-            assert(type_decl);
-            return type_decl;
-
-        } else if (ValueOfDatetime * value_of_datetime = value->as<ValueOfDatetime>()) {
-            TypeDecl *type_decl = this->QueryBuiltinTypeWithEnum(this->translate_unit_, BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDatetime);
-            assert(type_decl);
-            return type_decl;
-
-        } else if (ValueOfBool * value_of_bool = value->as<ValueOfBool>()) {
-            TypeDecl *type_decl = this->QueryBuiltinTypeWithEnum(this->translate_unit_, BuiltinTypeDecl::EnumOfBuiltinType::kBTypeBool);
-            assert(type_decl);
-            return type_decl;
-
-        } else if (ValueOfDecimal * value_of_decimal = value->as<ValueOfDecimal>()) {
-            TypeDecl *type_decl = this->QueryBuiltinTypeWithEnum(this->translate_unit_, BuiltinTypeDecl::EnumOfBuiltinType::kBTypeInteger);
-            assert(type_decl);
-            return type_decl;
-
-        } else if (ValueOfString * value_of_string = value->as<ValueOfString>()) {
-            TypeDecl *type_decl = this->QueryBuiltinTypeWithEnum(this->translate_unit_, BuiltinTypeDecl::EnumOfBuiltinType::kBTypeString);
-            assert(type_decl);
-            return type_decl;
-
-        } else {
-            assert(false);
-            return nullptr;
         }
+        return this->getTranslateUnit()->getDataSetTy();
+    }
+
+    TypeDecl *ValueOfDatetime::CheckExpressionInternal() {
+        return this->getTranslateUnit()->getDatetimeTy();
+    }
+
+    TypeDecl *ValueOfBool::CheckExpressionInternal() {
+        return this->getTranslateUnit()->getBoolTy();
+    }
+
+    TypeDecl *ValueOfDecimal::CheckExpressionInternal() {
+        return this->getTranslateUnit()->getIntegerTy();
+    }
+
+    TypeDecl *ValueOfString::CheckExpressionInternal() {
+        return this->getTranslateUnit()->getStringTy();
     }
 
     ErrOr<Expression *> SematicAnalysis::MakeImplicitConvertIfNeccessary(TypeDecl *targetType, Expression *convertExpression) {
         // 先判断赋值性
-        if (!this->IsAssignableBetweenType(targetType, convertExpression->expression_type_)) {
+        if (!this->IsAssignableBetweenType(targetType, convertExpression->GetExpressionTy())) {
             // 两边类型不可赋值
             return ErrOr<Expression*>::CreateError(1);
         }
         // 再判断是否转换
-        if (convertExpression->expression_type_ == targetType) {
+        if (convertExpression->GetExpressionTy() == targetType) {
             // 类型一致，无需转换
             return MakeNoErrVal(convertExpression);
-        } else if (!targetType->is<BuiltinTypeDecl>() || !convertExpression->expression_type_->is<BuiltinTypeDecl>()) {
+        } else if (!targetType->is<BuiltinTypeDecl>() || !convertExpression->GetExpressionTy()->is<BuiltinTypeDecl>()) {
             // 其中有非内置类型，无法转换
             return MakeNoErrVal(convertExpression);
         } else {
             TypeConvert *type_convert = CreateNode<TypeConvert>(convertExpression->ast_context_);
             type_convert->from_expression_ = convertExpression;
-            type_convert->expression_type_ = targetType;
-            type_convert->source_type_ = convertExpression->expression_type_;
+            type_convert->GetExpressionTy() = targetType;
+            type_convert->source_type_ = convertExpression->GetExpressionTy();
             type_convert->target_type_ = targetType;
             type_convert->parent_node_ = convertExpression;
             convertExpression->parent_node_ = type_convert;
             return MakeNoErrVal<Expression*>(type_convert);
-        }
-    }
-
-    TypeDecl *SematicAnalysis::GetBinaryOperationUpgradedType(TypeDecl *lhsType, TypeDecl *rhsType, _OperatorExpression::OperatorType operatorType) {
-        // 首先保证可进行二元计算
-        bool binary_opt_valid = TypeAssert::IsBinaryOperationValid(lhsType, rhsType, operatorType);
-        if (binary_opt_valid == false) {
-            assert(false);
-            return nullptr;
-        }
-        // 再计算结果类型
-        {
-            // 1. 如果是内置类型
-
-            BuiltinTypeDecl *lhs_builtin = lhsType->as<BuiltinTypeDecl>();
-            BuiltinTypeDecl *rhs_builtin = rhsType->as<BuiltinTypeDecl>();
-            if (lhs_builtin || rhs_builtin) {
-                if (lhs_builtin && rhs_builtin) {
-                    bool lhs_numerical = TypeAssert::IsNumerical(lhs_builtin);
-                    bool rhs_numerical = TypeAssert::IsNumerical(rhs_builtin);
-                    if (lhs_numerical && rhs_numerical) {
-
-                        // 1.1. 都有数值性
-
-                        BuiltinTypeDecl::EnumOfBuiltinType upgrade_type = TypeAssert::ResultOfTypeUpgrade(lhs_builtin->built_in_type_, rhs_builtin->built_in_type_);
-                        return this->QueryBuiltinTypeWithEnum(this->translate_unit_, upgrade_type);
-
-                    } else if (!lhs_numerical && !rhs_numerical) {
-
-                        // 1.2. 都无数值性
-
-                        if (lhs_builtin == rhs_builtin) {
-                            if (lhs_builtin->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeBool) {
-                                return lhs_builtin;
-
-                            } else if (lhs_builtin->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeString) {
-
-                                return lhs_builtin;
-
-                            } else if (lhs_builtin->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDataSet) {
-
-                                return lhs_builtin;
-
-                            } else if (lhs_builtin->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDatetime) {
-
-                                assert(false);
-                                return nullptr;
-
-                            } else if (lhs_builtin->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeFuncPtr) {
-
-                                assert(false);
-                                return nullptr;
-
-                            } else {
-                                assert(false);
-                                return nullptr;
-
-                            }
-                        } else {
-                            assert(false);
-                            return nullptr;
-
-                        }
-                    } else {
-
-                        // 其中一个有数值性
-
-                        assert(false);
-                        return nullptr;
-                    }
-                } else {
-
-                    // 只有一个是内置类型是无法计算的
-
-                    assert(false);
-                    return nullptr;
-                }
-            }
-        }
-        {
-            // 2. 非内置类型
-            assert(false);
-            return nullptr;
         }
     }
 
@@ -1040,7 +918,7 @@ namespace rexlang {
                 }
                 if (HierarchyIdentifier *hierarchy_identifier = arguments[idx]->as<HierarchyIdentifier>()) {
                     TypeDecl *argu_type = this->GetHierarchyIdentifierQualifiedType(hierarchy_identifier);
-                    SetupHierarchyReferenceType(hierarchy_identifier, IdentifierUsage::kAsLeftValue);
+                    SetupHierarchyReferenceType(hierarchy_identifier, ExprUsage::kAsLeftValue);
                     if (argu_type != parameters[idx]->type_decl_ptr_) {
                         assert(false);
                         return false;
@@ -1054,7 +932,7 @@ namespace rexlang {
             /*else*/ if (arguments[idx] != nullptr) {
 
                 // 5.4. 如果形参不具备上述属性
-                TypeDecl *argu_type = arguments[idx]->expression_type_;
+                TypeDecl *argu_type = arguments[idx]->GetExpressionTy();
                 assert(argu_type);
                 TypeDecl *param_type = parameters[idx]->type_decl_ptr_;
                 ErrOr<Expression*> implicit_convert = this->MakeImplicitConvertIfNeccessary(param_type, arguments[idx]);
@@ -1113,12 +991,26 @@ namespace rexlang {
     }
 
     bool SematicAnalysis::CheckAllBranchesReturnCorrectly(FunctionDecl *functionDecl) {
-        if (!CheckFullReturn(functionDecl->statement_list_, !TypeAssert::IsVoidType(functionDecl->return_type_))) {
+        if (!CheckFullReturn(functionDecl->statement_list_, !functionDecl->return_type_->IsVoidType())) {
             assert(false);
             return false;
         } else {
             return true;
         }
     }
+
+    bool FunctionCall::IsArgument(Expression *expr)       const { return IsArgument(const_cast<const Expression *>(expr)); }
+    bool FunctionCall::IsArgument(const Expression *expr) const { return IndexOfArgument(expr) >= 0; }
+
+    int FunctionCall::IndexOfArgument(const Expression *expr) const {
+        for (unsigned idx = 0, count = arguments_.size(); idx < count; ++idx) {
+            if (expr == arguments_[idx]) {
+                return idx;
+            }
+        }
+        return -1;
+    }
+
+    int FunctionCall::IndexOfArgument(Expression *expr) const { return IndexOfArgument(const_cast<const Expression *>(expr)); }
 
 }

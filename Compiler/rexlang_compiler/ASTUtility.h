@@ -63,14 +63,6 @@ namespace rexlang {
         static BaseVariDecl *FindVariableWithNameInStructureType(TypeDecl *typeDecl, const StringRef &variable_name);
 
         /*
-         * 获取数组索引组件的真实基对象
-         * 例如：
-         * arrayIndex[1][2][3][1]->arrayIndex
-         * func()[1][3]->func()
-         */
-        static NameComponent *GetArrayIndexBase(ArrayIndex *arrayIndex);
-
-        /*
          * 获取名称组件中的索引列表
          */
         static ErrOr<std::vector<Expression*>> GetArrayIndexIndexList(ArrayIndex *arrayIndex);

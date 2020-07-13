@@ -20,7 +20,7 @@ namespace rexlang {
      */
     class SematicAnalysis {
     private:
-        TranslateUnit * translate_unit_ = nullptr;
+        TranslateUnit * TU = nullptr;
         SematicAnalysisContext analysis_context_;
         //ASTBuilder *ast_builder_ = nullptr;
 
@@ -123,7 +123,7 @@ namespace rexlang {
          */
         bool CheckLoopStatement(LoopStatement *loopStatement);
 
-        TypeDecl *__CheckExpressionImpl__(Expression *expression);
+//        TypeDecl *__CheckExpressionImpl__(Expression *expression);
 
         /*
          * 检查表达式，并返回表达式的结果类型
@@ -139,12 +139,6 @@ namespace rexlang {
          * 检查实参是否匹配形参
          */
         bool CheckIfArgumentMatch(std::vector<ExpressionPtr> &arguments, const std::vector<ParameterDeclPtr> &parameters);
-
-        /*
-         * 获取二元表达式提升后的类型
-         * 返回的类型是提升后的类型
-         */
-        TypeDecl *GetBinaryOperationUpgradedType(TypeDecl *lhsType, TypeDecl *rhsType, _OperatorExpression::OperatorType operatorType);
 
         /**
          * @brief 视情况创建隐式转换
@@ -189,33 +183,11 @@ namespace rexlang {
     private:    // 工具方法
 
         /*
-         * 递归推断名称组件类型
-         */
-        TypeDecl * EvalBaseNameComponentType(NameComponent *nameComponent, TypeDecl *frontType);
-
-        /*
-         * 获取层次名称描述的准确类型
-         */
-        TypeDecl * GetHierarchyIdentifierQualifiedType(HierarchyIdentifier *hierarchyIdentifier);
-
-        /*
-         * 通过内置类型枚举值查询类型定义
-         */
-        BuiltinTypeDecl * QueryBuiltinTypeWithEnum(TranslateUnit *translateUnit, BuiltinTypeDecl::EnumOfBuiltinType type_enum);
-
-        /*
-         * 获取可索引类型的元素类型
-         * 例如：
-         * 整数型数组返回整数型
-         * 字节集返回字节型
-         */
-        TypeDecl * GetIndexableTypeElement(TypeDecl *typeDecl);
-
-        /*
          * 通过名称引用类型定义指针
          * 若找不到则返回空指针
+         * hint 置空则默认为整数型
          */
-        TypeDecl * QueryTypeDeclWithName(TranslateUnit *translateUnit, const StringRef &name, SematicAnalysisContext *context, BuiltinTypeDecl::EnumOfBuiltinType hint = BuiltinTypeDecl::EnumOfBuiltinType::kBTypeInteger);
+        TypeDecl * QueryTypeDeclWithName(TranslateUnit *translateUnit, const StringRef &name, SematicAnalysisContext *context, BuiltinTypeDecl *hint = nullptr);
 
     public:
         bool Run(TranslateUnit * translateUnitPtr);

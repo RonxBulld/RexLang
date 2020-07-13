@@ -40,8 +40,8 @@ namespace rexlang {
         std::string instance_name_;
         std::string code_filename_;
         std::string parse_code_;
-        std::vector<TranslateUnitPtr> translate_units_;
-        TranslateUnitPtr major_translate_unit_ = nullptr;
+        std::vector<TranslateUnit *> translate_units_;
+        TranslateUnit * major_translate_unit_ = nullptr;
         std::set<StringRef> libraries_name;
 
     private:
@@ -56,21 +56,21 @@ namespace rexlang {
 
         SourceManager &getSourceManager();
 
-        TranslateUnitPtr runParser();
+        TranslateUnit * runParser();
 
-        TranslateUnitPtr parseOnFile(const FileEntry &fileEntry);
+        TranslateUnit * parseOnFile(const FileEntry &fileEntry);
 
         bool runSematicAnalysis();
 
-        TranslateUnitPtr getTranslateUnit();
+        TranslateUnit * getTranslateUnit();
     };
 
     namespace tooling {
-        TranslateUnitPtr BuildASTFromFiles(ProjectDB &projectDB, const std::string &toolname);
+        TranslateUnit * BuildASTFromFiles(ProjectDB &projectDB, const std::string &toolname);
 
-        TranslateUnitPtr BuildASTFromCodes(const std::vector<std::string> &codes, const std::string &filename, const std::string &toolname);
+        TranslateUnit * BuildASTFromCodes(const std::vector<std::string> &codes, const std::string &filename, const std::string &toolname);
 
-        TranslateUnitPtr BuildASTFromCodeWithArgs(const std::vector<FileEntry> &entries, const std::vector<std::string> &args, const std::string &toolname);
+        TranslateUnit * BuildASTFromCodeWithArgs(const std::vector<FileEntry> &entries, const std::vector<std::string> &args, const std::string &toolname);
 
         int GenerateCodeFromTranslateUnit(ProjectDB &projectDB);
 

@@ -36,12 +36,12 @@ namespace rexlang {
             if (lhs_builtin || rhs_builtin) {
                 if (lhs_builtin && rhs_builtin) {
                     // 2.1. 两者都是内置类型
-                    if (lhs_builtin->built_in_type_ == rhs_builtin->built_in_type_) {
-                        // 2.1.1. 一致则可赋值
+                    if (lhs_builtin->GetBuiltinType() == rhs_builtin->GetBuiltinType()) {
+                        // 2.1.1. 内置类型一致则可赋值
                         return true;
                     } else {
                         // 2.1.2. 左值类型兼容右值类型则可赋值
-                        if (TypeAssert::IsNumerical(lhs_builtin) && TypeAssert::IsNumerical(rhs_builtin)) {
+                        if (lhs_builtin->IsNumerical() && rhs_builtin->IsNumerical()) {
                             return true;
                         } else {
                             return false;

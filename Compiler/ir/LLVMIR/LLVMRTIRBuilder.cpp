@@ -18,8 +18,7 @@ namespace rexlang {
         bool is_ordinary = typeDecl->is<BuiltinTypeDecl>();
         if (is_ordinary) {
             BuiltinTypeDecl *builtin_type_decl = typeDecl->as<BuiltinTypeDecl>();
-            if (builtin_type_decl->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeString ||
-                builtin_type_decl->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDataSet) {
+            if (builtin_type_decl->IsStringType() || builtin_type_decl->IsDataSetType()) {
                 is_ordinary = false;
             }
         }

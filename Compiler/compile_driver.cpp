@@ -46,7 +46,7 @@ namespace rexlang {
 }
 
 namespace rexlang {
-    TranslateUnitPtr tooling::BuildASTFromFiles(ProjectDB &projectDB, const std::string &toolname) {
+    TranslateUnit * tooling::BuildASTFromFiles(ProjectDB &projectDB, const std::string &toolname) {
         std::vector<FileEntry> enties;
         for (const std::string &filename : projectDB.GetFileList()) {
             enties.push_back(FileEntry::MakeFromFile(filename));
@@ -54,7 +54,7 @@ namespace rexlang {
         return tooling::BuildASTFromCodeWithArgs(enties, {}, toolname);
     }
 
-    TranslateUnitPtr tooling::BuildASTFromCodes(const std::vector<std::string> &codes, const std::string &filename, const std::string &toolname) {
+    TranslateUnit * tooling::BuildASTFromCodes(const std::vector<std::string> &codes, const std::string &filename, const std::string &toolname) {
         std::vector<FileEntry> enties;
         for (const std::string &code : codes) {
             enties.push_back(FileEntry::MakeFromCode(code));
@@ -62,7 +62,7 @@ namespace rexlang {
         return tooling::BuildASTFromCodeWithArgs(enties, {}, toolname);
     }
 
-    TranslateUnitPtr tooling::BuildASTFromCodeWithArgs(const std::vector<FileEntry> &entries, const std::vector<std::string> &args, const std::string &toolname) {
+    TranslateUnit * tooling::BuildASTFromCodeWithArgs(const std::vector<FileEntry> &entries, const std::vector<std::string> &args, const std::string &toolname) {
         REXCompilerInstance compilerInstance;
         compilerInstance.setInstanceName(toolname);
         bool all_parse_success = true;
@@ -109,11 +109,11 @@ namespace rexlang {
         return 0;
     }
 
-    TranslateUnitPtr REXCompilerInstance::runParser() {
+    TranslateUnit * REXCompilerInstance::runParser() {
 
         // 分析指定的源代码文件
 
-        TranslateUnitPtr translate_unit = this->ast_generate_.BuildASTFromCode(this->parse_code_, this->code_filename_, this->instance_name_);
+        TranslateUnit * translate_unit = this->ast_generate_.BuildASTFromCode(this->parse_code_, this->code_filename_, this->instance_name_);
         this->translate_units_.push_back(translate_unit);
 
         // 对于源代码文件中引入的外部库进行分析
@@ -152,7 +152,7 @@ namespace rexlang {
         return translate_unit;
     }
 
-    TranslateUnitPtr REXCompilerInstance::parseOnFile(const FileEntry &fileEntry) {
+    TranslateUnit * REXCompilerInstance::parseOnFile(const FileEntry &fileEntry) {
         std::cout << "分析文件：" << fileEntry.GetFilename() << std::endl;
         this->setParseFilename(fileEntry.GetFilename());
         this->setParseCode(fileEntry.GetCode());
@@ -191,7 +191,7 @@ namespace rexlang {
         return sematic_success;
     }
 
-    TranslateUnitPtr REXCompilerInstance::getTranslateUnit() {
+    TranslateUnit * REXCompilerInstance::getTranslateUnit() {
         return this->major_translate_unit_;
     }
 }

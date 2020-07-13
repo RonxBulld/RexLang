@@ -110,8 +110,9 @@ namespace rexlang {
         }
     }
 
-    NameComponent *ASTUtility::GetArrayIndexBase(ArrayIndex *arrayIndex) {
+    NameComponent *ArrayIndex::GetIndexBase() const {
         NameComponent *base = nullptr;
+        const ArrayIndex *arrayIndex = this;
         do{
             base = arrayIndex->base_;
         } while ((arrayIndex = base->as<ArrayIndex>()));
@@ -135,7 +136,7 @@ namespace rexlang {
             // 变量定义为数组
             return MakeNoErrVal(array_decl->dimensions_);
         } else if (const BuiltinTypeDecl *builtin_type_decl = typeDecl->as<BuiltinTypeDecl>()) {
-            if (builtin_type_decl->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDataSet) {
+            if (builtin_type_decl->IsDataSetType()) {
                 // 内置类型只有字节集能够被索引
                 return MakeNoErrVal(std::vector<size_t>{0});
             } else {

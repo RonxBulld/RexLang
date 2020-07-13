@@ -106,7 +106,8 @@ namespace rexlang {
     }
 
     antlrcpp::Any CST2ASTConvert::visitRexlang_src(rexLangParser::Rexlang_srcContext *context) {
-        TranslateUnitPtr translate_unit = CreateNode<TranslateUnit>(context->getStart(), context->getStop());
+        TranslateUnit * translate_unit = CreateNode<TranslateUnit>(context->getStart(), context->getStop());
+        ast_context_->SetTranslateUnit(translate_unit);
         // 分析版本号
         translate_unit->edition_ = GetFromCtxIfExist<unsigned int, true>(context->edition_spec(), 2);
         // 分析文件具体内容
@@ -479,17 +480,9 @@ namespace rexlang {
 
     antlrcpp::Any CST2ASTConvert::visitHierarchy_identifier(rexLangParser::Hierarchy_identifierContext *context) {
         HierarchyIdentifierPtr hierarchy_identifier = CreateNode<HierarchyIdentifier>(context->getStart(), context->getStop());
-        NameComponentPtr forward_name_component_ = nullptr;
         for (auto *name_component_ctx : context->components) {
             NameComponentPtr name_component = GetFromCtxIfExist<NameComponentPtr, true>(name_component_ctx);
-            hierarchy_identifier->name_components_.push_back(name_component);
-
-            if (forward_name_component_) {
-                forward_name_component_->backward_name_component_ = name_component;
-            }
-            name_component->forward_name_component_ = forward_name_component_;
-            forward_name_component_ = name_component;
-
+            hierarchy_identifier->AppendComponent(name_component);
         }
         return NodeWarp(hierarchy_identifier);
     }
@@ -712,9 +705,9 @@ namespace rexlang {
         : ast_context_(ast_context) {
     }
 
-    TranslateUnitPtr CST2ASTConvert::BuildTranslateUnitFromParseTree(antlr4::tree::ParseTree *tree) {
+    TranslateUnit * CST2ASTConvert::BuildTranslateUnitFromParseTree(antlr4::tree::ParseTree *tree) {
         antlrcpp::Any build_result = this->visit(tree);
-        TranslateUnitPtr translate_unit = nullptr;
+        TranslateUnit * translate_unit = nullptr;
         if (build_result.is<NodeWarp>()) {
             if ((translate_unit = build_result.as<NodeWarp>())) {
                 return translate_unit;

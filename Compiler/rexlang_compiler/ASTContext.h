@@ -13,37 +13,35 @@
 namespace rexlang {
 
     class Diagnostic;
+    class TranslateUnit;
 
     class ASTContext {
     private:
-        StringPool string_pool_;
         LocationPool location_pool_;
         Diagnostic *diagnostic_ = nullptr;
         size_t node_index_ = 0;
         std::set<StringRef> dependence_libraries_;
+        TranslateUnit *TU = nullptr;
 
     public:
         ASTContext();
-
         ~ASTContext();
 
         StringRef CreateString(const std::string &str);
-
         StringRef CreateString(const char *pstr);
 
         size_t CreateLocation(const std::string &filename, size_t line, size_t column);
-
         size_t CreateLocation(const StringRef &filename, size_t line, size_t column);
 
-        const StringRef &GetFileFromLocate(size_t locate);
+        const StringRef &   GetFileFromLocate   (size_t locate);
+        size_t              GetLineFromLocate   (size_t locate);
+        size_t              GetColumnFromLocate (size_t locate);
 
-        size_t GetLineFromLocate(size_t locate);
+        void            SetDiagnostic(Diagnostic *diagnostic);
+        Diagnostic *    GetDiagnostic();
 
-        size_t GetColumnFromLocate(size_t locate);
-
-        void SetDiagnostic(Diagnostic *diagnostic);
-
-        Diagnostic *GetDiagnostic();
+        void            SetTranslateUnit(TranslateUnit *translateUnit);
+        TranslateUnit * GetTranslateUnit() const;
 
         size_t GetNodeIndex();
 

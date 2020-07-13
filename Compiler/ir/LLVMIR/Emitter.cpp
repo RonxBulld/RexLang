@@ -479,47 +479,21 @@ namespace rexlang {
             }
         }
 
-        switch (builtinTypeDecl->built_in_type_) {
-            case BuiltinTypeDecl::EnumOfBuiltinType::kBTypeVoid:
-                type = Builder.getVoidTy();
-                break;
-            case BuiltinTypeDecl::EnumOfBuiltinType::kBTypeChar:
-                type = Builder.getInt8Ty();
-                break;
-            case BuiltinTypeDecl::EnumOfBuiltinType::kBTypeInteger:
-                type = Builder.getInt32Ty();
-                break;
-            case BuiltinTypeDecl::EnumOfBuiltinType::kBTypeFloat:
-                type = Builder.getFloatTy();
-                break;
-            case BuiltinTypeDecl::EnumOfBuiltinType::kBTypeBool:
-                type = Builder.getInt1Ty();
-                break;
-            case BuiltinTypeDecl::EnumOfBuiltinType::kBTypeString:
-                type = RTBuilder.getStringType(); // 字符串对象指针
-                break;
-            case BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDataSet:
-                type = RTBuilder.getStringType(); // 字节集对象指针
-                break;
-            case BuiltinTypeDecl::EnumOfBuiltinType::kBTypeShort:
-                type = Builder.getInt16Ty();
-                break;
-            case BuiltinTypeDecl::EnumOfBuiltinType::kBTypeLong:
-                type = Builder.getInt64Ty();
-                break;
-            case BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDatetime:
-                type = Builder.getInt64Ty();
-                break;
-            case BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDouble:
-                type = Builder.getDoubleTy();
-                break;
-            case BuiltinTypeDecl::EnumOfBuiltinType::kBTypeFuncPtr:
-                type = Builder.getVoidTy()->getPointerTo();
-                break;
-            default:
-                assert(false);
-                return nullptr;
-        }
+
+             if (builtinTypeDecl->IsVoidType    ()) { type = Builder.getVoidTy(); }
+        else if (builtinTypeDecl->IsCharType    ()) { type = Builder.getInt8Ty(); }
+        else if (builtinTypeDecl->IsIntegerType ()) { type = Builder.getInt32Ty(); }
+        else if (builtinTypeDecl->IsFloatType   ()) { type = Builder.getFloatTy(); }
+        else if (builtinTypeDecl->IsBoolType    ()) { type = Builder.getInt1Ty(); }
+        else if (builtinTypeDecl->IsStringType  ()) { type = RTBuilder.getStringType(); } /*字符串对象指针*/
+        else if (builtinTypeDecl->IsDataSetType ()) { type = RTBuilder.getStringType(); } /*字节集对象指针*/
+        else if (builtinTypeDecl->IsShortType   ()) { type = Builder.getInt16Ty(); }
+        else if (builtinTypeDecl->IsLongType    ()) { type = Builder.getInt64Ty(); }
+        else if (builtinTypeDecl->IsDatetimeType()) { type = Builder.getInt64Ty(); }
+        else if (builtinTypeDecl->IsDoubleType  ()) { type = Builder.getDoubleTy(); }
+        else if (builtinTypeDecl->IsFuncPtrType ()) { type = Builder.getVoidTy()->getPointerTo(); }
+        else { assert(false); return nullptr; }
+
         type_object_pool_[builtinTypeDecl] = type;
         return type;
     }
@@ -625,7 +599,7 @@ namespace rexlang {
         llvm::BasicBlock *ret_bb = llvm::BasicBlock::Create(TheContext, "return", function);
         function_retbb_map_[function] = ret_bb;
         llvm::Value *return_value_ptr = nullptr;
-        if (!TypeAssert::IsVoidType(functionDecl->return_type_)) {
+        if (!functionDecl->return_type_->IsVoidType()) {
             llvm::Type *ret_type = GetType(functionDecl->return_type_);
             return_value_ptr = Builder.CreateAlloca(ret_type, nullptr, "ret");
         }
@@ -660,7 +634,7 @@ namespace rexlang {
 //            Builder.CreateBr(ret_bb);
 //        }
         Builder.SetInsertPoint(ret_bb);
-        if (!TypeAssert::IsVoidType(functionDecl->return_type_)) {
+        if (!functionDecl->return_type_->IsVoidType()) {
             llvm::Value *return_value = Builder.CreateLoad(return_value_ptr);
             Builder.CreateRet(return_value);
         } else {
@@ -1174,8 +1148,8 @@ namespace rexlang {
             return nullptr;
         }
 
-        assert(nameComponent->identifier_usage_ != IdentifierUsage::kUnknown);
-        if (nameComponent->identifier_usage_ == IdentifierUsage::kAsRightValue) {
+        assert(nameComponent->identifier_usage_ != ExprUsage::kUnknown);
+        if (nameComponent->identifier_usage_ == ExprUsage::kAsRightValue) {
             ref = LoadVariable(ref);
         }
 
@@ -1252,16 +1226,16 @@ namespace rexlang {
 
     llvm::Value *IREmit::_EmitImpl_(NameComponent *nameComponent) {
         llvm::Value *previous_value = nullptr;
-        if (nameComponent->forward_name_component_) {
-            previous_value = Emit(nameComponent->forward_name_component_);
+        if (nameComponent->Forward()) {
+            previous_value = Emit(nameComponent->Forward());
         }
         llvm::Value *this_value = GetFromStructOrPool(previous_value, nameComponent);
 
-        if (nameComponent->identifier_usage_ == IdentifierUsage::kAsRightValue) {
+        if (nameComponent->identifier_usage_ == ExprUsage::kAsRightValue) {
 //            std::cout << nameComponent->ast_context_->GetLineFromLocate(nameComponent->location_start_) << std::endl;
             // 将名称组件当右值使用
             this_value = LoadVariable(this_value);
-        } else if (nameComponent->identifier_usage_ == IdentifierUsage::kAsLeftValue) {
+        } else if (nameComponent->identifier_usage_ == ExprUsage::kAsLeftValue) {
             // 将名称组件当左值使用
         }
         // 如果是一个引用参数则需要加载它实际的内存地址
@@ -1282,7 +1256,7 @@ namespace rexlang {
             return nullptr;
         }
         switch (unaryExpression->operator_type_) {
-            case _OperatorExpression::OperatorType::kOptSub: {
+            case OperatorType::kOptSub: {
                 return Builder.CreateNeg(V, ".neg");
             }
             default: {
@@ -1305,7 +1279,7 @@ namespace rexlang {
 
         switch (binaryExpression->operator_type_) {
             // *** 运算系列 ***
-            case _OperatorExpression::OperatorType::kOptAdd: {
+            case OperatorType::kOptAdd: {
 
                 // 支持整数、浮点、字符串、字节集
 
@@ -1320,7 +1294,7 @@ namespace rexlang {
                     return nullptr;
                 }
             }
-            case _OperatorExpression::OperatorType::kOptSub: {
+            case OperatorType::kOptSub: {
 
                 // 支持整数、浮点
 
@@ -1333,7 +1307,7 @@ namespace rexlang {
                     return nullptr;
                 }
             }
-            case _OperatorExpression::OperatorType::kOptMul: {
+            case OperatorType::kOptMul: {
 
                 // 支持整数、浮点
 
@@ -1346,7 +1320,7 @@ namespace rexlang {
                     return nullptr;
                 }
             }
-            case _OperatorExpression::OperatorType::kOptDiv: {
+            case OperatorType::kOptDiv: {
 
                 // 支持整数、浮点
 
@@ -1359,7 +1333,7 @@ namespace rexlang {
                     return nullptr;
                 }
             }
-            case _OperatorExpression::OperatorType::kOptFullDiv: {
+            case OperatorType::kOptFullDiv: {
 
                 // 支持整数、浮点
 
@@ -1374,7 +1348,7 @@ namespace rexlang {
                 }
                 return Builder.CreateFPToSI(div_res, Builder.getInt64Ty());
             }
-            case _OperatorExpression::OperatorType::kOptMod: {
+            case OperatorType::kOptMod: {
 
                 // 支持整数、浮点
 
@@ -1388,7 +1362,7 @@ namespace rexlang {
                 }
             }
                 // *** 比较系列 ***
-            case _OperatorExpression::OperatorType::kOptEqual: {
+            case OperatorType::kOptEqual: {
 
                 // 支持整数、浮点、字符串、字节集
 
@@ -1404,7 +1378,7 @@ namespace rexlang {
                     return nullptr;
                 }
             }
-            case _OperatorExpression::OperatorType::kOptNotEqual: {
+            case OperatorType::kOptNotEqual: {
 
                 // 支持整数、浮点、字符串、字节集
 
@@ -1420,7 +1394,7 @@ namespace rexlang {
                     return nullptr;
                 }
             }
-            case _OperatorExpression::OperatorType::kOptGreatThan: {
+            case OperatorType::kOptGreatThan: {
 
                 // 支持整数、浮点、字符串、字节集
 
@@ -1436,7 +1410,7 @@ namespace rexlang {
                     return nullptr;
                 }
             }
-            case _OperatorExpression::OperatorType::kOptLessThan: {
+            case OperatorType::kOptLessThan: {
 
                 // 支持整数、浮点、字符串、字节集
 
@@ -1452,7 +1426,7 @@ namespace rexlang {
                     return nullptr;
                 }
             }
-            case _OperatorExpression::OperatorType::kOptGreatEqual: {
+            case OperatorType::kOptGreatEqual: {
 
                 // 支持整数、浮点、字符串、字节集
 
@@ -1468,7 +1442,7 @@ namespace rexlang {
                     return nullptr;
                 }
             }
-            case _OperatorExpression::OperatorType::kOptLessEqual: {
+            case OperatorType::kOptLessEqual: {
 
                 // 支持整数、浮点、字符串、字节集
 
@@ -1484,7 +1458,7 @@ namespace rexlang {
                     return nullptr;
                 }
             }
-            case _OperatorExpression::OperatorType::kOptLikeEqual: {
+            case OperatorType::kOptLikeEqual: {
 
                 // 支持字符串、字节集
 
@@ -1496,7 +1470,7 @@ namespace rexlang {
                 }
             }
                 // *** 逻辑系列 ***
-            case _OperatorExpression::OperatorType::kOptAnd: {
+            case OperatorType::kOptAnd: {
 
                 // 支持整数
 
@@ -1507,7 +1481,7 @@ namespace rexlang {
                     return nullptr;
                 }
             }
-            case _OperatorExpression::OperatorType::kOptOr: {
+            case OperatorType::kOptOr: {
 
                 // 支持整数
 

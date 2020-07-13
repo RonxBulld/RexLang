@@ -179,7 +179,7 @@ namespace rexlang {
     public:
         CST2ASTConvert(ASTContext *ast_context, Diagnostic *diagnostic);
 
-        TranslateUnitPtr BuildTranslateUnitFromParseTree(antlr4::tree::ParseTree* tree);
+        TranslateUnit * BuildTranslateUnitFromParseTree(antlr4::tree::ParseTree* tree);
     };
 }
 

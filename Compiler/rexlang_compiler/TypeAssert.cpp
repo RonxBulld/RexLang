@@ -8,122 +8,277 @@
 #include "ASTUtility.h"
 
 namespace rexlang {
-    bool TypeAssert::IsVoidType(const TypeDecl *typeDecl) {
-        if (const BuiltinTypeDecl * builtin_type_decl = typeDecl->as<BuiltinTypeDecl>()) {
-            return builtin_type_decl->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeVoid;
+
+    /**********************************************************
+     * 运算符类型的断言
+     **********************************************************/
+
+    OperatorType::OperatorType(Opt opt) : opt_(opt) { }
+
+    bool OperatorType::IsUnaryOpt() const {
+        switch (opt_) {
+            case Opt::kOptSub:
+                return true;
+            default:
+                return false;
         }
-        return false;
     }
 
-    bool TypeAssert::IsCharType(const TypeDecl * typeDecl) {
-        if (const BuiltinTypeDecl * builtin_type_decl = typeDecl->as<BuiltinTypeDecl>()) {
-            return builtin_type_decl->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeChar;
+    bool OperatorType::IsBinaryOpt() const {
+        switch (opt_) {
+            case Opt::kOptAdd:
+            case Opt::kOptSub:
+            case Opt::kOptMul:
+            case Opt::kOptDiv:
+            case Opt::kOptFullDiv:
+            case Opt::kOptMod:
+            case Opt::kOptEqual:
+            case Opt::kOptNotEqual:
+            case Opt::kOptGreatThan:
+            case Opt::kOptLessThan:
+            case Opt::kOptGreatEqual:
+            case Opt::kOptLessEqual:
+            case Opt::kOptLikeEqual:
+            case Opt::kOptAnd:
+            case Opt::kOptOr:
+                return true;
+            default:
+                return false;
         }
-        return false;
     }
 
-    bool TypeAssert::IsIntegerType(const TypeDecl * typeDecl) {
-        if (const BuiltinTypeDecl * builtin_type_decl = typeDecl->as<BuiltinTypeDecl>()) {
-            return builtin_type_decl->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeInteger;
+    bool OperatorType::IsNumericalOpt() const {
+        switch (opt_) {
+            case Opt::kOptAdd:
+            case Opt::kOptSub:
+            case Opt::kOptMul:
+            case Opt::kOptDiv:
+            case Opt::kOptFullDiv:
+            case Opt::kOptMod:
+                return true;
+            default:
+                return false;
         }
-        return false;
     }
 
-    bool TypeAssert::IsFloatType(const TypeDecl * typeDecl) {
-        if (const BuiltinTypeDecl * builtin_type_decl = typeDecl->as<BuiltinTypeDecl>()) {
-            return builtin_type_decl->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeFloat;
+    bool OperatorType::IsEqualOrNotOpt() const {
+        switch (opt_) {
+            case Opt::kOptEqual:
+            case Opt::kOptNotEqual:
+                return true;
+            default:
+                return false;
         }
-        return false;
     }
 
-    bool TypeAssert::IsBoolType(const TypeDecl * typeDecl) {
-        if (const BuiltinTypeDecl * builtin_type_decl = typeDecl->as<BuiltinTypeDecl>()) {
-            return builtin_type_decl->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeBool;
+    bool OperatorType::IsRelationalOpt() const{
+        switch (opt_) {
+            case Opt::kOptEqual:
+            case Opt::kOptNotEqual:
+            case Opt::kOptGreatThan:
+            case Opt::kOptLessThan:
+            case Opt::kOptGreatEqual:
+            case Opt::kOptLessEqual:
+                return true;
+            default:
+                return false;
         }
-        return false;
     }
 
-    bool TypeAssert::IsStringType(const TypeDecl * typeDecl) {
-        if (const BuiltinTypeDecl * builtin_type_decl = typeDecl->as<BuiltinTypeDecl>()) {
-            return builtin_type_decl->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeString;
+    bool OperatorType::IsExtraRelOpt() const {
+        switch (opt_) {
+            case Opt::kOptEqual:
+            case Opt::kOptNotEqual:
+            case Opt::kOptGreatThan:
+            case Opt::kOptLessThan:
+            case Opt::kOptGreatEqual:
+            case Opt::kOptLessEqual:
+            case Opt::kOptLikeEqual:
+                return true;
+            default:
+                return false;
         }
-        return false;
     }
 
-    bool TypeAssert::IsDataSetType(const TypeDecl * typeDecl) {
-        if (const BuiltinTypeDecl * builtin_type_decl = typeDecl->as<BuiltinTypeDecl>()) {
-            return builtin_type_decl->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDataSet;
+    bool OperatorType::IsBooleanOpt() const {
+        switch (opt_) {
+            case Opt::kOptAnd:
+            case Opt::kOptOr:
+                return true;
+            default:
+                return false;
         }
+    }
+
+    OperatorType::Opt OperatorType::GetOperate() const {
+        return opt_;
+    }
+
+    /**********************************************************
+     * 内置分类的特定类型断言
+     **********************************************************/
+
+    bool    TypeDecl            :: IsVoidType           () const { return false; }
+    bool    TypeDecl            :: IsCommonType         () const { return false; }
+    bool    TypeDecl            :: IsCharType           () const { return false; }
+    bool    TypeDecl            :: IsIntegerType        () const { return false; }
+    bool    TypeDecl            :: IsFloatType          () const { return false; }
+    bool    TypeDecl            :: IsBoolType           () const { return false; }
+    bool    TypeDecl            :: IsStringType         () const { return false; }
+    bool    TypeDecl            :: IsDataSetType        () const { return false; }
+    bool    TypeDecl            :: IsShortType          () const { return false; }
+    bool    TypeDecl            :: IsLongType           () const { return false; }
+    bool    TypeDecl            :: IsDatetimeType       () const { return false; }
+    bool    TypeDecl            :: IsFuncPtrType        () const { return false; }
+    bool    TypeDecl            :: IsDoubleType         () const { return false; }
+    bool    TypeDecl            :: IsStructType         () const { return false; }
+    bool    TypeDecl            :: IsExternBooleanType  () const { return false; }
+    bool    TypeDecl            :: IsNumerical          () const { return false; }
+    bool    TypeDecl            :: IsIntegerClass       () const { return false; }
+
+    bool    BuiltinVoidType     :: IsVoidType           () const { return true; }
+    bool    BuiltinCommonType   :: IsCommonType         () const { return true; }
+    bool    BuiltinCharType     :: IsCharType           () const { return true; }
+    bool    BuiltinIntegerType  :: IsIntegerType        () const { return true; }
+    bool    BuiltinFloatType    :: IsFloatType          () const { return true; }
+    bool    BuiltinBoolType     :: IsBoolType           () const { return true; }
+    bool    BuiltinStringType   :: IsStringType         () const { return true; }
+    bool    BuiltinDataSetType  :: IsDataSetType        () const { return true; }
+    bool    BuiltinShortType    :: IsShortType          () const { return true; }
+    bool    BuiltinLongType     :: IsLongType           () const { return true; }
+    bool    BuiltinDatetimeType :: IsDatetimeType       () const { return true; }
+    bool    BuiltinFuncPtrType  :: IsFuncPtrType        () const { return true; }
+    bool    BuiltinDoubleType   :: IsDoubleType         () const { return true; }
+    bool    StructureDecl       :: IsStructType         () const { return true; }
+
+    bool BuiltinTypeDecl::IsExternBooleanType() const {
+        if (this->IsBoolType   ()) { return true; }
+        if (this->IsNumerical  ()) { return true; }
+        if (this->IsFuncPtrType()) { return true; }
         return false;
     }
 
-    bool TypeAssert::IsShortType(const TypeDecl * typeDecl) {
-        if (const BuiltinTypeDecl * builtin_type_decl = typeDecl->as<BuiltinTypeDecl>()) {
-            return builtin_type_decl->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeShort;
+    bool BuiltinTypeDecl::IsNumerical() const {
+        if (this->IsIntegerClass()) { return true; }
+        if (this->IsFloatType   ()) { return true; }
+        if (this->IsDoubleType  ()) { return true; }
+        return false;
+    }
+
+    bool BuiltinTypeDecl::IsIntegerClass() const {
+        if (this->IsCharType   ()) { return true; }
+        if (this->IsIntegerType()) { return true; }
+        if (this->IsShortType  ()) { return true; }
+        if (this->IsLongType   ()) { return true; }
+        return false;
+    }
+
+    /**********************************************************
+     *
+     **********************************************************/
+
+    bool ParameterDecl::ShouldBeReference() const {
+             if (this->is_reference_)                   { return true; }
+        else if (this->is_array)                        { return true; }
+        else if (this->type_decl_ptr_->IsStringType())  { return true; }
+        else if (this->type_decl_ptr_->IsDataSetType()) { return true; }
+        else if (this->type_decl_ptr_->IsStructType())  { return true; }
+        else                                            { return false; }
+    }
+
+    /**********************************************************
+     * 计算有效性判定
+     **********************************************************/
+
+    bool TypeDecl::IsBinOptValid(OperatorType opt, TypeDecl *otherType) const { return false; }
+
+    // 函数类型不接受任何二元运算
+
+    bool FunctorDecl::IsBinOptValid(OperatorType opt, TypeDecl *otherType) const { return false; }
+
+    // 数组类型不接受任何二元运算
+
+    bool ArrayDecl::IsBinOptValid(OperatorType opt, TypeDecl *otherType) const { return false; }
+
+    // 结构体类型不接受任何二元运算
+
+    bool StructureDecl::IsBinOptValid(OperatorType opt, TypeDecl *otherType) const { return false; }
+
+    // 数值型的二元操作，仅要求另一个操作数也具有数值性即可
+
+    bool BuiltinCharType    ::IsBinOptValid(OperatorType opt, TypeDecl *otherType) const { return otherType->IsNumerical(); }
+    bool BuiltinIntegerType ::IsBinOptValid(OperatorType opt, TypeDecl *otherType) const { return otherType->IsNumerical(); }
+    bool BuiltinShortType   ::IsBinOptValid(OperatorType opt, TypeDecl *otherType) const { return otherType->IsNumerical(); }
+    bool BuiltinLongType    ::IsBinOptValid(OperatorType opt, TypeDecl *otherType) const { return otherType->IsNumerical(); }
+    bool BuiltinFloatType   ::IsBinOptValid(OperatorType opt, TypeDecl *otherType) const { return otherType->IsNumerical(); }
+    bool BuiltinDoubleType  ::IsBinOptValid(OperatorType opt, TypeDecl *otherType) const { return otherType->IsNumerical(); }
+
+    // 字符串型仅接受其它字节集型的扩展关系运算、加法运算
+
+    bool BuiltinStringType::IsBinOptValid(OperatorType opt, TypeDecl *otherType) const {
+        if (!otherType->IsDataSetType()) { return false; }
+        if (opt.IsExtraRelOpt())         { return true; }
+        switch (opt.GetOperate()) {
+            case OperatorType::Opt::kOptAdd:
+                return true;
+            default:
+                return false;
         }
-        return false;
     }
 
-    bool TypeAssert::IsLongType(const TypeDecl * typeDecl) {
-        if (const BuiltinTypeDecl * builtin_type_decl = typeDecl->as<BuiltinTypeDecl>()) {
-            return builtin_type_decl->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeLong;
+    // 字节集型仅接受其它字节集型的扩展关系运算、加法运算
+
+    bool BuiltinDataSetType::IsBinOptValid(OperatorType opt, TypeDecl *otherType) const {
+        if (!otherType->IsDataSetType()) { return false; }
+        if (opt.IsExtraRelOpt())         { return true; }
+        switch (opt.GetOperate()) {
+            case OperatorType::Opt::kOptAdd:
+                return true;
+            default:
+                return false;
         }
+    }
+
+    // 逻辑型仅接受其它逻辑型的布尔运算和相等关系运算
+
+    bool BuiltinBoolType::IsBinOptValid(OperatorType opt, TypeDecl *otherType) const {
+        if (!otherType->IsBoolType()) { return false; }
+        if (opt.IsBooleanOpt())       { return true; }
+        if (opt.IsEqualOrNotOpt())    { return true; }
         return false;
     }
 
-    bool TypeAssert::IsDatatimeType(const TypeDecl * typeDecl) {
-        if (const BuiltinTypeDecl * builtin_type_decl = typeDecl->as<BuiltinTypeDecl>()) {
-            return builtin_type_decl->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDatetime;
+    // 日期时间型仅接受其它日期时间型的加减运算
+
+    bool BuiltinDatetimeType::IsBinOptValid(OperatorType opt, TypeDecl *otherType) const {
+        if (!otherType->IsDatetimeType()) { return false; }
+        switch (opt.GetOperate()) {
+            case OperatorType::Opt::kOptAdd:
+            case OperatorType::Opt::kOptSub:
+                return true;
+            default:
+                return false;
         }
-        return false;
     }
 
-    bool TypeAssert::IsFuncPtrType(const TypeDecl * typeDecl) {
-        if (const BuiltinTypeDecl * builtin_type_decl = typeDecl->as<BuiltinTypeDecl>()) {
-            return builtin_type_decl->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeFuncPtr;
-        }
-        return false;
-    }
+    // 函数指针不接受任何二元运算
 
-    bool TypeAssert::IsDoubleType(const TypeDecl * typeDecl) {
-        if (const BuiltinTypeDecl * builtin_type_decl = typeDecl->as<BuiltinTypeDecl>()) {
-            return builtin_type_decl->built_in_type_ == BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDouble;
-        }
-        return false;
-    }
+    bool BuiltinFuncPtrType::IsBinOptValid(OperatorType opt, TypeDecl *otherType) const { return false; }
 
-    bool TypeAssert::IsExternBooleanType(const TypeDecl * typeDecl) {
-        if (TypeAssert::IsBoolType(typeDecl)) { return true; }
-        if (TypeAssert::IsNumerical(typeDecl)) { return true; }
-        if (TypeAssert::IsFuncPtrType(typeDecl)) { return true; }
-        return false;
-    }
-
-    bool TypeAssert::IsNumerical(const TypeDecl *typeDecl) {
-        if (TypeAssert::IsIntegerClass(typeDecl)) { return true; }
-        if (TypeAssert::IsFloatType(typeDecl)) { return true; }
-        if (TypeAssert::IsDoubleType(typeDecl)) { return true; }
-        return false;
-    }
-
-    bool TypeAssert::IsIntegerClass(const TypeDecl *typeDecl) {
-        if (TypeAssert::IsCharType(typeDecl)) { return true; }
-        if (TypeAssert::IsIntegerType(typeDecl)) { return true; }
-        if (TypeAssert::IsShortType(typeDecl)) { return true; }
-        if (TypeAssert::IsLongType(typeDecl)) { return true; }
-        return false;
-    }
+    /**********************************************************
+     *
+     **********************************************************/
 
     class ValidMarixOpt {
     private:
         /*
          * 类型有效运算矩阵
          */
-        std::set<_OperatorExpression::OperatorType> TypeValidMatrix[(size_t)BuiltinTypeDecl::EnumOfBuiltinType::kBTtypeEND][(size_t)BuiltinTypeDecl::EnumOfBuiltinType::kBTtypeEND];
+        std::set<OperatorType> TypeValidMatrix[(size_t)EnumOfBuiltinType::kBTypeEND][(size_t)EnumOfBuiltinType::kBTypeEND];
         /*
          * 类型提升矩阵
          */
-        BuiltinTypeDecl::EnumOfBuiltinType TypeUpgradeMatrix[(size_t)BuiltinTypeDecl::EnumOfBuiltinType::kBTtypeEND][(size_t)BuiltinTypeDecl::EnumOfBuiltinType::kBTtypeEND];
+        EnumOfBuiltinType TypeUpgradeMatrix[(size_t)EnumOfBuiltinType::kBTypeEND][(size_t)EnumOfBuiltinType::kBTypeEND];
 
         /**
          * @brief 添加有效运算符信息
@@ -132,17 +287,17 @@ namespace rexlang {
          * @param enumOfBuiltinType 运算符
          * @param commutativeLaw 符合交换律
          */
-        void AddValid(BuiltinTypeDecl::EnumOfBuiltinType l, BuiltinTypeDecl::EnumOfBuiltinType r, _OperatorExpression::OperatorType enumOfBuiltinType, bool commutativeLaw = true) {
+        void AddValid(EnumOfBuiltinType l, EnumOfBuiltinType r, OperatorType enumOfBuiltinType, bool commutativeLaw = true) {
             TypeValidMatrix[(size_t)l][(size_t)r].insert(enumOfBuiltinType);
             if (commutativeLaw) {
                 TypeValidMatrix[(size_t)r][(size_t)l].insert(enumOfBuiltinType);
             }
         }
 
-        void AddValids(std::set<BuiltinTypeDecl::EnumOfBuiltinType> ls, std::set<BuiltinTypeDecl::EnumOfBuiltinType> rs, std::set<_OperatorExpression::OperatorType> enumOfBuiltinTypes, bool commutativeLaw = true) {
-            for (BuiltinTypeDecl::EnumOfBuiltinType l : ls) {
-                for (BuiltinTypeDecl::EnumOfBuiltinType r : rs) {
-                    for (_OperatorExpression::OperatorType t : enumOfBuiltinTypes) {
+        void AddValids(std::set<EnumOfBuiltinType> ls, std::set<EnumOfBuiltinType> rs, std::set<OperatorType> enumOfBuiltinTypes, bool commutativeLaw = true) {
+            for (EnumOfBuiltinType l : ls) {
+                for (EnumOfBuiltinType r : rs) {
+                    for (OperatorType t : enumOfBuiltinTypes) {
                         this->AddValid(l, r, t, commutativeLaw);
                     }
                 }
@@ -156,16 +311,16 @@ namespace rexlang {
          * @param result 处理结果类型
          * @param commutativeLaw 符合交换律
          */
-        void AddUpgrade(BuiltinTypeDecl::EnumOfBuiltinType l, BuiltinTypeDecl::EnumOfBuiltinType r, BuiltinTypeDecl::EnumOfBuiltinType result, bool commutativeLaw = true) {
+        void AddUpgrade(EnumOfBuiltinType l, EnumOfBuiltinType r, EnumOfBuiltinType result, bool commutativeLaw = true) {
             TypeUpgradeMatrix[(size_t)l][(size_t)r] = result;
             if (commutativeLaw) {
                 TypeUpgradeMatrix[(size_t)r][(size_t)l] = result;
             }
         }
 
-        void AddUpgrades(std::set<BuiltinTypeDecl::EnumOfBuiltinType> ls, std::set<BuiltinTypeDecl::EnumOfBuiltinType> rs, BuiltinTypeDecl::EnumOfBuiltinType result, bool commutativeLaw = true) {
-            for (BuiltinTypeDecl::EnumOfBuiltinType l : ls) {
-                for (BuiltinTypeDecl::EnumOfBuiltinType r : rs) {
+        void AddUpgrades(std::set<EnumOfBuiltinType> ls, std::set<EnumOfBuiltinType> rs, EnumOfBuiltinType result, bool commutativeLaw = true) {
+            for (EnumOfBuiltinType l : ls) {
+                for (EnumOfBuiltinType r : rs) {
                     AddUpgrade(l, r, result, commutativeLaw);
                 }
             }
@@ -174,32 +329,32 @@ namespace rexlang {
     public:
         ValidMarixOpt() {
             // 简化命名
-            BuiltinTypeDecl::EnumOfBuiltinType C = BuiltinTypeDecl::EnumOfBuiltinType::kBTypeChar;
-            BuiltinTypeDecl::EnumOfBuiltinType I = BuiltinTypeDecl::EnumOfBuiltinType::kBTypeInteger;
-            BuiltinTypeDecl::EnumOfBuiltinType F = BuiltinTypeDecl::EnumOfBuiltinType::kBTypeFloat;
-            BuiltinTypeDecl::EnumOfBuiltinType B = BuiltinTypeDecl::EnumOfBuiltinType::kBTypeBool;
-            BuiltinTypeDecl::EnumOfBuiltinType S = BuiltinTypeDecl::EnumOfBuiltinType::kBTypeString;
-            BuiltinTypeDecl::EnumOfBuiltinType A = BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDataSet;
-            BuiltinTypeDecl::EnumOfBuiltinType H = BuiltinTypeDecl::EnumOfBuiltinType::kBTypeShort;
-            BuiltinTypeDecl::EnumOfBuiltinType L = BuiltinTypeDecl::EnumOfBuiltinType::kBTypeLong;
-            BuiltinTypeDecl::EnumOfBuiltinType T = BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDatetime;
-            BuiltinTypeDecl::EnumOfBuiltinType N = BuiltinTypeDecl::EnumOfBuiltinType::kBTypeFuncPtr;
-            BuiltinTypeDecl::EnumOfBuiltinType D = BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDouble;
-            _OperatorExpression::OperatorType ADD       = _OperatorExpression::OperatorType::kOptAdd;
-            _OperatorExpression::OperatorType SUB       = _OperatorExpression::OperatorType::kOptSub;
-            _OperatorExpression::OperatorType MUL       = _OperatorExpression::OperatorType::kOptMul;
-            _OperatorExpression::OperatorType DIV       = _OperatorExpression::OperatorType::kOptDiv;
-            _OperatorExpression::OperatorType FULLDIV   = _OperatorExpression::OperatorType::kOptFullDiv;
-            _OperatorExpression::OperatorType MOD       = _OperatorExpression::OperatorType::kOptMod;
-            _OperatorExpression::OperatorType EQU       = _OperatorExpression::OperatorType::kOptEqual;
-            _OperatorExpression::OperatorType NEQ       = _OperatorExpression::OperatorType::kOptNotEqual;
-            _OperatorExpression::OperatorType GT        = _OperatorExpression::OperatorType::kOptGreatThan;
-            _OperatorExpression::OperatorType LT        = _OperatorExpression::OperatorType::kOptLessThan;
-            _OperatorExpression::OperatorType GE        = _OperatorExpression::OperatorType::kOptGreatEqual;
-            _OperatorExpression::OperatorType LE        = _OperatorExpression::OperatorType::kOptLessEqual;
-            _OperatorExpression::OperatorType LIKE      = _OperatorExpression::OperatorType::kOptLikeEqual;
-            _OperatorExpression::OperatorType AND       = _OperatorExpression::OperatorType::kOptAnd;
-            _OperatorExpression::OperatorType OR        = _OperatorExpression::OperatorType::kOptOr;
+            EnumOfBuiltinType C = EnumOfBuiltinType::kBTypeChar;
+            EnumOfBuiltinType I = EnumOfBuiltinType::kBTypeInteger;
+            EnumOfBuiltinType F = EnumOfBuiltinType::kBTypeFloat;
+            EnumOfBuiltinType B = EnumOfBuiltinType::kBTypeBool;
+            EnumOfBuiltinType S = EnumOfBuiltinType::kBTypeString;
+            EnumOfBuiltinType A = EnumOfBuiltinType::kBTypeDataSet;
+            EnumOfBuiltinType H = EnumOfBuiltinType::kBTypeShort;
+            EnumOfBuiltinType L = EnumOfBuiltinType::kBTypeLong;
+            EnumOfBuiltinType T = EnumOfBuiltinType::kBTypeDatetime;
+            EnumOfBuiltinType N = EnumOfBuiltinType::kBTypeFuncPtr;
+            EnumOfBuiltinType D = EnumOfBuiltinType::kBTypeDouble;
+            OperatorType ADD       = OperatorType::Opt::kOptAdd;
+            OperatorType SUB       = OperatorType::Opt::kOptSub;
+            OperatorType MUL       = OperatorType::Opt::kOptMul;
+            OperatorType DIV       = OperatorType::Opt::kOptDiv;
+            OperatorType FULLDIV   = OperatorType::Opt::kOptFullDiv;
+            OperatorType MOD       = OperatorType::Opt::kOptMod;
+            OperatorType EQU       = OperatorType::Opt::kOptEqual;
+            OperatorType NEQ       = OperatorType::Opt::kOptNotEqual;
+            OperatorType GT        = OperatorType::Opt::kOptGreatThan;
+            OperatorType LT        = OperatorType::Opt::kOptLessThan;
+            OperatorType GE        = OperatorType::Opt::kOptGreatEqual;
+            OperatorType LE        = OperatorType::Opt::kOptLessEqual;
+            OperatorType LIKE      = OperatorType::Opt::kOptLikeEqual;
+            OperatorType AND       = OperatorType::Opt::kOptAnd;
+            OperatorType OR        = OperatorType::Opt::kOptOr;
             this->AddValids({C, I, F, H, L, D}, {C, I, F, H, L, D}, {ADD, SUB, MUL, DIV, FULLDIV, MOD, EQU, NEQ, GT, LT, GE, LE});
             this->AddValids({B}, {B}, {AND, OR});
             this->AddValids({S}, {S}, {ADD, LIKE});
@@ -209,8 +364,8 @@ namespace rexlang {
             /*
              * 类型提升图
              * C→H→I→L
-             *      ↓ ↓
-             *      F→D
+             *     ↓ ↓
+             *     F→D
              * 类型提升矩阵
              *    C H I L F D
              *  C C
@@ -229,29 +384,29 @@ namespace rexlang {
             this->AddUpgrades({D}, {C, H, I, L, F, D}, D);
         }
 
-        bool OperateValid(BuiltinTypeDecl::EnumOfBuiltinType l, BuiltinTypeDecl::EnumOfBuiltinType r, _OperatorExpression::OperatorType operatorType) const {
-            const std::set<_OperatorExpression::OperatorType> &valid_set = TypeValidMatrix[(size_t)l][(size_t)r];
+        bool OperateValid(EnumOfBuiltinType l, EnumOfBuiltinType r, OperatorType operatorType) const {
+            const std::set<OperatorType> &valid_set = TypeValidMatrix[(size_t)l][(size_t)r];
             return valid_set.find(operatorType) != valid_set.end();
         }
 
-        BuiltinTypeDecl::EnumOfBuiltinType TypeUpgrade(BuiltinTypeDecl::EnumOfBuiltinType l, BuiltinTypeDecl::EnumOfBuiltinType r) const {
+        EnumOfBuiltinType TypeUpgrade(EnumOfBuiltinType l, EnumOfBuiltinType r) const {
             return TypeUpgradeMatrix[(size_t)l][(size_t)r];
         }
     } type_matrix;
 
-    bool TypeAssert::IsBinaryOperationValid(TypeDecl *lhsType, TypeDecl *rhsType, _OperatorExpression::OperatorType operatorType) {
+    bool BinaryExpression::IsBinaryOperateValid() const {
         // 只有内置类型才能执行二元运算
-        BuiltinTypeDecl *lhsBuiltinType = lhsType->as<BuiltinTypeDecl>();
-        BuiltinTypeDecl *rhsBuiltinType = rhsType->as<BuiltinTypeDecl>();
+        BuiltinTypeDecl *lhsBuiltinType = this->lhs_->as<BuiltinTypeDecl>();
+        BuiltinTypeDecl *rhsBuiltinType = this->rhs_->as<BuiltinTypeDecl>();
         if (lhsBuiltinType == nullptr || rhsBuiltinType == nullptr) {
             return false;
         }
-        BuiltinTypeDecl::EnumOfBuiltinType lhsBTEnum = lhsBuiltinType->built_in_type_;
-        BuiltinTypeDecl::EnumOfBuiltinType rhsBTEnum = rhsBuiltinType->built_in_type_;
-        return type_matrix.OperateValid(lhsBTEnum, rhsBTEnum, operatorType);
+        EnumOfBuiltinType lhsBTEnum = lhsBuiltinType->GetBuiltinType();
+        EnumOfBuiltinType rhsBTEnum = rhsBuiltinType->GetBuiltinType();
+        return type_matrix.OperateValid(lhsBTEnum, rhsBTEnum, this->operator_type_);
     }
 
-    BuiltinTypeDecl::EnumOfBuiltinType TypeAssert::ResultOfTypeUpgrade(BuiltinTypeDecl::EnumOfBuiltinType ltype, BuiltinTypeDecl::EnumOfBuiltinType rtype) {
+    EnumOfBuiltinType TypeAssert::ResultOfTypeUpgrade(EnumOfBuiltinType ltype, EnumOfBuiltinType rtype) {
         return type_matrix.TypeUpgrade(ltype, rtype);
     }
 
@@ -259,15 +414,15 @@ namespace rexlang {
         return expression->is<HierarchyIdentifier>();
     }
 
-    bool TypeAssert::IsCompareOperator(_OperatorExpression::OperatorType operatorType) {
+    bool TypeAssert::IsCompareOperator(OperatorType operatorType) {
         switch (operatorType) {
-            case _OperatorExpression::OperatorType::kOptEqual:
-            case _OperatorExpression::OperatorType::kOptNotEqual:
-            case _OperatorExpression::OperatorType::kOptGreatThan:
-            case _OperatorExpression::OperatorType::kOptLessThan:
-            case _OperatorExpression::OperatorType::kOptGreatEqual:
-            case _OperatorExpression::OperatorType::kOptLessEqual:
-            case _OperatorExpression::OperatorType::kOptLikeEqual:
+            case OperatorType::kOptEqual:
+            case OperatorType::kOptNotEqual:
+            case OperatorType::kOptGreatThan:
+            case OperatorType::kOptLessThan:
+            case OperatorType::kOptGreatEqual:
+            case OperatorType::kOptLessEqual:
+            case OperatorType::kOptLikeEqual:
                 return true;
             default:
                 return false;

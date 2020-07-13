@@ -17,12 +17,6 @@ namespace rexlang {
         static bool VariableDeclareAsArray(const BaseVariDecl *baseVariDecl);
 
         /*
-         * 判定类型是否可索引
-         * 只有数组类型定义或字节集是可索引类型
-         */
-        static bool TypeCanIndexable(const TypeDecl *typeDecl);
-
-        /*
          * 判定类型是否可调用
          * 只有函数定义是可调用类型
          */

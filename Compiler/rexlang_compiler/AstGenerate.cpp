@@ -15,13 +15,13 @@
 #include "CST2ASTConvert.h"
 
 namespace rexlang {
-    TranslateUnitPtr AstGenerate::BuildASTFromCode(const std::string &code,
+    TranslateUnit * AstGenerate::BuildASTFromCode(const std::string &code,
                                       const std::string &filename,
                                       const std::string &toolname) {
         return this->BuildASTFromCodeWithArgs(code, {}, filename, toolname);
     }
 
-    TranslateUnitPtr AstGenerate::BuildASTFromCodeWithArgs(const std::string &code,
+    TranslateUnit * AstGenerate::BuildASTFromCodeWithArgs(const std::string &code,
                                               const std::vector<std::string> &args,
                                               const std::string &filename,
                                               const std::string &toolname) {

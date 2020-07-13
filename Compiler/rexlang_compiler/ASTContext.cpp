@@ -13,16 +13,16 @@ namespace rexlang {
     ASTContext::~ASTContext() = default;
 
     StringRef ASTContext::CreateString(const std::string &str) {
-        return this->string_pool_.Create(str);
+        return StringPool::Create(str);
     }
 
     StringRef ASTContext::CreateString(const char *pstr) {
-        return this->string_pool_.Create(pstr);
+        return StringPool::Create(pstr);
     }
 
     size_t ASTContext::CreateLocation(const std::string &filename, size_t line, size_t column) {
         std::filesystem::path file_path = std::filesystem::canonical(filename);
-        return this->location_pool_.CreateLocation(this->string_pool_.Create(file_path.string()), line, column);
+        return this->location_pool_.CreateLocation(StringPool::Create(file_path.string()), line, column);
     }
 
     size_t ASTContext::CreateLocation(const StringRef &filename, size_t line, size_t column) {
@@ -41,13 +41,11 @@ namespace rexlang {
         return this->location_pool_.GetColumnNumber(locate);
     }
 
-    void ASTContext::SetDiagnostic(Diagnostic *diagnostic) {
-        this->diagnostic_ = diagnostic;
-    }
+    void            ASTContext::SetDiagnostic(Diagnostic *diagnostic)   { this->diagnostic_ = diagnostic; }
+    Diagnostic *    ASTContext::GetDiagnostic()                         { return this->diagnostic_; }
 
-    Diagnostic *ASTContext::GetDiagnostic() {
-        return this->diagnostic_;
-    }
+    void            ASTContext::SetTranslateUnit(TranslateUnit *translateUnit)  { this->TU = translateUnit; }
+    TranslateUnit * ASTContext::GetTranslateUnit() const                        { return this->TU; }
 
     size_t ASTContext::GetNodeIndex() {
         return this->node_index_++;

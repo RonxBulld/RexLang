@@ -8,39 +8,39 @@
 #include "Str2Attr.h"
 
 namespace rexlang {
-    const std::map<std::string, BuiltinTypeDecl::EnumOfBuiltinType> builtin_type_map {
-            {std::string(u8"<空类型>"),    BuiltinTypeDecl::EnumOfBuiltinType::kBTypeVoid},
-            {std::string(u8"通用型"),    BuiltinTypeDecl::EnumOfBuiltinType::kBTTypeCommon},
-            {std::string(u8"字节型"),    BuiltinTypeDecl::EnumOfBuiltinType::kBTypeChar},
-            {std::string(u8"整数型"),    BuiltinTypeDecl::EnumOfBuiltinType::kBTypeInteger},
-            {std::string(u8"小数型"),    BuiltinTypeDecl::EnumOfBuiltinType::kBTypeFloat},
-            {std::string(u8"逻辑型"),    BuiltinTypeDecl::EnumOfBuiltinType::kBTypeBool},
-            {std::string(u8"文本型"),    BuiltinTypeDecl::EnumOfBuiltinType::kBTypeString},
-            {std::string(u8"字节集"),    BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDataSet},
-            {std::string(u8"短整型"),    BuiltinTypeDecl::EnumOfBuiltinType::kBTypeShort},
-            {std::string(u8"长整数型"),  BuiltinTypeDecl::EnumOfBuiltinType::kBTypeLong},
-            {std::string(u8"日期时间型"),  BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDatetime},
-            {std::string(u8"子程序指针"),  BuiltinTypeDecl::EnumOfBuiltinType::kBTypeFuncPtr},
-            {std::string(u8"双精度小数型"), BuiltinTypeDecl::EnumOfBuiltinType::kBTypeDouble},
-    };
+//    const std::map<std::string, EnumOfBuiltinType> builtin_type_map {
+//            {std::string(u8"<空类型>"),    EnumOfBuiltinType::kBTypeVoid},
+//            {std::string(u8"通用型"),    EnumOfBuiltinType::kBTypeCommon},
+//            {std::string(u8"字节型"),    EnumOfBuiltinType::kBTypeChar},
+//            {std::string(u8"整数型"),    EnumOfBuiltinType::kBTypeInteger},
+//            {std::string(u8"小数型"),    EnumOfBuiltinType::kBTypeFloat},
+//            {std::string(u8"逻辑型"),    EnumOfBuiltinType::kBTypeBool},
+//            {std::string(u8"文本型"),    EnumOfBuiltinType::kBTypeString},
+//            {std::string(u8"字节集"),    EnumOfBuiltinType::kBTypeDataSet},
+//            {std::string(u8"短整型"),    EnumOfBuiltinType::kBTypeShort},
+//            {std::string(u8"长整数型"),  EnumOfBuiltinType::kBTypeLong},
+//            {std::string(u8"日期时间型"),  EnumOfBuiltinType::kBTypeDatetime},
+//            {std::string(u8"子程序指针"),  EnumOfBuiltinType::kBTypeFuncPtr},
+//            {std::string(u8"双精度小数型"), EnumOfBuiltinType::kBTypeDouble},
+//    };
 
-    ErrOr<BuiltinTypeDecl::EnumOfBuiltinType> Str2Attr::Name2BuiltinType(const StringRef &name) {
-        auto found = builtin_type_map.find(name.str());
-        if (found != builtin_type_map.end()) {
-            return MakeNoErrVal(found->second);
-        } else {
-            return CreateError<BuiltinTypeDecl::EnumOfBuiltinType>(1);
-        }
-    }
+//    ErrOr<EnumOfBuiltinType> Str2Attr::Name2BuiltinType(const StringRef &name) {
+//        auto found = builtin_type_map.find(name.str());
+//        if (found != builtin_type_map.end()) {
+//            return MakeNoErrVal(found->second);
+//        } else {
+//            return CreateError<EnumOfBuiltinType>(1);
+//        }
+//    }
 
-    ErrOr<std::string> Str2Attr::BuiltinType2Name(BuiltinTypeDecl::EnumOfBuiltinType type) {
-        for (const auto & item : builtin_type_map) {
-            if (item.second == type) {
-                return MakeNoErrVal(item.first);
-            }
-        }
-        return CreateError<std::string>(1);
-    }
+//    ErrOr<std::string> Str2Attr::BuiltinType2Name(EnumOfBuiltinType type) {
+//        for (const auto & item : builtin_type_map) {
+//            if (item.second == type) {
+//                return MakeNoErrVal(item.first);
+//            }
+//        }
+//        return CreateError<std::string>(1);
+//    }
 
     ErrOr<AccessLevel> Str2Attr::Name2AccessLevel(const StringRef &name) {
         if (name == u8"公开") {
