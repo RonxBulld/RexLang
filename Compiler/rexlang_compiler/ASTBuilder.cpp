@@ -10,10 +10,10 @@ namespace rexlang {
     ASTBuilder::ASTBuilder(ASTContext &context) : context_(context) {
     }
 
-    ParameterDecl *ASTBuilder::CreateParameter(const std::string &name, TypeDecl *paramType, bool isReference, bool isNullable, bool isArray) {
+    ParameterDecl *ASTBuilder::CreateParameter(const std::string &name, VariTypeDecl *paramType, bool isReference, bool isNullable, bool isArray) {
         ParameterDecl *parameter_decl = CreateNode<ParameterDecl>(&context_);
         parameter_decl->name_.string_ = context_.CreateString(name);
-        parameter_decl->type_decl_ptr_ = paramType;
+        parameter_decl->vari_type_decl_ = paramType;
         parameter_decl->type_name_ = paramType->name_;
         parameter_decl->is_reference_ = isReference;
         parameter_decl->is_nullable = isNullable;
@@ -21,7 +21,7 @@ namespace rexlang {
         return parameter_decl;
     }
 
-    FunctorDecl * ASTBuilder::CreateFunctorDecl(const std::string &name, TypeDecl *returnType, const std::vector<ParameterDecl *> &params, TranslateUnit *translateUnit) {
+    FunctorDecl * ASTBuilder::CreateFunctorDecl(const std::string &name, VariTypeDecl *returnType, const std::vector<ParameterDecl *> &params, TranslateUnit *translateUnit) {
         FunctorDecl *functor_decl = CreateNode<FunctorDecl>(&context_);
         functor_decl->name_.string_ = context_.CreateString(name);
         functor_decl->return_type_ = returnType;

@@ -118,23 +118,23 @@ namespace rexlang {
      * 内置分类的特定类型断言
      **********************************************************/
 
-    bool    TypeDecl            :: IsVoidType           () const { return false; }
-    bool    TypeDecl            :: IsCommonType         () const { return false; }
-    bool    TypeDecl            :: IsCharType           () const { return false; }
-    bool    TypeDecl            :: IsIntegerType        () const { return false; }
-    bool    TypeDecl            :: IsFloatType          () const { return false; }
-    bool    TypeDecl            :: IsBoolType           () const { return false; }
-    bool    TypeDecl            :: IsStringType         () const { return false; }
-    bool    TypeDecl            :: IsDataSetType        () const { return false; }
-    bool    TypeDecl            :: IsShortType          () const { return false; }
-    bool    TypeDecl            :: IsLongType           () const { return false; }
-    bool    TypeDecl            :: IsDatetimeType       () const { return false; }
-    bool    TypeDecl            :: IsFuncPtrType        () const { return false; }
-    bool    TypeDecl            :: IsDoubleType         () const { return false; }
-    bool    TypeDecl            :: IsStructType         () const { return false; }
-    bool    TypeDecl            :: IsExternBooleanType  () const { return false; }
-    bool    TypeDecl            :: IsNumerical          () const { return false; }
-    bool    TypeDecl            :: IsIntegerClass       () const { return false; }
+    bool    VariTypeDecl        :: IsVoidType           () const { return false; }
+    bool    VariTypeDecl        :: IsCommonType         () const { return false; }
+    bool    VariTypeDecl        :: IsCharType           () const { return false; }
+    bool    VariTypeDecl        :: IsIntegerType        () const { return false; }
+    bool    VariTypeDecl        :: IsFloatType          () const { return false; }
+    bool    VariTypeDecl        :: IsBoolType           () const { return false; }
+    bool    VariTypeDecl        :: IsStringType         () const { return false; }
+    bool    VariTypeDecl        :: IsDataSetType        () const { return false; }
+    bool    VariTypeDecl        :: IsShortType          () const { return false; }
+    bool    VariTypeDecl        :: IsLongType           () const { return false; }
+    bool    VariTypeDecl        :: IsDatetimeType       () const { return false; }
+    bool    VariTypeDecl        :: IsFuncPtrType        () const { return false; }
+    bool    VariTypeDecl        :: IsDoubleType         () const { return false; }
+    bool    VariTypeDecl        :: IsStructType         () const { return false; }
+    bool    VariTypeDecl        :: IsExternBooleanType  () const { return false; }
+    bool    VariTypeDecl        :: IsNumerical          () const { return false; }
+    bool    VariTypeDecl        :: IsIntegerClass       () const { return false; }
 
     bool    BuiltinVoidType     :: IsVoidType           () const { return true; }
     bool    BuiltinCommonType   :: IsCommonType         () const { return true; }
@@ -174,15 +174,15 @@ namespace rexlang {
     }
 
     /**********************************************************
-     *
+     * 符号特性提取
      **********************************************************/
 
     bool ParameterDecl::ShouldBeReference() const {
              if (this->is_reference_)                   { return true; }
         else if (this->is_array)                        { return true; }
-        else if (this->type_decl_ptr_->IsStringType())  { return true; }
-        else if (this->type_decl_ptr_->IsDataSetType()) { return true; }
-        else if (this->type_decl_ptr_->IsStructType())  { return true; }
+        else if (this->GetTypeDecl()->IsStringType())   { return true; }
+        else if (this->GetTypeDecl()->IsDataSetType())  { return true; }
+        else if (this->GetTypeDecl()->IsStructType())   { return true; }
         else                                            { return false; }
     }
 
@@ -190,32 +190,28 @@ namespace rexlang {
      * 计算有效性判定
      **********************************************************/
 
-    bool TypeDecl::IsBinOptValid(OperatorType opt, TypeDecl *otherType) const { return false; }
-
-    // 函数类型不接受任何二元运算
-
-    bool FunctorDecl::IsBinOptValid(OperatorType opt, TypeDecl *otherType) const { return false; }
+    bool VariTypeDecl::IsBinOptValid(OperatorType opt, VariTypeDecl *otherType) const { return false; }
 
     // 数组类型不接受任何二元运算
 
-    bool ArrayDecl::IsBinOptValid(OperatorType opt, TypeDecl *otherType) const { return false; }
+    bool ArrayDecl::IsBinOptValid(OperatorType opt, VariTypeDecl *otherType) const { return false; }
 
     // 结构体类型不接受任何二元运算
 
-    bool StructureDecl::IsBinOptValid(OperatorType opt, TypeDecl *otherType) const { return false; }
+    bool StructureDecl::IsBinOptValid(OperatorType opt, VariTypeDecl *otherType) const { return false; }
 
     // 数值型的二元操作，仅要求另一个操作数也具有数值性即可
 
-    bool BuiltinCharType    ::IsBinOptValid(OperatorType opt, TypeDecl *otherType) const { return otherType->IsNumerical(); }
-    bool BuiltinIntegerType ::IsBinOptValid(OperatorType opt, TypeDecl *otherType) const { return otherType->IsNumerical(); }
-    bool BuiltinShortType   ::IsBinOptValid(OperatorType opt, TypeDecl *otherType) const { return otherType->IsNumerical(); }
-    bool BuiltinLongType    ::IsBinOptValid(OperatorType opt, TypeDecl *otherType) const { return otherType->IsNumerical(); }
-    bool BuiltinFloatType   ::IsBinOptValid(OperatorType opt, TypeDecl *otherType) const { return otherType->IsNumerical(); }
-    bool BuiltinDoubleType  ::IsBinOptValid(OperatorType opt, TypeDecl *otherType) const { return otherType->IsNumerical(); }
+    bool BuiltinCharType    ::IsBinOptValid(OperatorType opt, VariTypeDecl *otherType) const { return otherType->IsNumerical(); }
+    bool BuiltinIntegerType ::IsBinOptValid(OperatorType opt, VariTypeDecl *otherType) const { return otherType->IsNumerical(); }
+    bool BuiltinShortType   ::IsBinOptValid(OperatorType opt, VariTypeDecl *otherType) const { return otherType->IsNumerical(); }
+    bool BuiltinLongType    ::IsBinOptValid(OperatorType opt, VariTypeDecl *otherType) const { return otherType->IsNumerical(); }
+    bool BuiltinFloatType   ::IsBinOptValid(OperatorType opt, VariTypeDecl *otherType) const { return otherType->IsNumerical(); }
+    bool BuiltinDoubleType  ::IsBinOptValid(OperatorType opt, VariTypeDecl *otherType) const { return otherType->IsNumerical(); }
 
     // 字符串型仅接受其它字节集型的扩展关系运算、加法运算
 
-    bool BuiltinStringType::IsBinOptValid(OperatorType opt, TypeDecl *otherType) const {
+    bool BuiltinStringType::IsBinOptValid(OperatorType opt, VariTypeDecl *otherType) const {
         if (!otherType->IsDataSetType()) { return false; }
         if (opt.IsExtraRelOpt())         { return true; }
         switch (opt.GetOperate()) {
@@ -228,7 +224,7 @@ namespace rexlang {
 
     // 字节集型仅接受其它字节集型的扩展关系运算、加法运算
 
-    bool BuiltinDataSetType::IsBinOptValid(OperatorType opt, TypeDecl *otherType) const {
+    bool BuiltinDataSetType::IsBinOptValid(OperatorType opt, VariTypeDecl *otherType) const {
         if (!otherType->IsDataSetType()) { return false; }
         if (opt.IsExtraRelOpt())         { return true; }
         switch (opt.GetOperate()) {
@@ -241,7 +237,7 @@ namespace rexlang {
 
     // 逻辑型仅接受其它逻辑型的布尔运算和相等关系运算
 
-    bool BuiltinBoolType::IsBinOptValid(OperatorType opt, TypeDecl *otherType) const {
+    bool BuiltinBoolType::IsBinOptValid(OperatorType opt, VariTypeDecl *otherType) const {
         if (!otherType->IsBoolType()) { return false; }
         if (opt.IsBooleanOpt())       { return true; }
         if (opt.IsEqualOrNotOpt())    { return true; }
@@ -250,7 +246,7 @@ namespace rexlang {
 
     // 日期时间型仅接受其它日期时间型的加减运算
 
-    bool BuiltinDatetimeType::IsBinOptValid(OperatorType opt, TypeDecl *otherType) const {
+    bool BuiltinDatetimeType::IsBinOptValid(OperatorType opt, VariTypeDecl *otherType) const {
         if (!otherType->IsDatetimeType()) { return false; }
         switch (opt.GetOperate()) {
             case OperatorType::Opt::kOptAdd:
@@ -263,7 +259,17 @@ namespace rexlang {
 
     // 函数指针不接受任何二元运算
 
-    bool BuiltinFuncPtrType::IsBinOptValid(OperatorType opt, TypeDecl *otherType) const { return false; }
+    bool BuiltinFuncPtrType::IsBinOptValid(OperatorType opt, VariTypeDecl *otherType) const { return false; }
+
+    /**********************************************************
+     * 赋值有效性判定
+     **********************************************************/
+
+    bool VariTypeDecl::IsAssginFromValid(TypeDecl *fromType) const { return false; }
+
+    /**********************************************************
+     * 计算结果类型推导
+     **********************************************************/
 
     /**********************************************************
      *
@@ -401,9 +407,7 @@ namespace rexlang {
         if (lhsBuiltinType == nullptr || rhsBuiltinType == nullptr) {
             return false;
         }
-        EnumOfBuiltinType lhsBTEnum = lhsBuiltinType->GetBuiltinType();
-        EnumOfBuiltinType rhsBTEnum = rhsBuiltinType->GetBuiltinType();
-        return type_matrix.OperateValid(lhsBTEnum, rhsBTEnum, this->operator_type_);
+        return lhsBuiltinType->IsBinOptValid(GetOpt(), rhsBuiltinType);
     }
 
     EnumOfBuiltinType TypeAssert::ResultOfTypeUpgrade(EnumOfBuiltinType ltype, EnumOfBuiltinType rtype) {

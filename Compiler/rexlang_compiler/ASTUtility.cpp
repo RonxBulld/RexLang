@@ -97,19 +97,6 @@ namespace rexlang {
         return nullptr;
     }
 
-    BaseVariDecl *ASTUtility::FindVariableWithNameInStructureType(TypeDecl *typeDecl, const StringRef &variable_name) {
-        if (const StructureDecl *structure_decl = typeDecl->as<StructureDecl>()) {
-            for (auto & item : structure_decl->members_) {
-                if (item.first == variable_name) {
-                    return item.second;
-                }
-            }
-            return nullptr;
-        } else {
-            return nullptr;
-        }
-    }
-
     NameComponent *ArrayIndex::GetIndexBase() const {
         NameComponent *base = nullptr;
         const ArrayIndex *arrayIndex = this;
@@ -126,39 +113,6 @@ namespace rexlang {
             arrayIndex = arrayIndex->base_->as<ArrayIndex>();
         }
         return MakeNoErrVal(indexes);
-    }
-
-    ErrOr<std::vector<size_t>> ASTUtility::GetTypeIndexList(TypeDecl *typeDecl) {
-        if (ASTAssert::TypeCanIndexable(typeDecl) == false) {
-            return MakeNoErrVal(std::vector<size_t>{});
-        }
-        if (const ArrayDecl *array_decl = typeDecl->as<ArrayDecl>()) {
-            // 变量定义为数组
-            return MakeNoErrVal(array_decl->dimensions_);
-        } else if (const BuiltinTypeDecl *builtin_type_decl = typeDecl->as<BuiltinTypeDecl>()) {
-            if (builtin_type_decl->IsDataSetType()) {
-                // 内置类型只有字节集能够被索引
-                return MakeNoErrVal(std::vector<size_t>{0});
-            } else {
-                assert(false);
-                return ErrOr<std::vector<size_t>>::CreateError(1);
-            }
-        } else {
-            assert(false);
-            return ErrOr<std::vector<size_t>>::CreateError(1);
-        }
-    }
-
-    TypeDecl *ASTUtility::GetCallableReturnType(TypeDecl *typeDecl) {
-        if (ASTAssert::TypeCanCallable(typeDecl) == false) {
-            return nullptr;
-        }
-        if (FunctorDecl *functor_decl = typeDecl->as<FunctorDecl>()) {
-            return functor_decl->return_type_;
-        } else {
-            assert(false);
-            return nullptr;
-        }
     }
 
     FunctorDecl * ASTUtility::GetFunctionDeclare(FunctionCall *functionCall) {

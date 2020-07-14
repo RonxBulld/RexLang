@@ -58,24 +58,9 @@ namespace rexlang {
         static Node * FindNearstScope(Node *base);
 
         /*
-         * 在指定的结构类型中查找变量
-         */
-        static BaseVariDecl *FindVariableWithNameInStructureType(TypeDecl *typeDecl, const StringRef &variable_name);
-
-        /*
          * 获取名称组件中的索引列表
          */
         static ErrOr<std::vector<Expression*>> GetArrayIndexIndexList(ArrayIndex *arrayIndex);
-
-        /*
-         * 获取定义的索引维度信息
-         */
-        static ErrOr<std::vector<size_t>> GetTypeIndexList(TypeDecl *typeDecl);
-
-        /*
-         * 获取可调用类型的返回值类型
-         */
-        static TypeDecl * GetCallableReturnType(TypeDecl *typeDecl);
 
         /*
          * 获取函数引用的函数定义

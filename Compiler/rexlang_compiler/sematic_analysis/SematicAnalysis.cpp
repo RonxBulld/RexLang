@@ -264,7 +264,7 @@ namespace rexlang {
         LocalVariableDecl *implicit_local_vari = CreateNode<LocalVariableDecl>(astContext);
         implicit_local_vari->parent_node_ = parentFunction;
         implicit_local_vari->name_.string_ = referenceName;
-        implicit_local_vari->type_decl_ptr_ = TU->getIntegerTy();
+        implicit_local_vari->vari_type_decl_ = TU->getIntegerTy();
         parentFunction->local_vari_[referenceName] = implicit_local_vari;
         this->analysis_context_.AddNamedSymbol(implicit_local_vari);
         return implicit_local_vari;
@@ -284,10 +284,10 @@ namespace rexlang {
 
         size_t param_idx = 0;
         for (ParameterDeclPtr parameter_decl : functorDecl->parameters_) {
-            parameter_decl->type_decl_ptr_ = this->QueryTypeDeclWithName(TU, parameter_decl->type_name_.string_, &this->analysis_context_);
+            parameter_decl->vari_type_decl_ = this->QueryTypeDeclWithName(TU, parameter_decl->type_name_.string_, &this->analysis_context_);
             this->SetupParameterType(parameter_decl);
             parameter_decl->index_ = param_idx++;
-            if (parameter_decl->type_decl_ptr_ == nullptr) {
+            if (parameter_decl->vari_type_decl_ == nullptr) {
                 assert(false);
                 return false;
             }
@@ -302,7 +302,7 @@ namespace rexlang {
         for (auto & item : functionDecl->local_vari_) {
             LocalVariableDeclPtr local_vari = item.second;
             this->SetupLocalVariableType(local_vari);
-            if (local_vari->type_decl_ptr_ == nullptr) {
+            if (local_vari->vari_type_decl_ == nullptr) {
                 assert(false);
                 return false;
             }
@@ -524,11 +524,11 @@ namespace rexlang {
                 parameter->is_nullable = true;
             } else if (attr.string_ == u8"数组") {
                 parameter->is_array = true;
-                assert(parameter->type_decl_ptr_->is<ArrayDecl>() == false);
+                assert(parameter->vari_type_decl_->is<ArrayDecl>() == false);
                 ArrayDecl *array_decl = CreateNode<ArrayDecl>(parameter->ast_context_);
                 array_decl->dimensions_ = {0};
-                array_decl->base_type_ = parameter->type_decl_ptr_;
-                parameter->type_decl_ptr_ = array_decl;
+                array_decl->base_type_ = parameter->vari_type_decl_;
+                parameter->vari_type_decl_ = array_decl;
             } else {
                 assert(false);
                 return false;
@@ -549,8 +549,8 @@ namespace rexlang {
         if (!err_or_dims.Value().empty()) {
             ArrayDecl *array_decl = CreateNode<ArrayDecl>(variableDecl->ast_context_);
             array_decl->dimensions_ = err_or_dims.Value();
-            array_decl->base_type_ = variableDecl->type_decl_ptr_;
-            variableDecl->type_decl_ptr_ = array_decl;
+            array_decl->base_type_ = variableDecl->vari_type_decl_;
+            variableDecl->vari_type_decl_ = array_decl;
         }
         return true;
     }
@@ -603,8 +603,8 @@ namespace rexlang {
 
     bool SematicAnalysis::SetupBaseVariableType(BaseVariDecl *baseVariDecl) {
         StringRef name = baseVariDecl->type_name_.string_;
-        baseVariDecl->type_decl_ptr_ = this->QueryTypeDeclWithName(TU, name, &this->analysis_context_)->as<TypeDecl>();
-        if (baseVariDecl->type_decl_ptr_ == nullptr) {
+        baseVariDecl->vari_type_decl_ = this->QueryTypeDeclWithName(TU, name, &this->analysis_context_)->as<TypeDecl>();
+        if (baseVariDecl->vari_type_decl_ == nullptr) {
             assert(false);
             return false;
         }
@@ -674,7 +674,7 @@ namespace rexlang {
         return functor_decl->return_type_;
     }
 
-    TypeDecl *UnaryExpression::CheckExpressionInternal() {
+    VariTypeDecl *UnaryExpression::CheckExpressionInternal() {
 
         // 检查一元表达式是否合法
 
@@ -696,7 +696,7 @@ namespace rexlang {
 
     }
 
-    TypeDecl *BinaryExpression::CheckExpressionInternal() {
+    VariTypeDecl *BinaryExpression::CheckExpressionInternal() {
 
         // 检查二元表达式是否可结合
 
@@ -892,7 +892,7 @@ namespace rexlang {
                 if (HierarchyIdentifier *hierarchy_identifier = arguments[idx]->as<HierarchyIdentifier>()) {
                     TypeDecl *argu_type = this->GetHierarchyIdentifierQualifiedType(hierarchy_identifier);
                     if (argu_type->is<ArrayDecl>()) {
-                        TypeDecl *param_arr_element_type = this->GetIndexableTypeElement(parameters[idx]->type_decl_ptr_);
+                        TypeDecl *param_arr_element_type = this->GetIndexableTypeElement(parameters[idx]->vari_type_decl_);
                         TypeDecl *argu_arr_element_type = this->GetIndexableTypeElement(argu_type);
                         if (param_arr_element_type != argu_arr_element_type) {
                             assert(false);
@@ -919,7 +919,7 @@ namespace rexlang {
                 if (HierarchyIdentifier *hierarchy_identifier = arguments[idx]->as<HierarchyIdentifier>()) {
                     TypeDecl *argu_type = this->GetHierarchyIdentifierQualifiedType(hierarchy_identifier);
                     SetupHierarchyReferenceType(hierarchy_identifier, ExprUsage::kAsLeftValue);
-                    if (argu_type != parameters[idx]->type_decl_ptr_) {
+                    if (argu_type != parameters[idx]->vari_type_decl_) {
                         assert(false);
                         return false;
                     }
@@ -934,7 +934,7 @@ namespace rexlang {
                 // 5.4. 如果形参不具备上述属性
                 TypeDecl *argu_type = arguments[idx]->GetExpressionTy();
                 assert(argu_type);
-                TypeDecl *param_type = parameters[idx]->type_decl_ptr_;
+                TypeDecl *param_type = parameters[idx]->vari_type_decl_;
                 ErrOr<Expression*> implicit_convert = this->MakeImplicitConvertIfNeccessary(param_type, arguments[idx]);
                 if (implicit_convert.NoError()) {
                     arguments[idx] = implicit_convert.Value();

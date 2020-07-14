@@ -120,7 +120,7 @@ namespace rexlang {
 
         } else if (BaseVariDecl *base_vari_decl = id_type->as<BaseVariDecl>()) {
             identifier->reference_ = base_vari_decl;
-            return base_vari_decl->type_decl_ptr_;
+            return base_vari_decl->vari_type_decl_;
 
         } else {
             assert(false);
@@ -173,7 +173,7 @@ namespace rexlang {
             } else if (FunctorDecl *functor_decl = typeDecl->as<FunctorDecl>()) {
                 CheckRecursiveDefinition(functor_decl->return_type_, marks);
                 for (ParameterDecl *parameter_decl : functor_decl->parameters_) {
-                    CheckRecursiveDefinition(parameter_decl->type_decl_ptr_, marks);
+                    CheckRecursiveDefinition(parameter_decl->vari_type_decl_, marks);
                 }
             }
             marks[typeDecl] = MarkType::kChecked;

@@ -8,29 +8,7 @@ namespace rexlang {
 
     bool ASTAssert::VariableDeclareAsArray(const BaseVariDecl *baseVariDecl) {
         if (const VariableDecl *variable_decl = baseVariDecl->as<VariableDecl>()) {
-            return !variable_decl->type_decl_ptr_->is<ArrayDecl>();
-        } else {
-            return false;
-        }
-    }
-
-    bool ASTAssert::TypeCanCallable(const TypeDecl *typeDecl) {
-        if (const FunctorDecl *functor_decl = typeDecl->as<FunctorDecl>()) {
-            (void) functor_decl;
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    bool ASTAssert::IsFixedDimArray(const TypeDecl *typeDecl) {
-        if (ASTAssert::TypeCanIndexable(typeDecl) == false) { return false; }
-        if (const ArrayDecl *array_decl = typeDecl->as<ArrayDecl>()) {
-            // 数组变量总是可变的
-            return false;
-        } else if (const BuiltinTypeDecl *builtin_type_decl = typeDecl->as<BuiltinTypeDecl>()) {
-            // 字节集维度总是固定为1
-            return true;
+            return !variable_decl->vari_type_decl_->is<ArrayDecl>();
         } else {
             return false;
         }

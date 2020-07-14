@@ -20,8 +20,8 @@ namespace rexlang {
 
     public:
         ASTBuilder(ASTContext &context);
-        ParameterDecl * CreateParameter(const std::string &name, TypeDecl *paramType, bool isReference = false, bool isNullable = false, bool isArray = false);
-        FunctorDecl * CreateFunctorDecl(const std::string &name, TypeDecl *returnType, const std::vector<ParameterDecl *> &params, TranslateUnit *translateUnit);
+        ParameterDecl * CreateParameter(const std::string &name, VariTypeDecl *paramType, bool isReference = false, bool isNullable = false, bool isArray = false);
+        FunctorDecl * CreateFunctorDecl(const std::string &name, VariTypeDecl *returnType, const std::vector<ParameterDecl *> &params, TranslateUnit *translateUnit);
         FunctorDecl * GetFunctor(const std::string &name, TranslateUnit *translateUnit);
         Expression *CreateCall(FunctorDecl *callee, std::vector<Expression*> args);
 

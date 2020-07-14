@@ -335,7 +335,7 @@ namespace rexlang {
             member_variable_decl = CreateNode<MemberVariableDecl>(context->getStart(), context->getStop());
             member_variable_decl->dimension_ = variable_decl->dimension_;
             member_variable_decl->type_name_ = variable_decl->type_name_;
-            member_variable_decl->type_decl_ptr_ = variable_decl->type_decl_ptr_;
+            member_variable_decl->vari_type_decl_ = variable_decl->vari_type_decl_;
             member_variable_decl->name_ = variable_decl->name_;
             member_variable_decl->comment_ = variable_decl->comment_;
             delete variable_decl;
@@ -350,7 +350,7 @@ namespace rexlang {
             file_variable_decl = CreateNode<FileVariableDecl>(context->getStart(), context->getStop());
             file_variable_decl->dimension_ = variable_decl->dimension_;
             file_variable_decl->type_name_ = variable_decl->type_name_;
-            file_variable_decl->type_decl_ptr_ = variable_decl->type_decl_ptr_;
+            file_variable_decl->vari_type_decl_ = variable_decl->vari_type_decl_;
             file_variable_decl->name_ = variable_decl->name_;
             file_variable_decl->comment_ = variable_decl->comment_;
             delete variable_decl;

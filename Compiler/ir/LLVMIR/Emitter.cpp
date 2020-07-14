@@ -216,7 +216,7 @@ namespace rexlang {
     }
 
     llvm::Type *IREmit::GetParameterType(ParameterDecl *parameterDecl) {
-        llvm::Type *param_type = GetType(parameterDecl->type_decl_ptr_);
+        llvm::Type *param_type = GetType(parameterDecl->vari_type_decl_);
         if (parameterDecl->is_reference_ && !param_type->isPointerTy()) {
             param_type = param_type->getPointerTo();
         }
@@ -399,7 +399,7 @@ namespace rexlang {
     }
 
     llvm::GlobalVariable *IREmit::_EmitImpl_(GlobalVariableDecl *globalVariableDecl) {
-        llvm::GlobalVariable *global_variable = CreateGlobalVariableAndInit(globalVariableDecl->type_decl_ptr_, globalVariableDecl->name_.string_.str());
+        llvm::GlobalVariable *global_variable = CreateGlobalVariableAndInit(globalVariableDecl->vari_type_decl_, globalVariableDecl->name_.string_.str());
         RegistVariableIR(globalVariableDecl, global_variable);
         return global_variable;
     }
@@ -425,14 +425,14 @@ namespace rexlang {
         std::string vari_name = fileVariableDecl->name_.string_.str();
         vari_name = TheProgramSet->name_.string_.str() + "." + vari_name;
 
-        llvm::GlobalVariable *file_vari = CreateGlobalVariableAndInit(fileVariableDecl->type_decl_ptr_, vari_name);
+        llvm::GlobalVariable *file_vari = CreateGlobalVariableAndInit(fileVariableDecl->vari_type_decl_, vari_name);
         file_vari->setLinkage(llvm::GlobalValue::LinkageTypes::InternalLinkage);
         RegistVariableIR(fileVariableDecl, file_vari);
         return file_vari;
     }
 
     llvm::Value *IREmit::_EmitImpl_(LocalVariableDecl *localVariableDecl) {
-        llvm::Type *vari_type = GetType(localVariableDecl->type_decl_ptr_);
+        llvm::Type *vari_type = GetType(localVariableDecl->vari_type_decl_);
         std::string vari_name = localVariableDecl->name_.string_.str();
         if (!localVariableDecl->is_static_) {
 
@@ -449,7 +449,7 @@ namespace rexlang {
             // 在静态变量前增加名字修饰以免冲突
 
             vari_name = TheASTFunction->super_set_->name_.string_.str() + "." + TheASTFunction->name_.string_.str() + "." + vari_name;
-            llvm::GlobalVariable *static_vari = CreateGlobalVariableAndInit(localVariableDecl->type_decl_ptr_, vari_name);
+            llvm::GlobalVariable *static_vari = CreateGlobalVariableAndInit(localVariableDecl->vari_type_decl_, vari_name);
             static_vari->setLinkage(llvm::GlobalValue::LinkageTypes::InternalLinkage);
             RegistVariableIR(localVariableDecl, static_vari);
             return static_vari;

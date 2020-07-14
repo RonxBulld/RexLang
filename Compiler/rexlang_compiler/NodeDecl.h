@@ -53,6 +53,7 @@ namespace rexlang {
     typedef class Decl* DeclPtr;
     typedef class TagDecl* TagDeclPtr;
     typedef class TypeDecl* TypeDeclPtr;
+    typedef class VariTypeDecl* VariTypeDeclPtr;
     typedef class StructureDecl* StructureDeclPtr;
     typedef class BuiltinTypeDecl* BuiltinTypeDeclPtr;
     typedef class ArrayDecl* ArrayDeclPtr;
@@ -134,6 +135,7 @@ namespace rexlang {
         kNTyFileVariableDecl,
         kNTyLocalVariableDecl,
         kNTyTypeDecl,
+        kNTyVariTypeDecl,
         kNTyBuiltinTypeDecl,
         kNTyArrayDecl,
         kNTyStructureDecl,
@@ -220,15 +222,20 @@ namespace rexlang {
         OperatorType(Opt opt) ;
 
     public:
+
+        /***********************************************
+         * 基本符号特性判定
+         ***********************************************/
+
         bool IsUnaryOpt      () const ;
         bool IsBinaryOpt     () const ;
-
-    public:
         bool IsNumericalOpt  () const ;
         bool IsEqualOrNotOpt () const ;
         bool IsRelationalOpt () const ;
         bool IsExtraRelOpt   () const ;
         bool IsBooleanOpt    () const ;
+
+    public:
 
     public:
         Opt GetOperate() const;
@@ -368,7 +375,10 @@ namespace rexlang {
         // === 下面是经过语义分析后的数据 ===
 
         // 类型指针
-        TypeDeclPtr type_decl_ptr_ = nullptr;
+        VariTypeDecl *vari_type_decl_ = nullptr;
+
+    public:
+        virtual VariTypeDecl *GetTypeDecl() const ;
 
     public:
         static const NodeType GetClassId () ;
@@ -489,6 +499,14 @@ namespace rexlang {
 
     public:
 
+    };
+
+    class VariTypeDecl : public TypeDecl {
+    public:
+        static const NodeType GetClassId () ;
+
+    public:
+
         /********************************************************
          * 基本类型工具
          ********************************************************/
@@ -516,10 +534,15 @@ namespace rexlang {
          ********************************************************/
 
         [[nodiscard]] virtual bool       IsIndexable         () const ;   // 类型是否可索引
+        [[nodiscard]] virtual bool       IsFixedDimensions   () const ;   // 维度数量是否可变
         [[nodiscard]] virtual TypeDecl * GetIndexedElementTy () const ;   // 获取索引的类型
 
+        [[nodiscard]] virtual std::vector<size_t> GetDimensions () const ;  // 获取定义的索引维度
+
         [[nodiscard]] virtual bool       IsUnyOptValid       (OperatorType opt) const ;                      // 判断一元计算有效性
-        [[nodiscard]] virtual bool       IsBinOptValid       (OperatorType opt, TypeDecl *otherType) const ; // 判断二元计算有效性
+        [[nodiscard]] virtual bool       IsBinOptValid       (OperatorType opt, VariTypeDecl *otherType) const ; // 判断二元计算有效性
+        [[nodiscard]] virtual bool       IsAssginFromValid   (TypeDecl *fromType) const ;                    // 判断赋值有效性
+
     };
 
     // 内置类型枚举
@@ -543,8 +566,8 @@ namespace rexlang {
     /*
      * 内置类型定义
      */
-    class BuiltinTypeDecl : public TypeDecl {
-    public:
+    class BuiltinTypeDecl : public VariTypeDecl {
+    protected:
         BuiltinTypeDecl(const char *typeName, EnumOfBuiltinType typeEnum) ;
 
     public:
@@ -595,7 +618,7 @@ namespace rexlang {
         EnumOfBuiltinType   GetBuiltinType  () const override ;
         bool                IsCharType      () const override ;
         const char *        GetTypeText     () const override ;
-        bool                IsBinOptValid   (OperatorType opt, TypeDecl *otherType) const override ;
+        bool                IsBinOptValid   (OperatorType opt, VariTypeDecl *otherType) const override ;
 
         static EnumOfBuiltinType    BuiltinType     () ;
         static const char *         TypeText        () ;
@@ -609,7 +632,7 @@ namespace rexlang {
         EnumOfBuiltinType   GetBuiltinType  () const override ;
         bool                IsIntegerType   () const override ;
         const char *        GetTypeText     () const override ;
-        bool                IsBinOptValid   (OperatorType opt, TypeDecl *otherType) const override ;
+        bool                IsBinOptValid   (OperatorType opt, VariTypeDecl *otherType) const override ;
 
         static EnumOfBuiltinType    BuiltinType     () ;
         static const char *         TypeText        () ;
@@ -623,7 +646,7 @@ namespace rexlang {
         EnumOfBuiltinType   GetBuiltinType  () const override ;
         bool                IsFloatType     () const override ;
         const char *        GetTypeText     () const override ;
-        bool                IsBinOptValid   (OperatorType opt, TypeDecl *otherType) const override ;
+        bool                IsBinOptValid   (OperatorType opt, VariTypeDecl *otherType) const override ;
 
         static EnumOfBuiltinType    BuiltinType     () ;
         static const char *         TypeText        () ;
@@ -637,7 +660,7 @@ namespace rexlang {
         EnumOfBuiltinType   GetBuiltinType  () const override ;
         bool                IsBoolType      () const override ;
         const char *        GetTypeText     () const override ;
-        bool                IsBinOptValid   (OperatorType opt, TypeDecl *otherType) const override ;
+        bool                IsBinOptValid   (OperatorType opt, VariTypeDecl *otherType) const override ;
 
         static EnumOfBuiltinType    BuiltinType     () ;
         static const char *         TypeText        () ;
@@ -648,11 +671,13 @@ namespace rexlang {
         BuiltinStringType() ;
 
     public:
-        EnumOfBuiltinType   GetBuiltinType  () const override ;
-        bool                IsStringType    () const override ;
-        const char *        GetTypeText     () const override ;
-        bool                IsIndexable     () const override ;
-        bool                IsBinOptValid   (OperatorType opt, TypeDecl *otherType) const override ;
+        EnumOfBuiltinType   GetBuiltinType          () const override ;
+        bool                IsStringType            () const override ;
+        const char *        GetTypeText             () const override ;
+        bool                IsIndexable             () const override ;
+        bool                IsFixedDimensions       () const override ;
+        std::vector<size_t> GetDimensions           () const override ;
+        bool                IsBinOptValid           (OperatorType opt, VariTypeDecl *otherType) const override ;
 
         TypeDecl *          GetIndexedElementTy     () const override ;
 
@@ -665,11 +690,13 @@ namespace rexlang {
         BuiltinDataSetType() ;
 
     public:
-        EnumOfBuiltinType   GetBuiltinType  () const override ;
-        bool                IsDataSetType   () const override ;
-        const char *        GetTypeText     () const override ;
-        bool                IsIndexable     () const override ;
-        bool                IsBinOptValid   (OperatorType opt, TypeDecl *otherType) const override ;
+        EnumOfBuiltinType   GetBuiltinType          () const override ;
+        bool                IsDataSetType           () const override ;
+        const char *        GetTypeText             () const override ;
+        bool                IsIndexable             () const override ;
+        bool                IsFixedDimensions       () const override ;
+        std::vector<size_t> GetDimensions           () const override ;
+        bool                IsBinOptValid           (OperatorType opt, VariTypeDecl *otherType) const override ;
 
         TypeDecl *          GetIndexedElementTy     () const override ;
 
@@ -685,7 +712,7 @@ namespace rexlang {
         EnumOfBuiltinType   GetBuiltinType  () const override ;
         bool                IsShortType     () const override ;
         const char *        GetTypeText     () const override ;
-        bool                IsBinOptValid   (OperatorType opt, TypeDecl *otherType) const override ;
+        bool                IsBinOptValid   (OperatorType opt, VariTypeDecl *otherType) const override ;
 
         static EnumOfBuiltinType    BuiltinType     () ;
         static const char *         TypeText        () ;
@@ -699,7 +726,7 @@ namespace rexlang {
         EnumOfBuiltinType   GetBuiltinType  () const override ;
         bool                IsLongType      () const override ;
         const char *        GetTypeText     () const override ;
-        bool                IsBinOptValid   (OperatorType opt, TypeDecl *otherType) const override ;
+        bool                IsBinOptValid   (OperatorType opt, VariTypeDecl *otherType) const override ;
 
         static EnumOfBuiltinType    BuiltinType     () ;
         static const char *         TypeText        () ;
@@ -713,7 +740,7 @@ namespace rexlang {
         EnumOfBuiltinType   GetBuiltinType  () const override ;
         bool                IsDatetimeType  () const override ;
         const char *        GetTypeText     () const override ;
-        bool                IsBinOptValid   (OperatorType opt, TypeDecl *otherType) const override ;
+        bool                IsBinOptValid   (OperatorType opt, VariTypeDecl *otherType) const override ;
 
         static EnumOfBuiltinType    BuiltinType     () ;
         static const char *         TypeText        () ;
@@ -727,7 +754,7 @@ namespace rexlang {
         EnumOfBuiltinType   GetBuiltinType  () const override ;
         bool                IsFuncPtrType   () const override ;
         const char *        GetTypeText     () const override ;
-        bool                IsBinOptValid   (OperatorType opt, TypeDecl *otherType) const override ;
+        bool                IsBinOptValid   (OperatorType opt, VariTypeDecl *otherType) const override ;
 
         static EnumOfBuiltinType    BuiltinType     () ;
         static const char *         TypeText        () ;
@@ -741,7 +768,7 @@ namespace rexlang {
         EnumOfBuiltinType   GetBuiltinType  () const override ;
         bool                IsDoubleType    () const override ;
         const char *        GetTypeText     () const override ;
-        bool                IsBinOptValid   (OperatorType opt, TypeDecl *otherType) const override ;
+        bool                IsBinOptValid   (OperatorType opt, VariTypeDecl *otherType) const override ;
 
         static EnumOfBuiltinType    BuiltinType     () ;
         static const char *         TypeText        () ;
@@ -750,21 +777,22 @@ namespace rexlang {
     /*
      * 数据结构定义
      */
-    class StructureDecl : public TypeDecl {
+    class StructureDecl : public VariTypeDecl {
         TString access_;
         ordered_map<StringRef, MemberVariableDeclPtr> members_;
     public:
         static const NodeType GetClassId () ;
 
     public:
-        bool IsBinOptValid  (OperatorType opt, TypeDecl *otherType) const override ;
-        bool IsStructType   () const override ;
+        bool            IsBinOptValid       (OperatorType opt, VariTypeDecl *otherType) const override ;
+        bool            IsStructType        () const override ;
+        BaseVariDecl *  GetElementWithName  (const StringRef &variable_name);
     };
 
     /*
      * 数组类型
      */
-    class ArrayDecl : public TypeDecl {
+    class ArrayDecl : public VariTypeDecl {
         TString base_type_str;
 
         // === 下面是经过语义分析后的数据 ===
@@ -775,8 +803,10 @@ namespace rexlang {
 
     public:
         bool                IsIndexable             () const override ;
+        bool                IsFixedDimensions       () const override ;
         TypeDecl *          GetIndexedElementTy     () const override ;
-        bool                IsBinOptValid           (OperatorType opt, TypeDecl *otherType) const override ;
+        std::vector<size_t> GetDimensions           () const override ;
+        bool                IsBinOptValid           (OperatorType opt, VariTypeDecl *otherType) const override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -801,7 +831,6 @@ namespace rexlang {
         static const NodeType GetClassId () ;
 
     public:
-        bool IsBinOptValid(OperatorType opt, TypeDecl *otherType) const override ;
         ParameterDecl *GetParameterAt(unsigned idx) const ;
     };
 
@@ -1271,6 +1300,9 @@ namespace rexlang {
 
     public:
         static const NodeType GetClassId () ;
+
+    public:
+        const OperatorType &GetOpt() const ;
     };
 
     class UnaryExpression : public _OperatorExpression {
@@ -1280,7 +1312,7 @@ namespace rexlang {
         static const NodeType GetClassId () ;
 
     public:
-        TypeDecl *CheckExpressionInternal   () override ;
+        VariTypeDecl *CheckExpressionInternal   () override ;
 
     protected:
         ExprUsage GetSubExprLRType          (const Expression *expr) const override ;
@@ -1294,14 +1326,14 @@ namespace rexlang {
         static const NodeType GetClassId () ;
 
     public:
-        bool        IsBinaryOperateValid         () const;   // 检查二元运算是否合法，该断言主要判断二元表达式中左右子式是否可以通过运算符计算
-        TypeDecl *  GetBinaryOperateUpgradeType  () const;   // 获取二元表达式提升后的类型
+        bool            IsBinaryOperateValid         () const;   // 检查二元运算是否合法，该断言主要判断二元表达式中左右子式是否可以通过运算符计算
+        VariTypeDecl *  GetBinaryOperateUpgradeType  () const;   // 获取二元表达式提升后的类型
 
     protected:
         ExprUsage   GetSubExprLRType                (const Expression *expr) const override ;
 
     public:
-        TypeDecl *CheckExpressionInternal() override ;
+        VariTypeDecl *CheckExpressionInternal() override ;
     };
 
     class ResourceRefExpression : public Expression {

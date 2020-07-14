@@ -34,6 +34,7 @@ namespace rexlang {
     const NodeType FileVariableDecl     ::GetClassId() { return NodeType::kNTyFileVariableDecl; }
     const NodeType LocalVariableDecl    ::GetClassId() { return NodeType::kNTyLocalVariableDecl; }
     const NodeType TypeDecl             ::GetClassId() { return NodeType::kNTyTypeDecl; }
+    const NodeType VariTypeDecl         ::GetClassId() { return NodeType::kNTyVariTypeDecl; }
     const NodeType BuiltinTypeDecl      ::GetClassId() { return NodeType::kNTyBuiltinTypeDecl; }
     const NodeType StructureDecl        ::GetClassId() { return NodeType::kNTyStructureDecl; }
     const NodeType ArrayDecl            ::GetClassId() { return NodeType::kNTyArrayDecl; }
@@ -166,18 +167,38 @@ namespace rexlang {
     const char * BuiltinDoubleType  ::GetTypeText() const { return BuiltinDoubleType  ::TypeText(); }
 
     /************************************************
-     * 定义内建类型节点的可索引性及索引元素类型
+     * 类型的可索引性及索引元素类型
      ************************************************/
 
-    bool TypeDecl           ::IsIndexable() const { return false; }
+    bool VariTypeDecl       ::IsIndexable() const { return false; }
     bool BuiltinStringType  ::IsIndexable() const { return true; }
     bool BuiltinDataSetType ::IsIndexable() const { return true; }
     bool ArrayDecl          ::IsIndexable() const { return true; }
 
-    TypeDecl *TypeDecl           ::GetIndexedElementTy() const { return nullptr; }
+    TypeDecl *VariTypeDecl       ::GetIndexedElementTy() const { return nullptr; }
     TypeDecl *BuiltinStringType  ::GetIndexedElementTy() const { return this->getTranslateUnit()->getCharTy(); }
     TypeDecl *BuiltinDataSetType ::GetIndexedElementTy() const { return this->getTranslateUnit()->getCharTy(); }
     TypeDecl *ArrayDecl          ::GetIndexedElementTy() const { return this->base_type_; }
+
+    /************************************************
+     * 获取定义的索引维度
+     ************************************************/
+
+    std::vector<size_t> VariTypeDecl       ::GetDimensions() const { return {}; }
+    std::vector<size_t> BuiltinStringType  ::GetDimensions() const { return {0}; }
+    std::vector<size_t> BuiltinDataSetType ::GetDimensions() const { return {0}; }
+    std::vector<size_t> ArrayDecl          ::GetDimensions() const { return this->dimensions_; }
+
+    /**********************************************************
+     * 维度数量是否可变
+     * 数组变量的维度数总是可变的
+     * 字符串和字节集维度总是固定为1
+     **********************************************************/
+
+    bool VariTypeDecl       ::IsFixedDimensions() const { return false; }
+    bool ArrayDecl          ::IsFixedDimensions() const { return true; }
+    bool BuiltinStringType  ::IsFixedDimensions() const { return false; }
+    bool BuiltinDataSetType ::IsFixedDimensions() const { return false; }
 
     /************************************************
      * 注册及获取一个翻译单元中的内建类型
@@ -227,8 +248,14 @@ namespace rexlang {
     }
 
 
+    /************************************************
+     * 符号类型提取
+     ************************************************/
 
-    TypeDecl *BinaryExpression::GetBinaryOperateUpgradeType() const {
+    VariTypeDecl * BaseVariDecl::GetTypeDecl() const { return vari_type_decl_; }
+
+
+    VariTypeDecl *BinaryExpression::GetBinaryOperateUpgradeType() const {
         // 首先保证可进行二元计算
         bool binary_opt_valid = this->IsBinaryOperateValid();
         if (binary_opt_valid == false) {

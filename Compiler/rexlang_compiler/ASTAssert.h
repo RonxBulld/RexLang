@@ -16,17 +16,6 @@ namespace rexlang {
          */
         static bool VariableDeclareAsArray(const BaseVariDecl *baseVariDecl);
 
-        /*
-         * 判定类型是否可调用
-         * 只有函数定义是可调用类型
-         */
-        static bool TypeCanCallable(const TypeDecl *typeDecl);
-
-        /*
-         * 判定是否固定维度数组
-         */
-        static bool IsFixedDimArray(const TypeDecl *typeDecl);
-
         static bool IsStaticLibraryAPI(const FunctorDecl *functorDecl);
 
         static bool IsDynamicLibraryAPI(const FunctorDecl *functorDecl);
