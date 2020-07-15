@@ -528,6 +528,7 @@ namespace rexlang {
         [[nodiscard]] virtual bool    IsExternBooleanType () const ;   // 类型是否具有扩展布尔性
         [[nodiscard]] virtual bool    IsNumerical         () const ;   // 类型是否具有数值性
         [[nodiscard]] virtual bool    IsIntegerClass      () const ;   // 类型是否整数族
+        [[nodiscard]] virtual bool    IsArray             () const ;   // 类型是否数组
 
         /********************************************************
          * 高级类型工具
@@ -804,6 +805,7 @@ namespace rexlang {
     public:
         bool                IsIndexable             () const override ;
         bool                IsFixedDimensions       () const override ;
+        bool                IsArray                 () const override ;
         TypeDecl *          GetIndexedElementTy     () const override ;
         std::vector<size_t> GetDimensions           () const override ;
         bool                IsBinOptValid           (OperatorType opt, VariTypeDecl *otherType) const override ;
@@ -831,7 +833,10 @@ namespace rexlang {
         static const NodeType GetClassId () ;
 
     public:
-        ParameterDecl *GetParameterAt(unsigned idx) const ;
+        ParameterDecl * GetParameterAt(unsigned idx) const ;
+
+        virtual bool    IsStaticLibraryAPI  () const = 0;
+        virtual bool    IsDynamicLibraryAPI () const = 0;
     };
 
     /**
@@ -852,6 +857,9 @@ namespace rexlang {
 
     public:
         static const NodeType GetClassId () ;
+
+        bool    IsStaticLibraryAPI  () const override ;
+        bool    IsDynamicLibraryAPI () const override ;
     };
 
     /*!
@@ -899,6 +907,9 @@ namespace rexlang {
 
     public:
         static const NodeType GetClassId () ;
+
+        bool    IsStaticLibraryAPI  () const override ;
+        bool    IsDynamicLibraryAPI () const override ;
     };
 
     /**

@@ -135,6 +135,7 @@ namespace rexlang {
     bool    VariTypeDecl        :: IsExternBooleanType  () const { return false; }
     bool    VariTypeDecl        :: IsNumerical          () const { return false; }
     bool    VariTypeDecl        :: IsIntegerClass       () const { return false; }
+    bool    VariTypeDecl        :: IsArray              () const { return false; }
 
     bool    BuiltinVoidType     :: IsVoidType           () const { return true; }
     bool    BuiltinCommonType   :: IsCommonType         () const { return true; }
@@ -150,6 +151,7 @@ namespace rexlang {
     bool    BuiltinFuncPtrType  :: IsFuncPtrType        () const { return true; }
     bool    BuiltinDoubleType   :: IsDoubleType         () const { return true; }
     bool    StructureDecl       :: IsStructType         () const { return true; }
+    bool    ArrayDecl           :: IsArray              () const { return true; }
 
     bool BuiltinTypeDecl::IsExternBooleanType() const {
         if (this->IsBoolType   ()) { return true; }
@@ -260,6 +262,16 @@ namespace rexlang {
     // 函数指针不接受任何二元运算
 
     bool BuiltinFuncPtrType::IsBinOptValid(OperatorType opt, VariTypeDecl *otherType) const { return false; }
+
+    /**********************************************************
+     * 可调用对象库类型断言
+     **********************************************************/
+
+    bool FunctionDecl::IsStaticLibraryAPI  () const { return false; }
+    bool FunctionDecl::IsDynamicLibraryAPI () const { return false; }
+
+    bool APICommandDecl::IsStaticLibraryAPI  () const { return library_type_ == LibraryType::kLTStatic; }
+    bool APICommandDecl::IsDynamicLibraryAPI () const { return library_type_ == LibraryType::kLTDynamic; }
 
     /**********************************************************
      * 赋值有效性判定

@@ -9,18 +9,6 @@
 
 namespace rexlang {
 
-    class ASTAssert {
-    public:
-        /*
-         * 判定变量是否被定义为数组
-         */
-        static bool VariableDeclareAsArray(const BaseVariDecl *baseVariDecl);
-
-        static bool IsStaticLibraryAPI(const FunctorDecl *functorDecl);
-
-        static bool IsDynamicLibraryAPI(const FunctorDecl *functorDecl);
-    };
-
 }
 
 #endif //REXLANG_ASTASSERT_H
