@@ -35,14 +35,6 @@ namespace rexlang {
          */
         static ErrOr<StringRef> GetNameComponentQualifiedName(NameComponent *nameComponent);
 
-        /*
-         * 获取名称组件的确切名称对象
-         * 如果是数组引用则获取数组名组件，例如：arr[5]->arr；
-         * 如果是函数调用则获取函数名组件，例如：func()->func；
-         * 如果是名称直接引用则返回该组件，例如：name->name。
-         */
-        static Identifier *GetNameComponentQualifiedBase(NameComponent *nameComponent);
-
         template <typename Ty, typename = typename std::enable_if_t<std::is_base_of_v<Node, Ty>>>
         static Ty *FindSpecifyTypeParent(Node *base) {
             while (base && !base->is<Ty>()) {

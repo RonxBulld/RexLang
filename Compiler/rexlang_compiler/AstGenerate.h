@@ -21,6 +21,7 @@ namespace rexlang {
 
     public:
         AstGenerate();
+        ~AstGenerate();
 
     public:
         TranslateUnit * BuildASTFromCode(const std::string &code, const std::string &filename, const std::string &toolname);

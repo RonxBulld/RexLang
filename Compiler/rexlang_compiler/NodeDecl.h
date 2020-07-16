@@ -1182,6 +1182,9 @@ namespace rexlang {
         NameComponent * Backward    () const ;
 
         virtual TypeDecl *      EvalBaseNameComponentType   () = 0;
+
+    public:
+        virtual Identifier *GetBaseId() const = 0;    // 获取组件的确切名称对象
     };
 
     /**
@@ -1200,7 +1203,8 @@ namespace rexlang {
         static const NodeType GetClassId () ;
 
     public:
-        TypeDecl *      EvalBaseNameComponentType   () override;
+        TypeDecl *      EvalBaseNameComponentType   ()       override;
+        Identifier *    GetBaseId                   () const override ;
     };
 
     /**
@@ -1234,6 +1238,8 @@ namespace rexlang {
          */
         TypeDecl * GetElementTy() const ;
 
+        Identifier *GetBaseId() const override ;
+
     protected:
         ExprUsage GetSubExprLRType(const Expression *expr) const override;
     };
@@ -1256,8 +1262,9 @@ namespace rexlang {
         FunctorDecl * functor_declare_ = nullptr;
 
     public:
-        TypeDecl *CheckExpressionInternal   () override ;
-        TypeDecl *EvalBaseNameComponentType () override ;
+        TypeDecl *      CheckExpressionInternal     ()       override ;
+        TypeDecl *      EvalBaseNameComponentType   ()       override ;
+        Identifier *    GetBaseId                   () const override ;
 
         FunctorDecl *   GetFunctionDeclare  () const ;
 

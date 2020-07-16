@@ -57,4 +57,14 @@ namespace rexlang {
         diagnostic_ = new Diagnostic();
         ast_context_ = new ASTContext();
     }
+
+    AstGenerate::~AstGenerate() {
+
+        delete diagnostic_;
+        delete ast_context_;
+
+        diagnostic_  = nullptr;
+        ast_context_ = nullptr;
+
+    }
 }

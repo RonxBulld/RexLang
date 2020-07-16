@@ -65,27 +65,35 @@ namespace rexlang {
         return true;
     }
 
-    void ProjectDB::SetProjectName(const std::string &project_name) { project_name_ = project_name; }
+    void               ProjectDB::SetProjectName(const std::string &project_name) { project_name_ = project_name; }
     const std::string &ProjectDB::GetProjectName() const { return project_name_.empty() ? random_string_ : project_name_; }
-    std::string ProjectDB::GetProjectName() { return project_name_.empty() ? random_string_ : project_name_; }
-    void ProjectDB::SetFileList(const std::vector<std::string> &filelist) { file_list_ = filelist; }
+          std::string  ProjectDB::GetProjectName()       { return project_name_.empty() ? random_string_ : project_name_; }
+
+    void                            ProjectDB::SetFileList(const std::vector<std::string> &filelist) { file_list_ = filelist; }
     const std::vector<std::string> &ProjectDB::GetFileList() const { return file_list_; }
-    std::vector<std::string> ProjectDB::GetFileList() { return file_list_; }
-    void ProjectDB::SetTargetBinName(const std::string &targetBinName) { target_bin_name_ = targetBinName; }
+          std::vector<std::string>  ProjectDB::GetFileList()       { return file_list_; }
+
+    void               ProjectDB::SetTargetBinName(const std::string &targetBinName) { target_bin_name_ = targetBinName; }
     const std::string &ProjectDB::GetTargetBinName() const { return target_bin_name_.empty() ? random_string_ : target_bin_name_; }
-    std::string ProjectDB::GetTargetBinName() { return target_bin_name_.empty() ? random_string_ : target_bin_name_; }
-    void ProjectDB::SetTranslateUnit(TranslateUnit *translateUnit) { translate_unit_ = translateUnit; }
-    TranslateUnit *ProjectDB::GetTranslateUnit() { return translate_unit_; }
+          std::string  ProjectDB::GetTargetBinName()       { return target_bin_name_.empty() ? random_string_ : target_bin_name_; }
+
+    void                 ProjectDB::SetTranslateUnit(TranslateUnit *translateUnit) { translate_unit_ = translateUnit; }
     const TranslateUnit *ProjectDB::GetTranslateUnit() const { return translate_unit_; }
-    ASTContext &ProjectDB::GetASTContext() { return *translate_unit_->ast_context_; }
-    const ASTContext &ProjectDB::GetASTContext() const { return *translate_unit_->ast_context_; }
+          TranslateUnit *ProjectDB::GetTranslateUnit()       { return translate_unit_; }
+
+    const ASTContext &ProjectDB::GetASTContext() const { return *translate_unit_->getAstContext(); }
+          ASTContext &ProjectDB::GetASTContext()       { return *translate_unit_->getAstContext(); }
+
     std::string ProjectDB::GetByteCodeFilename() const { return GetProjectName() + "." + program_db.GetByteCodeFileExt(); }
-    std::string ProjectDB::GetObjectFilename() const { return GetProjectName() + "." + program_db.GetObjectFileExt(); }
-    std::string ProjectDB::GetExecuteFilename() const { return GetTargetBinName(); }
-    void ProjectDB::SetMainEntryName(const std::string &main_entry_name) { main_entry_name_ = main_entry_name; }
-    std::string &ProjectDB::GetMainEntryName() { return main_entry_name_; }
+    std::string ProjectDB::GetObjectFilename  () const { return GetProjectName() + "." + program_db.GetObjectFileExt(); }
+    std::string ProjectDB::GetExecuteFilename () const { return GetTargetBinName(); }
+
+    void               ProjectDB::SetMainEntryName(const std::string &main_entry_name) { main_entry_name_ = main_entry_name; }
     const std::string &ProjectDB::GetMainEntryName() const { return main_entry_name_; }
-    void ProjectDB::SetMainEntry(FunctorDecl *main_entry) { main_entry_ = main_entry; }
-    FunctorDecl *ProjectDB::GetMainEntry() { return main_entry_; }
+          std::string &ProjectDB::GetMainEntryName()       { return main_entry_name_; }
+
+    void               ProjectDB::SetMainEntry(FunctorDecl *main_entry) { main_entry_ = main_entry; }
     const FunctorDecl *ProjectDB::GetMainEntry() const { return main_entry_; }
+          FunctorDecl *ProjectDB::GetMainEntry()       { return main_entry_; }
+
 }

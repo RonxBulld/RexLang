@@ -13,6 +13,16 @@
 
 namespace rexlang {
 
+    /***********************************************************
+     * 获取组件的确切名称对象
+     ***********************************************************/
+
+    Identifier *Identifier  ::GetBaseId() const { return const_cast<Identifier *>(this); }
+    Identifier *ArrayIndex  ::GetBaseId() const { return this->base_->GetBaseId(); }
+    Identifier *FunctionCall::GetBaseId() const { return this->function_name_->GetBaseId(); }
+
+
+
     void ASTUtility::FixNodeParent(Node *root) {
         std::queue<std::pair<const Node*, ASTFetchSubnode::ASTFetchResult>> workqueue;
         workqueue.push(std::pair(root, ASTFetchSubnode::ASTFetchResult()));
