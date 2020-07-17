@@ -138,9 +138,28 @@ namespace rexlang {
         else { assert(false);    return U; }
     }
 
+    /********************************************************
+     * 常量值
+     ********************************************************/
+
     ExprUsage Value::GetSubExprLRType(const Expression *expr) const {
-        assert(false);
-        return U;
+        return R;
+    }
+
+    ExprUsage FuncAddrExpression::GetSubExprLRType(const Expression *expr) const {
+        return R;
+    }
+
+    ExprUsage ResourceRefExpression::GetSubExprLRType(const Expression *expr) const {
+        return R;
+    }
+
+    /********************************************************
+     * 其它类型
+     ********************************************************/
+
+    ExprUsage TypeConvert::GetSubExprLRType(const Expression *expr) const {
+        return this->GetLRType();
     }
 
 #undef L

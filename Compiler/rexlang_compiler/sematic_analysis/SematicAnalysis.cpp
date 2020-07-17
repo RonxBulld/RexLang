@@ -141,7 +141,7 @@ namespace rexlang {
 
     bool SematicAnalysis::SetupAllStructMemberType() {
         for (auto & item: TU->global_type_) {
-            if (StructureDeclPtr structure_decl = item.second->as<StructureDecl>()) {
+            if (StructureDecl* structure_decl = item.second->as<StructureDecl>()) {
                 size_t idx = 0;
                 for (auto & member_item : structure_decl->members_) {
                     this->SetupMemberVariableType(member_item.second);
@@ -178,7 +178,7 @@ namespace rexlang {
 
     bool SematicAnalysis::MergeGlobal() {
         TranslateUnit * translateUnitPtr = TU;
-        for (SourceFilePtr sfptr : translateUnitPtr->source_file_) {
+        for (SourceFile* sfptr : translateUnitPtr->source_file_) {
             if (GlobalVariableFile *global_variable_file = sfptr->as<GlobalVariableFile>()) {
 
                 // 全局变量
@@ -190,7 +190,7 @@ namespace rexlang {
 
                 // 数据结构
 
-                bool success = MergeMap(data_structure_file_ptr->structure_decl_map_, translateUnitPtr->global_type_, [](StructureDeclPtr v) -> TypeDeclPtr {
+                bool success = MergeMap(data_structure_file_ptr->structure_decl_map_, translateUnitPtr->global_type_, [](StructureDecl* v) -> TypeDecl* {
                     return v->as<TypeDecl>();
                 });
                 if (!success) { return false; }
@@ -205,7 +205,7 @@ namespace rexlang {
 
                 // 程序集
 
-                ProgSetDeclPtr prog_set_decl = program_set_file->program_set_declares_;
+                ProgSetDecl* prog_set_decl = program_set_file->program_set_declares_;
                 translateUnitPtr->program_sets_[prog_set_decl->name_.string_] = prog_set_decl;
 
                 // 函数定义
@@ -213,7 +213,7 @@ namespace rexlang {
                 bool success = MergeMap(prog_set_decl->function_decls_, translateUnitPtr->function_decls_);
                 if (!success) { return false; }
 
-                success = MergeMap(prog_set_decl->function_decls_, translateUnitPtr->functor_declares_, [](FunctionDeclPtr v) -> FunctorDeclPtr {
+                success = MergeMap(prog_set_decl->function_decls_, translateUnitPtr->functor_declares_, [](FunctionDecl* v) -> FunctorDecl* {
                     return v->as<FunctorDecl>();
                 });
                 if (!success) { return false; }
@@ -224,7 +224,7 @@ namespace rexlang {
 
                 bool success = MergeMap(dll_define_file->dll_declares_, translateUnitPtr->dll_declares_);
                 if (!success) { return success; }
-                success = MergeMap(dll_define_file->dll_declares_, translateUnitPtr->functor_declares_, [](APICommandDeclPtr v) -> FunctorDeclPtr {
+                success = MergeMap(dll_define_file->dll_declares_, translateUnitPtr->functor_declares_, [](APICommandDecl* v) -> FunctorDecl* {
                     return v->as<FunctorDecl>();
                 });
                 if (!success) { return false; }
@@ -283,7 +283,7 @@ namespace rexlang {
         // 3.1.2. 明确参数类型
 
         size_t param_idx = 0;
-        for (ParameterDeclPtr parameter_decl : functorDecl->parameters_) {
+        for (ParameterDecl* parameter_decl : functorDecl->parameters_) {
             parameter_decl->vari_type_decl_ = this->QueryTypeDeclWithName(TU, parameter_decl->type_name_.string_, &this->analysis_context_);
             this->SetupParameterType(parameter_decl);
             parameter_decl->index_ = param_idx++;
@@ -300,7 +300,7 @@ namespace rexlang {
         // 3.1.3. 明确局部变量类型
 
         for (auto & item : functionDecl->local_vari_) {
-            LocalVariableDeclPtr local_vari = item.second;
+            LocalVariableDecl* local_vari = item.second;
             this->SetupLocalVariableType(local_vari);
             if (local_vari->vari_type_decl_ == nullptr) {
                 assert(false);
@@ -314,7 +314,7 @@ namespace rexlang {
         if (statement == nullptr) {
             return true;
         }
-        if (IfStmtPtr if_stmt = statement->as<IfStmt>()) {
+        if (IfStmt* if_stmt = statement->as<IfStmt>()) {
 
             // 检查是否有分支
 
@@ -326,7 +326,7 @@ namespace rexlang {
             // 检查条件语句的条件表达式是否为扩展布尔类型
 
             for (auto & branch : if_stmt->switches_) {
-                TypeDeclPtr switch_expr_type = this->CheckExpression(branch.first);
+                TypeDecl* switch_expr_type = this->CheckExpression(branch.first);
                 if (switch_expr_type->IsExternBooleanType() == false) {
                     assert(false);
                     return false;
@@ -343,22 +343,22 @@ namespace rexlang {
             }
             return true;
 
-        } else if (StatementBlockPtr statement_list = statement->as<StatementBlock>()) {
+        } else if (StatementBlock* statement_list = statement->as<StatementBlock>()) {
 
             // 直接遍历列表进行检查
 
-            for (StatementPtr stmt : statement_list->statements_) {
+            for (Statement* stmt : statement_list->statements_) {
                 if (this->CheckStatementsAndExpression(stmt) == false) {
                     return false;
                 }
             }
             return true;
 
-        } else if (WhileStmtPtr while_stmt = statement->as<WhileStmt>()) {
+        } else if (WhileStmt* while_stmt = statement->as<WhileStmt>()) {
 
             // 检查循环条件语句的条件表达式是否为扩展布尔类型
 
-            TypeDeclPtr while_expr_type = this->CheckExpression(while_stmt->condition_);
+            TypeDecl* while_expr_type = this->CheckExpression(while_stmt->condition_);
             if (while_expr_type->IsExternBooleanType() == false) {
                 assert(false);
                 return false;
@@ -370,15 +370,15 @@ namespace rexlang {
             }
             return true;
 
-        } else if (LoopStatementPtr loop_statement = statement->as<LoopStatement>()) {
+        } else if (LoopStatement* loop_statement = statement->as<LoopStatement>()) {
             return this->CheckLoopStatement(loop_statement);
 
-        } else if (AssignStmtPtr assign_stmt = statement->as<AssignStmt>()) {
+        } else if (AssignStmt* assign_stmt = statement->as<AssignStmt>()) {
 
             // 检查赋值语句左右子式类型是否匹配或兼容
 
-            TypeDeclPtr lhs_type = this->CheckExpression(assign_stmt->lhs_);
-            TypeDeclPtr rhs_type = this->CheckExpression(assign_stmt->rhs_);
+            TypeDecl* lhs_type = this->CheckExpression(assign_stmt->lhs_);
+            TypeDecl* rhs_type = this->CheckExpression(assign_stmt->rhs_);
             SetupHierarchyReferenceType(assign_stmt->lhs_, ExprUsage::kAsLeftValue);
             ErrOr<Expression*> implicit_convert = this->MakeImplicitConvertIfNeccessary(lhs_type, assign_stmt->rhs_);
             if (implicit_convert.HadError()) { return false; }
@@ -461,7 +461,7 @@ namespace rexlang {
     }
 
     bool SematicAnalysis::CheckLoopStatement(LoopStatement *loopStatement) {
-        if (RangeForStmtPtr range_for_stmt = loopStatement->as<RangeForStmt>()) {
+        if (RangeForStmt* range_for_stmt = loopStatement->as<RangeForStmt>()) {
             // 检查次数表达式类型是否为整数族
             if (this->CheckIfExprTypeIsIntegerClass(range_for_stmt->range_size_) == false) { assert(false); return false; }
             // 如果循环变量存在则检查变量类型是否为整数族
@@ -472,7 +472,7 @@ namespace rexlang {
                     return false;
                 }
             }
-        } else if (ForStmtPtr for_stmt = loopStatement->as<ForStmt>()) {
+        } else if (ForStmt* for_stmt = loopStatement->as<ForStmt>()) {
             // 检查初值表达式、终值表达式、步长表达式类型是否为整数族
             if (this->CheckIfExprTypeIsIntegerClass(for_stmt->start_value_) == false) { assert(false); return false; }
             if (this->CheckIfExprTypeIsIntegerClass(for_stmt->stop_value_) == false) { assert(false); return false; }
@@ -497,7 +497,7 @@ namespace rexlang {
 //                for_stmt->loop_vari_->name_components_.push_back(implicit_lv);
 //                for_stmt->loop_vari_->qualified_type_ = implicit_lv_decl->type_decl_ptr_;
             }
-        } else if (DoWhileStmtPtr do_while_stmt = loopStatement->as<DoWhileStmt>()) {
+        } else if (DoWhileStmt* do_while_stmt = loopStatement->as<DoWhileStmt>()) {
             // 检查条件表达式类型是否为布尔类型
             TypeDecl *condition_expr_type = this->CheckExpression(do_while_stmt->conditon_);
             bool is_boolean = condition_expr_type->IsBoolType();
@@ -656,13 +656,13 @@ namespace rexlang {
 
         // 检查函数实参是否符合形参定义
 
-        std::vector<ExpressionPtr> &arguments = function_call->arguments_;
+        std::vector<Expression*> &arguments = function_call->arguments_;
         FunctorDecl *functor_decl = ASTUtility::GetFunctionDeclare(function_call);
         if (functor_decl == nullptr) {
             assert(false);
             return nullptr;
         }
-        std::vector<ParameterDeclPtr> &parameters = functor_decl->parameters_;
+        std::vector<ParameterDecl*> &parameters = functor_decl->parameters_;
         if (this->CheckIfArgumentMatch(arguments, parameters) == false) {
             assert(false);
             return nullptr;
@@ -815,7 +815,7 @@ namespace rexlang {
         }
     }
 
-    bool SematicAnalysis::CheckIfArgumentMatch(std::vector<ExpressionPtr> &arguments, const std::vector<ParameterDeclPtr> &parameters) {
+    bool SematicAnalysis::CheckIfArgumentMatch(std::vector<Expression*> &arguments, const std::vector<ParameterDecl*> &parameters) {
 
         // 检查所有实参表达式
 

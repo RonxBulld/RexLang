@@ -124,13 +124,13 @@ namespace rexlang {
 
         antlrcpp::Any visitDatetime_value(rexLangParser::Datetime_valueContext *context) override;
 
-        ValueOfDatetimePtr TimeNodeBuilder(time_t time, antlr4::Token *start_token, antlr4::Token *end_token);
+        ValueOfDatetime* TimeNodeBuilder(time_t time, antlr4::Token *start_token, antlr4::Token *end_token);
 
         antlrcpp::Any visitDatetimePureNumber(rexLangParser::DatetimePureNumberContext *context) override;
 
         tm TimeBuilder(unsigned year, unsigned month, unsigned day, unsigned hour, unsigned minute, unsigned second);
 
-        ValueOfDatetimePtr TimeNodeBuilder(tm && stm, antlr4::Token *start_token, antlr4::Token *end_token);
+        ValueOfDatetime* TimeNodeBuilder(tm && stm, antlr4::Token *start_token, antlr4::Token *end_token);
 
         antlrcpp::Any visitDatetimeSeparateByChinese(rexLangParser::DatetimeSeparateByChineseContext *context) override;
 

@@ -40,79 +40,44 @@ namespace rexlang {
 
     // File
 
-    typedef class SourceFile* SourceFilePtr;
-    typedef class ProgramSetFile* ProgramSetFilePtr;
-    typedef class GlobalVariableFile* GlobalVariableFilePtr;
-    typedef class DataStructureFile* DataStructureFilePtr;
-    typedef class DllDefineFile* DllDefineFilePtr;
+    class SourceFile;           class ProgramSetFile;           class GlobalVariableFile;
+    class DataStructureFile;    class DllDefineFile;
 
     // Declare
 
     // Type declare
 
-    typedef class Decl* DeclPtr;
-    typedef class TagDecl* TagDeclPtr;
-    typedef class TypeDecl* TypeDeclPtr;
-    typedef class VariTypeDecl* VariTypeDeclPtr;
-    typedef class StructureDecl* StructureDeclPtr;
-    typedef class BuiltinTypeDecl* BuiltinTypeDeclPtr;
-    typedef class ArrayDecl* ArrayDeclPtr;
+    class Decl;                 class TagDecl;                  class TypeDecl;
+    class VariTypeDecl;         class StructureDecl;            class BuiltinTypeDecl;
+    class ArrayDecl;
 
     // Entity declare
 
-    typedef class BaseVariDecl* BaseVariDeclPtr;
-    typedef class VariableDecl* VariableDeclPtr;
-    typedef class GlobalVariableDecl* GlobalVariableDeclPtr;
-    typedef class LocalVariableDecl* LocalVariableDeclPtr;
-    typedef class ParameterDecl* ParameterDeclPtr;
-    typedef class MemberVariableDecl* MemberVariableDeclPtr;
-    typedef class FileVariableDecl* FileVariableDeclPtr;
-    typedef class FunctorDecl* FunctorDeclPtr;
-    typedef class FunctionDecl* FunctionDeclPtr;
-    typedef class ProgSetDecl* ProgSetDeclPtr;
-    typedef class APICommandDecl* APICommandDeclPtr;
+    class BaseVariDecl;         class VariableDecl;             class GlobalVariableDecl;
+    class LocalVariableDecl;    class ParameterDecl;            class MemberVariableDecl;
+    class FileVariableDecl;     class FunctorDecl;              class FunctionDecl;
+    class ProgSetDecl;          class APICommandDecl;
 
     // Statement
 
-    typedef class Statement* StatementPtr;
-    typedef class IfStmt* IfStmtPtr;
-    typedef class StatementBlock* StatementBlockPtr;
-    typedef class LoopStatement* LoopStatementPtr;
-    typedef class WhileStmt* WhileStmtPtr;
-    typedef class RangeForStmt* RangeForStmtPtr;
-    typedef class ForStmt* ForStmtPtr;
-    typedef class DoWhileStmt* DoWhileStmtPtr;
-    typedef class AssignStmt* AssignStmtPtr;
-    typedef class ControlStmt *ControlStmtPtr;
-    typedef class LoopControlStmt *LoopControlStmtPtr;
-    typedef class ContinueStmt *ContinueStmtPtr;
-    typedef class BreakStmt *BreakStmtPtr;
-    typedef class ReturnStmt *ReturnStmtPtr;
-    typedef class ExitStmt *ExitStmtPtr;
+    class Statement;            class IfStmt;                   class StatementBlock;
+    class LoopStatement;        class WhileStmt;                class RangeForStmt;
+    class ForStmt;              class DoWhileStmt;              class AssignStmt;
+    class ControlStmt;          class LoopControlStmt;          class ContinueStmt;
+    class BreakStmt;            class ReturnStmt;               class ExitStmt;
 
     // Expression
 
-    typedef class Expression* ExpressionPtr;
-    typedef class HierarchyIdentifier* HierarchyIdentifierPtr;
-    typedef class NameComponent* NameComponentPtr;
-    typedef class Identifier* IdentifierPtr;
-    typedef class ArrayIndex* ArrayIndexPtr;
-    typedef class FunctionCall* FunctionCallPtr;
-    typedef class UnaryExpression* UnaryExpressionPtr;
-    typedef class BinaryExpression* BinaryExpressionPtr;
-    typedef class _OperatorExpression* _OperatorExpressionPtr;
-    typedef class TypeConvert* TypeConvertPtr;
+    class Expression;           class HierarchyIdentifier;      class NameComponent;
+    class Identifier;           class ArrayIndex;               class FunctionCall;
+    class UnaryExpression;      class BinaryExpression;         class _OperatorExpression;
+    class TypeConvert;
 
     // Value
 
-    typedef class Value* ValuePtr;
-    typedef class ValueOfDataSet* ValueOfDataSetPtr;
-    typedef class ValueOfDatetime* ValueOfDatetimePtr;
-    typedef class FuncAddrExpression* FuncAddrExpressionPtr;
-    typedef class ResourceRefExpression* ResourceRefExpressionPtr;
-    typedef class ValueOfBool* ValueOfBoolPtr;
-    typedef class ValueOfDecimal* ValueOfDecimalPtr;
-    typedef class ValueOfString* ValueOfStringPtr;
+    class Value;                class ValueOfDataSet;           class ValueOfDatetime;
+    class FuncAddrExpression;   class ResourceRefExpression;    class ValueOfBool;
+    class ValueOfDecimal;       class ValueOfString;
 
     /**
      * @brief 节点类型枚举
@@ -120,11 +85,13 @@ namespace rexlang {
     typedef enum class NodeType {
         kNTyBadType,
         kNTyTranslateUnit,
+
         kNTySourceFile,
         kNTyProgramSetFile,
         kNTyGlobalVariableFile,
         kNTyDataStructureFile,
         kNTyDllDefineFile,
+
         kNTyDecl,
         kNTyTagDecl,
         kNTyVariableDecl,
@@ -143,10 +110,10 @@ namespace rexlang {
         kNTyFunctionDecl,
         kNTyProgSetDecl,
         kNTyAPICommandDecl,
+
         kNTyStatement,
         kNTyIfStmt,
         kNTyStatementBlock,
-//        kNTyLoopStatement,
         kNTyWhileStmt,
         kNTyRangeForStmt,
         kNTyForStmt,
@@ -158,6 +125,7 @@ namespace rexlang {
         kNTyBreakStmt,
         kNTyReturnStmt,
         kNTyExitStmt,
+
         kNTyExpression,
         kNTyHierarchyIdentifier,
         kNTyNameComponent,
@@ -167,12 +135,14 @@ namespace rexlang {
         kNTyUnaryExpression,
         kNTyBinaryExpression,
         kNTy_OperatorExpression,
+
         kNTyTypeConvert,
+        kNTyFuncAddrExpression,
+        kNTyResourceRefExpression,
+
         kNTyValue,
         kNTyValueOfDataSet,
         kNTyValueOfDatetime,
-        kNTyFuncAddrExpression,
-        kNTyResourceRefExpression,
         kNTyValueOfBool,
         kNTyValueOfDecimal,
         kNTyValueOfString,
@@ -257,6 +227,9 @@ namespace rexlang {
         size_t location_end_     = 0;
 
     public:
+        virtual ~Node() = default;
+
+    public:
         template<typename NodeTy, typename ... Args, typename = typename std::enable_if<std::is_base_of<Node, NodeTy>::value>::type>
         static NodeTy *Create(ASTContext *ast_context, Args && ... args) {
             NodeTy *node = new NodeTy(args...);
@@ -268,24 +241,29 @@ namespace rexlang {
 
     public:
         template<typename Ty, typename = typename std::enable_if_t<std::is_base_of_v<Node, Ty>>>
-        const Ty *as() const {
-            return dynamic_cast<const Ty *>(this);
-        }
+        const Ty *as() const { return dynamic_cast<const Ty *>(this); }
 
         template<typename Ty, typename = typename std::enable_if_t<std::is_base_of_v<Node, Ty>>>
-        Ty *as() {
-            return dynamic_cast<Ty *>(this);
-        }
+        Ty *as() { return dynamic_cast<Ty *>(this); }
 
         template<typename Ty, typename = typename std::enable_if_t<std::is_base_of_v<Node, Ty>>>
-        bool is() const {
-            return dynamic_cast<const Ty *>(this) != nullptr;
+        bool is() const { return dynamic_cast<const Ty *>(this) != nullptr; }
+
+    public:
+        TranslateUnit * getTranslateUnit    () const { return ast_context_->GetTranslateUnit(); }
+        ASTContext *    getAstContext       () const { return ast_context_; }
+
+    public:
+        void setLocation(const char *filename, size_t leftLine, size_t leftColumn, size_t rightLine, size_t rightColumn) {
+            location_start_ = this->ast_context_->CreateLocation(filename, leftLine,  leftColumn );
+            location_end_   = this->ast_context_->CreateLocation(filename, rightLine, rightColumn);
         }
 
-        virtual ~Node() = default;
-
-        TranslateUnit * getTranslateUnit    () const { return this->ast_context_->GetTranslateUnit(); }
-        ASTContext *    getAstContext       () const { return this->ast_context_; }
+        const char *    getFileName   () const { return ast_context_->GetFileFromLocate  (location_start_).c_str(); }
+        size_t          getLeftLine   () const { return ast_context_->GetLineFromLocate  (location_start_); }
+        size_t          getLeftColumn () const { return ast_context_->GetColumnFromLocate(location_start_); }
+        size_t          getRightLine  () const { return ast_context_->GetLineFromLocate  (location_end_); }
+        size_t          getRightColumn() const { return ast_context_->GetColumnFromLocate(location_end_); }
     };
 
     /**
@@ -302,18 +280,25 @@ namespace rexlang {
      * @brief 函数声明文件
      */
     class ProgramSetFile : public SourceFile {
+    private:
         std::vector<TString> libraries_;
-        ProgSetDeclPtr program_set_declares_ = nullptr;
+        ProgSetDecl* program_set_declares_ = nullptr;
 
     public:
         static const NodeType GetClassId () ;
+
+    public:
+        void appendReferenceLibName(const TString &libraryName) {
+            libraries_.push_back(libraryName);
+            getAstContext()->AddDependenceLibrary(libraryName.string_);
+        }
     };
 
     /**
      * @brief 全局变量声明文件
      */
     class GlobalVariableFile : public SourceFile {
-        ordered_map<StringRef, GlobalVariableDeclPtr> global_variable_map_;
+        ordered_map<StringRef, GlobalVariableDecl*> global_variable_map_;
 
     public:
         static const NodeType GetClassId () ;
@@ -323,7 +308,7 @@ namespace rexlang {
      * @brief 数据结构定义文件
      */
     class DataStructureFile : public SourceFile {
-        ordered_map<StringRef, StructureDeclPtr> structure_decl_map_;
+        ordered_map<StringRef, StructureDecl*> structure_decl_map_;
 
     public:
         static const NodeType GetClassId () ;
@@ -333,7 +318,7 @@ namespace rexlang {
      * @brief DLL函数接口声明文件
      */
     class DllDefineFile : public SourceFile {
-        ordered_map<StringRef, APICommandDeclPtr> dll_declares_;
+        ordered_map<StringRef, APICommandDecl*> dll_declares_;
 
     public:
         static const NodeType GetClassId () ;
@@ -780,7 +765,7 @@ namespace rexlang {
      */
     class StructureDecl : public VariTypeDecl {
         TString access_;
-        ordered_map<StringRef, MemberVariableDeclPtr> members_;
+        ordered_map<StringRef, MemberVariableDecl*> members_;
     public:
         static const NodeType GetClassId () ;
 
@@ -798,7 +783,7 @@ namespace rexlang {
 
         // === 下面是经过语义分析后的数据 ===
 
-        TypeDeclPtr base_type_ = nullptr;
+        TypeDecl* base_type_ = nullptr;
         // 数组维度定义，如果不是数组，则为空
         std::vector<size_t> dimensions_;
 
@@ -827,7 +812,7 @@ namespace rexlang {
         // === 下面是经过语义分析后的数据 ===
 
         // 返回值类型
-        TypeDeclPtr return_type_ = nullptr;
+        TypeDecl* return_type_ = nullptr;
 
     public:
         static const NodeType GetClassId () ;
@@ -846,14 +831,14 @@ namespace rexlang {
         // 访问级别
         TString access_;
         // 局部变量列表
-        ordered_map<StringRef, LocalVariableDeclPtr> local_vari_;
+        ordered_map<StringRef, LocalVariableDecl*> local_vari_;
         // 语句列表
-        StatementBlockPtr statement_list_ = nullptr;
+        StatementBlock* statement_list_ = nullptr;
 
         // === 下面是经过语义分析后的数据 ===
 
         // 所属程序集
-        ProgSetDeclPtr super_set_ = nullptr;
+        ProgSetDecl* super_set_ = nullptr;
 
     public:
         static const NodeType GetClassId () ;
@@ -918,8 +903,8 @@ namespace rexlang {
     class ProgSetDecl : public TagDecl {
         TString base_;
         TString access_;
-        ordered_map<StringRef, FileVariableDeclPtr> file_static_variables_;
-        ordered_map<StringRef, FunctionDeclPtr> function_decls_;
+        ordered_map<StringRef, FileVariableDecl*> file_static_variables_;
+        ordered_map<StringRef, FunctionDecl*> function_decls_;
 
     public:
         static const NodeType GetClassId () ;
@@ -946,8 +931,8 @@ namespace rexlang {
      * @brief 赋值语句
      */
     class AssignStmt : public Statement {
-        HierarchyIdentifierPtr lhs_ = nullptr;
-        ExpressionPtr rhs_ = nullptr;
+        HierarchyIdentifier* lhs_ = nullptr;
+        Expression* rhs_ = nullptr;
 
     public:
         static const NodeType GetClassId () ;
@@ -971,7 +956,7 @@ namespace rexlang {
         // === 下面是经过语义分析后的数据 ===
 
         // 所控制的循环语句
-        LoopStatementPtr loop_statement_ = nullptr;
+        LoopStatement* loop_statement_ = nullptr;
 
     public:
         static const NodeType GetClassId () ;
@@ -1003,7 +988,7 @@ namespace rexlang {
      * @brief 返回
      */
     class ReturnStmt : public ControlStmt {
-        ExpressionPtr return_value_ = nullptr;
+        Expression* return_value_ = nullptr;
 
     public:
         static const NodeType GetClassId () ;
@@ -1029,9 +1014,9 @@ namespace rexlang {
      */
     class IfStmt : public Statement {
         // 选择分支，每个pair第一个元素为测试表达式，第二个元素为相应的语句块
-        std::vector<std::pair<ExpressionPtr, StatementPtr>> switches_;
+        std::vector<std::pair<Expression*, Statement*>> switches_;
         // 默认分支
-        StatementPtr default_statement_ = nullptr;
+        Statement* default_statement_ = nullptr;
 
     public:
         static const NodeType GetClassId () ;
@@ -1044,14 +1029,14 @@ namespace rexlang {
      * @brief 循环语句基本结构
      */
     class LoopStatement : public Statement {
-        StatementPtr loop_body_ = nullptr;
+        Statement* loop_body_ = nullptr;
     };
 
     /**
      * @brief 描述先判断后执行的While-Loop结构
      */
     class WhileStmt : public LoopStatement {
-        ExpressionPtr condition_ = nullptr;
+        Expression* condition_ = nullptr;
 
     public:
         static const NodeType GetClassId () ;
@@ -1064,8 +1049,8 @@ namespace rexlang {
      * @brief 描述计次循环的范围迭代循环结构
      */
     class RangeForStmt : public LoopStatement {
-        ExpressionPtr range_size_ = nullptr;
-        HierarchyIdentifierPtr loop_vari_ = nullptr;
+        Expression* range_size_ = nullptr;
+        HierarchyIdentifier* loop_vari_ = nullptr;
 
     public:
         static const NodeType GetClassId () ;
@@ -1078,10 +1063,10 @@ namespace rexlang {
      * @brief 描述计步循环的范围迭代循环结构
      */
     class ForStmt : public LoopStatement {
-        ExpressionPtr start_value_ = nullptr;
-        ExpressionPtr stop_value_ = nullptr;
-        ExpressionPtr step_value_ = nullptr;
-        HierarchyIdentifierPtr loop_vari_ = nullptr;
+        Expression* start_value_ = nullptr;
+        Expression* stop_value_ = nullptr;
+        Expression* step_value_ = nullptr;
+        HierarchyIdentifier* loop_vari_ = nullptr;
 
     public:
         static const NodeType GetClassId () ;
@@ -1094,7 +1079,7 @@ namespace rexlang {
      * @brief 描述先执行后判断的Do-While循环结构
      */
     class DoWhileStmt : public LoopStatement {
-        ExpressionPtr conditon_ = nullptr;
+        Expression* conditon_ = nullptr;
 
     public:
         static const NodeType GetClassId () ;
@@ -1107,7 +1092,7 @@ namespace rexlang {
      * @brief 语句块
      */
     class StatementBlock : public Statement {
-        std::vector<StatementPtr> statements_;
+        std::vector<Statement*> statements_;
 
     public:
         static const NodeType GetClassId () ;
@@ -1128,7 +1113,7 @@ namespace rexlang {
 
     private:
         // 该表达式的类型
-        TypeDeclPtr expression_type_ = nullptr;
+        TypeDecl* expression_type_ = nullptr;
 
         virtual TypeDecl *CheckExpressionInternal() = 0;
 
@@ -1147,12 +1132,12 @@ namespace rexlang {
         static const NodeType GetClassId () ;
 
     private:
-        std::vector<NameComponentPtr> name_components_;
+        std::vector<NameComponent*> name_components_;
 
         // === 下面是经过语义分析后的数据 ===
     public:
         // 该层次名称所指向的类型
-        TypeDeclPtr qualified_type_ = nullptr;
+        TypeDecl* qualified_type_ = nullptr;
 
     public:
         void AppendComponent(NameComponent *component);
@@ -1172,8 +1157,8 @@ namespace rexlang {
         static const NodeType GetClassId () ;
 
     private:
-        NameComponentPtr forward_name_component_ = nullptr;
-        NameComponentPtr backward_name_component_ = nullptr;
+        NameComponent* forward_name_component_ = nullptr;
+        NameComponent* backward_name_component_ = nullptr;
 
     public:
         void            SetForward  (NameComponent *component) ;
@@ -1196,8 +1181,8 @@ namespace rexlang {
 
         // === 下面是经过语义分析后的数据 ===
 
-        BaseVariDeclPtr reference_ = nullptr;
-        FunctorDeclPtr function_ref_ = nullptr;
+        BaseVariDecl* reference_ = nullptr;
+        FunctorDecl* function_ref_ = nullptr;
 
     public:
         static const NodeType GetClassId () ;
@@ -1205,6 +1190,12 @@ namespace rexlang {
     public:
         TypeDecl *      EvalBaseNameComponentType   ()       override;
         Identifier *    GetBaseId                   () const override ;
+
+    private:
+        TypeDecl *CheckExpressionInternal() override;
+
+    protected:
+        ExprUsage GetSubExprLRType(const Expression *expr) const override;
     };
 
     /**
@@ -1212,9 +1203,9 @@ namespace rexlang {
      */
     class ArrayIndex : public NameComponent {
         // 索引对象
-        NameComponentPtr base_ = nullptr;
+        NameComponent* base_ = nullptr;
         // 索引表达式
-        ExpressionPtr index_ = nullptr;
+        Expression* index_ = nullptr;
 
     public:
         static const NodeType GetClassId () ;
@@ -1242,19 +1233,22 @@ namespace rexlang {
 
     protected:
         ExprUsage GetSubExprLRType(const Expression *expr) const override;
+
+    private:
+        TypeDecl *CheckExpressionInternal() override;
     };
 
     /**
      * @brief 函数调用组件
      */
     class FunctionCall : public NameComponent {
-        NameComponentPtr function_name_ = nullptr;
+        NameComponent* function_name_ = nullptr;
 
     public:
         static const NodeType GetClassId () ;
 
     private:
-        std::vector<ExpressionPtr> arguments_;
+        std::vector<Expression*> arguments_;
 
     public:
         // === 下面是经过语义分析后的数据 ===
@@ -1287,21 +1281,22 @@ namespace rexlang {
         /*
          * 被转换表达式
          */
-        ExpressionPtr from_expression_ = nullptr;
+        Expression* from_expression_ = nullptr;
         /*
          * 源类型
          */
-        TypeDeclPtr source_type_ = nullptr;
+        TypeDecl* source_type_ = nullptr;
         /*
          * 目标类型
          */
-        TypeDeclPtr target_type_ = nullptr;
+        TypeDecl* target_type_ = nullptr;
 
     public:
         static const NodeType GetClassId () ;
 
     public:
         TypeDecl *CheckExpressionInternal() override ;
+        ExprUsage GetSubExprLRType(const Expression *expr) const override ;
     };
 
     /*
@@ -1324,7 +1319,7 @@ namespace rexlang {
     };
 
     class UnaryExpression : public _OperatorExpression {
-        ExpressionPtr operand_value_ = nullptr;
+        Expression* operand_value_ = nullptr;
 
     public:
         static const NodeType GetClassId () ;
@@ -1337,8 +1332,8 @@ namespace rexlang {
     };
 
     class BinaryExpression : public _OperatorExpression {
-        ExpressionPtr lhs_ = nullptr;
-        ExpressionPtr rhs_ = nullptr;
+        Expression* lhs_ = nullptr;
+        Expression* rhs_ = nullptr;
 
     public:
         static const NodeType GetClassId () ;
@@ -1362,6 +1357,7 @@ namespace rexlang {
 
     public:
         TypeDecl *CheckExpressionInternal() override ;
+        ExprUsage GetSubExprLRType(const Expression *expr) const override ;
     };
 
     class FuncAddrExpression : public Expression {
@@ -1369,13 +1365,14 @@ namespace rexlang {
 
         // === 下面是经过语义分析后的数据 ===
 
-        FunctorDeclPtr functor_declare_ = nullptr;
+        FunctorDecl* functor_declare_ = nullptr;
 
     public:
         static const NodeType GetClassId () ;
 
     public:
         TypeDecl *CheckExpressionInternal() override ;
+        ExprUsage GetSubExprLRType(const Expression *expr) const override ;
     };
 
     /**
@@ -1391,7 +1388,7 @@ namespace rexlang {
     };
 
     class ValueOfDataSet : public Value {
-        std::vector<ExpressionPtr> elements_;
+        std::vector<Expression*> elements_;
 
     public:
         static const NodeType GetClassId () ;
@@ -1449,39 +1446,60 @@ namespace rexlang {
      * 翻译单元结构将所有可编译数据打包，提供一致的索引方式，同时应对可能的名称冲突。
      */
     class TranslateUnit : public Node {
+    private:
         // 语法版本号
         unsigned int edition_ = 0;
         // 资源文件列表（包括全局变量定义、数据结构定义、类模块定义、DLL接口定义、子程序集合）
-        std::vector<SourceFilePtr> source_file_;
+        std::vector<SourceFile*> source_file_;
 
         // === 下面是经过语义分析后的数据 ===
 
         // 全局类型索引表
-        ordered_map<StringRef, TypeDeclPtr> global_type_;
+        ordered_map<StringRef, TypeDecl*> global_type_;
         // 全局变量索引表
-        ordered_map<StringRef, GlobalVariableDeclPtr> global_variables_;
+        ordered_map<StringRef, GlobalVariableDecl*> global_variables_;
         // 支持库引用列表
         std::set<StringRef> libraries_list_;
         // 程序集索引表
-        ordered_map<StringRef, ProgSetDeclPtr> program_sets_;
+        ordered_map<StringRef, ProgSetDecl*> program_sets_;
         // 函数定义表
-        ordered_map<StringRef, FunctionDeclPtr> function_decls_;
+        ordered_map<StringRef, FunctionDecl*> function_decls_;
         // DLL函数声明表
-        ordered_map<StringRef, APICommandDeclPtr> dll_declares_;
+        ordered_map<StringRef, APICommandDecl*> dll_declares_;
         // 函数定义表和DLL声明表的合并
         // TODO: 是否要将上面两个逗逼玩意干掉
-        ordered_map<StringRef, FunctorDeclPtr> functor_declares_;
+        ordered_map<StringRef, FunctorDecl*> functor_declares_;
         // 程序入口
-        FunctorDeclPtr main_entry_ = nullptr;
+        FunctorDecl* main_entry_ = nullptr;
+        // 内建类型索引
+        ordered_map<EnumOfBuiltinType, BuiltinTypeDecl *> builtin_type_map_;
 
     public:
         static const NodeType GetClassId () ;
 
-    private:
-        ordered_map<EnumOfBuiltinType, BuiltinTypeDecl *> builtin_type_map_;
+        /******************************************************
+         * 资源文件操作接口
+         ******************************************************/
 
     public:
+        void    appendSourceFile(SourceFile* sourceFile) { assert(false); source_file_.push_back(sourceFile); }
+
+        /******************************************************
+         * 版本号操作接口
+         ******************************************************/
+
+    public:
+        void     setSourceEdition(unsigned edition) { edition_ = edition; }
+        unsigned getSourceEdition() const           { return edition_; }
+
+        /******************************************************
+         * 内建类型操作接口
+         ******************************************************/
+
+    private:
         bool RegistBuiltinType(BuiltinTypeDecl *builtinTypeDecl);
+
+    public:
         bool InitBuiltinTypes();
 
     public:
@@ -1504,6 +1522,8 @@ namespace rexlang {
 
     class NodeWarp {
         Node * node_;
+
+    public:
         explicit NodeWarp(Node * node) {
             node_ = node;
         }
@@ -1512,6 +1532,9 @@ namespace rexlang {
         operator T *() {
             return dynamic_cast<T *>(this->node_);
         }
+
+        template <typename T>
+        T *get() { return node_->as<T>(); }
     };
 
     template<typename NodeTy, typename ... Args, typename = typename std::enable_if<std::is_base_of<Node, NodeTy>::value>::type>

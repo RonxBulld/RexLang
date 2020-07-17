@@ -138,7 +138,7 @@ namespace rexlang {
         /*
          * 检查实参是否匹配形参
          */
-        bool CheckIfArgumentMatch(std::vector<ExpressionPtr> &arguments, const std::vector<ParameterDeclPtr> &parameters);
+        bool CheckIfArgumentMatch(std::vector<Expression*> &arguments, const std::vector<ParameterDecl*> &parameters);
 
         /**
          * @brief 视情况创建隐式转换
