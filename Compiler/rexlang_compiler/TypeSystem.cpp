@@ -10,7 +10,7 @@ namespace rexlang {
         TString ts_name;
         ts_name.string_ = StringPool::Create(typeName);
         ts_name.location_ = 0;
-        this->SetName(ts_name);
+        this->setName(ts_name);
 
         (void) typeEnum;
     }
@@ -170,24 +170,24 @@ namespace rexlang {
      * 类型的可索引性及索引元素类型
      ************************************************/
 
-    bool VariTypeDecl       ::IsIndexable() const { return false; }
-    bool BuiltinStringType  ::IsIndexable() const { return true; }
-    bool BuiltinDataSetType ::IsIndexable() const { return true; }
-    bool ArrayDecl          ::IsIndexable() const { return true; }
+    bool VariTypeDecl       ::isIndexable() const { return false; }
+    bool BuiltinStringType  ::isIndexable() const { return true; }
+    bool BuiltinDataSetType ::isIndexable() const { return true; }
+    bool ArrayDecl          ::isIndexable() const { return true; }
 
-    TypeDecl *VariTypeDecl       ::GetIndexedElementTy() const { return nullptr; }
-    TypeDecl *BuiltinStringType  ::GetIndexedElementTy() const { return this->getTranslateUnit()->getCharTy(); }
-    TypeDecl *BuiltinDataSetType ::GetIndexedElementTy() const { return this->getTranslateUnit()->getCharTy(); }
-    TypeDecl *ArrayDecl          ::GetIndexedElementTy() const { return this->base_type_; }
+    TypeDecl *VariTypeDecl       ::getIndexedElementTy() const { return nullptr; }
+    TypeDecl *BuiltinStringType  ::getIndexedElementTy() const { return this->getTranslateUnit()->getCharTy(); }
+    TypeDecl *BuiltinDataSetType ::getIndexedElementTy() const { return this->getTranslateUnit()->getCharTy(); }
+    TypeDecl *ArrayDecl          ::getIndexedElementTy() const { return this->base_type_; }
 
     /************************************************
      * 获取定义的索引维度
      ************************************************/
 
-    std::vector<size_t> VariTypeDecl       ::GetDimensions() const { return {}; }
-    std::vector<size_t> BuiltinStringType  ::GetDimensions() const { return {0}; }
-    std::vector<size_t> BuiltinDataSetType ::GetDimensions() const { return {0}; }
-    std::vector<size_t> ArrayDecl          ::GetDimensions() const { return this->dimensions_; }
+    std::vector<size_t> VariTypeDecl       ::getDimensions() const { return {}; }
+    std::vector<size_t> BuiltinStringType  ::getDimensions() const { return {0}; }
+    std::vector<size_t> BuiltinDataSetType ::getDimensions() const { return {0}; }
+    std::vector<size_t> ArrayDecl          ::getDimensions() const { return this->dimensions_; }
 
     /**********************************************************
      * 维度数量是否可变
@@ -195,10 +195,10 @@ namespace rexlang {
      * 字符串和字节集维度总是固定为1
      **********************************************************/
 
-    bool VariTypeDecl       ::IsFixedDimensions() const { return false; }
-    bool ArrayDecl          ::IsFixedDimensions() const { return true; }
-    bool BuiltinStringType  ::IsFixedDimensions() const { return false; }
-    bool BuiltinDataSetType ::IsFixedDimensions() const { return false; }
+    bool VariTypeDecl       ::isFixedDimensions() const { return false; }
+    bool ArrayDecl          ::isFixedDimensions() const { return true; }
+    bool BuiltinStringType  ::isFixedDimensions() const { return false; }
+    bool BuiltinDataSetType ::isFixedDimensions() const { return false; }
 
     /************************************************
      * 注册及获取一个翻译单元中的内建类型
@@ -224,7 +224,7 @@ namespace rexlang {
     BuiltinDoubleType *   TranslateUnit::getDoubleTy   () const { BuiltinTypeDecl *BT = builtin_type_map_.at(BuiltinDoubleType  ::BuiltinType()); assert(BT); return (BuiltinDoubleType *  ) BT; }
 
     bool TranslateUnit::RegistBuiltinType(BuiltinTypeDecl *builtinTypeDecl) {
-        global_type_[builtinTypeDecl->GetNameRef()] = builtinTypeDecl;
+        global_type_[builtinTypeDecl->getNameRef()] = builtinTypeDecl;
         builtin_type_map_[builtinTypeDecl->GetBuiltinType()] = builtinTypeDecl;
         return true;
     }
@@ -252,7 +252,7 @@ namespace rexlang {
      * 符号类型提取
      ************************************************/
 
-    VariTypeDecl * BaseVariDecl::GetTypeDecl() const { return vari_type_decl_; }
+    VariTypeDecl * BaseVariDecl::getTypeDecl() const { assert(false); return vari_type_decl_; }
 
 
     VariTypeDecl *BinaryExpression::GetBinaryOperateUpgradeType() const {
@@ -270,8 +270,8 @@ namespace rexlang {
             BuiltinTypeDecl *rhs_builtin = rhs_->GetExpressionTy()->as<BuiltinTypeDecl>();
             if (lhs_builtin || rhs_builtin) {
                 if (lhs_builtin && rhs_builtin) {
-                    bool lhs_numerical = lhs_builtin->IsNumerical();
-                    bool rhs_numerical = rhs_builtin->IsNumerical();
+                    bool lhs_numerical = lhs_builtin->isNumerical();
+                    bool rhs_numerical = rhs_builtin->isNumerical();
                     if (lhs_numerical && rhs_numerical) {
 
                         // 1.1. 都有数值性
@@ -284,23 +284,23 @@ namespace rexlang {
                         // 1.2. 都无数值性
 
                         if (lhs_builtin == rhs_builtin) {
-                            if (lhs_builtin->IsBoolType()) {
+                            if (lhs_builtin->isBoolType()) {
                                 return lhs_builtin;
 
-                            } else if (lhs_builtin->IsStringType()) {
-
-                                return lhs_builtin;
-
-                            } else if (lhs_builtin->IsDataSetType()) {
+                            } else if (lhs_builtin->isStringType()) {
 
                                 return lhs_builtin;
 
-                            } else if (lhs_builtin->IsDatetimeType()) {
+                            } else if (lhs_builtin->isDataSetType()) {
+
+                                return lhs_builtin;
+
+                            } else if (lhs_builtin->isDatetimeType()) {
 
                                 assert(false);
                                 return nullptr;
 
-                            } else if (lhs_builtin->IsFuncPtrType()) {
+                            } else if (lhs_builtin->isFuncPtrType()) {
 
                                 assert(false);
                                 return nullptr;

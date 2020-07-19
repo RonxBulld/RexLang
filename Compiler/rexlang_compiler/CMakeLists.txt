@@ -73,7 +73,7 @@ SET(REXCompilerParse-Source
         ASTBuilder.h
         sematic_analysis/SematicAnalysisNameMangle.cpp
         sematic_analysis/SematicAnalysisNameMangle.h
-        utilities/RecursiveASTVisitor.h HierarchyIdentifier.cpp ExprLR.cpp)
+        utilities/RecursiveASTVisitor.h HierarchyIdentifier.cpp ExprLR.cpp ASTNodeConnect.cpp)
 
 if(NOT CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
     set (flags_1 "-Wno-overloaded-virtual")

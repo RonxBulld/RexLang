@@ -13,14 +13,14 @@
 
 namespace rexlang {
 
-    TypeDecl * ArrayIndex::GetElementTy() const {
+    TypeDecl * ArrayIndex::getElementTy() const {
 
-        if (!this->GetIndexBase()->GetExpressionTy()->IsIndexable()) {
+        if (!this->getIndexBase()->GetExpressionTy()->IsIndexable()) {
             return nullptr;
         }
 
         if (const BuiltinTypeDecl *builtin_type_decl = typeDecl->as<BuiltinTypeDecl>()) {
-            if (builtin_type_decl->IsDataSetType()) {
+            if (builtin_type_decl->isDataSetType()) {
                 TranslateUnit *translate_unit = ASTUtility::FindSpecifyTypeParent<TranslateUnit>(typeDecl);
                 return translate_unit->getCharTy();
             } else {
@@ -40,7 +40,7 @@ namespace rexlang {
     }
 
     TypeDecl *ArrayIndex::EvalBaseNameComponentType() {
-        NameComponent *array_base = this->GetIndexBase();
+        NameComponent *array_base = this->getIndexBase();
         TypeDecl *index_target = array_base->EvalBaseNameComponentType();
         if (!index_target) {
             assert(false);
@@ -56,7 +56,7 @@ namespace rexlang {
 
         this->index_->CheckExpression();
 
-        return this->GetElementTy(index_target);
+        return this->getElementTy(index_target);
     }
 
     TypeDecl *FunctionCall::EvalBaseNameComponentType() {

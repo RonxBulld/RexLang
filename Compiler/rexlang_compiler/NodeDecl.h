@@ -152,13 +152,9 @@ namespace rexlang {
      * 访问级别
      */
     enum class AccessLevel {
-        /*
-         * 公开
-         */
+        // 公开
         kALPublic,
-        /*
-         * 私有
-         */
+        // 私有
         kALPrivate,
     };
 
@@ -166,13 +162,9 @@ namespace rexlang {
      * 传值方式
      */
     enum class ValueTransferMode {
-        /*
-         * 传值
-         */
+        // 传值
         kVTMValue,
-        /*
-         * 传址
-         */
+        // 传址
         kVTMReference,
     };
 
@@ -226,6 +218,10 @@ namespace rexlang {
         size_t location_start_   = 0;
         size_t location_end_     = 0;
 
+    protected:
+        void setParent(Node *parent) { parent_node_ = parent; }
+        void setChild (Node *child)  { child->parent_node_ = this; }
+
     public:
         virtual ~Node() = default;
 
@@ -270,10 +266,15 @@ namespace rexlang {
      * @brief 资源文件基类
      */
     class SourceFile : public Node {
-        enum FileType {kProgramSetFile, kGlobalVariableFile, kDataStructureFile, kDllDefineFile} file_type_;
+//        enum FileType {kProgramSetFile, kGlobalVariableFile, kDataStructureFile, kDllDefineFile} file_type_;
 
     public:
         static const NodeType GetClassId () ;
+
+        virtual bool IsProgramSetFile       () const ;
+        virtual bool IsGlobalVariableFile   () const ;
+        virtual bool IsDataStructureFile    () const ;
+        virtual bool IsDllDefineFile        () const ;
     };
 
     /**
@@ -288,17 +289,28 @@ namespace rexlang {
         static const NodeType GetClassId () ;
 
     public:
-        void appendReferenceLibName(const TString &libraryName) {
-            libraries_.push_back(libraryName);
-            getAstContext()->AddDependenceLibrary(libraryName.string_);
-        }
+        bool IsProgramSetFile       () const override ;
+
+    public:
+        void appendReferenceLibName (const TString &libraryName) ;
+        void appendProgramSetDecl   (ProgSetDecl *progSetDecl) ;
     };
 
     /**
      * @brief 全局变量声明文件
      */
     class GlobalVariableFile : public SourceFile {
-        ordered_map<StringRef, GlobalVariableDecl*> global_variable_map_;
+    public:
+        typedef ordered_map<StringRef, GlobalVariableDecl*> GlobalVariMapTy;
+
+    private:
+        GlobalVariMapTy global_variable_map_;
+
+    public:
+        void appendGlobalVariableDecl(GlobalVariableDecl *globalVariableDecl) ;
+
+    public:
+        bool IsGlobalVariableFile   () const override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -308,7 +320,17 @@ namespace rexlang {
      * @brief 数据结构定义文件
      */
     class DataStructureFile : public SourceFile {
-        ordered_map<StringRef, StructureDecl*> structure_decl_map_;
+    public:
+        typedef ordered_map<StringRef, StructureDecl*> StructDeclMapTy;
+
+    private:
+        StructDeclMapTy structure_decl_map_;
+
+    public:
+        void appendStructureDecl(StructureDecl *structureDecl) ;
+
+    public:
+        bool IsDataStructureFile    () const override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -318,7 +340,16 @@ namespace rexlang {
      * @brief DLL函数接口声明文件
      */
     class DllDefineFile : public SourceFile {
-        ordered_map<StringRef, APICommandDecl*> dll_declares_;
+    public:
+        typedef ordered_map<StringRef, APICommandDecl*> DllDefMayTy;
+    private:
+        DllDefMayTy dll_declares_;
+
+    public:
+        void appendDllDefine(APICommandDecl *apiCommandDecl) ;
+
+    public:
+        bool IsDllDefineFile        () const override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -328,6 +359,13 @@ namespace rexlang {
      * @brief 定义基类
      */
     class Decl : public Node {
+    private:
+        // 访问级别
+        AccessLevel access_level_ = AccessLevel::kALPublic;
+
+    public:
+        virtual void applyAttribute(const TString &attribute) ;
+        virtual void applyAttributes(const std::vector<TString> &attributes) ;
 
     public:
         static const NodeType GetClassId () ;
@@ -337,15 +375,19 @@ namespace rexlang {
      * 带有名称和注释的命名定义基本结构
      */
     class TagDecl : public Decl {
+    private:
         // 定义名称
         TString name_;
         // 注释
         TString comment_;
 
     public:
-        void                SetName     (const TString &name)   { name_ = name; }
-        const TString &     GetName     () const                { return name_; }
-        const StringRef &   GetNameRef  () const                { return name_.string_; }
+        void                setName         (const TString &name)    ;
+        const TString &     getName         () const                 ;
+        const StringRef &   getNameRef      () const                 ;
+        void                setComment      (const TString &comment) ;
+        const TString &     getComment      () const                 ;
+        const StringRef &   getCommentRef   () const                 ;
 
     public:
         static const NodeType GetClassId () ;
@@ -355,15 +397,19 @@ namespace rexlang {
      * 描述成员变量、全局变量、局部变量、参数等带有类型的基本结构
      */
     class BaseVariDecl : public TagDecl {
+    private:
         // 类型名称
         TString type_name_;
-        // === 下面是经过语义分析后的数据 ===
-
         // 类型指针
         VariTypeDecl *vari_type_decl_ = nullptr;
 
     public:
-        virtual VariTypeDecl *GetTypeDecl() const ;
+        void setTypeName(const TString &typeName) ;
+        const TString &getTypeName() const ;
+
+        void setTypeDecl(VariTypeDecl *variType) ;
+        virtual VariTypeDecl *getTypeDecl() const ;
+        virtual VariTypeDecl *takeTypeDecl() const ;
 
     public:
         static const NodeType GetClassId () ;
@@ -375,45 +421,39 @@ namespace rexlang {
     class ParameterDecl : public BaseVariDecl {
         // 可选参数为：参考、可空、数组
         std::vector<TString> attributes_;
+        // 形参位置索引
+        unsigned index_        = -1;
+        // 是否引用类型
+        bool     is_reference_ = false;
+        // 是否可空
+        bool     is_nullable_  = false;
+        // 是否数组
+        bool     is_array_     = false;
 
-        // === 下面是经过语义分析后的数据 ===
+    public:
+        unsigned getParamIndex      () const ;
+        bool     isNullable         () const ;
+        bool     isArray            () const ;
 
-        /*
-         * 形参位置索引
-         */
-        size_t index_ = 0;
-
-        /*
-         * 是否引用类型
-         */
-        bool is_reference_ = false;
-
-        /*
-         * 是否可空
-         */
-        bool is_nullable = false;
-
-        /*
-         * 是否数组
-         */
-        bool is_array = false;
+        // 判断该参数是否应该以引用的方式传递，如果是数组、字符串、字节集、自定义类型或 is_reference 为真时则为真
+        bool     shouldBeReference  () const ;
 
     public:
         static const NodeType GetClassId () ;
 
-    public:
-        bool ShouldBeReference() const ;    // 判断该参数是否应该以引用的方式传递，如果是数组、字符串、字节集、自定义类型或 is_reference 为真时则为真
     };
 
     /*
      * 描述成员变量、全局变量、局部变量、文件变量
      */
     class VariableDecl : public BaseVariDecl {
-        // 变量属性
-        std::vector<TString> attributes_;
+    private:
+        // 维度声明
+        TString dimensions_decl_;
 
-        // 维度的文本描述
-        TString dimension_;
+    public:
+        void setDimensionsText(const TString &dimStr) ;
+        const TString &getDimensionsText() const ;
 
     public:
         static const NodeType GetClassId () ;
@@ -423,15 +463,8 @@ namespace rexlang {
      * 描述全局变量
      */
     class GlobalVariableDecl : public VariableDecl {
-        // 访问级别的文本描述
-        TString access_;
-
-        // === 下面是经过语义分析后的数据 ===
-
-        /*
-         * 访问级别
-         */
-        AccessLevel access_level_ = AccessLevel::kALPublic;
+    public:
+        void applyAttribute(const TString &attribute) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -491,43 +524,46 @@ namespace rexlang {
         static const NodeType GetClassId () ;
 
     public:
+        ArrayDecl *getArrayToWithDimStr(const TString &dimensions) ;
+
+    public:
 
         /********************************************************
          * 基本类型工具
          ********************************************************/
 
-        [[nodiscard]] virtual bool    IsVoidType          () const ;   // 是否为空类型
-        [[nodiscard]] virtual bool    IsCommonType        () const ;   // 是否为通用型
-        [[nodiscard]] virtual bool    IsCharType          () const ;   // 是否为字节型
-        [[nodiscard]] virtual bool    IsIntegerType       () const ;   // 是否为整数型
-        [[nodiscard]] virtual bool    IsFloatType         () const ;   // 是否为小数型
-        [[nodiscard]] virtual bool    IsBoolType          () const ;   // 是否为逻辑型
-        [[nodiscard]] virtual bool    IsStringType        () const ;   // 是否为文本型
-        [[nodiscard]] virtual bool    IsDataSetType       () const ;   // 是否为字节集
-        [[nodiscard]] virtual bool    IsShortType         () const ;   // 是否为短整型
-        [[nodiscard]] virtual bool    IsLongType          () const ;   // 是否为长整型
-        [[nodiscard]] virtual bool    IsDatetimeType      () const ;   // 是否为日期时间型
-        [[nodiscard]] virtual bool    IsFuncPtrType       () const ;   // 是否为子程序指针
-        [[nodiscard]] virtual bool    IsDoubleType        () const ;   // 是否为双精度小数型
-        [[nodiscard]] virtual bool    IsStructType        () const ;   // 是否为自定义结构体类型
-        [[nodiscard]] virtual bool    IsExternBooleanType () const ;   // 类型是否具有扩展布尔性
-        [[nodiscard]] virtual bool    IsNumerical         () const ;   // 类型是否具有数值性
-        [[nodiscard]] virtual bool    IsIntegerClass      () const ;   // 类型是否整数族
-        [[nodiscard]] virtual bool    IsArray             () const ;   // 类型是否数组
+        [[nodiscard]] virtual bool    isVoidType          () const ;   // 是否为空类型
+        [[nodiscard]] virtual bool    isCommonType        () const ;   // 是否为通用型
+        [[nodiscard]] virtual bool    isCharType          () const ;   // 是否为字节型
+        [[nodiscard]] virtual bool    isIntegerType       () const ;   // 是否为整数型
+        [[nodiscard]] virtual bool    isFloatType         () const ;   // 是否为小数型
+        [[nodiscard]] virtual bool    isBoolType          () const ;   // 是否为逻辑型
+        [[nodiscard]] virtual bool    isStringType        () const ;   // 是否为文本型
+        [[nodiscard]] virtual bool    isDataSetType       () const ;   // 是否为字节集
+        [[nodiscard]] virtual bool    isShortType         () const ;   // 是否为短整型
+        [[nodiscard]] virtual bool    isLongType          () const ;   // 是否为长整型
+        [[nodiscard]] virtual bool    isDatetimeType      () const ;   // 是否为日期时间型
+        [[nodiscard]] virtual bool    isFuncPtrType       () const ;   // 是否为子程序指针
+        [[nodiscard]] virtual bool    isDoubleType        () const ;   // 是否为双精度小数型
+        [[nodiscard]] virtual bool    isStructType        () const ;   // 是否为自定义结构体类型
+        [[nodiscard]] virtual bool    isExternBooleanType () const ;   // 类型是否具有扩展布尔性
+        [[nodiscard]] virtual bool    isNumerical         () const ;   // 类型是否具有数值性
+        [[nodiscard]] virtual bool    isIntegerClass      () const ;   // 类型是否整数族
+        [[nodiscard]] virtual bool    isArray             () const ;   // 类型是否数组
 
         /********************************************************
          * 高级类型工具
          ********************************************************/
 
-        [[nodiscard]] virtual bool       IsIndexable         () const ;   // 类型是否可索引
-        [[nodiscard]] virtual bool       IsFixedDimensions   () const ;   // 维度数量是否可变
-        [[nodiscard]] virtual TypeDecl * GetIndexedElementTy () const ;   // 获取索引的类型
+        [[nodiscard]] virtual bool       isIndexable         () const ;   // 类型是否可索引
+        [[nodiscard]] virtual bool       isFixedDimensions   () const ;   // 维度数量是否可变
+        [[nodiscard]] virtual TypeDecl * getIndexedElementTy () const ;   // 获取索引的类型
 
-        [[nodiscard]] virtual std::vector<size_t> GetDimensions () const ;  // 获取定义的索引维度
+        [[nodiscard]] virtual std::vector<size_t> getDimensions () const ;  // 获取定义的索引维度
 
-        [[nodiscard]] virtual bool       IsUnyOptValid       (OperatorType opt) const ;                      // 判断一元计算有效性
-        [[nodiscard]] virtual bool       IsBinOptValid       (OperatorType opt, VariTypeDecl *otherType) const ; // 判断二元计算有效性
-        [[nodiscard]] virtual bool       IsAssginFromValid   (TypeDecl *fromType) const ;                    // 判断赋值有效性
+        [[nodiscard]] virtual bool       isUnyOptValid       (OperatorType opt) const ;                      // 判断一元计算有效性
+        [[nodiscard]] virtual bool       isBinOptValid       (OperatorType opt, VariTypeDecl *otherType) const ; // 判断二元计算有效性
+        [[nodiscard]] virtual bool       isAssginFromValid   (TypeDecl *fromType) const ;                    // 判断赋值有效性
 
     };
 
@@ -560,9 +596,9 @@ namespace rexlang {
         virtual EnumOfBuiltinType GetBuiltinType() const = 0;
 
     public:
-        bool    IsExternBooleanType () const override;
-        bool    IsNumerical         () const override;
-        bool    IsIntegerClass      () const override;
+        bool    isExternBooleanType () const override;
+        bool    isNumerical         () const override;
+        bool    isIntegerClass      () const override;
 
         virtual const char *GetTypeText () const = 0;
 
@@ -576,7 +612,7 @@ namespace rexlang {
 
     public:
         EnumOfBuiltinType   GetBuiltinType  () const override ;
-        bool                IsVoidType      () const override ;
+        bool                isVoidType      () const override ;
         const char *        GetTypeText     () const override ;
 
         static EnumOfBuiltinType    BuiltinType     () ;
@@ -589,7 +625,7 @@ namespace rexlang {
 
     public:
         EnumOfBuiltinType   GetBuiltinType  () const override ;
-        bool                IsCommonType    () const override ;
+        bool                isCommonType    () const override ;
         const char *        GetTypeText     () const override ;
 
         static EnumOfBuiltinType    BuiltinType     () ;
@@ -602,9 +638,9 @@ namespace rexlang {
 
     public:
         EnumOfBuiltinType   GetBuiltinType  () const override ;
-        bool                IsCharType      () const override ;
+        bool                isCharType      () const override ;
         const char *        GetTypeText     () const override ;
-        bool                IsBinOptValid   (OperatorType opt, VariTypeDecl *otherType) const override ;
+        bool                isBinOptValid   (OperatorType opt, VariTypeDecl *otherType) const override ;
 
         static EnumOfBuiltinType    BuiltinType     () ;
         static const char *         TypeText        () ;
@@ -616,9 +652,9 @@ namespace rexlang {
 
     public:
         EnumOfBuiltinType   GetBuiltinType  () const override ;
-        bool                IsIntegerType   () const override ;
+        bool                isIntegerType   () const override ;
         const char *        GetTypeText     () const override ;
-        bool                IsBinOptValid   (OperatorType opt, VariTypeDecl *otherType) const override ;
+        bool                isBinOptValid   (OperatorType opt, VariTypeDecl *otherType) const override ;
 
         static EnumOfBuiltinType    BuiltinType     () ;
         static const char *         TypeText        () ;
@@ -630,9 +666,9 @@ namespace rexlang {
 
     public:
         EnumOfBuiltinType   GetBuiltinType  () const override ;
-        bool                IsFloatType     () const override ;
+        bool                isFloatType     () const override ;
         const char *        GetTypeText     () const override ;
-        bool                IsBinOptValid   (OperatorType opt, VariTypeDecl *otherType) const override ;
+        bool                isBinOptValid   (OperatorType opt, VariTypeDecl *otherType) const override ;
 
         static EnumOfBuiltinType    BuiltinType     () ;
         static const char *         TypeText        () ;
@@ -644,9 +680,9 @@ namespace rexlang {
 
     public:
         EnumOfBuiltinType   GetBuiltinType  () const override ;
-        bool                IsBoolType      () const override ;
+        bool                isBoolType      () const override ;
         const char *        GetTypeText     () const override ;
-        bool                IsBinOptValid   (OperatorType opt, VariTypeDecl *otherType) const override ;
+        bool                isBinOptValid   (OperatorType opt, VariTypeDecl *otherType) const override ;
 
         static EnumOfBuiltinType    BuiltinType     () ;
         static const char *         TypeText        () ;
@@ -658,14 +694,14 @@ namespace rexlang {
 
     public:
         EnumOfBuiltinType   GetBuiltinType          () const override ;
-        bool                IsStringType            () const override ;
+        bool                isStringType            () const override ;
         const char *        GetTypeText             () const override ;
-        bool                IsIndexable             () const override ;
-        bool                IsFixedDimensions       () const override ;
-        std::vector<size_t> GetDimensions           () const override ;
-        bool                IsBinOptValid           (OperatorType opt, VariTypeDecl *otherType) const override ;
+        bool                isIndexable             () const override ;
+        bool                isFixedDimensions       () const override ;
+        std::vector<size_t> getDimensions           () const override ;
+        bool                isBinOptValid           (OperatorType opt, VariTypeDecl *otherType) const override ;
 
-        TypeDecl *          GetIndexedElementTy     () const override ;
+        TypeDecl *          getIndexedElementTy     () const override ;
 
         static EnumOfBuiltinType    BuiltinType     () ;
         static const char *         TypeText        () ;
@@ -677,14 +713,14 @@ namespace rexlang {
 
     public:
         EnumOfBuiltinType   GetBuiltinType          () const override ;
-        bool                IsDataSetType           () const override ;
+        bool                isDataSetType           () const override ;
         const char *        GetTypeText             () const override ;
-        bool                IsIndexable             () const override ;
-        bool                IsFixedDimensions       () const override ;
-        std::vector<size_t> GetDimensions           () const override ;
-        bool                IsBinOptValid           (OperatorType opt, VariTypeDecl *otherType) const override ;
+        bool                isIndexable             () const override ;
+        bool                isFixedDimensions       () const override ;
+        std::vector<size_t> getDimensions           () const override ;
+        bool                isBinOptValid           (OperatorType opt, VariTypeDecl *otherType) const override ;
 
-        TypeDecl *          GetIndexedElementTy     () const override ;
+        TypeDecl *          getIndexedElementTy     () const override ;
 
         static EnumOfBuiltinType    BuiltinType     () ;
         static const char *         TypeText        () ;
@@ -696,9 +732,9 @@ namespace rexlang {
 
     public:
         EnumOfBuiltinType   GetBuiltinType  () const override ;
-        bool                IsShortType     () const override ;
+        bool                isShortType     () const override ;
         const char *        GetTypeText     () const override ;
-        bool                IsBinOptValid   (OperatorType opt, VariTypeDecl *otherType) const override ;
+        bool                isBinOptValid   (OperatorType opt, VariTypeDecl *otherType) const override ;
 
         static EnumOfBuiltinType    BuiltinType     () ;
         static const char *         TypeText        () ;
@@ -710,9 +746,9 @@ namespace rexlang {
 
     public:
         EnumOfBuiltinType   GetBuiltinType  () const override ;
-        bool                IsLongType      () const override ;
+        bool                isLongType      () const override ;
         const char *        GetTypeText     () const override ;
-        bool                IsBinOptValid   (OperatorType opt, VariTypeDecl *otherType) const override ;
+        bool                isBinOptValid   (OperatorType opt, VariTypeDecl *otherType) const override ;
 
         static EnumOfBuiltinType    BuiltinType     () ;
         static const char *         TypeText        () ;
@@ -724,9 +760,9 @@ namespace rexlang {
 
     public:
         EnumOfBuiltinType   GetBuiltinType  () const override ;
-        bool                IsDatetimeType  () const override ;
+        bool                isDatetimeType  () const override ;
         const char *        GetTypeText     () const override ;
-        bool                IsBinOptValid   (OperatorType opt, VariTypeDecl *otherType) const override ;
+        bool                isBinOptValid   (OperatorType opt, VariTypeDecl *otherType) const override ;
 
         static EnumOfBuiltinType    BuiltinType     () ;
         static const char *         TypeText        () ;
@@ -738,9 +774,9 @@ namespace rexlang {
 
     public:
         EnumOfBuiltinType   GetBuiltinType  () const override ;
-        bool                IsFuncPtrType   () const override ;
+        bool                isFuncPtrType   () const override ;
         const char *        GetTypeText     () const override ;
-        bool                IsBinOptValid   (OperatorType opt, VariTypeDecl *otherType) const override ;
+        bool                isBinOptValid   (OperatorType opt, VariTypeDecl *otherType) const override ;
 
         static EnumOfBuiltinType    BuiltinType     () ;
         static const char *         TypeText        () ;
@@ -752,9 +788,9 @@ namespace rexlang {
 
     public:
         EnumOfBuiltinType   GetBuiltinType  () const override ;
-        bool                IsDoubleType    () const override ;
+        bool                isDoubleType    () const override ;
         const char *        GetTypeText     () const override ;
-        bool                IsBinOptValid   (OperatorType opt, VariTypeDecl *otherType) const override ;
+        bool                isBinOptValid   (OperatorType opt, VariTypeDecl *otherType) const override ;
 
         static EnumOfBuiltinType    BuiltinType     () ;
         static const char *         TypeText        () ;
@@ -764,15 +800,18 @@ namespace rexlang {
      * 数据结构定义
      */
     class StructureDecl : public VariTypeDecl {
-        TString access_;
+    public:
         ordered_map<StringRef, MemberVariableDecl*> members_;
+
     public:
         static const NodeType GetClassId () ;
 
     public:
-        bool            IsBinOptValid       (OperatorType opt, VariTypeDecl *otherType) const override ;
-        bool            IsStructType        () const override ;
-        BaseVariDecl *  GetElementWithName  (const StringRef &variable_name);
+        bool            isBinOptValid       (OperatorType opt, VariTypeDecl *otherType) const override ;
+        bool            isStructType        () const override ;
+        void            appendElement       (MemberVariableDecl *element) ;
+        BaseVariDecl *  getElementWithIndex () ;
+        BaseVariDecl *  getElementWithName  (const StringRef &variable_name) const ;
     };
 
     /*
@@ -788,12 +827,12 @@ namespace rexlang {
         std::vector<size_t> dimensions_;
 
     public:
-        bool                IsIndexable             () const override ;
-        bool                IsFixedDimensions       () const override ;
-        bool                IsArray                 () const override ;
-        TypeDecl *          GetIndexedElementTy     () const override ;
-        std::vector<size_t> GetDimensions           () const override ;
-        bool                IsBinOptValid           (OperatorType opt, VariTypeDecl *otherType) const override ;
+        bool                isIndexable             () const override ;
+        bool                isFixedDimensions       () const override ;
+        bool                isArray                 () const override ;
+        TypeDecl *          getIndexedElementTy     () const override ;
+        std::vector<size_t> getDimensions           () const override ;
+        bool                isBinOptValid           (OperatorType opt, VariTypeDecl *otherType) const override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -804,47 +843,52 @@ namespace rexlang {
      * 包含子函数定义和DLL函数定义
      */
     class FunctorDecl : public TypeDecl {
+    private:
         // 返回值类型名
         TString return_type_name_;
         // 参数列表
         std::vector<ParameterDecl *> parameters_;
-
-        // === 下面是经过语义分析后的数据 ===
-
         // 返回值类型
         TypeDecl* return_type_ = nullptr;
 
     public:
-        static const NodeType GetClassId () ;
+                void setReturnTypeName  (const TString &typeName) ;
+        virtual void appendParameter    (ParameterDecl *parameterDecl) ;
 
     public:
         ParameterDecl * GetParameterAt(unsigned idx) const ;
 
-        virtual bool    IsStaticLibraryAPI  () const = 0;
-        virtual bool    IsDynamicLibraryAPI () const = 0;
+        virtual bool    isStaticLibraryAPI  () const = 0;
+        virtual bool    isDynamicLibraryAPI () const = 0;
+
+    public:
+        static const NodeType GetClassId () ;
+
     };
 
     /**
      * @brief 子程序/函数定义
      */
     class FunctionDecl : public FunctorDecl {
-        // 访问级别
-        TString access_;
+    private:
         // 局部变量列表
         ordered_map<StringRef, LocalVariableDecl*> local_vari_;
         // 语句列表
         StatementBlock* statement_list_ = nullptr;
-
-        // === 下面是经过语义分析后的数据 ===
-
         // 所属程序集
         ProgSetDecl* super_set_ = nullptr;
 
     public:
+        void appendLocalVariable(LocalVariableDecl *variableDecl) ;
+        void setStatementBlock(StatementBlock *statementBlock) ;
+
+    public:
+        bool    isStaticLibraryAPI  () const override ;
+        bool    isDynamicLibraryAPI () const override ;
+
+    public:
         static const NodeType GetClassId () ;
 
-        bool    IsStaticLibraryAPI  () const override ;
-        bool    IsDynamicLibraryAPI () const override ;
     };
 
     /*!
@@ -879,6 +923,7 @@ namespace rexlang {
      * @brief DLL函数声明
      */
     class APICommandDecl : public FunctorDecl {
+    private:
         // API库文件名
         TString library_file_;
         // API库类型
@@ -891,20 +936,31 @@ namespace rexlang {
         std::vector<StringRef> mapping_names_;
 
     public:
+        APICommandDecl(const TString &library, LibraryType libraryType, const TString &name, const TString &apiName);
+
+    public:
+        void appendParameter    (ParameterDecl *parameterDecl) override ;
+
+    public:
+        bool    isStaticLibraryAPI  () const override ;
+        bool    isDynamicLibraryAPI () const override ;
+
+    public:
         static const NodeType GetClassId () ;
 
-        bool    IsStaticLibraryAPI  () const override ;
-        bool    IsDynamicLibraryAPI () const override ;
     };
 
     /**
      * @brief 程序集定义
      */
     class ProgSetDecl : public TagDecl {
-        TString base_;
-        TString access_;
-        ordered_map<StringRef, FileVariableDecl*> file_static_variables_;
-        ordered_map<StringRef, FunctionDecl*> function_decls_;
+    private:
+        ordered_map<StringRef, FileVariableDecl*>   file_static_variables_;
+        ordered_map<StringRef, FunctionDecl*>       function_decls_;
+
+    public:
+        void appendFileStaticVari(FileVariableDecl *variable) ;
+        void appendFunctionDecl  (FunctionDecl *functionDecl) ;
 
     public:
         static const NodeType GetClassId () ;
@@ -934,11 +990,16 @@ namespace rexlang {
         HierarchyIdentifier* lhs_ = nullptr;
         Expression* rhs_ = nullptr;
 
+    protected:
+        ExprUsage GetSubExprLRType(const Expression *expr) const override ;
+
+    public:
+        void setLHS(HierarchyIdentifier *lhs) ;
+        void setRHS(Expression *rhs) ;
+
     public:
         static const NodeType GetClassId () ;
 
-    protected:
-        ExprUsage GetSubExprLRType(const Expression *expr) const override ;
     };
 
     /**
@@ -988,13 +1049,18 @@ namespace rexlang {
      * @brief 返回
      */
     class ReturnStmt : public ControlStmt {
+    private:
         Expression* return_value_ = nullptr;
+
+    protected:
+        ExprUsage GetSubExprLRType(const Expression *expr) const override ;
+
+    public:
+        void setReturnValue(Expression *returnValue) ;
 
     public:
         static const NodeType GetClassId () ;
 
-    protected:
-        ExprUsage GetSubExprLRType(const Expression *expr) const override ;
     };
 
     /**
@@ -1013,92 +1079,131 @@ namespace rexlang {
      * 如果、如果真、判断
      */
     class IfStmt : public Statement {
+    private:
         // 选择分支，每个pair第一个元素为测试表达式，第二个元素为相应的语句块
         std::vector<std::pair<Expression*, Statement*>> switches_;
         // 默认分支
         Statement* default_statement_ = nullptr;
 
+    protected:
+        ExprUsage GetSubExprLRType(const Expression *expr) const override ;
+
+    public:
+        void appendBranch(Expression *condition, Statement *statement) ;
+        void setDefault  (Statement *statement) ;
+
     public:
         static const NodeType GetClassId () ;
 
-    protected:
-        ExprUsage GetSubExprLRType(const Expression *expr) const override ;
     };
 
     /**
      * @brief 循环语句基本结构
      */
     class LoopStatement : public Statement {
+    private:
         Statement* loop_body_ = nullptr;
+
+    public:
+        void setLoopBody(Statement *loopBody) ;
+
     };
 
     /**
      * @brief 描述先判断后执行的While-Loop结构
      */
     class WhileStmt : public LoopStatement {
+    private:
         Expression* condition_ = nullptr;
+
+    protected:
+        ExprUsage GetSubExprLRType(const Expression *expr) const override ;
+
+    public:
+        void setLoopCondition(Expression *condition) ;
 
     public:
         static const NodeType GetClassId () ;
 
-    protected:
-        ExprUsage GetSubExprLRType(const Expression *expr) const override ;
     };
 
     /**
      * @brief 描述计次循环的范围迭代循环结构
      */
     class RangeForStmt : public LoopStatement {
-        Expression* range_size_ = nullptr;
-        HierarchyIdentifier* loop_vari_ = nullptr;
+    private:
+        Expression *            range_size_ = nullptr;
+        HierarchyIdentifier *   loop_vari_  = nullptr;
+
+    protected:
+        ExprUsage GetSubExprLRType(const Expression *expr) const override ;
+
+    public:
+        void setRangeSize    (Expression *rangeSize) ;
+        void setLoopVariable (HierarchyIdentifier *loopVari) ;
 
     public:
         static const NodeType GetClassId () ;
 
-    protected:
-        ExprUsage GetSubExprLRType(const Expression *expr) const override ;
     };
 
     /**
      * @brief 描述计步循环的范围迭代循环结构
      */
     class ForStmt : public LoopStatement {
-        Expression* start_value_ = nullptr;
-        Expression* stop_value_ = nullptr;
-        Expression* step_value_ = nullptr;
-        HierarchyIdentifier* loop_vari_ = nullptr;
+        Expression *          start_value_ = nullptr;
+        Expression *          stop_value_  = nullptr;
+        Expression *          step_value_  = nullptr;
+        HierarchyIdentifier * loop_vari_   = nullptr;
+
+    protected:
+        ExprUsage GetSubExprLRType(const Expression *expr) const override ;
+
+    public:
+        void setStartValue(Expression *startValue) ;
+        void setStopValue (Expression *stopValue)  ;
+        void setStepValue (Expression *stepValue)  ;
+        void setLoopVari  (HierarchyIdentifier *loopVari) ;
 
     public:
         static const NodeType GetClassId () ;
 
-    protected:
-        ExprUsage GetSubExprLRType(const Expression *expr) const override ;
     };
 
     /**
      * @brief 描述先执行后判断的Do-While循环结构
      */
     class DoWhileStmt : public LoopStatement {
-        Expression* conditon_ = nullptr;
+    private:
+        Expression* condition_ = nullptr;
+
+    protected:
+        ExprUsage GetSubExprLRType(const Expression *expr) const override ;
+
+    public:
+        void setCondition(Expression *condition) ;
 
     public:
         static const NodeType GetClassId () ;
 
-    protected:
-        ExprUsage GetSubExprLRType(const Expression *expr) const override ;
     };
 
     /**
      * @brief 语句块
      */
     class StatementBlock : public Statement {
+    private:
         std::vector<Statement*> statements_;
+
+    protected:
+        ExprUsage GetSubExprLRType(const Expression *expr) const override ;
+
+    public:
+        void appendStatement(Statement *statement) ;
 
     public:
         static const NodeType GetClassId () ;
 
-    protected:
-        ExprUsage GetSubExprLRType(const Expression *expr) const override ;
     };
 
     /**
@@ -1169,48 +1274,55 @@ namespace rexlang {
         virtual TypeDecl *      EvalBaseNameComponentType   () = 0;
 
     public:
-        virtual Identifier *GetBaseId() const = 0;    // 获取组件的确切名称对象
+        virtual Identifier *getBaseId() const = 0;    // 获取组件的确切名称对象
     };
 
     /**
      * @brief 普通名称组件
      */
     class Identifier : public NameComponent {
+    private:
         // 引用名
         TString name_;
-
-        // === 下面是经过语义分析后的数据 ===
-
-        BaseVariDecl* reference_ = nullptr;
-        FunctorDecl* function_ref_ = nullptr;
-
-    public:
-        static const NodeType GetClassId () ;
-
-    public:
-        TypeDecl *      EvalBaseNameComponentType   ()       override;
-        Identifier *    GetBaseId                   () const override ;
+        BaseVariDecl * reference_    = nullptr;
+        FunctorDecl *  function_ref_ = nullptr;
 
     private:
         TypeDecl *CheckExpressionInternal() override;
 
     protected:
         ExprUsage GetSubExprLRType(const Expression *expr) const override;
+
+    public:
+        void            setName                     (const TString &name) ;
+        TypeDecl *      EvalBaseNameComponentType   ()       override ;
+        Identifier *    getBaseId                   () const override ;
+
+    public:
+        static const NodeType GetClassId () ;
+
     };
 
     /**
      * @brief 数组引用组件
      */
     class ArrayIndex : public NameComponent {
+    private:
         // 索引对象
         NameComponent* base_ = nullptr;
         // 索引表达式
         Expression* index_ = nullptr;
 
-    public:
-        static const NodeType GetClassId () ;
+    protected:
+        ExprUsage GetSubExprLRType(const Expression *expr) const override;
+
+    private:
+        TypeDecl *CheckExpressionInternal() override;
 
     public:
+        void setBaseComponent(NameComponent *baseComponent) ;
+        void setIndexExpr    (Expression *indexExpr) ;
+
         TypeDecl *      EvalBaseNameComponentType   () override;
 
         /*
@@ -1219,7 +1331,7 @@ namespace rexlang {
          * arrayIndex[1][2][3][1]->arrayIndex
          * func()[1][3]->func()
          */
-        NameComponent *GetIndexBase() const;
+        NameComponent *getIndexBase() const;
 
         /*
          * 获取可索引类型的元素类型
@@ -1227,48 +1339,44 @@ namespace rexlang {
          * 整数型数组返回整数型
          * 字节集返回字节型
          */
-        TypeDecl * GetElementTy() const ;
+        TypeDecl * getElementTy() const ;
 
-        Identifier *GetBaseId() const override ;
+        Identifier *getBaseId() const override ;
 
-    protected:
-        ExprUsage GetSubExprLRType(const Expression *expr) const override;
+    public:
+        static const NodeType GetClassId () ;
 
-    private:
-        TypeDecl *CheckExpressionInternal() override;
     };
 
     /**
      * @brief 函数调用组件
      */
     class FunctionCall : public NameComponent {
-        NameComponent* function_name_ = nullptr;
-
-    public:
-        static const NodeType GetClassId () ;
-
     private:
-        std::vector<Expression*> arguments_;
+        NameComponent *           function_name_ = nullptr;
+        std::vector<Expression *> arguments_;
+        FunctorDecl *             functor_declare_ = nullptr;
 
-    public:
-        // === 下面是经过语义分析后的数据 ===
-
-        FunctorDecl * functor_declare_ = nullptr;
+    protected:
+        ExprUsage GetSubExprLRType          (const Expression *expr) const override ;
 
     public:
         TypeDecl *      CheckExpressionInternal     ()       override ;
         TypeDecl *      EvalBaseNameComponentType   ()       override ;
-        Identifier *    GetBaseId                   () const override ;
+        Identifier *    getBaseId                   () const override ;
 
-        FunctorDecl *   GetFunctionDeclare  () const ;
+        void setCallName(NameComponent *funcName) ;
+        void appendArgument(Expression *argument) ;
+        FunctorDecl *   getFunctionDeclare  () const ;
 
-        bool    IsArgument      (Expression *expr) const ;          // 判定表达式是否为实参，依赖 IndexOfArgument 实现
+        bool    IsArgument      (      Expression *expr) const ;    // 判定表达式是否为实参，依赖 IndexOfArgument 实现
         bool    IsArgument      (const Expression *expr) const ;    // 判定表达式是否为实参，依赖 IndexOfArgument 实现
-        int     IndexOfArgument (Expression *expr) const ;          // 若表达式是实参则返回是第几个参数，否则返回-1
+        int     IndexOfArgument (      Expression *expr) const ;    // 若表达式是实参则返回是第几个参数，否则返回-1
         int     IndexOfArgument (const Expression *expr) const ;    // 若表达式是实参则返回是第几个参数，否则返回-1
 
-    protected:
-        ExprUsage GetSubExprLRType          (const Expression *expr) const override ;
+    public:
+        static const NodeType GetClassId () ;
+
     };
 
     /*
@@ -1312,67 +1420,81 @@ namespace rexlang {
         TString operator_;
 
     public:
-        static const NodeType GetClassId () ;
+        void setOperatorText            (const TString &operatorText) ;
+        void setOperator                (const OperatorType &opt) ;
+        const OperatorType &getOperator () const ;
 
     public:
-        const OperatorType &GetOpt() const ;
+        static const NodeType GetClassId () ;
+
     };
 
     class UnaryExpression : public _OperatorExpression {
+    private:
         Expression* operand_value_ = nullptr;
-
-    public:
-        static const NodeType GetClassId () ;
-
-    public:
-        VariTypeDecl *CheckExpressionInternal   () override ;
 
     protected:
         ExprUsage GetSubExprLRType          (const Expression *expr) const override ;
-    };
 
-    class BinaryExpression : public _OperatorExpression {
-        Expression* lhs_ = nullptr;
-        Expression* rhs_ = nullptr;
+    public:
+        void setOperand(Expression *operand) ;
+        VariTypeDecl *CheckExpressionInternal   () override ;
 
     public:
         static const NodeType GetClassId () ;
 
-    public:
-        bool            IsBinaryOperateValid         () const;   // 检查二元运算是否合法，该断言主要判断二元表达式中左右子式是否可以通过运算符计算
-        VariTypeDecl *  GetBinaryOperateUpgradeType  () const;   // 获取二元表达式提升后的类型
+    };
+
+    class BinaryExpression : public _OperatorExpression {
+    private:
+        Expression* lhs_ = nullptr;
+        Expression* rhs_ = nullptr;
 
     protected:
         ExprUsage   GetSubExprLRType                (const Expression *expr) const override ;
 
     public:
+        void    setLHS(Expression *lhsExpr) ;
+        void    setRHS(Expression *rhsExpr) ;
+
+        bool            IsBinaryOperateValid         () const;   // 检查二元运算是否合法，该断言主要判断二元表达式中左右子式是否可以通过运算符计算
+        VariTypeDecl *  GetBinaryOperateUpgradeType  () const;   // 获取二元表达式提升后的类型
+
+    public:
         VariTypeDecl *CheckExpressionInternal() override ;
+
+    public:
+        static const NodeType GetClassId () ;
+
     };
 
     class ResourceRefExpression : public Expression {
+    private:
         TString resource_name_;
 
     public:
-        static const NodeType GetClassId () ;
-
-    public:
+        void setResourceName(const TString &resourceName) ;
         TypeDecl *CheckExpressionInternal() override ;
         ExprUsage GetSubExprLRType(const Expression *expr) const override ;
+
+    public:
+        static const NodeType GetClassId () ;
+
     };
 
     class FuncAddrExpression : public Expression {
+    private:
         TString function_name_;
-
-        // === 下面是经过语义分析后的数据 ===
-
         FunctorDecl* functor_declare_ = nullptr;
+
+    public:
+        void setRefFuncName(const TString &functionName) ;
+        TypeDecl *CheckExpressionInternal() override ;
+        ExprUsage GetSubExprLRType(const Expression *expr) const override ;
 
     public:
         static const NodeType GetClassId () ;
 
-    public:
-        TypeDecl *CheckExpressionInternal() override ;
-        ExprUsage GetSubExprLRType(const Expression *expr) const override ;
     };
 
     /**
@@ -1388,57 +1510,77 @@ namespace rexlang {
     };
 
     class ValueOfDataSet : public Value {
+    private:
         std::vector<Expression*> elements_;
 
     public:
-        static const NodeType GetClassId () ;
+        void appendElement(Expression *element) ;
+
+        TypeDecl *CheckExpressionInternal() override ;
 
     public:
-        TypeDecl *CheckExpressionInternal() override ;
+        static const NodeType GetClassId () ;
+
     };
 
     class ValueOfDatetime : public Value {
+    private:
         time_t time_ = 0;
 
     public:
-        static const NodeType GetClassId () ;
+        void setTime(time_t time) ;
+
+        TypeDecl *CheckExpressionInternal() override ;
 
     public:
-        TypeDecl *CheckExpressionInternal() override ;
+        static const NodeType GetClassId () ;
+
     };
 
     class ValueOfBool : public Value {
+    private:
         bool value_ = false;
+
+    public:
+        void setBool(bool boolValue) ;
+        TypeDecl *CheckExpressionInternal() override ;
 
     public:
         static const NodeType GetClassId () ;
 
-    public:
-        TypeDecl *CheckExpressionInternal() override ;
     };
 
     class ValueOfDecimal : public Value {
+    private:
         union {
-            int int_val_ = 0;
+            int   int_val_ = 0;
             float float_val_;
         };
         enum type { kInt, kFloat } type_ = type::kInt;
 
     public:
-        static const NodeType GetClassId () ;
+        void setIntValue  (int   value) ;
+        void setFloatValue(float value) ;
+
+        TypeDecl *CheckExpressionInternal() override ;
 
     public:
-        TypeDecl *CheckExpressionInternal() override ;
+        static const NodeType GetClassId () ;
+
     };
 
     class ValueOfString : public Value {
+    private:
         TString string_literal_;
+
+    public:
+        void setStringLiteral(const TString &literal) ;
+
+        TypeDecl *CheckExpressionInternal() override ;
 
     public:
         static const NodeType GetClassId () ;
 
-    public:
-        TypeDecl *CheckExpressionInternal() override ;
     };
 
     /**

@@ -521,9 +521,9 @@ namespace rexlang {
             if (attr.string_ == u8"参考" || attr.string_ == u8"传址") {
                 parameter->is_reference_ = true;
             } else if (attr.string_ == u8"可空") {
-                parameter->is_nullable = true;
+                parameter->is_nullable_ = true;
             } else if (attr.string_ == u8"数组") {
-                parameter->is_array = true;
+                parameter->is_array_ = true;
                 assert(parameter->vari_type_decl_->is<ArrayDecl>() == false);
                 ArrayDecl *array_decl = CreateNode<ArrayDecl>(parameter->ast_context_);
                 array_decl->dimensions_ = {0};
@@ -868,7 +868,7 @@ namespace rexlang {
 
                 // 5.1.1. 检查形参可空属性
 
-                if (parameters[idx]->is_nullable == false) {
+                if (parameters[idx]->is_nullable_ == false) {
                     assert(false);
                     return false;
                 } else {
@@ -876,7 +876,7 @@ namespace rexlang {
                 }
 
             }
-            /*else*/ if (parameters[idx]->is_array && arguments[idx] != nullptr) {
+            /*else*/ if (parameters[idx]->is_array_ && arguments[idx] != nullptr) {
 
                 // 5.2. 如果形参数组属性为真，则实参必须为左值或左值引用（参考形参）数组变量，且元素类型严格一致
                 // 数组参数只能以引用方式传递

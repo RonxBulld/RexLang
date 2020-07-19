@@ -41,7 +41,7 @@ namespace rexlang {
                         return true;
                     } else {
                         // 2.1.2. 左值类型兼容右值类型则可赋值
-                        if (lhs_builtin->IsNumerical() && rhs_builtin->IsNumerical()) {
+                        if (lhs_builtin->isNumerical() && rhs_builtin->isNumerical()) {
                             return true;
                         } else {
                             return false;

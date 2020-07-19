@@ -17,9 +17,9 @@ namespace rexlang {
      * 获取组件的确切名称对象
      ***********************************************************/
 
-    Identifier *Identifier  ::GetBaseId() const { return const_cast<Identifier *>(this); }
-    Identifier *ArrayIndex  ::GetBaseId() const { return this->base_->GetBaseId(); }
-    Identifier *FunctionCall::GetBaseId() const { return this->function_name_->GetBaseId(); }
+    Identifier *Identifier  ::getBaseId() const { return const_cast<Identifier *>(this); }
+    Identifier *ArrayIndex  ::getBaseId() const { return this->base_->getBaseId(); }
+    Identifier *FunctionCall::getBaseId() const { return this->function_name_->getBaseId(); }
 
 
 
@@ -107,7 +107,7 @@ namespace rexlang {
         return nullptr;
     }
 
-    NameComponent *ArrayIndex::GetIndexBase() const {
+    NameComponent *ArrayIndex::getIndexBase() const {
         NameComponent *base = nullptr;
         const ArrayIndex *arrayIndex = this;
         do{

@@ -16,8 +16,8 @@ namespace rexlang {
         parameter_decl->vari_type_decl_ = paramType;
         parameter_decl->type_name_ = paramType->name_;
         parameter_decl->is_reference_ = isReference;
-        parameter_decl->is_nullable = isNullable;
-        parameter_decl->is_array = isArray;
+        parameter_decl->is_nullable_ = isNullable;
+        parameter_decl->is_array_ = isArray;
         return parameter_decl;
     }
 

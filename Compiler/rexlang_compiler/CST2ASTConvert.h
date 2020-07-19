@@ -19,8 +19,6 @@ namespace rexlang {
         ASTContext *ast_context_ = nullptr;
 
     private:
-        void RemoveRoundQuotes(TString &tString) const;
-
         TString GetTextIfExist(const antlr4::Token *token, const std::string &hint = "") const;
 
         long GetLongIfExist(const antlr4::Token *token, int hint = 0) const;
@@ -41,7 +39,10 @@ namespace rexlang {
         T GetFromCtxIfExist(antlr4::ParserRuleContext *ctx, const T &hint = T());
 
         template<typename NodeTy, typename ... Args, typename = typename std::enable_if_t<std::is_base_of_v<Node, NodeTy>>>
-        NodeTy *CreateNode(antlr4::Token *start_token, antlr4::Token *end_token, Args ... args);
+        NodeTy *CreateNode(antlr4::Token *start_token, antlr4::Token *end_token, Args && ... args);
+
+        template<typename NodeTy, typename ... Args, typename = typename std::enable_if_t<std::is_base_of_v<Node, NodeTy>>>
+        NodeTy *CreateNode(antlr4::ParserRuleContext *parserRuleContext, Args && ... args);
 
     public:
         antlrcpp::Any visitRexlang_src(rexLangParser::Rexlang_srcContext *context) override;
@@ -124,13 +125,11 @@ namespace rexlang {
 
         antlrcpp::Any visitDatetime_value(rexLangParser::Datetime_valueContext *context) override;
 
-        ValueOfDatetime* TimeNodeBuilder(time_t time, antlr4::Token *start_token, antlr4::Token *end_token);
+        ValueOfDatetime* TimeNodeBuilder(time_t ntm, antlr4::ParserRuleContext *parserRuleContext);
 
         antlrcpp::Any visitDatetimePureNumber(rexLangParser::DatetimePureNumberContext *context) override;
 
         tm TimeBuilder(unsigned year, unsigned month, unsigned day, unsigned hour, unsigned minute, unsigned second);
-
-        ValueOfDatetime* TimeNodeBuilder(tm && stm, antlr4::Token *start_token, antlr4::Token *end_token);
 
         antlrcpp::Any visitDatetimeSeparateByChinese(rexLangParser::DatetimeSeparateByChineseContext *context) override;
 

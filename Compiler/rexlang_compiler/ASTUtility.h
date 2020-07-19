@@ -15,26 +15,6 @@ namespace rexlang {
     public:
         static void FixNodeParent(Node *root);
 
-        /*
-         * 查找名称所指示的变量定义
-         * 注意：如果变量定义为数组，无论是引用整个数组还是引用数组中的一个元素，FindDeclareInASTWithHierarchyName返回同一个指针，
-         * 如果需要区别名称指向的类型请使用GetVariableQualifiedTypeWithHierarchyName
-         */
-        //static TypeDecl * FindDeclareInASTWithHierarchyName(HierarchyIdentifier *hierarchyIdentifier, SematicAnalysisContext *context);
-
-        /*
-         * 获取名称所指示的确切的定义描述
-         */
-        //static TagDecl * GetQualifiedTypeWithHierarchyName(HierarchyIdentifier *hierarchyIdentifier);
-
-        /*
-         * 获取名称组件的确切名字
-         * 如果是数组引用则获取数组名，例如：arr[5]->"arr"；
-         * 如果是函数调用则获取函数名，例如：func()->"func"；
-         * 如果是名称直接引用则返回该名称，例如：name->"name"。
-         */
-        static ErrOr<StringRef> GetNameComponentQualifiedName(NameComponent *nameComponent);
-
         template <typename Ty, typename = typename std::enable_if_t<std::is_base_of_v<Node, Ty>>>
         static Ty *FindSpecifyTypeParent(Node *base) {
             while (base && !base->is<Ty>()) {

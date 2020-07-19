@@ -480,18 +480,18 @@ namespace rexlang {
         }
 
 
-             if (builtinTypeDecl->IsVoidType    ()) { type = Builder.getVoidTy(); }
-        else if (builtinTypeDecl->IsCharType    ()) { type = Builder.getInt8Ty(); }
-        else if (builtinTypeDecl->IsIntegerType ()) { type = Builder.getInt32Ty(); }
-        else if (builtinTypeDecl->IsFloatType   ()) { type = Builder.getFloatTy(); }
-        else if (builtinTypeDecl->IsBoolType    ()) { type = Builder.getInt1Ty(); }
-        else if (builtinTypeDecl->IsStringType  ()) { type = RTBuilder.getStringType(); } /*字符串对象指针*/
-        else if (builtinTypeDecl->IsDataSetType ()) { type = RTBuilder.getStringType(); } /*字节集对象指针*/
-        else if (builtinTypeDecl->IsShortType   ()) { type = Builder.getInt16Ty(); }
-        else if (builtinTypeDecl->IsLongType    ()) { type = Builder.getInt64Ty(); }
-        else if (builtinTypeDecl->IsDatetimeType()) { type = Builder.getInt64Ty(); }
-        else if (builtinTypeDecl->IsDoubleType  ()) { type = Builder.getDoubleTy(); }
-        else if (builtinTypeDecl->IsFuncPtrType ()) { type = Builder.getVoidTy()->getPointerTo(); }
+             if (builtinTypeDecl->isVoidType()) { type = Builder.getVoidTy(); }
+        else if (builtinTypeDecl->isCharType()) { type = Builder.getInt8Ty(); }
+        else if (builtinTypeDecl->isIntegerType()) { type = Builder.getInt32Ty(); }
+        else if (builtinTypeDecl->isFloatType()) { type = Builder.getFloatTy(); }
+        else if (builtinTypeDecl->isBoolType()) { type = Builder.getInt1Ty(); }
+        else if (builtinTypeDecl->isStringType()) { type = RTBuilder.getStringType(); } /*字符串对象指针*/
+        else if (builtinTypeDecl->isDataSetType()) { type = RTBuilder.getStringType(); } /*字节集对象指针*/
+        else if (builtinTypeDecl->isShortType()) { type = Builder.getInt16Ty(); }
+        else if (builtinTypeDecl->isLongType()) { type = Builder.getInt64Ty(); }
+        else if (builtinTypeDecl->isDatetimeType()) { type = Builder.getInt64Ty(); }
+        else if (builtinTypeDecl->isDoubleType()) { type = Builder.getDoubleTy(); }
+        else if (builtinTypeDecl->isFuncPtrType()) { type = Builder.getVoidTy()->getPointerTo(); }
         else { assert(false); return nullptr; }
 
         type_object_pool_[builtinTypeDecl] = type;
