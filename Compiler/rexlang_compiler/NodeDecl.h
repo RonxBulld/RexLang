@@ -211,12 +211,13 @@ namespace rexlang {
      */
     class Node {
     private:
-        size_t node_id_          = 0;
-        ASTContext *ast_context_ = nullptr;
-        Node *parent_node_       = nullptr;
-        NodeType node_type_      = NodeType::kNTyBadType;
-        size_t location_start_   = 0;
-        size_t location_end_     = 0;
+        size_t          node_id_            = 0;
+        ASTContext *    ast_context_        = nullptr;
+        Node *          parent_scope_       = nullptr;
+        Node *          parent_node_        = nullptr;
+        NodeType        node_type_          = NodeType::kNTyBadType;
+        size_t          location_start_     = 0;
+        size_t          location_end_       = 0;
 
     protected:
         void setParent(Node *parent) { parent_node_ = parent; }
@@ -229,9 +230,12 @@ namespace rexlang {
         template<typename NodeTy, typename ... Args, typename = typename std::enable_if<std::is_base_of<Node, NodeTy>::value>::type>
         static NodeTy *Create(ASTContext *ast_context, Args && ... args) {
             NodeTy *node = new NodeTy(args...);
-            node->node_id_     = ast_context->GetNodeIndex();
-            node->node_type_   = NodeTy::GetClassId();
-            node->ast_context_ = ast_context;
+
+            node->node_id_      = ast_context->GetNodeIndex();
+            node->node_type_    = NodeTy::GetClassId();
+            node->ast_context_  = ast_context;
+            node->parent_scope_ = ast_context->currentScope();
+
             return node;
         }
 
@@ -248,6 +252,7 @@ namespace rexlang {
     public:
         TranslateUnit * getTranslateUnit    () const { return ast_context_->GetTranslateUnit(); }
         ASTContext *    getAstContext       () const { return ast_context_; }
+        Node *          getNearstScope      () const { return parent_scope_; }
 
     public:
         void setLocation(const char *filename, size_t leftLine, size_t leftColumn, size_t rightLine, size_t rightColumn) {
@@ -260,6 +265,9 @@ namespace rexlang {
         size_t          getLeftColumn () const { return ast_context_->GetColumnFromLocate(location_start_); }
         size_t          getRightLine  () const { return ast_context_->GetLineFromLocate  (location_end_); }
         size_t          getRightColumn() const { return ast_context_->GetColumnFromLocate(location_end_); }
+
+    public:
+        virtual TagDecl * findDeclWithNameString(const StringRef &name) const ;
     };
 
     /**
@@ -856,7 +864,8 @@ namespace rexlang {
         virtual void appendParameter    (ParameterDecl *parameterDecl) ;
 
     public:
-        ParameterDecl * GetParameterAt(unsigned idx) const ;
+        ParameterDecl * getParameterAt  (unsigned idx) const ;
+        ParameterDecl * getParameter    (const StringRef &name) const ;
 
         virtual bool    isStaticLibraryAPI  () const = 0;
         virtual bool    isDynamicLibraryAPI () const = 0;
@@ -879,12 +888,17 @@ namespace rexlang {
         ProgSetDecl* super_set_ = nullptr;
 
     public:
-        void appendLocalVariable(LocalVariableDecl *variableDecl) ;
-        void setStatementBlock(StatementBlock *statementBlock) ;
+        void     appendLocalVariable(LocalVariableDecl * variableDecl) ;
+        void     setStatementBlock  (StatementBlock *    statementBlock) ;
+
+        LocalVariableDecl *getLocalVari (const StringRef &   name) const ;
 
     public:
         bool    isStaticLibraryAPI  () const override ;
         bool    isDynamicLibraryAPI () const override ;
+
+    public:
+        TagDecl *findDeclWithNameString(const StringRef &name) const override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -955,12 +969,18 @@ namespace rexlang {
      */
     class ProgSetDecl : public TagDecl {
     private:
-        ordered_map<StringRef, FileVariableDecl*>   file_static_variables_;
-        ordered_map<StringRef, FunctionDecl*>       function_decls_;
+        ordered_map<StringRef, FileVariableDecl *>  file_static_variables_;
+        ordered_map<StringRef, FunctionDecl *>      function_decls_;
 
     public:
         void appendFileStaticVari(FileVariableDecl *variable) ;
         void appendFunctionDecl  (FunctionDecl *functionDecl) ;
+
+        FileVariableDecl *  getFileVariableDecl (const StringRef &name) const ;
+        FunctionDecl *      getFunctionDecl     (const StringRef &name) const ;
+
+    public:
+        TagDecl *findDeclWithNameString(const StringRef &name) const override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -1271,7 +1291,7 @@ namespace rexlang {
         NameComponent * Forward     () const ;
         NameComponent * Backward    () const ;
 
-        virtual TypeDecl *      EvalBaseNameComponentType   () = 0;
+        virtual TagDecl *      EvalBaseNameComponentType   () = 0;
 
     public:
         virtual Identifier *getBaseId() const = 0;    // 获取组件的确切名称对象
@@ -1284,8 +1304,8 @@ namespace rexlang {
     private:
         // 引用名
         TString name_;
-        BaseVariDecl * reference_    = nullptr;
-        FunctorDecl *  function_ref_ = nullptr;
+        // 引用目标
+        TagDecl * reference_    = nullptr;
 
     private:
         TypeDecl *CheckExpressionInternal() override;
@@ -1294,9 +1314,18 @@ namespace rexlang {
         ExprUsage GetSubExprLRType(const Expression *expr) const override;
 
     public:
-        void            setName                     (const TString &name) ;
-        TypeDecl *      EvalBaseNameComponentType   ()       override ;
+        Identifier() ;
+        Identifier(const TString &name) ;
+
+    public:
+        void                setName         (const TString &name) ;
+        const TString &     getName         () const ;
+        const StringRef &   getNameRef      () const ;
+
+        TagDecl *       EvalBaseNameComponentType   ()       override ;
         Identifier *    getBaseId                   () const override ;
+        TagDecl *       getDecl                     () ;
+        TagDecl *       getDecl                     () const ;
 
     public:
         static const NodeType GetClassId () ;
@@ -1323,7 +1352,7 @@ namespace rexlang {
         void setBaseComponent(NameComponent *baseComponent) ;
         void setIndexExpr    (Expression *indexExpr) ;
 
-        TypeDecl *      EvalBaseNameComponentType   () override;
+        TagDecl *      EvalBaseNameComponentType   () override;
 
         /*
          * 获取数组索引组件的真实基对象
@@ -1362,7 +1391,7 @@ namespace rexlang {
 
     public:
         TypeDecl *      CheckExpressionInternal     ()       override ;
-        TypeDecl *      EvalBaseNameComponentType   ()       override ;
+        TagDecl *       EvalBaseNameComponentType   ()       override ;
         Identifier *    getBaseId                   () const override ;
 
         void setCallName(NameComponent *funcName) ;
@@ -1484,11 +1513,11 @@ namespace rexlang {
 
     class FuncAddrExpression : public Expression {
     private:
-        TString function_name_;
-        FunctorDecl* functor_declare_ = nullptr;
+        Identifier *  function_name_;
+        FunctorDecl * functor_declare_ = nullptr;
 
     public:
-        void setRefFuncName(const TString &functionName) ;
+        void setRefFuncName(Identifier *functionName) ;
         TypeDecl *CheckExpressionInternal() override ;
         ExprUsage GetSubExprLRType(const Expression *expr) const override ;
 
@@ -1597,17 +1626,17 @@ namespace rexlang {
         // === 下面是经过语义分析后的数据 ===
 
         // 全局类型索引表
-        ordered_map<StringRef, TypeDecl*> global_type_;
+        ordered_map<StringRef, TypeDecl *> global_type_;
         // 全局变量索引表
-        ordered_map<StringRef, GlobalVariableDecl*> global_variables_;
+        ordered_map<StringRef, GlobalVariableDecl *> global_variables_;
         // 支持库引用列表
         std::set<StringRef> libraries_list_;
         // 程序集索引表
-        ordered_map<StringRef, ProgSetDecl*> program_sets_;
+        ordered_map<StringRef, ProgSetDecl *> program_sets_;
         // 函数定义表
-        ordered_map<StringRef, FunctionDecl*> function_decls_;
+        ordered_map<StringRef, FunctionDecl *> function_decls_;
         // DLL函数声明表
-        ordered_map<StringRef, APICommandDecl*> dll_declares_;
+        ordered_map<StringRef, APICommandDecl *> dll_declares_;
         // 函数定义表和DLL声明表的合并
         // TODO: 是否要将上面两个逗逼玩意干掉
         ordered_map<StringRef, FunctorDecl*> functor_declares_;
@@ -1619,18 +1648,27 @@ namespace rexlang {
     public:
         static const NodeType GetClassId () ;
 
+    public:
         /******************************************************
          * 资源文件操作接口
          ******************************************************/
 
-    public:
-        void    appendSourceFile(SourceFile* sourceFile) { assert(false); source_file_.push_back(sourceFile); }
+        void    appendSourceFile(SourceFile* sourceFile) ;
 
+    public:
+        /******************************************************
+         * 查询接口
+         ******************************************************/
+
+        TypeDecl *              getType         (const StringRef &name) const ;
+        GlobalVariableDecl *    getGlobalVari   (const StringRef &name) const ;
+        FunctorDecl *           getFunctor      (const StringRef &name) const ;
+
+    public:
         /******************************************************
          * 版本号操作接口
          ******************************************************/
 
-    public:
         void     setSourceEdition(unsigned edition) { edition_ = edition; }
         unsigned getSourceEdition() const           { return edition_; }
 
@@ -1660,6 +1698,7 @@ namespace rexlang {
         BuiltinFuncPtrType *    getFuncPtrTy    () const ;
         BuiltinDoubleType *     getDoubleTy     () const ;
 
+        TagDecl *findDeclWithNameString(const StringRef &name) const override ;
     };
 
     class NodeWarp {

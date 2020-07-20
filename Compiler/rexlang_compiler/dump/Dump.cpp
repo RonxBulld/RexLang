@@ -18,7 +18,7 @@ namespace rexlang {
         DumpToken dump_token;
         dump_token.node_name = "TranslateUnit";
         dump_token.node_ptr = translateUnitPtr;
-        dump_token.line = translateUnitPtr->ast_context_->GetLineNumber(translateUnitPtr->location_start_);
+//        dump_token.line = translateUnitPtr->ast_context_->GetLineNumber(translateUnitPtr->location_start_);
         return dump_token;
     }
 

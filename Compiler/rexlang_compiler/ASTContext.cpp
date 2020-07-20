@@ -44,15 +44,11 @@ namespace rexlang {
     void            ASTContext::SetDiagnostic(Diagnostic *diagnostic)   { this->diagnostic_ = diagnostic; }
     Diagnostic *    ASTContext::GetDiagnostic()                         { return this->diagnostic_; }
 
-    void            ASTContext::SetTranslateUnit(TranslateUnit *translateUnit)  { this->TU = translateUnit; }
-    TranslateUnit * ASTContext::GetTranslateUnit() const                        { return this->TU; }
+    void            ASTContext::SetTranslateUnit(TranslateUnit *translateUnit)  { this->translate_unit_ = translateUnit; }
+    TranslateUnit * ASTContext::GetTranslateUnit() const                        { return this->translate_unit_; }
 
     size_t ASTContext::GetNodeIndex() {
         return this->node_index_++;
-    }
-
-    size_t ASTContext::GetLineNumber(size_t position_id) {
-        return this->location_pool_.GetLineNumber(position_id);
     }
 
     void ASTContext::AddDependenceLibrary(const StringRef &library_name) {
@@ -66,4 +62,9 @@ namespace rexlang {
         }
         return libraries;
     }
+
+    void  ASTContext::pushScope   (Node *scope) { scope_stack_.push(scope); }
+    Node *ASTContext::currentScope() const      { return scope_stack_.empty() ? nullptr : scope_stack_.top(); }
+    void  ASTContext::popScope    (Node *scope) { assert(currentScope() == scope); scope_stack_.pop(); }
+
 }

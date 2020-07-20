@@ -116,12 +116,16 @@ namespace rexlang {
 
     antlrcpp::Any CST2ASTConvert::visitRexlang_src(rexLangParser::Rexlang_srcContext *context) {
         TranslateUnit * translate_unit = CreateNode<TranslateUnit>(context);
+        ast_context_->pushScope(translate_unit);
+
         ast_context_->SetTranslateUnit(translate_unit);
         // 分析版本号
         translate_unit->setSourceEdition(GetFromCtxIfExist<unsigned int, true>(context->edition_spec(), 2));
         // 分析文件具体内容
         auto *src_ctx = context->src_content();
         translate_unit->appendSourceFile(GetFromCtxIfExist<SourceFile*, true>(src_ctx));
+
+        ast_context_->popScope(translate_unit);
         return NodeWarp(translate_unit);
     }
 
@@ -251,8 +255,9 @@ namespace rexlang {
 
     antlrcpp::Any CST2ASTConvert::visitProg_set(rexLangParser::Prog_setContext *context) {
         ProgSetDecl* prog_set_decl = CreateNode<ProgSetDecl>(context);
+        ast_context_->pushScope(prog_set_decl);
+
         prog_set_decl->setName(GetTextIfExist(context->name));
-//        prog_set_decl->base_ = GetTextIfExist(context->base);
         prog_set_decl->applyAttribute(GetTextIfExist(context->access));
         prog_set_decl->setComment(GetFromCtxIfExist<TString>(context->table_comment()));
         for (auto *vari_ctx : context->prog_set_varis) {
@@ -263,6 +268,8 @@ namespace rexlang {
             FunctionDecl* sub_prog_decl = GetFromCtxIfExist<FunctionDecl*>(func_ctx);
             prog_set_decl->appendFunctionDecl(sub_prog_decl);
         }
+
+        ast_context_->popScope(prog_set_decl);
         return NodeWarp(prog_set_decl);
     }
 
@@ -278,6 +285,8 @@ namespace rexlang {
 
     antlrcpp::Any CST2ASTConvert::visitSub_program(rexLangParser::Sub_programContext *context) {
         FunctionDecl* sub_prog_decl = CreateNode<FunctionDecl>(context);
+        ast_context_->pushScope(sub_prog_decl);
+
         sub_prog_decl->setName(GetTextIfExist(context->name));
         sub_prog_decl->setReturnTypeName(GetTextIfExist(context->type));
         sub_prog_decl->applyAttribute(GetTextIfExist(context->access));
@@ -290,6 +299,8 @@ namespace rexlang {
             sub_prog_decl->appendLocalVariable(local_vari);
         }
         sub_prog_decl->setStatementBlock(GetFromCtxIfExist<StatementBlock*>(context->statement_list()));
+
+        ast_context_->popScope(sub_prog_decl);
         return NodeWarp(sub_prog_decl);
     }
 
@@ -505,8 +516,7 @@ namespace rexlang {
     }
 
     antlrcpp::Any CST2ASTConvert::visitIdentifier(rexLangParser::IdentifierContext *context) {
-        Identifier* identifier = CreateNode<Identifier>(context);
-        identifier->setName(GetTextIfExist(context->IDENTIFIER()->getSymbol()));
+        Identifier* identifier = CreateNode<Identifier>(context, GetTextIfExist(context->IDENTIFIER()->getSymbol()));
         return NodeWarp(identifier);
     }
 
@@ -673,8 +683,9 @@ namespace rexlang {
     }
 
     antlrcpp::Any CST2ASTConvert::visitFunc_ptr(rexLangParser::Func_ptrContext *context) {
-        FuncAddrExpression* func_addr_expression = CreateNode<FuncAddrExpression>(context);
-        func_addr_expression->setRefFuncName(GetTextIfExist(context->IDENTIFIER()->getSymbol()));
+        FuncAddrExpression *func_addr_expression = CreateNode<FuncAddrExpression>(context);
+        Identifier *reference = CreateNode<Identifier>(context, GetTextIfExist(context->IDENTIFIER()->getSymbol()));
+        func_addr_expression->setRefFuncName(reference);
         return NodeWarp(func_addr_expression);
     }
 

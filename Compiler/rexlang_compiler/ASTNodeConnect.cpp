@@ -3,6 +3,7 @@
 // 1、将节点加入到另一个节点作为子级节点的例程
 // 2、将属性加入到节点并进行解析的例程
 // 3、获取属性的例程
+// * 注意检查同域冲突
 // Created by rex on 2020/7/18.
 //
 
@@ -232,7 +233,9 @@ namespace rexlang {
      * Identifier
      ***************************************************/
 
-    void Identifier::setName(const TString &name) { name_ = name; }
+         Identifier::Identifier () = default;
+         Identifier::Identifier (const TString &name)   { setName(name); }
+    void Identifier::setName    (const TString &name)   { name_ = name; }
 
     /***************************************************
      * ArrayIndex
@@ -284,7 +287,7 @@ namespace rexlang {
      * FuncAddrExpression
      ***************************************************/
 
-    void FuncAddrExpression::setRefFuncName(const TString &functionName) { function_name_ = functionName; }
+    void FuncAddrExpression::setRefFuncName(Identifier *functionName) { function_name_ = functionName; }
 
     /***************************************************
      * ValueOfBool

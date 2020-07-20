@@ -92,7 +92,7 @@ namespace rexlang {
         else if (this->IsArgument(expr)) {
             int idx = this->IndexOfArgument(expr);
             FunctorDecl *functor_decl = this->getFunctionDeclare();
-            ParameterDecl *parameter = functor_decl->GetParameterAt(idx);
+            ParameterDecl *parameter = functor_decl->getParameterAt(idx);
             return parameter->shouldBeReference() ? L : R ;
         }
         else {

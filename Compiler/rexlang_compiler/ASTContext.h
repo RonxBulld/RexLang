@@ -7,31 +7,34 @@
 
 #include <set>
 #include <vector>
+#include <stack>
 #include "../../lite_util/StringRef.h"
 #include "utilities/Location.h"
 
 namespace rexlang {
 
+    class Node;
     class Diagnostic;
     class TranslateUnit;
 
     class ASTContext {
     private:
-        LocationPool location_pool_;
-        Diagnostic *diagnostic_ = nullptr;
-        size_t node_index_ = 0;
+        LocationPool        location_pool_;
+        Diagnostic *        diagnostic_ = nullptr;
+        size_t              node_index_ = 0;
         std::set<StringRef> dependence_libraries_;
-        TranslateUnit *TU = nullptr;
+        TranslateUnit *     translate_unit_ = nullptr;
+        std::stack<Node *>  scope_stack_;
 
     public:
         ASTContext();
         ~ASTContext();
 
-        StringRef CreateString(const std::string &str);
-        StringRef CreateString(const char *pstr);
+        StringRef CreateString(const std::string & str);
+        StringRef CreateString(const char *        pstr);
 
-        size_t CreateLocation(const std::string &filename, size_t line, size_t column);
-        size_t CreateLocation(const StringRef &filename, size_t line, size_t column);
+        size_t CreateLocation(const std::string & filename, size_t line, size_t column);
+        size_t CreateLocation(const StringRef &   filename, size_t line, size_t column);
 
         const StringRef &   GetFileFromLocate   (size_t locate);
         size_t              GetLineFromLocate   (size_t locate);
@@ -43,13 +46,17 @@ namespace rexlang {
         void            SetTranslateUnit(TranslateUnit *translateUnit);
         TranslateUnit * GetTranslateUnit() const;
 
+        void                    AddDependenceLibrary  (const StringRef &library_name);
+        std::vector<StringRef>  GetDependenceLibraries() const;
+
         size_t GetNodeIndex();
 
-        size_t GetLineNumber(size_t position_id);
+        // TranslateUnit、ProgSetDecl和FunctionDecl会被认为带有Scope性质
 
-        void AddDependenceLibrary(const StringRef &library_name);
+        void    pushScope   (Node *scope) ;
+        Node *  currentScope() const ;
+        void    popScope    (Node *scope) ;
 
-        std::vector<StringRef> GetDependenceLibraries() const;
     };
 
 }

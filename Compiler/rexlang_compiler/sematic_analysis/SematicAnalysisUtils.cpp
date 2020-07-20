@@ -39,9 +39,9 @@ namespace rexlang {
         }
     }
 
-    TypeDecl *ArrayIndex::EvalBaseNameComponentType() {
+    TagDecl *ArrayIndex::EvalBaseNameComponentType() {
         NameComponent *array_base = this->getIndexBase();
-        TypeDecl *index_target = array_base->EvalBaseNameComponentType();
+        TagDecl *index_target = array_base->EvalBaseNameComponentType();
         if (!index_target) {
             assert(false);
             return nullptr;
@@ -59,8 +59,8 @@ namespace rexlang {
         return this->getElementTy(index_target);
     }
 
-    TypeDecl *FunctionCall::EvalBaseNameComponentType() {
-        TypeDecl *call_target = EvalBaseNameComponentType(function_call->function_name_, frontType);
+    TagDecl *FunctionCall::EvalBaseNameComponentType() {
+        TagDecl *call_target = EvalBaseNameComponentType(function_call->function_name_, frontType);
 
         // 检查类型是否可调用
 
@@ -82,7 +82,7 @@ namespace rexlang {
         return ASTUtility::GetCallableReturnType(call_target);
     }
 
-    TypeDecl *Identifier::EvalBaseNameComponentType() {
+    TagDecl *Identifier::EvalBaseNameComponentType() {
         TagDecl *id_type = nullptr;
 
         // 如果frontType非空表明有父级类型，将从父级类型中查找子类型
