@@ -23,7 +23,7 @@ namespace rexlang {
     const NodeType ProgramSetFile       ::GetClassId() { return NodeType::kNTyProgramSetFile; }
     const NodeType GlobalVariableFile   ::GetClassId() { return NodeType::kNTyGlobalVariableFile; }
     const NodeType DataStructureFile    ::GetClassId() { return NodeType::kNTyDataStructureFile; }
-    const NodeType DllDefineFile        ::GetClassId() { return NodeType::kNTyDllDefineFile; }
+    const NodeType APIDeclareFile       ::GetClassId() { return NodeType::kNTyAPIDeclareFile; }
     const NodeType Decl                 ::GetClassId() { return NodeType::kNTyDecl; }
     const NodeType TagDecl              ::GetClassId() { return NodeType::kNTyTagDecl; }
     const NodeType BaseVariDecl         ::GetClassId() { return NodeType::kNTyBaseVariDecl; }

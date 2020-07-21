@@ -179,15 +179,15 @@ namespace rexlang {
      * 文件类型断言
      **********************************************************/
 
-    bool SourceFile::IsProgramSetFile       () const { return false; }
-    bool SourceFile::IsGlobalVariableFile   () const { return false; }
-    bool SourceFile::IsDataStructureFile    () const { return false; }
-    bool SourceFile::IsDllDefineFile        () const { return false; }
+    bool SourceFile::isProgramSetFile    () const { return false; }
+    bool SourceFile::isGlobalVariableFile() const { return false; }
+    bool SourceFile::isDataStructureFile () const { return false; }
+    bool SourceFile::isAPIDeclareFile    () const { return false; }
 
-    bool ProgramSetFile    ::IsProgramSetFile       () const { return true; }
-    bool GlobalVariableFile::IsGlobalVariableFile   () const { return true; }
-    bool DataStructureFile ::IsDataStructureFile    () const { return true; }
-    bool DllDefineFile     ::IsDllDefineFile        () const { return true; }
+    bool ProgramSetFile    ::isProgramSetFile    () const { return true; }
+    bool GlobalVariableFile::isGlobalVariableFile() const { return true; }
+    bool DataStructureFile ::isDataStructureFile () const { return true; }
+    bool APIDeclareFile    ::isAPIDeclareFile    () const { return true; }
 
     /**********************************************************
      * 符号特性提取

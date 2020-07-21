@@ -6,7 +6,7 @@ digraph G {
 	"ProgramSetFile" -> "SourceFile"
 	"GlobalVariableFile" -> "SourceFile"
 	"DataStructureFile" -> "SourceFile"
-	"DllDefineFile" -> "SourceFile"
+	"APIDeclareFile" -> "SourceFile"
 	"Decl" -> "Node"
 	"TagDecl" -> "Decl"
 	"BaseVariDecl" -> "TagDecl"

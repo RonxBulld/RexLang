@@ -53,9 +53,10 @@ namespace rexlang {
 
         // TranslateUnit、ProgSetDecl和FunctionDecl会被认为带有Scope性质
 
-        void    pushScope   (Node *scope) ;
-        Node *  currentScope() const ;
-        void    popScope    (Node *scope) ;
+        void    cleanScopeStack () ;
+        void    pushScope       (Node *scope) ;
+        Node *  currentScope    () const ;
+        void    popScope        (Node *scope) ;
 
     };
 

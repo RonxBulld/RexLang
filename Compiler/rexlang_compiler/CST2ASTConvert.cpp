@@ -115,7 +115,10 @@ namespace rexlang {
     }
 
     antlrcpp::Any CST2ASTConvert::visitRexlang_src(rexLangParser::Rexlang_srcContext *context) {
-        TranslateUnit * translate_unit = CreateNode<TranslateUnit>(context);
+        TranslateUnit * translate_unit = ast_context_->GetTranslateUnit();
+        if(!translate_unit) translate_unit = CreateNode<TranslateUnit>(context);
+
+        ast_context_->cleanScopeStack();
         ast_context_->pushScope(translate_unit);
 
         ast_context_->SetTranslateUnit(translate_unit);
@@ -133,7 +136,7 @@ namespace rexlang {
                if (auto *program_set_file_ctx     = context->program_set_file())     { return NodeWarp(GetFromCtxIfExist<ProgramSetFile*,     true>(program_set_file_ctx));
         } else if (auto *data_structure_file_ctx  = context->data_structure_file())  { return NodeWarp(GetFromCtxIfExist<DataStructureFile*,  true>(data_structure_file_ctx));
         } else if (auto *global_variable_file_ctx = context->global_variable_file()) { return NodeWarp(GetFromCtxIfExist<GlobalVariableFile*, true>(global_variable_file_ctx));
-        } else if (auto *dll_define_file_ctx      = context->dll_define_file())      { return NodeWarp(GetFromCtxIfExist<DllDefineFile*,      true>(dll_define_file_ctx));
+        } else if (auto *dll_define_file_ctx      = context->dll_define_file())      { return NodeWarp(GetFromCtxIfExist<APIDeclareFile*,     true>(dll_define_file_ctx));
         } else { return NodeWarp(nullptr); }
     }
 
@@ -166,14 +169,14 @@ namespace rexlang {
     }
 
     antlrcpp::Any CST2ASTConvert::visitDll_define_file(rexLangParser::Dll_define_fileContext *context) {
-        DllDefineFile* dll_define_file = CreateNode<DllDefineFile>(context);
+        APIDeclareFile* dll_define_file = CreateNode<APIDeclareFile>(context);
         for (auto *dll_func_decl_ctx : context->dll_command()) {
             APICommandDecl* dll_command_decl = GetFromCtxIfExist<APICommandDecl*>(dll_func_decl_ctx);
-            dll_define_file->appendDllDefine(dll_command_decl);
+            dll_define_file->appendAPIDeclare(dll_command_decl);
         }
         for (auto *lib_func_decl_ctx : context->lib_command()) {
             APICommandDecl* dll_command_decl = GetFromCtxIfExist<APICommandDecl*>(lib_func_decl_ctx);
-            dll_define_file->appendDllDefine(dll_command_decl);
+            dll_define_file->appendAPIDeclare(dll_command_decl);
         }
         return NodeWarp(dll_define_file);
     }

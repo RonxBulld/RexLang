@@ -45,7 +45,7 @@ namespace rexlang {
         static bool FetchProgramSetFile         (const ProgramSetFile *programSetFile           , ASTFetchResult &result);
         static bool FetchGlobalVariableFile     (const GlobalVariableFile *globalVariableFile   , ASTFetchResult &result);
         static bool FetchDataStructureFile      (const DataStructureFile *dataStructureFile     , ASTFetchResult &result);
-        static bool FetchDllDefineFile          (const DllDefineFile *dllDefineFile             , ASTFetchResult &result);
+        static bool FetchAPIDeclareFile         (const APIDeclareFile *apiDeclareFile           , ASTFetchResult &result);
         static bool FetchDecl                   (const Decl *decl                               , ASTFetchResult &result);
         static bool FetchTagDecl                (const TagDecl *tagDecl                         , ASTFetchResult &result);
         static bool FetchVariableDecl           (const VariableDecl *variableDecl               , ASTFetchResult &result);

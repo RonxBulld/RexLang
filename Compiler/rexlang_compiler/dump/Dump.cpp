@@ -38,7 +38,7 @@ namespace rexlang {
         return DumpToken();
     }
 
-    DumpToken DumpDllDefineFile(DllDefineFile *dllDefineFilePtr, const DumpStyle &dumpStyle) {
+    DumpToken DumpAPIDeclareFile(APIDeclareFile *apiDeclareFilePtr, const DumpStyle &dumpStyle) {
         return DumpToken();
     }
 

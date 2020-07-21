@@ -12,6 +12,48 @@
 namespace rexlang {
 
     /***************************************************
+     * TranslateUnit
+     ***************************************************/
+
+    const std::set<TString> &TranslateUnit::getReferenceLibraries() const {
+        return libraries_list_;
+    }
+
+    void TranslateUnit::appendSourceFile(rexlang::SourceFile *sourceFile) {
+        if (ProgramSetFile *program_set_file = sourceFile->as<ProgramSetFile>()) {
+            if (ProgSetDecl *prog_set_decl = program_set_file->getProgramSetDecl()) {
+                addProgSet(prog_set_decl);
+                for (FunctorDecl *signature : prog_set_decl->getFuncSignatures()) {
+                    addFunctor(signature);
+                }
+            }
+            for (const TString &lib : program_set_file->getRefLibs()) {
+                addRefLib(lib);
+            }
+        }
+        else if (DataStructureFile *data_structure_file = sourceFile->as<DataStructureFile>()) {
+            for (auto &item : data_structure_file->getTypes()) {
+                addType(item.second);
+            }
+        }
+        else if (GlobalVariableFile *global_variable_file = sourceFile->as<GlobalVariableFile>()) {
+            for (auto &item : global_variable_file->getGlobalVariMap()) {
+                addGlobalVari(item.second);
+            }
+        }
+        else if (APIDeclareFile *dll_define_file = sourceFile->as<APIDeclareFile>()) {
+            for (auto &item : dll_define_file->getAPIDefMap()) {
+                addFunctor(item.second);
+            }
+        }
+        else {
+            assert(false);
+            return;
+        }
+        source_file_.emplace_back(sourceFile);
+    }
+
+    /***************************************************
      * ProgramSetFile
      ***************************************************/
 
@@ -44,11 +86,11 @@ namespace rexlang {
     }
 
     /***************************************************
-     * DllDefineFile
+     * APIDeclareFile
      ***************************************************/
 
-    void DllDefineFile::appendDllDefine(APICommandDecl *apiCommandDecl) {
-        dll_declares_[apiCommandDecl->getNameRef()] = apiCommandDecl;
+    void APIDeclareFile::appendAPIDeclare(APICommandDecl *apiCommandDecl) {
+        api_declares_[apiCommandDecl->getNameRef()] = apiCommandDecl;
         setChild(apiCommandDecl);
     }
 

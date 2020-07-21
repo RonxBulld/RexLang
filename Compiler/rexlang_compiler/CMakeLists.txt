@@ -76,7 +76,7 @@ SET(REXCompilerParse-Source
         utilities/RecursiveASTVisitor.h
         HierarchyIdentifier.cpp
         ExprLR.cpp
-        ASTNodeConnect.cpp
+        ASTNodeGetterSetter.cpp
         Symbols.cpp)
 
 if(NOT CMAKE_CXX_COMPILER_ID MATCHES "MSVC")

@@ -15,9 +15,7 @@
 
 namespace rexlang {
 
-    struct TranslateUnit;
-
-    class SourceManager {};
+    class TranslateUnit;
 
     class FileEntry {
     private:
@@ -34,47 +32,73 @@ namespace rexlang {
         bool Valid() const;
     };
 
+    /*************************************************************
+     * 编译器对象
+     *************************************************************/
+
     class REXCompilerInstance {
     private:
         AstGenerate ast_generate_;
+
         std::string instance_name_;
         std::string code_filename_;
         std::string parse_code_;
+
         std::vector<TranslateUnit *> translate_units_;
         TranslateUnit * major_translate_unit_ = nullptr;
         std::set<StringRef> libraries_name;
 
     private:
-        bool assembleTranslate();
+        bool assembleTranslates();
 
     public:
-        int setInstanceName(const std::string &name);
 
-        int setParseCode(const std::string &code);
+        /*************************************************************
+         * 编译前参数设定
+         *************************************************************/
 
+        int setInstanceName (const std::string &name);
         int setParseFilename(const std::string &filename);
+        int setParseCode    (const std::string &code);
 
-        SourceManager &getSourceManager();
+        /*************************************************************
+         * 编译时执行例程
+         *************************************************************/
 
-        TranslateUnit * runParser();
+        TranslateUnit * runParser            ();                            // 根据实例中的信息执行分析过程
+        TranslateUnit * parseOnFile          (const FileEntry &fileEntry);  // 从文件进行分析
+        FileEntry       detectLibraryFile    (const StringRef &filePath);   // 探测库是否存在
+        int             processExternLibrary (const StringRef &filePath);   // 处理外部引用库
 
-        TranslateUnit * parseOnFile(const FileEntry &fileEntry);
+        /*************************************************************
+         * 其他分析动作
+         *************************************************************/
 
         bool runSematicAnalysis();
+
+        /*************************************************************
+         * 编译生成信息提取
+         *************************************************************/
 
         TranslateUnit * getTranslateUnit();
     };
 
     namespace tooling {
-        TranslateUnit * BuildASTFromFiles(ProjectDB &projectDB, const std::string &toolname);
 
-        TranslateUnit * BuildASTFromCodes(const std::vector<std::string> &codes, const std::string &filename, const std::string &toolname);
+        /*************************************************************
+         * AST构建便捷工具
+         *************************************************************/
 
+        TranslateUnit * BuildASTFromFiles       (ProjectDB &projectDB, const std::string &toolname);
+        TranslateUnit * BuildASTFromCodes       (const std::vector<std::string> &codes, const std::string &filename, const std::string &toolname);
         TranslateUnit * BuildASTFromCodeWithArgs(const std::vector<FileEntry> &entries, const std::vector<std::string> &args, const std::string &toolname);
 
-        int GenerateCodeFromTranslateUnit(ProjectDB &projectDB);
+        /*************************************************************
+         * 二进制便捷工具
+         *************************************************************/
 
-        int LinkExecuteFromObjects(ProjectDB &projectDB);
+        int GenerateCodeFromTranslateUnit   (ProjectDB &projectDB);
+        int LinkExecuteFromObjects          (ProjectDB &projectDB);
     }
 
 }

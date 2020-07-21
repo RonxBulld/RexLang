@@ -218,13 +218,13 @@ namespace rexlang {
                 });
                 if (!success) { return false; }
 
-            } else if (DllDefineFile *dll_define_file = sfptr->as<DllDefineFile>()) {
+            } else if (APIDeclareFile *dll_define_file = sfptr->as<APIDeclareFile>()) {
 
                 // DLL声明
 
-                bool success = MergeMap(dll_define_file->dll_declares_, translateUnitPtr->dll_declares_);
+                bool success = MergeMap(dll_define_file->api_declares_, translateUnitPtr->dll_declares_);
                 if (!success) { return success; }
-                success = MergeMap(dll_define_file->dll_declares_, translateUnitPtr->functor_declares_, [](APICommandDecl* v) -> FunctorDecl* {
+                success = MergeMap(dll_define_file->api_declares_, translateUnitPtr->functor_declares_, [](APICommandDecl* v) -> FunctorDecl* {
                     return v->as<FunctorDecl>();
                 });
                 if (!success) { return false; }

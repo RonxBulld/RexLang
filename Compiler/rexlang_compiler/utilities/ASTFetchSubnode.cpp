@@ -70,9 +70,9 @@ namespace rexlang {
         return ASTFetchSubnode::FetchSourceFile(dataStructureFile, result);
     }
 
-    bool ASTFetchSubnode::FetchDllDefineFile(const DllDefineFile *dllDefineFile, ASTFetchSubnode::ASTFetchResult &result) {
-        if (Fetch(dllDefineFile->dll_declares_, result) == false) { return false; }
-        return ASTFetchSubnode::FetchSourceFile(dllDefineFile, result);
+    bool ASTFetchSubnode::FetchAPIDeclareFile(const APIDeclareFile *apiDeclareFile, ASTFetchSubnode::ASTFetchResult &result) {
+        if (Fetch(apiDeclareFile->api_declares_, result) == false) { return false; }
+        return ASTFetchSubnode::FetchSourceFile(apiDeclareFile, result);
     }
 
     bool ASTFetchSubnode::FetchDecl(const Decl *decl, ASTFetchSubnode::ASTFetchResult &result) {
@@ -276,7 +276,7 @@ namespace rexlang {
         else if (node->node_type_ == NodeType::kNTyProgramSetFile)          { return FetchProgramSetFile(static_cast<const ProgramSetFile *>(node), result); }
         else if (node->node_type_ == NodeType::kNTyGlobalVariableFile)      { return FetchGlobalVariableFile(static_cast<const GlobalVariableFile *>(node), result); }
         else if (node->node_type_ == NodeType::kNTyDataStructureFile)       { return FetchDataStructureFile(static_cast<const DataStructureFile *>(node), result); }
-        else if (node->node_type_ == NodeType::kNTyDllDefineFile)           { return FetchDllDefineFile(static_cast<const DllDefineFile *>(node), result); }
+        else if (node->node_type_ == NodeType::kNTyAPIDeclareFile)          { return FetchAPIDeclareFile(static_cast<const APIDeclareFile *>(node), result); }
 //        else if (node->node_type_ == NodeType::kNTyDecl)                    { return FetchDecl(static_cast<const Decl *>(node), result); }
         else if (node->node_type_ == NodeType::kNTyTagDecl)                 { return FetchTagDecl(static_cast<const TagDecl *>(node), result); }
         else if (node->node_type_ == NodeType::kNTyVariableDecl)            { return FetchVariableDecl(static_cast<const VariableDecl *>(node), result); }

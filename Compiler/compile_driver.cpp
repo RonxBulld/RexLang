@@ -94,20 +94,10 @@ namespace rexlang {
 }
 
 namespace rexlang {
-    int REXCompilerInstance::setInstanceName(const std::string &name) {
-        this->instance_name_ = name;
-        return 0;
-    }
 
-    int REXCompilerInstance::setParseCode(const std::string &code) {
-        this->parse_code_ = code;
-        return 0;
-    }
-
-    int REXCompilerInstance::setParseFilename(const std::string &filename) {
-        this->code_filename_ = filename;
-        return 0;
-    }
+    int REXCompilerInstance::setInstanceName    (const std::string &name)       { this->instance_name_ = name;     return 0; }
+    int REXCompilerInstance::setParseCode       (const std::string &code)       { this->parse_code_    = code;     return 0; }
+    int REXCompilerInstance::setParseFilename   (const std::string &filename)   { this->code_filename_ = filename; return 0; }
 
     TranslateUnit * REXCompilerInstance::runParser() {
 
@@ -118,37 +108,10 @@ namespace rexlang {
 
         // 对于源代码文件中引入的外部库进行分析
 
-        const std::vector<std::string> &include_dirs = program_db.GetIncludePath();
-
-        if (!translate_unit->source_file_.empty()) {
-            if (ProgramSetFile *program_set_file = translate_unit->source_file_.front()->as<ProgramSetFile>()) {
-                for (const TString &library : program_set_file->libraries_) {
-
-                    StringRef library_name = library.string_;
-                    if (this->libraries_name.find(library_name) != this->libraries_name.end()) {
-                        continue;
-                    }
-                    this->libraries_name.insert(library_name);
-
-                    // 尝试探测库的声明文件
-
-                    FileEntry file_entry;
-
-                    for (const std::string &include_dir : include_dirs) {
-                        FileEntry test_file_entry = FileEntry::MakeFromFile(include_dir + "/" + library_name.str() + "." + program_db.GetDefaultLibraryHeadFileExt());
-                        if (test_file_entry.Valid()) {
-                            file_entry = test_file_entry;
-                            break;
-                        }
-                    }
-                    assert(file_entry.Valid());
-
-                    TranslateUnit *library_tu = this->parseOnFile(file_entry);
-                    assert(library_tu);
-
-                }
-            }
+        for (const TString &library : translate_unit->getReferenceLibraries()) {
+            processExternLibrary(library.string_);
         }
+
         return translate_unit;
     }
 
@@ -159,28 +122,42 @@ namespace rexlang {
         return this->runParser();
     }
 
-    bool REXCompilerInstance::assembleTranslate() {
+    FileEntry REXCompilerInstance::detectLibraryFile(const rexlang::StringRef &filePath) {
 
-        // 将翻译单元列表中的项目进行依次组装
+        FileEntry file_entry;
+
+        for (const std::string &include_dir : program_db.GetIncludePath()) {
+            FileEntry test_file_entry = FileEntry::MakeFromFile(include_dir + "/" + filePath.str() + "." + program_db.GetDefaultLibraryHeadFileExt());
+            if (test_file_entry.Valid()) {
+                file_entry = test_file_entry;
+                break;
+            }
+        }
+        return file_entry;
+    }
+
+    int REXCompilerInstance::processExternLibrary(const rexlang::StringRef &filePath) {
+        FileEntry file_entry = detectLibraryFile(filePath);
+        assert(file_entry.Valid());
+        TranslateUnit *library_tu = this->parseOnFile(file_entry);
+        assert(library_tu);
+        return 0;
+    }
+
+    bool REXCompilerInstance::assembleTranslates() {
+
+        // 将翻译单元列表中的项目进行依次组装，并解决冲突
 
         if (this->translate_units_.empty()) { return true; }
         this->major_translate_unit_ = this->translate_units_[0];
         for (size_t idx = 1; idx < this->translate_units_.size(); idx++) {
-            if (this->major_translate_unit_->edition_ != this->translate_units_[idx]->edition_) {
-                assert(false);
-                return false;
-            }
-            this->major_translate_unit_->source_file_.insert(
-                    this->major_translate_unit_->source_file_.end(),
-                    this->translate_units_[idx]->source_file_.begin(),
-                    this->translate_units_[idx]->source_file_.end()
-                    );
+            this->major_translate_unit_->merge(this->translate_units_[idx]);
         }
         return true;
     }
 
     bool REXCompilerInstance::runSematicAnalysis() {
-        if (this->assembleTranslate() == false) {
+        if (this->assembleTranslates() == false) {
             assert(false);
             return false;
         }

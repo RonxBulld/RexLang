@@ -350,7 +350,7 @@ namespace rexlang {
 //        llvm::Value *IREmit::_EmitImpl_(ProgramSetFile *programSetFile);
 //        llvm::Value *IREmit::_EmitImpl_(GlobalVariableFile *globalVariableFile);
 //        llvm::Value *IREmit::_EmitImpl_(DataStructureFile *dataStructureFile);
-//        llvm::Value *IREmit::_EmitImpl_(DllDefineFile *dllDefineFile);
+//        llvm::Value *IREmit::_EmitImpl_(APIDeclareFile *APIDeclareFile);
 //        llvm::Value *IREmit::_EmitImpl_(Decl *decl);
 //        llvm::Value *IREmit::_EmitImpl_(TagDecl *tagDecl);
 //        llvm::Value *IREmit::_EmitImpl_(VariableDecl *variableDecl);

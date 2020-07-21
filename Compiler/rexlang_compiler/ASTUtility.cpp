@@ -30,46 +30,14 @@ namespace rexlang {
         return base;
     }
 
-    ErrOr<std::vector<Expression *>> ASTUtility::GetArrayIndexIndexList(ArrayIndex *arrayIndex) {
+    ErrOr<std::vector<Expression *>> ArrayIndex::getIndexesList() const {
         std::vector<Expression *> indexes;
-        while (arrayIndex) {
-            indexes.push_back(arrayIndex->index_);
-            arrayIndex = arrayIndex->base_->as<ArrayIndex>();
+        const ArrayIndex *ptr = this;
+        while (ptr) {
+            indexes.push_back(ptr->index_);
+            ptr = ptr->base_->as<ArrayIndex>();
         }
         return MakeNoErrVal(indexes);
     }
 
-    FunctorDecl * ASTUtility::GetFunctionDeclare(FunctionCall *functionCall) {
-        TranslateUnit *translate_unit = ASTUtility::FindSpecifyTypeParent<TranslateUnit>(functionCall);
-        NameComponent *func_name = functionCall->function_name_;
-        if (Identifier *identifier = func_name->as<Identifier>()) {
-            // 直接函数调用
-            auto found = translate_unit->functor_declares_.find(identifier->name_.string_);
-            if (found == translate_unit->functor_declares_.end()) {
-                assert(false);
-                return nullptr;
-            }
-            functionCall->functor_declare_ = found->second;
-            return functionCall->functor_declare_;
-        } else {
-            // 间接函数调用
-            assert(false);
-            return nullptr;
-        }
-    }
-
-    FunctorDecl *ASTUtility::GetFunctionDeclare(FuncAddrExpression *funcAddrExpression) {
-        TranslateUnit *translate_unit = ASTUtility::FindSpecifyTypeParent<TranslateUnit>(funcAddrExpression);
-        if (funcAddrExpression->function_name_.string_.empty()) {
-            assert(false);
-            return nullptr;
-        }
-        auto found = translate_unit->functor_declares_.find(funcAddrExpression->function_name_.string_);
-        if (found == translate_unit->functor_declares_.end()) {
-            assert(false);
-            return nullptr;
-        }
-        funcAddrExpression->functor_declare_ = found->second;
-        return funcAddrExpression->functor_declare_;
-    }
 }

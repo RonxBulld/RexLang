@@ -169,7 +169,7 @@ namespace rexlang {
 //        llvm::Value *           Emit(ProgramSetFile *       programSetFile);
 //        llvm::Value *           Emit(GlobalVariableFile *   globalVariableFile);
 //        llvm::Value *           Emit(DataStructureFile *    dataStructureFile);
-//        llvm::Value *           Emit(DllDefineFile *        dllDefineFile);
+//        llvm::Value *           Emit(APIDeclareFile *        apiDeclareFile);
 //        llvm::Value *           Emit(Decl *                 decl);
 //        llvm::Value *           Emit(TagDecl *              tagDecl);
 //        llvm::Value *           Emit(VariableDecl *         variableDecl);

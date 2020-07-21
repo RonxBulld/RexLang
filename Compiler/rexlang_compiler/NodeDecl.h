@@ -13,6 +13,7 @@
 
 #include "../../lite_util/TString.h"
 #include "../../lite_util/ordered_map/ordered_map.h"
+#include "../../lite_util/ErrOr.h"
 #include "ASTContext.h"
 
 namespace rexlang {
@@ -41,7 +42,7 @@ namespace rexlang {
     // File
 
     class SourceFile;           class ProgramSetFile;           class GlobalVariableFile;
-    class DataStructureFile;    class DllDefineFile;
+    class DataStructureFile;    class APIDeclareFile;
 
     // Declare
 
@@ -90,7 +91,7 @@ namespace rexlang {
         kNTyProgramSetFile,
         kNTyGlobalVariableFile,
         kNTyDataStructureFile,
-        kNTyDllDefineFile,
+        kNTyAPIDeclareFile,
 
         kNTyDecl,
         kNTyTagDecl,
@@ -274,15 +275,15 @@ namespace rexlang {
      * @brief 资源文件基类
      */
     class SourceFile : public Node {
-//        enum FileType {kProgramSetFile, kGlobalVariableFile, kDataStructureFile, kDllDefineFile} file_type_;
+//        enum FileType {kProgramSetFile, kGlobalVariableFile, kDataStructureFile, kAPIDeclareFile} file_type_;
 
     public:
         static const NodeType GetClassId () ;
 
-        virtual bool IsProgramSetFile       () const ;
-        virtual bool IsGlobalVariableFile   () const ;
-        virtual bool IsDataStructureFile    () const ;
-        virtual bool IsDllDefineFile        () const ;
+        virtual bool isProgramSetFile    () const ;
+        virtual bool isGlobalVariableFile() const ;
+        virtual bool isDataStructureFile () const ;
+        virtual bool isAPIDeclareFile    () const ;
     };
 
     /**
@@ -291,17 +292,20 @@ namespace rexlang {
     class ProgramSetFile : public SourceFile {
     private:
         std::vector<TString> libraries_;
-        ProgSetDecl* program_set_declares_ = nullptr;
+        ProgSetDecl *        program_set_declares_ = nullptr;
 
     public:
         static const NodeType GetClassId () ;
 
     public:
-        bool IsProgramSetFile       () const override ;
+        bool isProgramSetFile() const override ;
 
     public:
         void appendReferenceLibName (const TString &libraryName) ;
         void appendProgramSetDecl   (ProgSetDecl *progSetDecl) ;
+
+        ProgSetDecl *getProgramSetDecl() const ;
+        const std::vector<TString> &getRefLibs() const ;
     };
 
     /**
@@ -316,9 +320,10 @@ namespace rexlang {
 
     public:
         void appendGlobalVariableDecl(GlobalVariableDecl *globalVariableDecl) ;
+        const GlobalVariMapTy &getGlobalVariMap() const ;
 
     public:
-        bool IsGlobalVariableFile   () const override ;
+        bool isGlobalVariableFile() const override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -336,9 +341,10 @@ namespace rexlang {
 
     public:
         void appendStructureDecl(StructureDecl *structureDecl) ;
+        const StructDeclMapTy &getTypes() const ;
 
     public:
-        bool IsDataStructureFile    () const override ;
+        bool isDataStructureFile() const override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -347,17 +353,18 @@ namespace rexlang {
     /**
      * @brief DLL函数接口声明文件
      */
-    class DllDefineFile : public SourceFile {
+    class APIDeclareFile : public SourceFile {
     public:
-        typedef ordered_map<StringRef, APICommandDecl*> DllDefMayTy;
+        typedef ordered_map<StringRef, APICommandDecl*> DllDefMapTy;
     private:
-        DllDefMayTy dll_declares_;
+        DllDefMapTy api_declares_;
 
     public:
-        void appendDllDefine(APICommandDecl *apiCommandDecl) ;
+        void appendAPIDeclare(APICommandDecl *apiCommandDecl) ;
+        const DllDefMapTy getAPIDefMap () const ;
 
     public:
-        bool IsDllDefineFile        () const override ;
+        bool isAPIDeclareFile() const override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -388,14 +395,23 @@ namespace rexlang {
         TString name_;
         // 注释
         TString comment_;
+        // 引用表
+        std::set<Identifier *> reference_table_;
 
     public:
+
         void                setName         (const TString &name)    ;
         const TString &     getName         () const                 ;
         const StringRef &   getNameRef      () const                 ;
+
         void                setComment      (const TString &comment) ;
         const TString &     getComment      () const                 ;
         const StringRef &   getCommentRef   () const                 ;
+
+    public:
+        const std::set<Identifier *> &  getReferenceTable   () const ;
+        int                             addReference        (Identifier *reference) ;
+        int                             removeReference     (Identifier *reference) ;
 
     public:
         static const NodeType GetClassId () ;
@@ -971,6 +987,7 @@ namespace rexlang {
     private:
         ordered_map<StringRef, FileVariableDecl *>  file_static_variables_;
         ordered_map<StringRef, FunctionDecl *>      function_decls_;
+        ordered_map<StringRef, FunctorDecl *>       signature_of_functions_;
 
     public:
         void appendFileStaticVari(FileVariableDecl *variable) ;
@@ -978,6 +995,8 @@ namespace rexlang {
 
         FileVariableDecl *  getFileVariableDecl (const StringRef &name) const ;
         FunctionDecl *      getFunctionDecl     (const StringRef &name) const ;
+
+        std::vector<FunctorDecl *>  getFuncSignatures() const ;
 
     public:
         TagDecl *findDeclWithNameString(const StringRef &name) const override ;
@@ -1372,6 +1391,8 @@ namespace rexlang {
 
         Identifier *getBaseId() const override ;
 
+        ErrOr<std::vector<Expression *>> getIndexesList() const ;
+
     public:
         static const NodeType GetClassId () ;
 
@@ -1618,63 +1639,47 @@ namespace rexlang {
      */
     class TranslateUnit : public Node {
     private:
-        // 语法版本号
-        unsigned int edition_ = 0;
-        // 资源文件列表（包括全局变量定义、数据结构定义、类模块定义、DLL接口定义、子程序集合）
-        std::vector<SourceFile*> source_file_;
+        unsigned int                edition_ = 0;   // 语法版本号
+        std::vector<SourceFile*>    source_file_;   // 资源文件列表（包括全局变量定义、数据结构定义、类模块定义、DLL接口定义、子程序集合）
 
-        // === 下面是经过语义分析后的数据 ===
+        /********************** 符号表需要用到的公共信息 **********************/
 
-        // 全局类型索引表
-        ordered_map<StringRef, TypeDecl *> global_type_;
-        // 全局变量索引表
-        ordered_map<StringRef, GlobalVariableDecl *> global_variables_;
-        // 支持库引用列表
-        std::set<StringRef> libraries_list_;
-        // 程序集索引表
-        ordered_map<StringRef, ProgSetDecl *> program_sets_;
-        // 函数定义表
-        ordered_map<StringRef, FunctionDecl *> function_decls_;
-        // DLL函数声明表
-        ordered_map<StringRef, APICommandDecl *> dll_declares_;
-        // 函数定义表和DLL声明表的合并
-        // TODO: 是否要将上面两个逗逼玩意干掉
-        ordered_map<StringRef, FunctorDecl*> functor_declares_;
-        // 程序入口
-        FunctorDecl* main_entry_ = nullptr;
-        // 内建类型索引
-        ordered_map<EnumOfBuiltinType, BuiltinTypeDecl *> builtin_type_map_;
+        ordered_map<StringRef, TypeDecl *>              global_type_;       /* 全局类型索引表 */
+        ordered_map<StringRef, GlobalVariableDecl *>    global_variables_;  /* 全局变量索引表 */
+        std::set<TString>                               libraries_list_;    /* 支持库引用列表 */
+        ordered_map<StringRef, FunctorDecl*>            functor_declares_;  /* 函数定义表和DLL声明表的合并 */
+
+        /****************************************************************/
+
+
+        ordered_map<StringRef, ProgSetDecl *>               program_sets_;          // 程序集索引表
+        FunctorDecl *                                       main_entry_ = nullptr;  // 程序入口
+        ordered_map<EnumOfBuiltinType, BuiltinTypeDecl *>   builtin_type_map_;      // 内建类型索引
 
     public:
         static const NodeType GetClassId () ;
 
     public:
-        /******************************************************
-         * 资源文件操作接口
-         ******************************************************/
-
         void    appendSourceFile(SourceFile* sourceFile) ;
+        bool    merge(TranslateUnit *other) ;   // 兼容性检查、冲突检查，并合并其它翻译单元
 
     public:
-        /******************************************************
-         * 查询接口
-         ******************************************************/
+        bool    addFunctor      (FunctorDecl *  functorDecl) const ;    // 添加函数原型声明
+        bool    addProgSet      (ProgSetDecl *  progSetDecl) const ;    // 添加程序集和程序集中的公开函数声明
+        bool    addType         (TypeDecl *     typeDecl)    const ;    // 添加类型
+        bool    addGlobalVari   (BaseVariDecl * variDecl)    const ;    // 添加全局变量
+        bool    addRefLib       (const TString &libName)     const ;    // 添加引用库
 
         TypeDecl *              getType         (const StringRef &name) const ;
         GlobalVariableDecl *    getGlobalVari   (const StringRef &name) const ;
         FunctorDecl *           getFunctor      (const StringRef &name) const ;
 
     public:
-        /******************************************************
-         * 版本号操作接口
-         ******************************************************/
-
         void     setSourceEdition(unsigned edition) { edition_ = edition; }
         unsigned getSourceEdition() const           { return edition_; }
 
-        /******************************************************
-         * 内建类型操作接口
-         ******************************************************/
+        const std::set<TString> &getReferenceLibraries () const ;
+
 
     private:
         bool RegistBuiltinType(BuiltinTypeDecl *builtinTypeDecl);

@@ -15,8 +15,8 @@
 namespace rexlang {
 
     class AstGenerate {
-    public:
-        Diagnostic *diagnostic_ = nullptr;
+    private:
+        Diagnostic *diagnostic_  = nullptr;
         ASTContext *ast_context_ = nullptr;
 
     public:
@@ -24,8 +24,11 @@ namespace rexlang {
         ~AstGenerate();
 
     public:
-        TranslateUnit * BuildASTFromCode(const std::string &code, const std::string &filename, const std::string &toolname);
+        void setCurrentTranslateUnit(TranslateUnit *translateUnit) ;
+        void setDiagnosticRoutine   (Diagnostic *   diagnostic) ;
 
+    public:
+        TranslateUnit * BuildASTFromCode(const std::string &code, const std::string &filename, const std::string &toolname);
         TranslateUnit * BuildASTFromCodeWithArgs(const std::string &code, const std::vector<std::string> &args, const std::string &filename, const std::string &toolname);
     };
 

@@ -26,15 +26,17 @@ namespace rexlang {
                                               const std::string &filename,
                                               const std::string &toolname) {
 
-        // 配置解析源。
+        // 配置解析源
 
         antlr4::ANTLRInputStream __input_stream(code);
         __input_stream.name = filename;
+
         rexLangLexer __lexer(&__input_stream);
         antlr4::CommonTokenStream __token_stream(&__lexer);
+
         rexLangParser __parser(&__token_stream);
 
-        // 设置自定义诊断监听器。
+        // 设置自定义诊断监听器
 
         __parser.removeErrorListeners();
         __parser.addErrorListener(diagnostic_);
@@ -47,14 +49,14 @@ namespace rexlang {
             return nullptr;
         }
 
-        // 遍历树以生成抽象语法树。
+        // 遍历树以生成抽象语法树
 
         CST2ASTConvert ast_builder(ast_context_, diagnostic_);
         return ast_builder.BuildTranslateUnitFromParseTree(__tree);
     }
 
     AstGenerate::AstGenerate() {
-        diagnostic_ = new Diagnostic();
+        diagnostic_  = new Diagnostic();
         ast_context_ = new ASTContext();
     }
 

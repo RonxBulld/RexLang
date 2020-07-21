@@ -63,8 +63,13 @@ namespace rexlang {
         return libraries;
     }
 
-    void  ASTContext::pushScope   (Node *scope) { scope_stack_.push(scope); }
-    Node *ASTContext::currentScope() const      { return scope_stack_.empty() ? nullptr : scope_stack_.top(); }
-    void  ASTContext::popScope    (Node *scope) { assert(currentScope() == scope); scope_stack_.pop(); }
+    void  ASTContext::cleanScopeStack()            {
+        while (currentScope()) {
+            popScope(currentScope());
+        }
+    }
+    void  ASTContext::pushScope      (Node *scope) { scope_stack_.push(scope); }
+    Node *ASTContext::currentScope   () const      { return scope_stack_.empty() ? nullptr : scope_stack_.top(); }
+    void  ASTContext::popScope       (Node *scope) { assert(currentScope() == scope); scope_stack_.pop(); }
 
 }

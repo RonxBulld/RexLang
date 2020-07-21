@@ -5,8 +5,17 @@
 #include "NodeDecl.h"
 
 namespace rexlang {
+
+    /********************************************
+     * Identifier查找符号定义例程
+     ********************************************/
+
     TagDecl * Identifier::getDecl() {
-        reference_ = const_cast<const Identifier *>(this)->getDecl();
+        if (reference_) {
+            assert(reference_ == const_cast<const Identifier *>(this)->getDecl());
+        } else {
+            reference_ = const_cast<const Identifier *>(this)->getDecl();
+        }
         return reference_;
     }
 
@@ -28,7 +37,7 @@ namespace rexlang {
     }
 
     /********************************************
-     * 查找符号定义
+     * 通用查找符号定义例程
      ********************************************/
 
     TagDecl * Node::findDeclWithNameString(const StringRef &name) const {
