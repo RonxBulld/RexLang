@@ -51,6 +51,7 @@ namespace rexlang {
             return;
         }
         source_file_.emplace_back(sourceFile);
+        setChild(sourceFile);
     }
 
     /***************************************************

@@ -443,22 +443,4 @@ namespace rexlang {
         return type_matrix.TypeUpgrade(ltype, rtype);
     }
 
-    bool TypeAssert::ExpressionIsLValue(Expression *expression) {
-        return expression->is<HierarchyIdentifier>();
-    }
-
-    bool TypeAssert::IsCompareOperator(OperatorType operatorType) {
-        switch (operatorType) {
-            case OperatorType::kOptEqual:
-            case OperatorType::kOptNotEqual:
-            case OperatorType::kOptGreatThan:
-            case OperatorType::kOptLessThan:
-            case OperatorType::kOptGreatEqual:
-            case OperatorType::kOptLessEqual:
-            case OperatorType::kOptLikeEqual:
-                return true;
-            default:
-                return false;
-        }
-    }
 }

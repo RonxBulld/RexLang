@@ -19,12 +19,9 @@ namespace rexlang {
         ASTContext *ast_context_ = nullptr;
 
     private:
-        TString GetTextIfExist(const antlr4::Token *token, const std::string &hint = "") const;
-
-        long GetLongIfExist(const antlr4::Token *token, int hint = 0) const;
-
-        float GetFloatIfExist(const antlr4::Token *token, float hint = 0.0f) const;
-
+        TString              GetTextIfExist   (const antlr4::Token *token, const std::string &hint = "") const;
+        long                 GetLongIfExist   (const antlr4::Token *token, int hint = 0) const;
+        float                GetFloatIfExist  (const antlr4::Token *token, float hint = 0.0f) const;
         std::vector<TString> GetTextVecIfExist(const std::vector<antlr4::Token *> tokens, const std::string &hint = "") const;
 
         template<

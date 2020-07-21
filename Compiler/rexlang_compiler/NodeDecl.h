@@ -85,73 +85,38 @@ namespace rexlang {
      */
     typedef enum class NodeType {
         kNTyBadType,
+
         kNTyTranslateUnit,
 
         kNTySourceFile,
-        kNTyProgramSetFile,
-        kNTyGlobalVariableFile,
-        kNTyDataStructureFile,
-        kNTyAPIDeclareFile,
+        kNTyProgramSetFile, kNTyGlobalVariableFile,
+        kNTyDataStructureFile, kNTyAPIDeclareFile,
 
         kNTyDecl,
-        kNTyTagDecl,
-        kNTyVariableDecl,
-        kNTyBaseVariDecl,
-        kNTyGlobalVariableDecl,
-        kNTyParameterDecl,
-        kNTyMemberVariableDecl,
-        kNTyFileVariableDecl,
-        kNTyLocalVariableDecl,
-        kNTyTypeDecl,
-        kNTyVariTypeDecl,
-        kNTyBuiltinTypeDecl,
-        kNTyArrayDecl,
-        kNTyStructureDecl,
-        kNTyFunctorDecl,
-        kNTyFunctionDecl,
-        kNTyProgSetDecl,
+        kNTyTagDecl, kNTyVariableDecl, kNTyBaseVariDecl, kNTyGlobalVariableDecl,
+        kNTyParameterDecl, kNTyMemberVariableDecl, kNTyFileVariableDecl, kNTyLocalVariableDecl,
+        kNTyTypeDecl, kNTyVariTypeDecl, kNTyBuiltinTypeDecl, kNTyArrayDecl,
+        kNTyStructureDecl, kNTyFunctorDecl, kNTyFunctionDecl, kNTyProgSetDecl,
         kNTyAPICommandDecl,
 
         kNTyStatement,
-        kNTyIfStmt,
-        kNTyStatementBlock,
-        kNTyWhileStmt,
-        kNTyRangeForStmt,
-        kNTyForStmt,
-        kNTyDoWhileStmt,
-        kNTyAssignStmt,
-        kNTyControlStmt,
-        kNTyLoopControlStmt,
-        kNTyContinueStmt,
-        kNTyBreakStmt,
-        kNTyReturnStmt,
+        kNTyIfStmt, kNTyStatementBlock, kNTyWhileStmt, kNTyRangeForStmt,
+        kNTyForStmt, kNTyDoWhileStmt, kNTyAssignStmt, kNTyControlStmt,
+        kNTyLoopControlStmt, kNTyContinueStmt, kNTyBreakStmt, kNTyReturnStmt,
         kNTyExitStmt,
 
         kNTyExpression,
-        kNTyHierarchyIdentifier,
-        kNTyNameComponent,
-        kNTyIdentifier,
-        kNTyArrayIndex,
-        kNTyFunctionCall,
-        kNTyUnaryExpression,
-        kNTyBinaryExpression,
-        kNTy_OperatorExpression,
+        kNTyHierarchyIdentifier, kNTyNameComponent, kNTyIdentifier, kNTyArrayIndex,
+        kNTyFunctionCall, kNTyUnaryExpression, kNTyBinaryExpression, kNTy_OperatorExpression,
 
-        kNTyTypeConvert,
-        kNTyFuncAddrExpression,
-        kNTyResourceRefExpression,
+        kNTyTypeConvert, kNTyFuncAddrExpression, kNTyResourceRefExpression,
 
         kNTyValue,
-        kNTyValueOfDataSet,
-        kNTyValueOfDatetime,
-        kNTyValueOfBool,
-        kNTyValueOfDecimal,
+        kNTyValueOfDataSet, kNTyValueOfDatetime, kNTyValueOfBool, kNTyValueOfDecimal,
         kNTyValueOfString,
     } NodeType;
 
-    /*
-     * 访问级别
-     */
+    // 访问级别
     enum class AccessLevel {
         // 公开
         kALPublic,
@@ -159,19 +124,13 @@ namespace rexlang {
         kALPrivate,
     };
 
-    /*
-     * 传值方式
-     */
+    // 传值方式
     enum class ValueTransferMode {
-        // 传值
-        kVTMValue,
-        // 传址
-        kVTMReference,
+        kVTMValue /* 传值 */,
+        kVTMReference /* 传址 */,
     };
 
-    /*
-     * 运算符类型
-     */
+    // 运算符类型
     class OperatorType {
     public:
         enum class Opt {
@@ -197,8 +156,6 @@ namespace rexlang {
         bool IsRelationalOpt () const ;
         bool IsExtraRelOpt   () const ;
         bool IsBooleanOpt    () const ;
-
-    public:
 
     public:
         Opt GetOperate() const;
@@ -252,8 +209,9 @@ namespace rexlang {
 
     public:
         TranslateUnit * getTranslateUnit    () const { return ast_context_->GetTranslateUnit(); }
-        ASTContext *    getAstContext       () const { return ast_context_; }
+        ASTContext *    getAstContext       () const { return ast_context_;  }
         Node *          getNearstScope      () const { return parent_scope_; }
+        Node *          getParent           () const { assert(parent_node_); return parent_node_;  }
 
     public:
         void setLocation(const char *filename, size_t leftLine, size_t leftColumn, size_t rightLine, size_t rightColumn) {
@@ -432,6 +390,7 @@ namespace rexlang {
         const TString &getTypeName() const ;
 
         void setTypeDecl(VariTypeDecl *variType) ;
+        virtual VariTypeDecl *getTypeDecl() ;
         virtual VariTypeDecl *getTypeDecl() const ;
         virtual VariTypeDecl *takeTypeDecl() const ;
 

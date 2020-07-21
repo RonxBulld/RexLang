@@ -23,15 +23,6 @@ namespace rexlang {
          */
         static EnumOfBuiltinType ResultOfTypeUpgrade(EnumOfBuiltinType ltype, EnumOfBuiltinType rtype);
 
-        /*
-         * 判断表达式是否为左值
-         */
-        static bool ExpressionIsLValue(Expression *expression);
-
-        /*
-         * 判断运算符是否为比较运算符
-         */
-        static bool IsCompareOperator(OperatorType operatorType);
     };
 
 }

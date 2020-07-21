@@ -3,7 +3,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.7.2)
 
 PROJECT(REXCompilerParse CXX)
 
-set(antlr4-GENERATED_SRC
+set(Antlr4-Generated-Src
         ${PROJECT_SOURCE_DIR}/gen/rexLangBaseListener.cpp
         ${PROJECT_SOURCE_DIR}/gen/rexLangBaseListener.h
         ${PROJECT_SOURCE_DIR}/gen/rexLangBaseVisitor.cpp
@@ -18,17 +18,17 @@ set(antlr4-GENERATED_SRC
         ${PROJECT_SOURCE_DIR}/gen/rexLangVisitor.h
         )
 
-foreach(src_file ${antlr4-GENERATED_SRC})
+foreach(src_file ${Antlr4-Generated-Src})
     set_source_files_properties(
             ${src_file}
             PROPERTIES
             GENERATED TRUE
     )
-endforeach(src_file ${antlr4-GENERATED_SRC})
+endforeach(src_file ${Antlr4-Generated-Src})
 
-add_custom_target(GenerateParser DEPENDS ${antlr4-GENERATED_SRC})
+add_custom_target(GenerateParser DEPENDS ${Antlr4-Generated-Src})
 IF(EXISTS ${PROJECT_SOURCE_DIR}/rexLang.g4)
-    add_custom_command(OUTPUT ${antlr4-GENERATED_SRC}
+    add_custom_command(OUTPUT ${Antlr4-Generated-Src}
             COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_SOURCE_DIR}/gen/
             COMMAND antlr4 -o ${PROJECT_SOURCE_DIR}/gen -lib ${PROJECT_SOURCE_DIR}/gen -encoding utf-8 -long-messages -listener -visitor -package rexlang -Dlanguage=Cpp ${PROJECT_SOURCE_DIR}/rexLang.g4
             WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
@@ -36,48 +36,50 @@ IF(EXISTS ${PROJECT_SOURCE_DIR}/rexLang.g4)
             )
 ENDIF()
 
-SET(REXCompilerParse-Source
-        ${antlr4-GENERATED_SRC}
-        AstGenerate.cpp
-        AstGenerate.h
+#SET(SematicAnalysis-Src
+#        sematic_analysis/SematicAnalysis.cpp
+#        sematic_analysis/SematicAnalysis.h
+#        sematic_analysis/SematicAnalysisContext.cpp
+#        sematic_analysis/SematicAnalysisContext.h
+#        sematic_analysis/SematicAnalysisUtils.cpp
+#        sematic_analysis/SematicAnalysisTypeAssert.cpp
+#        sematic_analysis/SematicAnalysisNameMangle.cpp
+#        sematic_analysis/SematicAnalysisNameMangle.h
+#        )
+
+SET(Utilities-Src
         utilities/Diagnostic.cpp
         utilities/Diagnostic.h
+        utilities/Location.cpp
+        utilities/Location.h
+        utilities/Str2Attr.cpp
+        utilities/Str2Attr.h
+        )
+
+SET(REXCompilerParse-Source
+        ${Antlr4-Generated-Src}
+        ${Utilities-Src}
+        AstGenerate.cpp
+        AstGenerate.h
         NodeDecl.h
         ASTContext.cpp
         ASTContext.h
-        utilities/Location.cpp
-        utilities/Location.h
-        dump/Dump.cpp
-        dump/Dump.h
         CST2ASTConvert.cpp
         CST2ASTConvert.h
-        sematic_analysis/SematicAnalysis.cpp
-        sematic_analysis/SematicAnalysis.h
-        utilities/Str2Attr.cpp
-        utilities/Str2Attr.h
         TypeAssert.cpp
         TypeAssert.h
-        utilities/ASTFetchSubnode.cpp
-        utilities/ASTFetchSubnode.h
         ASTUtility.cpp
         ASTUtility.h
         ASTAssert.cpp
         ASTAssert.h
         TypeSystem.cpp
         TypeSystem.h
-        sematic_analysis/SematicAnalysisContext.cpp
-        sematic_analysis/SematicAnalysisContext.h
-        sematic_analysis/SematicAnalysisUtils.cpp
-        sematic_analysis/SematicAnalysisTypeAssert.cpp
-#        ASTBuilder.cpp
-#        ASTBuilder.h
-        sematic_analysis/SematicAnalysisNameMangle.cpp
-        sematic_analysis/SematicAnalysisNameMangle.h
-        utilities/RecursiveASTVisitor.h
         HierarchyIdentifier.cpp
         ExprLR.cpp
         ASTNodeGetterSetter.cpp
-        Symbols.cpp)
+        Symbols.cpp
+        ${SematicAnalysis-Src}
+        )
 
 if(NOT CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
     set (flags_1 "-Wno-overloaded-virtual")

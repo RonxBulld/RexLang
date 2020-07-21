@@ -8,17 +8,6 @@
 #include "NodeDecl.h"
 
 namespace rexlang {
-
-    class TypeDescription {
-    public:
-        StringRef type_name_;
-
-    };
-
-    class TypeSystem {
-    public:
-    };
-
 }
 
 #endif //REXLANG_TYPESYSTEM_H

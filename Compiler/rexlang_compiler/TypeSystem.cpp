@@ -252,90 +252,13 @@ namespace rexlang {
      * 符号类型提取
      ************************************************/
 
-    VariTypeDecl * BaseVariDecl::getTypeDecl() const { assert(false); return vari_type_decl_; }
+    VariTypeDecl * BaseVariDecl::getTypeDecl() const {
+        return findDeclWithNameString(type_name_.string_)->as<VariTypeDecl>();
+    }
 
-
-    VariTypeDecl *BinaryExpression::GetBinaryOperateUpgradeType() const {
-        // 首先保证可进行二元计算
-        bool binary_opt_valid = this->IsBinaryOperateValid();
-        if (binary_opt_valid == false) {
-            assert(false);
-            return nullptr;
-        }
-        // 再计算结果类型
-        {
-            // 1. 如果是内置类型
-
-            BuiltinTypeDecl *lhs_builtin = lhs_->GetExpressionTy()->as<BuiltinTypeDecl>();
-            BuiltinTypeDecl *rhs_builtin = rhs_->GetExpressionTy()->as<BuiltinTypeDecl>();
-            if (lhs_builtin || rhs_builtin) {
-                if (lhs_builtin && rhs_builtin) {
-                    bool lhs_numerical = lhs_builtin->isNumerical();
-                    bool rhs_numerical = rhs_builtin->isNumerical();
-                    if (lhs_numerical && rhs_numerical) {
-
-                        // 1.1. 都有数值性
-
-                        EnumOfBuiltinType upgrade_type = TypeAssert::ResultOfTypeUpgrade(lhs_builtin->GetBuiltinType(), rhs_builtin->GetBuiltinType());
-                        return TU->getBuiltinTy(upgrade_type);
-
-                    } else if (!lhs_numerical && !rhs_numerical) {
-
-                        // 1.2. 都无数值性
-
-                        if (lhs_builtin == rhs_builtin) {
-                            if (lhs_builtin->isBoolType()) {
-                                return lhs_builtin;
-
-                            } else if (lhs_builtin->isStringType()) {
-
-                                return lhs_builtin;
-
-                            } else if (lhs_builtin->isDataSetType()) {
-
-                                return lhs_builtin;
-
-                            } else if (lhs_builtin->isDatetimeType()) {
-
-                                assert(false);
-                                return nullptr;
-
-                            } else if (lhs_builtin->isFuncPtrType()) {
-
-                                assert(false);
-                                return nullptr;
-
-                            } else {
-                                assert(false);
-                                return nullptr;
-
-                            }
-                        } else {
-                            assert(false);
-                            return nullptr;
-
-                        }
-                    } else {
-
-                        // 其中一个有数值性
-
-                        assert(false);
-                        return nullptr;
-                    }
-                } else {
-
-                    // 只有一个是内置类型是无法计算的
-
-                    assert(false);
-                    return nullptr;
-                }
-            }
-        }
-        {
-            // 2. 非内置类型
-            assert(false);
-            return nullptr;
-        }
+    VariTypeDecl * BaseVariDecl::getTypeDecl() {
+        vari_type_decl_ = const_cast<const BaseVariDecl *>(this)->getTypeDecl();
+        return vari_type_decl_;
     }
 
 }

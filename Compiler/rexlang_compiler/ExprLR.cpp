@@ -20,7 +20,7 @@ namespace rexlang {
 #define U ExprUsage::kUnknown
 
     ExprUsage Expression::GetLRType() const {
-        Node *P = this->parent_node_;
+        Node *P = this->getParent();
         if (Statement *STMT = P->as<Statement>()) {
             return STMT->GetSubExprLRType(this);
         } else {

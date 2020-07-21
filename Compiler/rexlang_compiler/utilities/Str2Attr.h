@@ -16,10 +16,6 @@ namespace rexlang {
     class Str2Attr {
     public:
 
-//        static ErrOr<EnumOfBuiltinType> Name2BuiltinType(const StringRef &name);
-
-//        static ErrOr<std::string> BuiltinType2Name(EnumOfBuiltinType type);
-
         static ErrOr<AccessLevel> Name2AccessLevel(const StringRef &name);
 
         static ErrOr<ValueTransferMode> Name2ValueTransferMode(const StringRef &name);
