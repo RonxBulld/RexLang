@@ -8,7 +8,7 @@
 #include "Str2Attr.h"
 
 namespace rexlang {
-    ErrOr<AccessLevel> Str2Attr::Name2AccessLevel(const StringRef &name) {
+    ErrOr<AccessLevel> Str2Attr::name2AccessLevel(const StringRef &name) {
         if (name == u8"公开") {
             return ErrOr<AccessLevel>(AccessLevel::kALPublic);
         } else if (name == u8"") {
@@ -19,7 +19,7 @@ namespace rexlang {
         }
     }
 
-    ErrOr<ValueTransferMode> Str2Attr::Name2ValueTransferMode(const StringRef &name) {
+    ErrOr<ValueTransferMode> Str2Attr::name2ValueTransferMode(const StringRef &name) {
         if (name == u8"传址") {
             return ErrOr<ValueTransferMode>(ValueTransferMode::kVTMReference);
         } else if (name == u8"") {
@@ -30,7 +30,7 @@ namespace rexlang {
         }
     }
 
-    ErrOr<std::vector<size_t>> Str2Attr::Str2Dimension(const StringRef &str) {
+    ErrOr<std::vector<size_t>> Str2Attr::str2Dimension(const StringRef &str) {
         std::string s = str.str();
         std::vector<size_t> dims;
         size_t n = 0;
@@ -88,5 +88,9 @@ namespace rexlang {
             return ErrOr<decltype(dims)>::CreateError(1);
         }
     }
+
+    bool Str2Attr::isNameOfReference(const StringRef &str) { return str == u8"参考"; }
+    bool Str2Attr::isNameOfNullable (const StringRef &str) { return str == u8"可空"; }
+    bool Str2Attr::isNameOfArray    (const StringRef &str) { return str == u8"数组"; }
 
 }

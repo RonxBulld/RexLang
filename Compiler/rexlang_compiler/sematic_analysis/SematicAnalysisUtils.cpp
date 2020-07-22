@@ -74,7 +74,7 @@ namespace rexlang {
         FunctorDecl *call_functor = call_target->as<FunctorDecl>();
         if (ASTAssert::IsStaticLibraryAPI(call_functor)) {
             APICommandDecl *api_command_decl = call_functor->as<APICommandDecl>();
-            function_call->ast_context_->AddDependenceLibrary(api_command_decl->library_file_.string_);
+            function_call->ast_context_->addDependenceLibrary(api_command_decl->library_file_.string_);
         }
 
         this->CheckExpression(function_call);

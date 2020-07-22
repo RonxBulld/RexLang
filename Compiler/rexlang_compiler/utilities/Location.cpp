@@ -5,7 +5,7 @@
 #include "Location.h"
 
 namespace rexlang {
-    size_t LocationPool::CreateLocation(const StringRef &filename, size_t line, size_t column) {
+    size_t LocationPool::createLocation(const StringRef &filename, size_t line, size_t column) {
         Location location{filename, line, column};
         size_t id = this->location_map_.size() + 1;
         this->location_map_[id] = location;

@@ -8,8 +8,32 @@
 //
 
 #include "NodeDecl.h"
+#include "utilities/Str2Attr.h"
 
 namespace rexlang {
+
+    /***************************************************
+     * Node
+     ***************************************************/
+
+    void Node::setParent(Node *parent) { parent_node_ = parent; }
+    void Node::setChild (Node *child)  { child->parent_node_ = this; }
+
+    TranslateUnit * Node::getTranslateUnit() const { return ast_context_->getTranslateUnit(); }
+    ASTContext *    Node::getAstContext   () const { return ast_context_;  }
+    Node *          Node::getNearstScope  () const { return parent_scope_; }
+    Node *          Node::getParent       () const { assert(parent_node_); return parent_node_;  }
+
+    void Node::setLocation(const char *filename, size_t leftLine, size_t leftColumn, size_t rightLine, size_t rightColumn) {
+        location_start_ = this->ast_context_->createLocation(filename, leftLine,  leftColumn );
+        location_end_   = this->ast_context_->createLocation(filename, rightLine, rightColumn);
+    }
+
+    const char * Node::getFileName   () const { return ast_context_->getFileFromLocate  (location_start_).c_str(); }
+    size_t       Node::getLeftLine   () const { return ast_context_->getLineFromLocate  (location_start_); }
+    size_t       Node::getLeftColumn () const { return ast_context_->getColumnFromLocate(location_start_); }
+    size_t       Node::getRightLine  () const { return ast_context_->getLineFromLocate  (location_end_); }
+    size_t       Node::getRightColumn() const { return ast_context_->getColumnFromLocate(location_end_); }
 
     /***************************************************
      * TranslateUnit
@@ -60,13 +84,16 @@ namespace rexlang {
 
     void ProgramSetFile::appendReferenceLibName(const TString &libraryName) {
         libraries_.push_back(libraryName);
-        getAstContext()->AddDependenceLibrary(libraryName.string_);
+        getAstContext()->addDependenceLibrary(libraryName.string_);
     }
 
     void ProgramSetFile::appendProgramSetDecl(ProgSetDecl *progSetDecl) {
         program_set_declares_ = progSetDecl;
         setChild(progSetDecl);
     }
+
+    ProgSetDecl *                ProgramSetFile::getProgramSetDecl() const { return program_set_declares_; }
+    const std::vector<TString> & ProgramSetFile::getRefLibs       () const { return libraries_; }
 
     /***************************************************
      * DataStructureFile
@@ -77,6 +104,8 @@ namespace rexlang {
         setChild(structureDecl);
     }
 
+    const DataStructureFile::StructDeclMapTy & DataStructureFile::getTypes() const { return structure_decl_map_; }
+
     /***************************************************
      * GlobalVariableFile
      ***************************************************/
@@ -86,6 +115,8 @@ namespace rexlang {
         setChild(globalVariableDecl);
     }
 
+    const GlobalVariableFile::GlobalVariMapTy &GlobalVariableFile::getGlobalVariMap() const { return global_variable_map_; }
+
     /***************************************************
      * APIDeclareFile
      ***************************************************/
@@ -94,6 +125,30 @@ namespace rexlang {
         api_declares_[apiCommandDecl->getNameRef()] = apiCommandDecl;
         setChild(apiCommandDecl);
     }
+
+    const APIDeclareFile::DllDefMapTy & APIDeclareFile::getAPIDefMap () const { return api_declares_; }
+
+    /***************************************************
+     * Decl
+     ***************************************************/
+
+    void Decl::applyAttribute(const TString &attribute) {
+        auto err_or_al = Str2Attr::name2AccessLevel(attribute.string_);
+        if (err_or_al.NoError()) {
+            setAccessLevel(err_or_al.Value());
+        }
+        else {
+            assert(false);
+        }
+    }
+    void Decl::applyAttributes(const std::vector<TString> &attributes) {
+        for (const TString &attr : attributes) {
+            applyAttribute(attr);
+        }
+    }
+
+    void        Decl::setAccessLevel(AccessLevel accessLevel) { access_level_ = accessLevel; }
+    AccessLevel Decl::getAccessLevel() const                  { return access_level_; }
 
     /***************************************************
      * TagDecl
@@ -107,11 +162,67 @@ namespace rexlang {
     const TString &     TagDecl::getComment      () const                   { return comment_; }
     const StringRef &   TagDecl::getCommentRef   () const                   { return comment_.string_; }
 
+    const std::set<Identifier *> &TagDecl::getReferenceTable() const                { return reference_table_; }
+    int                           TagDecl::addReference     (Identifier *reference) { reference_table_.insert(reference); }
+    int                           TagDecl::removeReference  (Identifier *reference) { reference_table_.erase(reference); }
+
     /***************************************************
      * BaseVariDecl
      ***************************************************/
 
-    void BaseVariDecl::setTypeName(const TString &typeName) { type_name_ = typeName; }
+    /***************************************************
+     * ParameterDecl
+     ***************************************************/
+
+    unsigned ParameterDecl::getParamIndex() const {
+        FunctorDecl *parent_func = getParent()->as<FunctorDecl>();
+        if (parent_func) {
+            int idx = parent_func->getIndexOf(this);
+            if (idx >= 0) return idx;
+            assert(false);
+        } else {
+            assert(parent_func);
+        }
+        return -1;
+    }
+
+    void ParameterDecl::applyAttribute(const TString &attribute) {
+             if (Str2Attr::isNameOfReference(attribute.string_)) { is_reference_ = true; }
+        else if (Str2Attr::isNameOfNullable(attribute.string_))  { is_nullable_  = true; }
+        else if (Str2Attr::isNameOfArray(attribute.string_))     { is_array_     = true; }
+        else { Decl::applyAttribute(attribute); }
+    }
+
+    /***************************************************
+     * VariableDecl
+     ***************************************************/
+
+    void VariableDecl::setDimensionsText(const TString &dimStr) {
+        dimensions_decl_ = dimStr;
+        auto err_or_dims = Str2Attr::str2Dimension(dimStr.string_);
+        if (err_or_dims.HadError()) {
+            assert(false);
+            return;
+        }
+        dimensions_ = err_or_dims.Value();
+    }
+
+    const TString &VariableDecl::getDimensionsText() const {
+        return dimensions_decl_;
+    }
+
+    /***************************************************
+     * GlobalVariableDecl
+     ***************************************************/
+
+    /***************************************************
+     * MemberVariableDecl
+     ***************************************************/
+
+    void MemberVariableDecl::applyAttribute(const TString &attribute) {
+        if (Str2Attr::isNameOfReference(attribute.string_)) { is_reference_ = true; }
+        else { Decl::applyAttribute(attribute); }
+    }
 
     /***************************************************
      * FunctorDecl

@@ -439,8 +439,8 @@ namespace rexlang {
         return lhsBuiltinType->isBinOptValid(getOperator(), rhsBuiltinType);
     }
 
-    EnumOfBuiltinType TypeAssert::ResultOfTypeUpgrade(EnumOfBuiltinType ltype, EnumOfBuiltinType rtype) {
-        return type_matrix.TypeUpgrade(ltype, rtype);
-    }
+//    EnumOfBuiltinType TypeAssert::ResultOfTypeUpgrade(EnumOfBuiltinType ltype, EnumOfBuiltinType rtype) {
+//        return type_matrix.TypeUpgrade(ltype, rtype);
+//    }
 
 }

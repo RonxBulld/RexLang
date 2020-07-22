@@ -204,7 +204,7 @@ namespace rexlang {
         typedef llvm::PointerType StringType;
         StringType *getStringType();
         bool isStringType(llvm::Type *type);
-        llvm::Value *CreateString(llvm::Value *stringLiteral);
+        llvm::Value *createString(llvm::Value *stringLiteral);
         /*
          * 克隆字符串
          */

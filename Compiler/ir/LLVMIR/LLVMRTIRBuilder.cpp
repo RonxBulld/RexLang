@@ -97,7 +97,7 @@ namespace rexlang {
             return CreateStructureInst(llvm::dyn_cast<LLVMRTIRBuilder::StructureType>(llType));
 
         } else if (isStringType(llType)) {    // 最后字节集和字符串混为一谈
-            return CreateString(nullptr);
+            return createString(nullptr);
 
         } else {
             assert(false);
@@ -576,7 +576,7 @@ namespace rexlang {
         return false;
     }
 
-    llvm::Value *LLVMRTIRBuilder::CreateString(llvm::Value *stringLiteral) {
+    llvm::Value *LLVMRTIRBuilder::createString(llvm::Value *stringLiteral) {
         llvm::FunctionCallee create_string_fn = getRTAPIFunction(
                 DoNewCoreRTAPINameMangle("create_string"),
                 getStringType(),

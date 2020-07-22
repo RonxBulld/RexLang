@@ -31,11 +31,11 @@ namespace rexlang {
     TString CST2ASTConvert::GetTextIfExist(const antlr4::Token *token, const std::string &hint) const {
         TString t_string;
         if (token) {
-            t_string.string_ = this->ast_context_->CreateString(token->getText());
+            t_string.string_ = this->ast_context_->createString(token->getText());
             antlr4::TokenSource *ts = token->getTokenSource();
-            t_string.location_ = this->ast_context_->CreateLocation(ts->getSourceName(), ts->getLine(), ts->getCharPositionInLine());
+            t_string.location_ = this->ast_context_->createLocation(ts->getSourceName(), ts->getLine(), ts->getCharPositionInLine());
         } else {
-            t_string.string_ = this->ast_context_->CreateString(hint);
+            t_string.string_ = this->ast_context_->createString(hint);
         }
         return t_string;
     }
@@ -115,13 +115,13 @@ namespace rexlang {
     }
 
     antlrcpp::Any CST2ASTConvert::visitRexlang_src(rexLangParser::Rexlang_srcContext *context) {
-        TranslateUnit * translate_unit = ast_context_->GetTranslateUnit();
+        TranslateUnit * translate_unit = ast_context_->getTranslateUnit();
         if(!translate_unit) translate_unit = CreateNode<TranslateUnit>(context);
 
         ast_context_->cleanScopeStack();
         ast_context_->pushScope(translate_unit);
 
-        ast_context_->SetTranslateUnit(translate_unit);
+        ast_context_->setTranslateUnit(translate_unit);
         // 分析版本号
         translate_unit->setSourceEdition(GetFromCtxIfExist<unsigned int, true>(context->edition_spec(), 2));
         // 分析文件具体内容

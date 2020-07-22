@@ -77,9 +77,9 @@ namespace rexlang {
     const std::string &ProjectDB::GetTargetBinName() const { return target_bin_name_.empty() ? random_string_ : target_bin_name_; }
           std::string  ProjectDB::GetTargetBinName()       { return target_bin_name_.empty() ? random_string_ : target_bin_name_; }
 
-    void                 ProjectDB::SetTranslateUnit(TranslateUnit *translateUnit) { translate_unit_ = translateUnit; }
-    const TranslateUnit *ProjectDB::GetTranslateUnit() const { return translate_unit_; }
-          TranslateUnit *ProjectDB::GetTranslateUnit()       { return translate_unit_; }
+    void                 ProjectDB::setTranslateUnit(TranslateUnit *translateUnit) { translate_unit_ = translateUnit; }
+    const TranslateUnit *ProjectDB::getTranslateUnit() const { return translate_unit_; }
+          TranslateUnit *ProjectDB::getTranslateUnit()       { return translate_unit_; }
 
     const ASTContext &ProjectDB::GetASTContext() const { return *translate_unit_->getAstContext(); }
           ASTContext &ProjectDB::GetASTContext()       { return *translate_unit_->getAstContext(); }

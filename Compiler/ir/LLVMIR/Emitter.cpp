@@ -281,7 +281,7 @@ namespace rexlang {
     bool IREmit::_EmitImpl_(TranslateUnit *translateUnit) {
 
         RexDbgMgr.GetOrCreateDICompileUnit(
-                translateUnit->ast_context_->GetFileFromLocate(
+                translateUnit->ast_context_->getFileFromLocate(
                         translateUnit->location_start_).c_str()
                         );
         DefineMainEntryAndInitFunc();
@@ -567,9 +567,9 @@ namespace rexlang {
 
     llvm::Function *IREmit::_EmitImpl_(FunctionDecl *functionDecl) {
         std::string function_name = functionDecl->name_.string_.str();
-        std::cout << functionDecl->ast_context_->GetFileFromLocate(functionDecl->location_start_).str() << ":"
-                  << functionDecl->ast_context_->GetLineFromLocate(functionDecl->location_start_) << ":"
-                  << functionDecl->ast_context_->GetColumnFromLocate(functionDecl->location_start_) << " ";
+        std::cout << functionDecl->ast_context_->getFileFromLocate(functionDecl->location_start_).str() << ":"
+                  << functionDecl->ast_context_->getLineFromLocate(functionDecl->location_start_) << ":"
+                  << functionDecl->ast_context_->getColumnFromLocate(functionDecl->location_start_) << " ";
 
         std::cout << "生成函数：" << function_name << std::endl;
         llvm::Function *function = function_object_pool_[functionDecl];
@@ -1232,7 +1232,7 @@ namespace rexlang {
         llvm::Value *this_value = GetFromStructOrPool(previous_value, nameComponent);
 
         if (nameComponent->identifier_usage_ == ExprUsage::kAsRightValue) {
-//            std::cout << nameComponent->ast_context_->GetLineFromLocate(nameComponent->location_start_) << std::endl;
+//            std::cout << nameComponent->ast_context_->getLineFromLocate(nameComponent->location_start_) << std::endl;
             // 将名称组件当右值使用
             this_value = LoadVariable(this_value);
         } else if (nameComponent->identifier_usage_ == ExprUsage::kAsLeftValue) {
@@ -1576,7 +1576,7 @@ namespace rexlang {
         // 创建指向字符串常量值的对象，就不需要Load了
 
         llvm::Value *strptr = Builder.CreateGlobalStringPtr(valueOfString->string_literal_.string_.str(), "$.pstr");
-        llvm::Value *str_rt_val = RTBuilder.CreateString(strptr);
+        llvm::Value *str_rt_val = RTBuilder.createString(strptr);
         return str_rt_val;
     }
 

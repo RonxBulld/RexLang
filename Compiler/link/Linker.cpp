@@ -78,7 +78,7 @@ namespace rexlang {
 
         objectFilename = projectDB.GetObjectFilename();
         targetFilename = projectDB.GetTargetBinName();
-        dependenceLibs = projectDB.GetASTContext().GetDependenceLibraries();
+        dependenceLibs = projectDB.GetASTContext().getDependenceLibraries();
 
         // 移除目标文件
 

@@ -70,9 +70,9 @@ namespace rexlang {
         const std::string &                 GetTargetBinName    () const;
         std::string                         GetTargetBinName    ();
 
-        void                                SetTranslateUnit    (TranslateUnit *translateUnit);
-        TranslateUnit *                     GetTranslateUnit    ();
-        const TranslateUnit *               GetTranslateUnit    () const;
+        void                                setTranslateUnit    (TranslateUnit *translateUnit);
+        TranslateUnit *                     getTranslateUnit    ();
+        const TranslateUnit *               getTranslateUnit    () const;
         ASTContext &                        GetASTContext       ();
         const ASTContext &                  GetASTContext       () const;
 

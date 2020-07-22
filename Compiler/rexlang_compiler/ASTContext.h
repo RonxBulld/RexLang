@@ -30,24 +30,24 @@ namespace rexlang {
         ASTContext();
         ~ASTContext();
 
-        StringRef CreateString(const std::string & str);
-        StringRef CreateString(const char *        pstr);
+        StringRef createString(const std::string & str);
+        StringRef createString(const char *        pstr);
 
-        size_t CreateLocation(const std::string & filename, size_t line, size_t column);
-        size_t CreateLocation(const StringRef &   filename, size_t line, size_t column);
+        size_t createLocation(const std::string & filename, size_t line, size_t column);
+        size_t createLocation(const StringRef &   filename, size_t line, size_t column);
 
-        const StringRef &   GetFileFromLocate   (size_t locate);
-        size_t              GetLineFromLocate   (size_t locate);
-        size_t              GetColumnFromLocate (size_t locate);
+        const StringRef &   getFileFromLocate   (size_t locate);
+        size_t              getLineFromLocate   (size_t locate);
+        size_t              getColumnFromLocate (size_t locate);
 
-        void            SetDiagnostic(Diagnostic *diagnostic);
-        Diagnostic *    GetDiagnostic();
+        void            setDiagnostic(Diagnostic *diagnostic);
+        Diagnostic *    getDiagnostic();
 
-        void            SetTranslateUnit(TranslateUnit *translateUnit);
-        TranslateUnit * GetTranslateUnit() const;
+        void            setTranslateUnit(TranslateUnit *translateUnit);
+        TranslateUnit * getTranslateUnit() const;
 
-        void                    AddDependenceLibrary  (const StringRef &library_name);
-        std::vector<StringRef>  GetDependenceLibraries() const;
+        void                    addDependenceLibrary  (const StringRef &library_name);
+        std::vector<StringRef>  getDependenceLibraries() const;
 
         size_t GetNodeIndex();
 

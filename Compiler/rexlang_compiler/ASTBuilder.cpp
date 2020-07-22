@@ -12,7 +12,7 @@ namespace rexlang {
 
     ParameterDecl *ASTBuilder::CreateParameter(const std::string &name, VariTypeDecl *paramType, bool isReference, bool isNullable, bool isArray) {
         ParameterDecl *parameter_decl = CreateNode<ParameterDecl>(&context_);
-        parameter_decl->name_.string_ = context_.CreateString(name);
+        parameter_decl->name_.string_ = context_.createString(name);
         parameter_decl->vari_type_decl_ = paramType;
         parameter_decl->type_name_ = paramType->name_;
         parameter_decl->is_reference_ = isReference;
@@ -23,7 +23,7 @@ namespace rexlang {
 
     FunctorDecl * ASTBuilder::CreateFunctorDecl(const std::string &name, VariTypeDecl *returnType, const std::vector<ParameterDecl *> &params, TranslateUnit *translateUnit) {
         FunctorDecl *functor_decl = CreateNode<FunctorDecl>(&context_);
-        functor_decl->name_.string_ = context_.CreateString(name);
+        functor_decl->name_.string_ = context_.createString(name);
         functor_decl->return_type_ = returnType;
         functor_decl->return_type_name_ = returnType->name_;
         functor_decl->parameters_ = params;
@@ -42,7 +42,7 @@ namespace rexlang {
             }
         }
         if (name[0] != '$') { return nullptr; }
-        StringRef name_sr = context_.CreateString(name);
+        StringRef name_sr = context_.createString(name);
         auto functor_iter = translateUnit->functor_declares_.find(name_sr);
         if (functor_iter != translateUnit->functor_declares_.end()) {
             return functor_iter->second;

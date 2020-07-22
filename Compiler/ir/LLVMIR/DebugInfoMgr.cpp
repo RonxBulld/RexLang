@@ -40,8 +40,8 @@ namespace rexlang {
         } else {
             scope = LexicalBlocks.back();
         }
-        size_t line = astNode->ast_context_->GetLineFromLocate(astNode->location_start_);
-        size_t column = astNode->ast_context_->GetColumnFromLocate(astNode->location_start_);
+        size_t line = astNode->ast_context_->getLineFromLocate(astNode->location_start_);
+        size_t column = astNode->ast_context_->getColumnFromLocate(astNode->location_start_);
         llvm::DebugLoc debug_loc = llvm::DebugLoc::get(line, column, scope);
         return debug_loc;
     }
@@ -61,7 +61,7 @@ namespace rexlang {
 
     llvm::DICompileUnit *DebugInfoMgr::GetOrCreateDICompileUnit(const Node *node) {
         if (node) {
-            const StringRef &file_path = node->ast_context_->GetFileFromLocate(node->location_start_);
+            const StringRef &file_path = node->ast_context_->getFileFromLocate(node->location_start_);
             return GetOrCreateDICompileUnit(file_path.str());
         } else {
             return nullptr;
@@ -118,7 +118,7 @@ namespace rexlang {
 
     llvm::DISubprogram *DebugInfoMgr::CreateFunctionDI(FunctorDecl *functor, llvm::Function *func_ir) {
         size_t func_loc = functor->location_start_;
-        std::filesystem::path file_name(functor->ast_context_->GetFileFromLocate(func_loc).str());
+        std::filesystem::path file_name(functor->ast_context_->getFileFromLocate(func_loc).str());
         unsigned file_line = functor->ast_context_->GetLineNumber(functor->location_start_);
         // TODO:有必要的话需要执行 Name Mangle
         StringRef mangled_name = functor->name_.string_;

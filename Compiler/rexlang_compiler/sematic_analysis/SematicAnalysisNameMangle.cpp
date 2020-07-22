@@ -26,7 +26,7 @@ namespace rexlang {
         std::string api_extern_name = apiCommandDecl->api_name_.string_.str();
         if (api_extern_name.back() == '#') {
             api_extern_name.pop_back();
-            apiCommandDecl->api_name_.string_ = apiCommandDecl->ast_context_->CreateString(api_extern_name);
+            apiCommandDecl->api_name_.string_ = apiCommandDecl->ast_context_->createString(api_extern_name);
             return true;
         }
         else {

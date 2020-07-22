@@ -16,11 +16,14 @@ namespace rexlang {
     class Str2Attr {
     public:
 
-        static ErrOr<AccessLevel> Name2AccessLevel(const StringRef &name);
+        static ErrOr<AccessLevel>         name2AccessLevel      (const StringRef &name);
+        static ErrOr<ValueTransferMode>   name2ValueTransferMode(const StringRef &name);
+        static ErrOr<std::vector<size_t>> str2Dimension         (const StringRef &str);
 
-        static ErrOr<ValueTransferMode> Name2ValueTransferMode(const StringRef &name);
+        static bool isNameOfReference(const StringRef &str) ;
+        static bool isNameOfNullable (const StringRef &str) ;
+        static bool isNameOfArray    (const StringRef &str) ;
 
-        static ErrOr<std::vector<size_t>> Str2Dimension(const StringRef &str);
     };
 
 }

@@ -20,7 +20,7 @@ namespace rexlang {
     private:
         std::map<size_t, Location> location_map_;
     public:
-        size_t CreateLocation(const StringRef &filename, size_t line, size_t column);
+        size_t createLocation(const StringRef &filename, size_t line, size_t column);
 
         const StringRef &GetFilename(size_t location_id) const;
 

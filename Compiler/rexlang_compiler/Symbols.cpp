@@ -20,20 +20,25 @@ namespace rexlang {
     }
 
     TagDecl * Identifier::getDecl() const {
-        Node *scope = getNearstScope();
+        Node *    scope = getNearstScope();
+        TagDecl * decl  = nullptr;
         if (FunctionDecl *function_decl = scope->as<FunctionDecl>()) {
-            return function_decl->findDeclWithNameString(getNameRef());
+            decl = function_decl->findDeclWithNameString(getNameRef());
         }
         else if (ProgSetDecl *prog_set_decl = scope->as<ProgSetDecl>()) {
-            return prog_set_decl->findDeclWithNameString(getNameRef());
+            decl = prog_set_decl->findDeclWithNameString(getNameRef());
         }
         else if (TranslateUnit *translate_unit = scope->as<TranslateUnit>()) {
-            return translate_unit->findDeclWithNameString(getNameRef());
+            decl = translate_unit->findDeclWithNameString(getNameRef());
         }
         else {
             assert(false);
-            return nullptr;
+            decl = nullptr;
         }
+
+        if (decl) { decl->addReference(const_cast<Identifier *>(this)); }
+
+        return decl;
     }
 
     /********************************************

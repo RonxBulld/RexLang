@@ -141,7 +141,7 @@ namespace rexlang {
             kOptEND,
         };
 
-        OperatorType(Opt opt) ;
+        explicit OperatorType(const Opt &opt) : opt_(opt) { }
 
     public:
 
@@ -149,16 +149,16 @@ namespace rexlang {
          * 基本符号特性判定
          ***********************************************/
 
-        bool IsUnaryOpt      () const ;
-        bool IsBinaryOpt     () const ;
-        bool IsNumericalOpt  () const ;
-        bool IsEqualOrNotOpt () const ;
-        bool IsRelationalOpt () const ;
-        bool IsExtraRelOpt   () const ;
-        bool IsBooleanOpt    () const ;
+        [[nodiscard]] bool IsUnaryOpt      () const ;
+        [[nodiscard]] bool IsBinaryOpt     () const ;
+        [[nodiscard]] bool IsNumericalOpt  () const ;
+        [[nodiscard]] bool IsEqualOrNotOpt () const ;
+        [[nodiscard]] bool IsRelationalOpt () const ;
+        [[nodiscard]] bool IsExtraRelOpt   () const ;
+        [[nodiscard]] bool IsBooleanOpt    () const ;
 
     public:
-        Opt GetOperate() const;
+        const Opt &GetOperate() const { return opt_; }
 
     private:
         Opt opt_;
@@ -178,8 +178,8 @@ namespace rexlang {
         size_t          location_end_       = 0;
 
     protected:
-        void setParent(Node *parent) { parent_node_ = parent; }
-        void setChild (Node *child)  { child->parent_node_ = this; }
+        void setParent(Node *parent) ;
+        void setChild (Node *child)  ;
 
     public:
         virtual ~Node() = default;
@@ -208,22 +208,19 @@ namespace rexlang {
         bool is() const { return dynamic_cast<const Ty *>(this) != nullptr; }
 
     public:
-        TranslateUnit * getTranslateUnit    () const { return ast_context_->GetTranslateUnit(); }
-        ASTContext *    getAstContext       () const { return ast_context_;  }
-        Node *          getNearstScope      () const { return parent_scope_; }
-        Node *          getParent           () const { assert(parent_node_); return parent_node_;  }
+        TranslateUnit * getTranslateUnit    () const ;
+        ASTContext *    getAstContext       () const ;
+        Node *          getNearstScope      () const ;
+        Node *          getParent           () const ;
 
     public:
-        void setLocation(const char *filename, size_t leftLine, size_t leftColumn, size_t rightLine, size_t rightColumn) {
-            location_start_ = this->ast_context_->CreateLocation(filename, leftLine,  leftColumn );
-            location_end_   = this->ast_context_->CreateLocation(filename, rightLine, rightColumn);
-        }
+        void setLocation(const char *filename, size_t leftLine, size_t leftColumn, size_t rightLine, size_t rightColumn) ;
 
-        const char *    getFileName   () const { return ast_context_->GetFileFromLocate  (location_start_).c_str(); }
-        size_t          getLeftLine   () const { return ast_context_->GetLineFromLocate  (location_start_); }
-        size_t          getLeftColumn () const { return ast_context_->GetColumnFromLocate(location_start_); }
-        size_t          getRightLine  () const { return ast_context_->GetLineFromLocate  (location_end_); }
-        size_t          getRightColumn() const { return ast_context_->GetColumnFromLocate(location_end_); }
+        const char *    getFileName   () const ;
+        size_t          getLeftLine   () const ;
+        size_t          getLeftColumn () const ;
+        size_t          getRightLine  () const ;
+        size_t          getRightColumn() const ;
 
     public:
         virtual TagDecl * findDeclWithNameString(const StringRef &name) const ;
@@ -262,8 +259,9 @@ namespace rexlang {
         void appendReferenceLibName (const TString &libraryName) ;
         void appendProgramSetDecl   (ProgSetDecl *progSetDecl) ;
 
-        ProgSetDecl *getProgramSetDecl() const ;
-        const std::vector<TString> &getRefLibs() const ;
+        ProgSetDecl *                getProgramSetDecl() const ;
+        const std::vector<TString> & getRefLibs       () const ;
+
     };
 
     /**
@@ -277,8 +275,8 @@ namespace rexlang {
         GlobalVariMapTy global_variable_map_;
 
     public:
-        void appendGlobalVariableDecl(GlobalVariableDecl *globalVariableDecl) ;
-        const GlobalVariMapTy &getGlobalVariMap() const ;
+        void                    appendGlobalVariableDecl(GlobalVariableDecl *globalVariableDecl) ;
+        const GlobalVariMapTy & getGlobalVariMap        () const ;
 
     public:
         bool isGlobalVariableFile() const override ;
@@ -298,8 +296,8 @@ namespace rexlang {
         StructDeclMapTy structure_decl_map_;
 
     public:
-        void appendStructureDecl(StructureDecl *structureDecl) ;
-        const StructDeclMapTy &getTypes() const ;
+        void                    appendStructureDecl(StructureDecl *structureDecl) ;
+        const StructDeclMapTy & getTypes() const ;
 
     public:
         bool isDataStructureFile() const override ;
@@ -318,8 +316,8 @@ namespace rexlang {
         DllDefMapTy api_declares_;
 
     public:
-        void appendAPIDeclare(APICommandDecl *apiCommandDecl) ;
-        const DllDefMapTy getAPIDefMap () const ;
+        void                appendAPIDeclare(APICommandDecl *apiCommandDecl) ;
+        const DllDefMapTy & getAPIDefMap () const ;
 
     public:
         bool isAPIDeclareFile() const override ;
@@ -337,8 +335,11 @@ namespace rexlang {
         AccessLevel access_level_ = AccessLevel::kALPublic;
 
     public:
-        virtual void applyAttribute(const TString &attribute) ;
+        virtual void applyAttribute (const TString &attribute) ;
         virtual void applyAttributes(const std::vector<TString> &attributes) ;
+
+        void        setAccessLevel(AccessLevel accessLevel) ;
+        AccessLevel getAccessLevel() const ;
 
     public:
         static const NodeType GetClassId () ;
@@ -386,13 +387,13 @@ namespace rexlang {
         VariTypeDecl *vari_type_decl_ = nullptr;
 
     public:
-        void setTypeName(const TString &typeName) ;
-        const TString &getTypeName() const ;
+        void            setTypeName(const TString &typeName) ;
+        const TString & getTypeName() const ;
 
-        void setTypeDecl(VariTypeDecl *variType) ;
-        virtual VariTypeDecl *getTypeDecl() ;
-        virtual VariTypeDecl *getTypeDecl() const ;
-        virtual VariTypeDecl *takeTypeDecl() const ;
+        void                  setTypeDecl  (VariTypeDecl *variType) ;
+        virtual VariTypeDecl *getTypeDecl  () ;
+        virtual VariTypeDecl *getTypeDecl  () const ;
+        virtual VariTypeDecl *takeTypeDecl () ;
 
     public:
         static const NodeType GetClassId () ;
@@ -403,15 +404,16 @@ namespace rexlang {
      */
     class ParameterDecl : public BaseVariDecl {
         // 可选参数为：参考、可空、数组
-        std::vector<TString> attributes_;
-        // 形参位置索引
-        unsigned index_        = -1;
+
         // 是否引用类型
         bool     is_reference_ = false;
         // 是否可空
         bool     is_nullable_  = false;
         // 是否数组
         bool     is_array_     = false;
+
+    public:
+        void applyAttribute (const TString &attribute)               override ;
 
     public:
         unsigned getParamIndex      () const ;
@@ -433,10 +435,12 @@ namespace rexlang {
     private:
         // 维度声明
         TString dimensions_decl_;
+        // 解析后的维度定义
+        std::vector<size_t> dimensions_;
 
     public:
-        void setDimensionsText(const TString &dimStr) ;
-        const TString &getDimensionsText() const ;
+        void            setDimensionsText(const TString &dimStr) ;
+        const TString & getDimensionsText() const ;
 
     public:
         static const NodeType GetClassId () ;
@@ -447,8 +451,6 @@ namespace rexlang {
      */
     class GlobalVariableDecl : public VariableDecl {
     public:
-        void applyAttribute(const TString &attribute) override ;
-
     public:
         static const NodeType GetClassId () ;
     };
@@ -457,12 +459,11 @@ namespace rexlang {
      * 描述成员变量
      */
     class MemberVariableDecl : public VariableDecl {
-
-        // === 下面是经过语义分析后的数据 ===
-
         size_t index_of_struct_ = 0;
+        bool   is_reference_    = false;
 
-        bool is_reference_ = false;
+    public:
+        void applyAttribute (const TString &attribute) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -839,8 +840,9 @@ namespace rexlang {
         virtual void appendParameter    (ParameterDecl *parameterDecl) ;
 
     public:
-        ParameterDecl * getParameterAt  (unsigned idx) const ;
-        ParameterDecl * getParameter    (const StringRef &name) const ;
+        ParameterDecl * getParameterAt  (unsigned idx)                       const ;
+        ParameterDecl * getParameter    (const StringRef &name)              const ;
+        int             getIndexOf      (const ParameterDecl *parameterDecl) const ;
 
         virtual bool    isStaticLibraryAPI  () const = 0;
         virtual bool    isDynamicLibraryAPI () const = 0;

@@ -252,13 +252,32 @@ namespace rexlang {
      * 符号类型提取
      ************************************************/
 
-    VariTypeDecl * BaseVariDecl::getTypeDecl() const {
-        return findDeclWithNameString(type_name_.string_)->as<VariTypeDecl>();
+    void BaseVariDecl::setTypeName(const TString &typeName) {
+        type_name_ = typeName;
+        // 重新查找类型
+        vari_type_decl_ = findDeclWithNameString(typeName.string_)->as<VariTypeDecl>();
+    }
+
+    const TString &BaseVariDecl::getTypeName() const { return type_name_; }
+
+    void BaseVariDecl::setTypeDecl(VariTypeDecl *variType) {
+        vari_type_decl_ = variType;
+        type_name_ = variType->getName();
     }
 
     VariTypeDecl * BaseVariDecl::getTypeDecl() {
         vari_type_decl_ = const_cast<const BaseVariDecl *>(this)->getTypeDecl();
         return vari_type_decl_;
+    }
+
+    VariTypeDecl * BaseVariDecl::getTypeDecl() const {
+        return findDeclWithNameString(type_name_.string_)->as<VariTypeDecl>();
+    }
+
+    VariTypeDecl *BaseVariDecl::takeTypeDecl () {
+        VariTypeDecl *type = vari_type_decl_;
+        vari_type_decl_ = nullptr;
+        return type;
     }
 
 }

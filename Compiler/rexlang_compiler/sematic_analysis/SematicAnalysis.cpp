@@ -49,7 +49,7 @@ namespace rexlang {
         // defer free_ast_builer([&](){ delete this->ast_builder_; this->ast_builder_ = nullptr; });
 
         if (translateUnitPtr->edition_ != 2) {
-            translateUnitPtr->ast_context_->GetDiagnostic()->EditionWrong(translateUnitPtr->edition_);
+            translateUnitPtr->ast_context_->getDiagnostic()->EditionWrong(translateUnitPtr->edition_);
             return false;
         }
         TU = translateUnitPtr;
@@ -129,7 +129,7 @@ namespace rexlang {
 
         // 5.1. 指定入口函数
 
-        StringRef start_entry = translateUnitPtr->ast_context_->CreateString(u8"_启动子程序");
+        StringRef start_entry = translateUnitPtr->ast_context_->createString(u8"_启动子程序");
         translateUnitPtr->main_entry_ = this->analysis_context_.QueryTagDeclFromDynSymbolTableWithName(start_entry)->as<FunctorDecl>();
         assert(translateUnitPtr->main_entry_);
         return true;
@@ -259,7 +259,7 @@ namespace rexlang {
         size_t idx = 0;
         while (this->analysis_context_.CheckIfNameExist(referenceName)) {
             std::string name = referenceName.str();
-            referenceName = astContext->CreateString(name + "_" + std::to_string(idx));
+            referenceName = astContext->createString(name + "_" + std::to_string(idx));
         }
         LocalVariableDecl *implicit_local_vari = CreateNode<LocalVariableDecl>(astContext);
         implicit_local_vari->parent_node_ = parentFunction;
@@ -488,7 +488,7 @@ namespace rexlang {
                 // 如果循环变量不存在则隐式创建循环变量
 //                FunctionDecl *function_decl = ASTUtility::FindSpecifyTypeParent<FunctionDecl>(loopStatement);
 //                assert(function_decl);
-//                StringRef reference_name = loopStatement->ast_context_->CreateString("implicit_loop_vari");
+//                StringRef reference_name = loopStatement->ast_context_->createString("implicit_loop_vari");
 //                ASTContext *ast_context = loopStatement->ast_context_;
 //                LocalVariableDecl *implicit_lv_decl = this->InsertLocalVariable(reference_name, ast_context, function_decl);
 //                for_stmt->loop_vari_ = CreateNode<HierarchyIdentifier>(ast_context);
@@ -541,7 +541,7 @@ namespace rexlang {
         if (this->SetupBaseVariableType(variableDecl) == false) {
             return false;
         }
-        auto err_or_dims = Str2Attr::Str2Dimension(variableDecl->dimension_.string_);
+        auto err_or_dims = Str2Attr::str2Dimension(variableDecl->dimension_.string_);
         if (err_or_dims.NoError() == false) {
             return false;
         }
@@ -559,7 +559,7 @@ namespace rexlang {
         if (this->SetupVariableType(globalVariableDecl) == false) {
             return false;
         }
-        auto err_or_access = Str2Attr::Name2AccessLevel(globalVariableDecl->access_.string_);
+        auto err_or_access = Str2Attr::name2AccessLevel(globalVariableDecl->access_.string_);
         if (err_or_access.NoError() == false) {
             return false;
         }
