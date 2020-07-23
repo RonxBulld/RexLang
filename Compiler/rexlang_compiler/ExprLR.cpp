@@ -6,23 +6,31 @@
 
 namespace rexlang {
 
-    /****************************************************************
-     * 对于表达式节点求其左右值特性
-     * - 语句参数、函数调用的参数、索引的下标、层次名称的非尾名称是可以自决的
-     * - 一元、二元表达式的运算值恒为右值
-     * - 资源引用、函数求址恒为右值
-     * - 常量值恒为右值
-     * - 其它类型需要向上传递
-     ****************************************************************/
+/****************************************************************
+ * 对于表达式节点求其左右值特性
+ * - 语句参数、函数调用的参数、索引的下标、层次名称的非尾名称是可以自决的
+ * - 一元、二元表达式的运算值恒为右值
+ * - 资源引用、函数求址恒为右值
+ * - 常量值恒为右值
+ * - 其它类型需要向上传递
+ ****************************************************************/
 
 #define L ExprUsage::kAsLeftValue
 #define R ExprUsage::kAsRightValue
 #define U ExprUsage::kUnknown
 
+    class StmtProtectedInvoker : public Statement {
+    public:
+        ExprUsage InvokeGetSubExprLRType(const Expression *expr) const {
+            return GetSubExprLRType(expr);
+        }
+
+    };
+
     ExprUsage Expression::GetLRType() const {
         Node *P = this->getParent();
         if (Statement *STMT = P->as<Statement>()) {
-            return STMT->GetSubExprLRType(this);
+            return ((StmtProtectedInvoker *)STMT)->InvokeGetSubExprLRType(this);
         } else {
             assert(false);
             return U;
@@ -73,7 +81,7 @@ namespace rexlang {
         else { assert(false);            return U; }
     }
     ExprUsage DoWhileStmt   ::GetSubExprLRType(const Expression *expr) const {
-             if (expr == conditon_)   { return R; }
+             if (expr == condition_)  { return R; }
         else { assert(false);           return U; }
     }
     ExprUsage StatementBlock::GetSubExprLRType(const Expression *expr) const {

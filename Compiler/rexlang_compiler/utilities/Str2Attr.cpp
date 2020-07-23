@@ -92,5 +92,6 @@ namespace rexlang {
     bool Str2Attr::isNameOfReference(const StringRef &str) { return str == u8"参考"; }
     bool Str2Attr::isNameOfNullable (const StringRef &str) { return str == u8"可空"; }
     bool Str2Attr::isNameOfArray    (const StringRef &str) { return str == u8"数组"; }
+    bool Str2Attr::isNameOfStatic   (const StringRef &str) { return str == u8"静态"; }
 
 }

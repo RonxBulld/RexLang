@@ -15,7 +15,7 @@ namespace rexlang {
 
     TypeDecl * ArrayIndex::getElementTy() const {
 
-        if (!this->getIndexBase()->GetExpressionTy()->IsIndexable()) {
+        if (!this->getIndexBase()->getExpressionTy()->IsIndexable()) {
             return nullptr;
         }
 

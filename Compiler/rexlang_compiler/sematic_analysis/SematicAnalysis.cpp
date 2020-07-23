@@ -620,7 +620,7 @@ namespace rexlang {
         return this->expression_type_;
     }
 
-    TypeDecl *Expression::GetExpressionTy() const {
+    TypeDecl *Expression::getExpressionTy() const {
         assert(this->expression_type_);
         return this->expression_type_;
     }
@@ -792,22 +792,22 @@ namespace rexlang {
 
     ErrOr<Expression *> SematicAnalysis::MakeImplicitConvertIfNeccessary(TypeDecl *targetType, Expression *convertExpression) {
         // 先判断赋值性
-        if (!this->IsAssignableBetweenType(targetType, convertExpression->GetExpressionTy())) {
+        if (!this->IsAssignableBetweenType(targetType, convertExpression->getExpressionTy())) {
             // 两边类型不可赋值
             return ErrOr<Expression*>::CreateError(1);
         }
         // 再判断是否转换
-        if (convertExpression->GetExpressionTy() == targetType) {
+        if (convertExpression->getExpressionTy() == targetType) {
             // 类型一致，无需转换
             return MakeNoErrVal(convertExpression);
-        } else if (!targetType->is<BuiltinTypeDecl>() || !convertExpression->GetExpressionTy()->is<BuiltinTypeDecl>()) {
+        } else if (!targetType->is<BuiltinTypeDecl>() || !convertExpression->getExpressionTy()->is<BuiltinTypeDecl>()) {
             // 其中有非内置类型，无法转换
             return MakeNoErrVal(convertExpression);
         } else {
             TypeConvert *type_convert = CreateNode<TypeConvert>(convertExpression->ast_context_);
             type_convert->from_expression_ = convertExpression;
-            type_convert->GetExpressionTy() = targetType;
-            type_convert->source_type_ = convertExpression->GetExpressionTy();
+            type_convert->getExpressionTy() = targetType;
+            type_convert->source_type_ = convertExpression->getExpressionTy();
             type_convert->target_type_ = targetType;
             type_convert->parent_node_ = convertExpression;
             convertExpression->parent_node_ = type_convert;
@@ -932,7 +932,7 @@ namespace rexlang {
             /*else*/ if (arguments[idx] != nullptr) {
 
                 // 5.4. 如果形参不具备上述属性
-                TypeDecl *argu_type = arguments[idx]->GetExpressionTy();
+                TypeDecl *argu_type = arguments[idx]->getExpressionTy();
                 assert(argu_type);
                 TypeDecl *param_type = parameters[idx]->vari_type_decl_;
                 ErrOr<Expression*> implicit_convert = this->MakeImplicitConvertIfNeccessary(param_type, arguments[idx]);

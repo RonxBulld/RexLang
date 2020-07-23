@@ -481,12 +481,13 @@ namespace rexlang {
      * 描述局部变量
      */
     class LocalVariableDecl : public VariableDecl {
-        // === 下面是经过语义分析后的数据 ===
-
         /*
          * 是否为静态
          */
         bool is_static_ = false;
+
+    public:
+        void applyAttribute (const TString &attribute) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -1211,21 +1212,22 @@ namespace rexlang {
      * 在这里，表达式被视作一种特殊的语句。
      */
     class Expression : public Statement {
-    public:
-        static const NodeType GetClassId () ;
-
-        // === 下面是经过语义分析后的数据 ===
-
     private:
         // 该表达式的类型
         TypeDecl* expression_type_ = nullptr;
 
-        virtual TypeDecl *CheckExpressionInternal() = 0;
+    protected:
+        virtual TypeDecl *CheckExpressionInternal() = 0 ;
 
     public:
-        TypeDecl *CheckExpression();    // 检查表达式并推算类型
-        TypeDecl *GetExpressionTy() const;
+        virtual TypeDecl *CheckExpression() = 0 ;    // 检查表达式
+        virtual TypeDecl *getExpressionTy() const = 0 ;
+                TypeDecl *getExpressionTy() ;
         ExprUsage GetLRType() const;    // 获取表达式自身的引用类型，依赖父节点的 GetSubExprLRType 实现
+
+    public:
+        static const NodeType GetClassId () ;
+
     };
 
     /**
@@ -1233,25 +1235,19 @@ namespace rexlang {
      * 该节点用于表示通过英文句点`.'连接的多层引用结构
      */
     class HierarchyIdentifier : public Expression {
-    public:
-        static const NodeType GetClassId () ;
-
     private:
         std::vector<NameComponent*> name_components_;
 
-        // === 下面是经过语义分析后的数据 ===
-    public:
-        // 该层次名称所指向的类型
-        TypeDecl* qualified_type_ = nullptr;
+    protected:
+        ExprUsage GetSubExprLRType(const Expression *expr) const override ;
 
     public:
         void AppendComponent(NameComponent *component);
         TypeDecl *CheckExpressionInternal() override ;
-        TypeDecl *GetQualifiedType() ;  // 获取层次名称描述的准确类型
-        TypeDecl *EvalComponentsType();
 
-    protected:
-        ExprUsage GetSubExprLRType(const Expression *expr) const override ;
+    public:
+        static const NodeType GetClassId () ;
+
     };
 
     /**
@@ -1422,7 +1418,7 @@ namespace rexlang {
      * 有运算符的表达式
      */
     class _OperatorExpression : public Expression {
-        OperatorType operator_type_ = OperatorType::Opt::kOptNone;
+        OperatorType operator_type_ = OperatorType(OperatorType::Opt::kOptNone);
         /*
          * 可选运算符：
          * 一元：-
@@ -1431,8 +1427,9 @@ namespace rexlang {
         TString operator_;
 
     public:
-        void setOperatorText            (const TString &operatorText) ;
-        void setOperator                (const OperatorType &opt) ;
+        void setOperatorText            (const TString &            operatorText) ;
+        void setOperator                (const OperatorType &       opt) ;
+        void setOperator                (const OperatorType::Opt &  opt) ;
         const OperatorType &getOperator () const ;
 
     public:

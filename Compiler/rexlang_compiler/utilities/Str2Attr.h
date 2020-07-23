@@ -23,6 +23,7 @@ namespace rexlang {
         static bool isNameOfReference(const StringRef &str) ;
         static bool isNameOfNullable (const StringRef &str) ;
         static bool isNameOfArray    (const StringRef &str) ;
+        static bool isNameOfStatic   (const StringRef &str) ;
 
     };
 

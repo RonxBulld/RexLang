@@ -13,8 +13,6 @@ namespace rexlang {
      * 运算符类型的断言
      **********************************************************/
 
-    OperatorType::OperatorType(Opt opt) : opt_(opt) { }
-
     bool OperatorType::IsUnaryOpt() const {
         switch (opt_) {
             case Opt::kOptSub:
@@ -108,10 +106,6 @@ namespace rexlang {
             default:
                 return false;
         }
-    }
-
-    OperatorType::Opt OperatorType::GetOperate() const {
-        return opt_;
     }
 
     /**********************************************************
@@ -297,150 +291,18 @@ namespace rexlang {
     bool VariTypeDecl::isAssginFromValid(TypeDecl *fromType) const { return false; }
 
     /**********************************************************
-     * 计算结果类型推导
-     **********************************************************/
-
-    /**********************************************************
      *
      **********************************************************/
-
-    class ValidMarixOpt {
-    private:
-        /*
-         * 类型有效运算矩阵
-         */
-        std::set<OperatorType> TypeValidMatrix[(size_t)EnumOfBuiltinType::kBTypeEND][(size_t)EnumOfBuiltinType::kBTypeEND];
-        /*
-         * 类型提升矩阵
-         */
-        EnumOfBuiltinType TypeUpgradeMatrix[(size_t)EnumOfBuiltinType::kBTypeEND][(size_t)EnumOfBuiltinType::kBTypeEND];
-
-        /**
-         * @brief 添加有效运算符信息
-         * @param l 左值类型
-         * @param r 右值类型
-         * @param enumOfBuiltinType 运算符
-         * @param commutativeLaw 符合交换律
-         */
-        void AddValid(EnumOfBuiltinType l, EnumOfBuiltinType r, OperatorType enumOfBuiltinType, bool commutativeLaw = true) {
-            TypeValidMatrix[(size_t)l][(size_t)r].insert(enumOfBuiltinType);
-            if (commutativeLaw) {
-                TypeValidMatrix[(size_t)r][(size_t)l].insert(enumOfBuiltinType);
-            }
-        }
-
-        void AddValids(std::set<EnumOfBuiltinType> ls, std::set<EnumOfBuiltinType> rs, std::set<OperatorType> enumOfBuiltinTypes, bool commutativeLaw = true) {
-            for (EnumOfBuiltinType l : ls) {
-                for (EnumOfBuiltinType r : rs) {
-                    for (OperatorType t : enumOfBuiltinTypes) {
-                        this->AddValid(l, r, t, commutativeLaw);
-                    }
-                }
-            }
-        }
-
-        /**
-         * @brief 添加类型提升信息
-         * @param l 左值类型
-         * @param r 右值类型
-         * @param result 处理结果类型
-         * @param commutativeLaw 符合交换律
-         */
-        void AddUpgrade(EnumOfBuiltinType l, EnumOfBuiltinType r, EnumOfBuiltinType result, bool commutativeLaw = true) {
-            TypeUpgradeMatrix[(size_t)l][(size_t)r] = result;
-            if (commutativeLaw) {
-                TypeUpgradeMatrix[(size_t)r][(size_t)l] = result;
-            }
-        }
-
-        void AddUpgrades(std::set<EnumOfBuiltinType> ls, std::set<EnumOfBuiltinType> rs, EnumOfBuiltinType result, bool commutativeLaw = true) {
-            for (EnumOfBuiltinType l : ls) {
-                for (EnumOfBuiltinType r : rs) {
-                    AddUpgrade(l, r, result, commutativeLaw);
-                }
-            }
-        }
-
-    public:
-        ValidMarixOpt() {
-            // 简化命名
-            EnumOfBuiltinType C = EnumOfBuiltinType::kBTypeChar;
-            EnumOfBuiltinType I = EnumOfBuiltinType::kBTypeInteger;
-            EnumOfBuiltinType F = EnumOfBuiltinType::kBTypeFloat;
-            EnumOfBuiltinType B = EnumOfBuiltinType::kBTypeBool;
-            EnumOfBuiltinType S = EnumOfBuiltinType::kBTypeString;
-            EnumOfBuiltinType A = EnumOfBuiltinType::kBTypeDataSet;
-            EnumOfBuiltinType H = EnumOfBuiltinType::kBTypeShort;
-            EnumOfBuiltinType L = EnumOfBuiltinType::kBTypeLong;
-            EnumOfBuiltinType T = EnumOfBuiltinType::kBTypeDatetime;
-            EnumOfBuiltinType N = EnumOfBuiltinType::kBTypeFuncPtr;
-            EnumOfBuiltinType D = EnumOfBuiltinType::kBTypeDouble;
-            OperatorType ADD       = OperatorType::Opt::kOptAdd;
-            OperatorType SUB       = OperatorType::Opt::kOptSub;
-            OperatorType MUL       = OperatorType::Opt::kOptMul;
-            OperatorType DIV       = OperatorType::Opt::kOptDiv;
-            OperatorType FULLDIV   = OperatorType::Opt::kOptFullDiv;
-            OperatorType MOD       = OperatorType::Opt::kOptMod;
-            OperatorType EQU       = OperatorType::Opt::kOptEqual;
-            OperatorType NEQ       = OperatorType::Opt::kOptNotEqual;
-            OperatorType GT        = OperatorType::Opt::kOptGreatThan;
-            OperatorType LT        = OperatorType::Opt::kOptLessThan;
-            OperatorType GE        = OperatorType::Opt::kOptGreatEqual;
-            OperatorType LE        = OperatorType::Opt::kOptLessEqual;
-            OperatorType LIKE      = OperatorType::Opt::kOptLikeEqual;
-            OperatorType AND       = OperatorType::Opt::kOptAnd;
-            OperatorType OR        = OperatorType::Opt::kOptOr;
-            this->AddValids({C, I, F, H, L, D}, {C, I, F, H, L, D}, {ADD, SUB, MUL, DIV, FULLDIV, MOD, EQU, NEQ, GT, LT, GE, LE});
-            this->AddValids({B}, {B}, {AND, OR});
-            this->AddValids({S}, {S}, {ADD, LIKE});
-            this->AddValids({A}, {A}, {ADD});
-            this->AddValids({T}, {}, {});
-            this->AddValids({N}, {}, {});
-            /*
-             * 类型提升图
-             * C→H→I→L
-             *     ↓ ↓
-             *     F→D
-             * 类型提升矩阵
-             *    C H I L F D
-             *  C C
-             *  H H H
-             *  I I I I
-             *  L L L L L
-             *  F F F F D F
-             *  D D D D D D D
-             */
-            this->AddUpgrades({C}, {C}, C);
-            this->AddUpgrades({H}, {C, H}, H);
-            this->AddUpgrades({I}, {C, H, I}, I);
-            this->AddUpgrades({L}, {C, H, I, L}, L);
-            this->AddUpgrades({F}, {C, H, I, F}, F);
-            this->AddUpgrade(F, L, D);
-            this->AddUpgrades({D}, {C, H, I, L, F, D}, D);
-        }
-
-        bool OperateValid(EnumOfBuiltinType l, EnumOfBuiltinType r, OperatorType operatorType) const {
-            const std::set<OperatorType> &valid_set = TypeValidMatrix[(size_t)l][(size_t)r];
-            return valid_set.find(operatorType) != valid_set.end();
-        }
-
-        EnumOfBuiltinType TypeUpgrade(EnumOfBuiltinType l, EnumOfBuiltinType r) const {
-            return TypeUpgradeMatrix[(size_t)l][(size_t)r];
-        }
-    } type_matrix;
 
     bool BinaryExpression::IsBinaryOperateValid() const {
         // 只有内置类型才能执行二元运算
         BuiltinTypeDecl *lhsBuiltinType = this->lhs_->as<BuiltinTypeDecl>();
         BuiltinTypeDecl *rhsBuiltinType = this->rhs_->as<BuiltinTypeDecl>();
         if (lhsBuiltinType == nullptr || rhsBuiltinType == nullptr) {
+            assert(false);
             return false;
         }
         return lhsBuiltinType->isBinOptValid(getOperator(), rhsBuiltinType);
     }
-
-//    EnumOfBuiltinType TypeAssert::ResultOfTypeUpgrade(EnumOfBuiltinType ltype, EnumOfBuiltinType rtype) {
-//        return type_matrix.TypeUpgrade(ltype, rtype);
-//    }
 
 }

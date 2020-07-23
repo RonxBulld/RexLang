@@ -221,7 +221,16 @@ namespace rexlang {
 
     void MemberVariableDecl::applyAttribute(const TString &attribute) {
         if (Str2Attr::isNameOfReference(attribute.string_)) { is_reference_ = true; }
-        else { Decl::applyAttribute(attribute); }
+        else { VariableDecl::applyAttribute(attribute); }
+    }
+
+    /***************************************************
+     * LocalVariableDecl
+     ***************************************************/
+
+    void LocalVariableDecl::applyAttribute (const TString &attribute) {
+        if (Str2Attr::isNameOfStatic(attribute.string_)) { is_static_ = true; }
+        else { VariableDecl::applyAttribute(attribute); }
     }
 
     /***************************************************
@@ -402,9 +411,10 @@ namespace rexlang {
      * _OperatorExpression
      ***************************************************/
 
-    void                 _OperatorExpression::setOperatorText(const TString &operatorText) { operator_      = operatorText; }
-    void                 _OperatorExpression::setOperator    (const OperatorType &opt)     { operator_type_ = opt; }
-    const OperatorType & _OperatorExpression::getOperator    () const                      { return operator_type_; }
+    void                 _OperatorExpression::setOperatorText(const TString & operatorText) { operator_      = operatorText; }
+    void                 _OperatorExpression::setOperator    (const OperatorType &     opt) { operator_type_ = opt; }
+    void                 _OperatorExpression::setOperator    (const OperatorType::Opt &opt) { operator_type_ = OperatorType(opt); }
+    const OperatorType & _OperatorExpression::getOperator    () const                       { return operator_type_; }
 
     /***************************************************
      * BinaryExpression
