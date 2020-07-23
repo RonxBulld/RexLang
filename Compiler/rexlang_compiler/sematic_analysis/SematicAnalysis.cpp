@@ -711,7 +711,7 @@ namespace rexlang {
 
         // 根据运算类型返回类型
 
-        TypeDecl *upgraded_type = binary_expression->GetBinaryOperateUpgradeType();
+        TypeDecl *upgraded_type = binary_expression->getBinaryOperateUpgradeType();
         assert(upgraded_type);
 
         ErrOr<Expression*> implicit_conv_lhs = this->MakeImplicitConvertIfNeccessary(upgraded_type, binary_expression->lhs_);

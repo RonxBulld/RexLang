@@ -280,4 +280,22 @@ namespace rexlang {
         return type;
     }
 
+    /******************************************
+     * NameComponent 族
+     ******************************************/
+
+    TypeDecl * BaseVariDecl::getType() const { return this->getTypeDecl(); }
+    TypeDecl * TypeDecl    ::getType() const { return const_cast<TypeDecl *>(this); }
+    TypeDecl * ProgSetDecl ::getType() const { return nullptr; }
+
+    TagDecl * ArrayIndex::EvalBaseNameComponentType() { return getElementTy(); }
+    TypeDecl * ArrayIndex::getElementTy() const { return getBaseId()->getExpressionTy(); }
+
+    /******************************************
+     * TypeConvert
+     ******************************************/
+
+    TypeDecl * TypeConvert::getSourceType () const { return from_expression_->getExpressionTy(); }
+    TypeDecl * TypeConvert::getTargetType () const { assert(target_type_); return target_type_; }
+
 }

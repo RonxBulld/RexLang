@@ -149,16 +149,16 @@ namespace rexlang {
          * 基本符号特性判定
          ***********************************************/
 
-        [[nodiscard]] bool IsUnaryOpt      () const ;
-        [[nodiscard]] bool IsBinaryOpt     () const ;
-        [[nodiscard]] bool IsNumericalOpt  () const ;
-        [[nodiscard]] bool IsEqualOrNotOpt () const ;
-        [[nodiscard]] bool IsRelationalOpt () const ;
-        [[nodiscard]] bool IsExtraRelOpt   () const ;
-        [[nodiscard]] bool IsBooleanOpt    () const ;
+        [[nodiscard]] bool isUnaryOpt      () const ;   // -
+        [[nodiscard]] bool isBinaryOpt     () const ;   // + - * / \ % == != > < >= <= ?= && ||
+        [[nodiscard]] bool isNumericalOpt  () const ;   // + - * / \ %
+        [[nodiscard]] bool isEqualOrNotOpt () const ;   // == !=
+        [[nodiscard]] bool isRelationalOpt () const ;   // == != > < >= <=
+        [[nodiscard]] bool isExtraRelOpt   () const ;   // == != > < >= <= ?=
+        [[nodiscard]] bool isBooleanOpt    () const ;   // && ||
 
     public:
-        const Opt &GetOperate() const { return opt_; }
+        const Opt &getOperate() const { return opt_; }
 
     private:
         Opt opt_;
@@ -341,6 +341,8 @@ namespace rexlang {
         void        setAccessLevel(AccessLevel accessLevel) ;
         AccessLevel getAccessLevel() const ;
 
+        virtual TypeDecl* getType () const = 0;    // 获取定义的类型，若为实例则获取实例类型，若为类型则返回自身
+
     public:
         static const NodeType GetClassId () ;
     };
@@ -394,6 +396,8 @@ namespace rexlang {
         virtual VariTypeDecl *getTypeDecl  () ;
         virtual VariTypeDecl *getTypeDecl  () const ;
         virtual VariTypeDecl *takeTypeDecl () ;
+
+        TypeDecl* getType () const override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -498,9 +502,10 @@ namespace rexlang {
      */
     class TypeDecl : public TagDecl {
     public:
-        static const NodeType GetClassId () ;
+        TypeDecl* getType () const override ;
 
     public:
+        static const NodeType GetClassId () ;
 
     };
 
@@ -844,6 +849,7 @@ namespace rexlang {
         ParameterDecl * getParameterAt  (unsigned idx)                       const ;
         ParameterDecl * getParameter    (const StringRef &name)              const ;
         int             getIndexOf      (const ParameterDecl *parameterDecl) const ;
+        TypeDecl *      getReturnType   ()                                   const ;
 
         virtual bool    isStaticLibraryAPI  () const = 0;
         virtual bool    isDynamicLibraryAPI () const = 0;
@@ -961,7 +967,8 @@ namespace rexlang {
         std::vector<FunctorDecl *>  getFuncSignatures() const ;
 
     public:
-        TagDecl *findDeclWithNameString(const StringRef &name) const override ;
+        TagDecl * findDeclWithNameString(const StringRef &name) const override ;
+        TypeDecl* getType () const override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -978,7 +985,7 @@ namespace rexlang {
      */
     class Statement : public Node {
     protected:
-        virtual ExprUsage GetSubExprLRType(const Expression *expr) const = 0;
+        virtual ExprUsage getSubExprAccessType(const Expression *expr) const = 0;
 
     public:
         static const NodeType GetClassId () ;
@@ -992,7 +999,7 @@ namespace rexlang {
         Expression* rhs_ = nullptr;
 
     protected:
-        ExprUsage GetSubExprLRType(const Expression *expr) const override ;
+        ExprUsage getSubExprAccessType(const Expression *expr) const override ;
 
     public:
         void setLHS(HierarchyIdentifier *lhs) ;
@@ -1032,7 +1039,7 @@ namespace rexlang {
         static const NodeType GetClassId () ;
 
     protected:
-        ExprUsage GetSubExprLRType(const Expression *expr) const override ;
+        ExprUsage getSubExprAccessType(const Expression *expr) const override ;
     };
 
     /**
@@ -1043,7 +1050,7 @@ namespace rexlang {
         static const NodeType GetClassId () ;
 
     protected:
-        ExprUsage GetSubExprLRType(const Expression *expr) const override ;
+        ExprUsage getSubExprAccessType(const Expression *expr) const override ;
     };
 
     /**
@@ -1054,7 +1061,7 @@ namespace rexlang {
         Expression* return_value_ = nullptr;
 
     protected:
-        ExprUsage GetSubExprLRType(const Expression *expr) const override ;
+        ExprUsage getSubExprAccessType(const Expression *expr) const override ;
 
     public:
         void setReturnValue(Expression *returnValue) ;
@@ -1072,7 +1079,7 @@ namespace rexlang {
         static const NodeType GetClassId () ;
 
     protected:
-        ExprUsage GetSubExprLRType(const Expression *expr) const override ;
+        ExprUsage getSubExprAccessType(const Expression *expr) const override ;
     };
 
     /**
@@ -1087,7 +1094,7 @@ namespace rexlang {
         Statement* default_statement_ = nullptr;
 
     protected:
-        ExprUsage GetSubExprLRType(const Expression *expr) const override ;
+        ExprUsage getSubExprAccessType(const Expression *expr) const override ;
 
     public:
         void appendBranch(Expression *condition, Statement *statement) ;
@@ -1118,7 +1125,7 @@ namespace rexlang {
         Expression* condition_ = nullptr;
 
     protected:
-        ExprUsage GetSubExprLRType(const Expression *expr) const override ;
+        ExprUsage getSubExprAccessType(const Expression *expr) const override ;
 
     public:
         void setLoopCondition(Expression *condition) ;
@@ -1137,7 +1144,7 @@ namespace rexlang {
         HierarchyIdentifier *   loop_vari_  = nullptr;
 
     protected:
-        ExprUsage GetSubExprLRType(const Expression *expr) const override ;
+        ExprUsage getSubExprAccessType(const Expression *expr) const override ;
 
     public:
         void setRangeSize    (Expression *rangeSize) ;
@@ -1158,7 +1165,7 @@ namespace rexlang {
         HierarchyIdentifier * loop_vari_   = nullptr;
 
     protected:
-        ExprUsage GetSubExprLRType(const Expression *expr) const override ;
+        ExprUsage getSubExprAccessType(const Expression *expr) const override ;
 
     public:
         void setStartValue(Expression *startValue) ;
@@ -1179,7 +1186,7 @@ namespace rexlang {
         Expression* condition_ = nullptr;
 
     protected:
-        ExprUsage GetSubExprLRType(const Expression *expr) const override ;
+        ExprUsage getSubExprAccessType(const Expression *expr) const override ;
 
     public:
         void setCondition(Expression *condition) ;
@@ -1197,7 +1204,7 @@ namespace rexlang {
         std::vector<Statement*> statements_;
 
     protected:
-        ExprUsage GetSubExprLRType(const Expression *expr) const override ;
+        ExprUsage getSubExprAccessType(const Expression *expr) const override ;
 
     public:
         void appendStatement(Statement *statement) ;
@@ -1218,12 +1225,13 @@ namespace rexlang {
 
     protected:
         virtual TypeDecl *CheckExpressionInternal() = 0 ;
+        virtual TypeDecl *getExpressionTypeInternal() const = 0 ;
 
     public:
         virtual TypeDecl *CheckExpression() = 0 ;    // 检查表达式
-        virtual TypeDecl *getExpressionTy() const = 0 ;
-                TypeDecl *getExpressionTy() ;
-        ExprUsage GetLRType() const;    // 获取表达式自身的引用类型，依赖父节点的 GetSubExprLRType 实现
+        TypeDecl *getExpressionTy() const ;
+        TypeDecl *getExpressionTy() ;
+        ExprUsage getLRType      () const;    // 获取表达式自身的引用类型，依赖父节点的 getSubExprAccessType 实现
 
     public:
         static const NodeType GetClassId () ;
@@ -1239,11 +1247,12 @@ namespace rexlang {
         std::vector<NameComponent*> name_components_;
 
     protected:
-        ExprUsage GetSubExprLRType(const Expression *expr) const override ;
+        TypeDecl *CheckExpressionInternal   ()                             override ;
+        ExprUsage getSubExprAccessType      (const Expression *expr) const override ;
+        TypeDecl *getExpressionTypeInternal ()                       const override ;
 
     public:
         void AppendComponent(NameComponent *component);
-        TypeDecl *CheckExpressionInternal() override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -1283,11 +1292,10 @@ namespace rexlang {
         // 引用目标
         TagDecl * reference_    = nullptr;
 
-    private:
-        TypeDecl *CheckExpressionInternal() override;
-
     protected:
-        ExprUsage GetSubExprLRType(const Expression *expr) const override;
+        TypeDecl *CheckExpressionInternal   () override;
+        ExprUsage getSubExprAccessType      (const Expression *expr) const override ;
+        TypeDecl *getExpressionTypeInternal ()                       const override ;
 
     public:
         Identifier() ;
@@ -1319,16 +1327,15 @@ namespace rexlang {
         Expression* index_ = nullptr;
 
     protected:
-        ExprUsage GetSubExprLRType(const Expression *expr) const override;
-
-    private:
         TypeDecl *CheckExpressionInternal() override;
+        ExprUsage getSubExprAccessType      (const Expression *expr) const override ;
+        TypeDecl *getExpressionTypeInternal ()                       const override ;
 
     public:
         void setBaseComponent(NameComponent *baseComponent) ;
         void setIndexExpr    (Expression *indexExpr) ;
 
-        TagDecl *      EvalBaseNameComponentType   () override;
+        TagDecl *EvalBaseNameComponentType() override ;
 
         /*
          * 获取数组索引组件的真实基对象
@@ -1365,10 +1372,11 @@ namespace rexlang {
         FunctorDecl *             functor_declare_ = nullptr;
 
     protected:
-        ExprUsage GetSubExprLRType          (const Expression *expr) const override ;
+        TypeDecl *CheckExpressionInternal   () override ;
+        ExprUsage getSubExprAccessType      (const Expression *expr) const override ;
+        TypeDecl *getExpressionTypeInternal ()                       const override ;
 
     public:
-        TypeDecl *      CheckExpressionInternal     ()       override ;
         TagDecl *       EvalBaseNameComponentType   ()       override ;
         Identifier *    getBaseId                   () const override ;
 
@@ -1393,25 +1401,22 @@ namespace rexlang {
         enum ConvertType { kCTImplicit, kCTExplicit };
         ConvertType convert_type_ = ConvertType::kCTImplicit;
 
-        /*
-         * 被转换表达式
-         */
-        Expression* from_expression_ = nullptr;
-        /*
-         * 源类型
-         */
-        TypeDecl* source_type_ = nullptr;
-        /*
-         * 目标类型
-         */
-        TypeDecl* target_type_ = nullptr;
+        Expression * from_expression_ = nullptr;     // 被转换表达式
+        TypeDecl *   target_type_     = nullptr;     // 目标类型
+
+    protected:
+        TypeDecl *CheckExpressionInternal   ()        override ;
+        TypeDecl *getExpressionTypeInternal ()  const override ;
+
+    public:
+        ExprUsage getSubExprAccessType      (const Expression *expr) const override ;
+
+        TypeDecl * getSourceType () const ;
+        TypeDecl * getTargetType () const ;
 
     public:
         static const NodeType GetClassId () ;
 
-    public:
-        TypeDecl *CheckExpressionInternal() override ;
-        ExprUsage GetSubExprLRType(const Expression *expr) const override ;
     };
 
     /*
@@ -1442,11 +1447,12 @@ namespace rexlang {
         Expression* operand_value_ = nullptr;
 
     protected:
-        ExprUsage GetSubExprLRType          (const Expression *expr) const override ;
+        VariTypeDecl *CheckExpressionInternal   () override ;
+        ExprUsage getSubExprAccessType          (const Expression *expr) const override ;
+        TypeDecl *getExpressionTypeInternal ()  const override ;
 
     public:
         void setOperand(Expression *operand) ;
-        VariTypeDecl *CheckExpressionInternal   () override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -1459,17 +1465,16 @@ namespace rexlang {
         Expression* rhs_ = nullptr;
 
     protected:
-        ExprUsage   GetSubExprLRType                (const Expression *expr) const override ;
+        VariTypeDecl *  CheckExpressionInternal     () override ;
+        ExprUsage       getSubExprAccessType        (const Expression *expr) const override ;
+        TypeDecl *      getExpressionTypeInternal   ()  const override ;
 
     public:
         void    setLHS(Expression *lhsExpr) ;
         void    setRHS(Expression *rhsExpr) ;
 
         bool            IsBinaryOperateValid         () const;   // 检查二元运算是否合法，该断言主要判断二元表达式中左右子式是否可以通过运算符计算
-        VariTypeDecl *  GetBinaryOperateUpgradeType  () const;   // 获取二元表达式提升后的类型
-
-    public:
-        VariTypeDecl *CheckExpressionInternal() override ;
+        VariTypeDecl *  getBinaryOperateUpgradeType  () const;   // 获取二元表达式提升后的类型
 
     public:
         static const NodeType GetClassId () ;
@@ -1480,10 +1485,12 @@ namespace rexlang {
     private:
         TString resource_name_;
 
+    protected:
+        TypeDecl *CheckExpressionInternal() override ;
+
     public:
         void setResourceName(const TString &resourceName) ;
-        TypeDecl *CheckExpressionInternal() override ;
-        ExprUsage GetSubExprLRType(const Expression *expr) const override ;
+        ExprUsage getSubExprAccessType(const Expression *expr) const override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -1495,10 +1502,12 @@ namespace rexlang {
         Identifier *  function_name_;
         FunctorDecl * functor_declare_ = nullptr;
 
+    protected:
+        TypeDecl *CheckExpressionInternal() override ;
+
     public:
         void setRefFuncName(Identifier *functionName) ;
-        TypeDecl *CheckExpressionInternal() override ;
-        ExprUsage GetSubExprLRType(const Expression *expr) const override ;
+        ExprUsage getSubExprAccessType(const Expression *expr) const override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -1514,17 +1523,18 @@ namespace rexlang {
         static const NodeType GetClassId () ;
 
     protected:
-        ExprUsage GetSubExprLRType(const Expression *expr) const override ;
+        ExprUsage getSubExprAccessType(const Expression *expr) const override ;
     };
 
     class ValueOfDataSet : public Value {
     private:
         std::vector<Expression*> elements_;
 
+    protected:
+        TypeDecl *CheckExpressionInternal() override ;
+
     public:
         void appendElement(Expression *element) ;
-
-        TypeDecl *CheckExpressionInternal() override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -1535,10 +1545,11 @@ namespace rexlang {
     private:
         time_t time_ = 0;
 
+    protected:
+        TypeDecl *CheckExpressionInternal() override ;
+
     public:
         void setTime(time_t time) ;
-
-        TypeDecl *CheckExpressionInternal() override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -1549,9 +1560,11 @@ namespace rexlang {
     private:
         bool value_ = false;
 
+    protected:
+        TypeDecl *CheckExpressionInternal() override ;
+
     public:
         void setBool(bool boolValue) ;
-        TypeDecl *CheckExpressionInternal() override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -1566,11 +1579,12 @@ namespace rexlang {
         };
         enum type { kInt, kFloat } type_ = type::kInt;
 
+    protected:
+        TypeDecl *CheckExpressionInternal() override ;
+
     public:
         void setIntValue  (int   value) ;
         void setFloatValue(float value) ;
-
-        TypeDecl *CheckExpressionInternal() override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -1581,10 +1595,11 @@ namespace rexlang {
     private:
         TString string_literal_;
 
+    protected:
+        TypeDecl *CheckExpressionInternal() override ;
+
     public:
         void setStringLiteral(const TString &literal) ;
-
-        TypeDecl *CheckExpressionInternal() override ;
 
     public:
         static const NodeType GetClassId () ;

@@ -13,95 +13,95 @@ namespace rexlang {
      * 运算符类型的断言
      **********************************************************/
 
-    bool OperatorType::IsUnaryOpt() const {
+    bool OperatorType::isUnaryOpt() const {
         switch (opt_) {
-            case Opt::kOptSub:
+            case Opt::kOptSub:          /* -  */
                 return true;
             default:
                 return false;
         }
     }
 
-    bool OperatorType::IsBinaryOpt() const {
+    bool OperatorType::isBinaryOpt() const {
         switch (opt_) {
-            case Opt::kOptAdd:
-            case Opt::kOptSub:
-            case Opt::kOptMul:
-            case Opt::kOptDiv:
-            case Opt::kOptFullDiv:
-            case Opt::kOptMod:
-            case Opt::kOptEqual:
-            case Opt::kOptNotEqual:
-            case Opt::kOptGreatThan:
-            case Opt::kOptLessThan:
-            case Opt::kOptGreatEqual:
-            case Opt::kOptLessEqual:
-            case Opt::kOptLikeEqual:
-            case Opt::kOptAnd:
-            case Opt::kOptOr:
+            case Opt::kOptAdd:          /* +  */
+            case Opt::kOptSub:          /* -  */
+            case Opt::kOptMul:          /* *  */
+            case Opt::kOptDiv:          /* /  */
+            case Opt::kOptFullDiv:      /* \  */
+            case Opt::kOptMod:          /* %  */
+            case Opt::kOptEqual:        /* == */
+            case Opt::kOptNotEqual:     /* != */
+            case Opt::kOptGreatThan:    /* >  */
+            case Opt::kOptLessThan:     /* <  */
+            case Opt::kOptGreatEqual:   /* >= */
+            case Opt::kOptLessEqual:    /* <= */
+            case Opt::kOptLikeEqual:    /* ?= */
+            case Opt::kOptAnd:          /* && */
+            case Opt::kOptOr:           /* || */
                 return true;
             default:
                 return false;
         }
     }
 
-    bool OperatorType::IsNumericalOpt() const {
+    bool OperatorType::isNumericalOpt() const {
         switch (opt_) {
-            case Opt::kOptAdd:
-            case Opt::kOptSub:
-            case Opt::kOptMul:
-            case Opt::kOptDiv:
-            case Opt::kOptFullDiv:
-            case Opt::kOptMod:
+            case Opt::kOptAdd:          /* +  */
+            case Opt::kOptSub:          /* -  */
+            case Opt::kOptMul:          /* *  */
+            case Opt::kOptDiv:          /* /  */
+            case Opt::kOptFullDiv:      /* \  */
+            case Opt::kOptMod:          /* %  */
                 return true;
             default:
                 return false;
         }
     }
 
-    bool OperatorType::IsEqualOrNotOpt() const {
+    bool OperatorType::isEqualOrNotOpt() const {
         switch (opt_) {
-            case Opt::kOptEqual:
-            case Opt::kOptNotEqual:
+            case Opt::kOptEqual:        /* == */
+            case Opt::kOptNotEqual:     /* != */
                 return true;
             default:
                 return false;
         }
     }
 
-    bool OperatorType::IsRelationalOpt() const{
+    bool OperatorType::isRelationalOpt() const{
         switch (opt_) {
-            case Opt::kOptEqual:
-            case Opt::kOptNotEqual:
-            case Opt::kOptGreatThan:
-            case Opt::kOptLessThan:
-            case Opt::kOptGreatEqual:
-            case Opt::kOptLessEqual:
+            case Opt::kOptEqual:        /* == */
+            case Opt::kOptNotEqual:     /* != */
+            case Opt::kOptGreatThan:    /* >  */
+            case Opt::kOptLessThan:     /* <  */
+            case Opt::kOptGreatEqual:   /* >= */
+            case Opt::kOptLessEqual:    /* <= */
                 return true;
             default:
                 return false;
         }
     }
 
-    bool OperatorType::IsExtraRelOpt() const {
+    bool OperatorType::isExtraRelOpt() const {
         switch (opt_) {
-            case Opt::kOptEqual:
-            case Opt::kOptNotEqual:
-            case Opt::kOptGreatThan:
-            case Opt::kOptLessThan:
-            case Opt::kOptGreatEqual:
-            case Opt::kOptLessEqual:
-            case Opt::kOptLikeEqual:
+            case Opt::kOptEqual:        /* == */
+            case Opt::kOptNotEqual:     /* != */
+            case Opt::kOptGreatThan:    /* >  */
+            case Opt::kOptLessThan:     /* <  */
+            case Opt::kOptGreatEqual:   /* >= */
+            case Opt::kOptLessEqual:    /* <= */
+            case Opt::kOptLikeEqual:    /* ?= */
                 return true;
             default:
                 return false;
         }
     }
 
-    bool OperatorType::IsBooleanOpt() const {
+    bool OperatorType::isBooleanOpt() const {
         switch (opt_) {
-            case Opt::kOptAnd:
-            case Opt::kOptOr:
+            case Opt::kOptAnd:          /* && */
+            case Opt::kOptOr:           /* || */
                 return true;
             default:
                 return false;
@@ -226,8 +226,8 @@ namespace rexlang {
 
     bool BuiltinStringType::isBinOptValid(OperatorType opt, VariTypeDecl *otherType) const {
         if (!otherType->isDataSetType()) { return false; }
-        if (opt.IsExtraRelOpt())         { return true; }
-        switch (opt.GetOperate()) {
+        if (opt.isExtraRelOpt())         { return true; }
+        switch (opt.getOperate()) {
             case OperatorType::Opt::kOptAdd:
                 return true;
             default:
@@ -239,8 +239,8 @@ namespace rexlang {
 
     bool BuiltinDataSetType::isBinOptValid(OperatorType opt, VariTypeDecl *otherType) const {
         if (!otherType->isDataSetType()) { return false; }
-        if (opt.IsExtraRelOpt())         { return true; }
-        switch (opt.GetOperate()) {
+        if (opt.isExtraRelOpt())         { return true; }
+        switch (opt.getOperate()) {
             case OperatorType::Opt::kOptAdd:
                 return true;
             default:
@@ -252,8 +252,8 @@ namespace rexlang {
 
     bool BuiltinBoolType::isBinOptValid(OperatorType opt, VariTypeDecl *otherType) const {
         if (!otherType->isBoolType()) { return false; }
-        if (opt.IsBooleanOpt())       { return true; }
-        if (opt.IsEqualOrNotOpt())    { return true; }
+        if (opt.isBooleanOpt())       { return true; }
+        if (opt.isEqualOrNotOpt())    { return true; }
         return false;
     }
 
@@ -261,7 +261,7 @@ namespace rexlang {
 
     bool BuiltinDatetimeType::isBinOptValid(OperatorType opt, VariTypeDecl *otherType) const {
         if (!otherType->isDatetimeType()) { return false; }
-        switch (opt.GetOperate()) {
+        switch (opt.getOperate()) {
             case OperatorType::Opt::kOptAdd:
             case OperatorType::Opt::kOptSub:
                 return true;
