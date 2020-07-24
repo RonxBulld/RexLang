@@ -291,7 +291,22 @@ namespace rexlang {
     TypeDecl * ProgSetDecl ::getType() const { return nullptr; }
 
     TagDecl * ArrayIndex::EvalBaseNameComponentType() { return getElementTy(); }
-    TypeDecl * ArrayIndex::getElementTy() const { return getBaseId()->getExpressionTy(); }
+    TypeDecl * ArrayIndex::getElementTy() const {
+        TypeDecl *type = getBaseId()->getExpressionTy();
+        if (VariTypeDecl *vari_type_decl = type->as<VariTypeDecl>()) {
+            if (vari_type_decl->isIndexable()) {
+                return vari_type_decl->getIndexedElementTy();
+            }
+            else {
+                assert(false);
+                return nullptr;
+            }
+        }
+        else {
+            assert(false);
+            return nullptr;
+        }
+    }
 
     /******************************************
      * TypeConvert

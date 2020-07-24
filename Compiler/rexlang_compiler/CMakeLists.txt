@@ -70,8 +70,6 @@ SET(REXCompilerParse-Source
         TypeAssert.h
         ASTUtility.cpp
         ASTUtility.h
-        ASTAssert.cpp
-        ASTAssert.h
         TypeSystem.cpp
         TypeSystem.h
         HierarchyIdentifier.cpp

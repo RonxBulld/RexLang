@@ -68,9 +68,10 @@ namespace rexlang {
     }
     TagDecl * TranslateUnit::findDeclWithNameString(const StringRef &name) const {
         // 查找类型、全局变量、函数、API接口
-             if (TypeDecl *          type    = getType      (name)) { return type; }
-        else if (GlobalVariableDecl *gvari   = getGlobalVari(name)) { return gvari; }
+             if (TypeDecl *          type    = getType      (name)) { return type;    }
+        else if (GlobalVariableDecl *gvari   = getGlobalVari(name)) { return gvari;   }
         else if (FunctorDecl *       functor = getFunctor   (name)) { return functor; }
+        else if (ConstDecl *         constv  = getConst     (name)) { return constv;  }
         else { return nullptr; }
     }
 }

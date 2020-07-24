@@ -9,7 +9,6 @@
 #include "../TypeAssert.h"
 #include "../ASTUtility.h"
 #include "../ASTContext.h"
-#include "../ASTAssert.h"
 #include "../utilities/Diagnostic.h"
 #include "../../../lite_util/Defer.h"
 #include "SematicAnalysisNameMangle.h"

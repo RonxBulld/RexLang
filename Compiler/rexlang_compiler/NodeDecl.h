@@ -1682,9 +1682,10 @@ namespace rexlang {
         TypeDecl *              getType         (const StringRef &name) const ;
         GlobalVariableDecl *    getGlobalVari   (const StringRef &name) const ;
         FunctorDecl *           getFunctor      (const StringRef &name) const ;
+        ConstDecl *             getConst        (const StringRef &name) const ;
 
     public:
-        void     setSourceEdition(unsigned edition) { edition_ = edition; }
+        void     setSourceEdition(unsigned edition) { assert(edition == 2); edition_ = edition; }
         unsigned getSourceEdition() const           { return edition_; }
 
         const std::set<TString> &getReferenceLibraries () const ;

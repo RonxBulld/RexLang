@@ -5,7 +5,6 @@
 #include <queue>
 
 #include "ASTUtility.h"
-#include "ASTAssert.h"
 #include "ASTContext.h"
 #include "utilities/Str2Attr.h"
 #include "TypeAssert.h"
