@@ -73,4 +73,16 @@ namespace rexlang {
         }
     }
 
+    TypeDecl *ResourceRefExpression::getExpressionTypeInternal() const {
+        assert(false);
+        return nullptr;
+    }
+
+    TypeDecl *FuncAddrExpression::getExpressionTypeInternal() const { return getTranslateUnit()->getFuncPtrTy(); }
+    TypeDecl *ValueOfDataSet    ::getExpressionTypeInternal() const { return getTranslateUnit()->getDataSetTy(); }
+    TypeDecl *ValueOfDatetime   ::getExpressionTypeInternal() const { return getTranslateUnit()->getDatetimeTy(); }
+    TypeDecl *ValueOfBool       ::getExpressionTypeInternal() const { return getTranslateUnit()->getBoolTy(); }
+    TypeDecl *ValueOfDecimal    ::getExpressionTypeInternal() const { if (type_ == type::kInt) return getTranslateUnit()->getIntegerTy(); else return getTranslateUnit()->getFloatTy() ; }
+    TypeDecl *ValueOfString     ::getExpressionTypeInternal() const { return getTranslateUnit()->getStringTy(); }
+
 }

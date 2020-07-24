@@ -1486,7 +1486,8 @@ namespace rexlang {
         TString resource_name_;
 
     protected:
-        TypeDecl *CheckExpressionInternal() override ;
+        TypeDecl *  CheckExpressionInternal     () override ;
+        TypeDecl *  getExpressionTypeInternal   () const override ;
 
     public:
         void setResourceName(const TString &resourceName) ;
@@ -1503,7 +1504,8 @@ namespace rexlang {
         FunctorDecl * functor_declare_ = nullptr;
 
     protected:
-        TypeDecl *CheckExpressionInternal() override ;
+        TypeDecl *  CheckExpressionInternal     () override ;
+        TypeDecl *  getExpressionTypeInternal   () const override ;
 
     public:
         void setRefFuncName(Identifier *functionName) ;
@@ -1531,7 +1533,8 @@ namespace rexlang {
         std::vector<Expression*> elements_;
 
     protected:
-        TypeDecl *CheckExpressionInternal() override ;
+        TypeDecl *  CheckExpressionInternal     () override ;
+        TypeDecl *  getExpressionTypeInternal   () const override ;
 
     public:
         void appendElement(Expression *element) ;
@@ -1546,7 +1549,8 @@ namespace rexlang {
         time_t time_ = 0;
 
     protected:
-        TypeDecl *CheckExpressionInternal() override ;
+        TypeDecl *  CheckExpressionInternal     () override ;
+        TypeDecl *  getExpressionTypeInternal   () const override ;
 
     public:
         void setTime(time_t time) ;
@@ -1561,7 +1565,8 @@ namespace rexlang {
         bool value_ = false;
 
     protected:
-        TypeDecl *CheckExpressionInternal() override ;
+        TypeDecl *  CheckExpressionInternal     () override ;
+        TypeDecl *  getExpressionTypeInternal   () const override ;
 
     public:
         void setBool(bool boolValue) ;
@@ -1580,7 +1585,8 @@ namespace rexlang {
         enum type { kInt, kFloat } type_ = type::kInt;
 
     protected:
-        TypeDecl *CheckExpressionInternal() override ;
+        TypeDecl *  CheckExpressionInternal     () override ;
+        TypeDecl *  getExpressionTypeInternal   () const override ;
 
     public:
         void setIntValue  (int   value) ;
@@ -1596,7 +1602,8 @@ namespace rexlang {
         TString string_literal_;
 
     protected:
-        TypeDecl *CheckExpressionInternal() override ;
+        TypeDecl *  CheckExpressionInternal     () override ;
+        TypeDecl *  getExpressionTypeInternal   () const override ;
 
     public:
         void setStringLiteral(const TString &literal) ;
