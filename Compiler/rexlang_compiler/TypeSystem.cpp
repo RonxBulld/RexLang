@@ -24,10 +24,12 @@ namespace rexlang {
     const NodeType GlobalVariableFile   ::GetClassId() { return NodeType::kNTyGlobalVariableFile; }
     const NodeType DataStructureFile    ::GetClassId() { return NodeType::kNTyDataStructureFile; }
     const NodeType APIDeclareFile       ::GetClassId() { return NodeType::kNTyAPIDeclareFile; }
+    const NodeType ConstDeclareFile     ::GetClassId() { return NodeType::kNTyConstDeclareFile; }
     const NodeType Decl                 ::GetClassId() { return NodeType::kNTyDecl; }
     const NodeType TagDecl              ::GetClassId() { return NodeType::kNTyTagDecl; }
     const NodeType BaseVariDecl         ::GetClassId() { return NodeType::kNTyBaseVariDecl; }
     const NodeType ParameterDecl        ::GetClassId() { return NodeType::kNTyParameterDecl; }
+    const NodeType ConstDecl            ::GetClassId() { return NodeType::kNTyConstDecl; }
     const NodeType VariableDecl         ::GetClassId() { return NodeType::kNTyVariableDecl; }
     const NodeType GlobalVariableDecl   ::GetClassId() { return NodeType::kNTyGlobalVariableDecl; }
     const NodeType MemberVariableDecl   ::GetClassId() { return NodeType::kNTyMemberVariableDecl; }

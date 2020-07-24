@@ -42,7 +42,7 @@ namespace rexlang {
     // File
 
     class SourceFile;           class ProgramSetFile;           class GlobalVariableFile;
-    class DataStructureFile;    class APIDeclareFile;
+    class DataStructureFile;    class APIDeclareFile;           class ConstDeclareFile;
 
     // Declare
 
@@ -50,7 +50,7 @@ namespace rexlang {
 
     class Decl;                 class TagDecl;                  class TypeDecl;
     class VariTypeDecl;         class StructureDecl;            class BuiltinTypeDecl;
-    class ArrayDecl;
+    class ArrayDecl;            class ConstDecl;
 
     // Entity declare
 
@@ -89,15 +89,15 @@ namespace rexlang {
         kNTyTranslateUnit,
 
         kNTySourceFile,
-        kNTyProgramSetFile, kNTyGlobalVariableFile,
-        kNTyDataStructureFile, kNTyAPIDeclareFile,
+        kNTyProgramSetFile, kNTyGlobalVariableFile, kNTyDataStructureFile,
+        kNTyAPIDeclareFile, kNTyConstDeclareFile,
 
         kNTyDecl,
         kNTyTagDecl, kNTyVariableDecl, kNTyBaseVariDecl, kNTyGlobalVariableDecl,
         kNTyParameterDecl, kNTyMemberVariableDecl, kNTyFileVariableDecl, kNTyLocalVariableDecl,
         kNTyTypeDecl, kNTyVariTypeDecl, kNTyBuiltinTypeDecl, kNTyArrayDecl,
-        kNTyStructureDecl, kNTyFunctorDecl, kNTyFunctionDecl, kNTyProgSetDecl,
-        kNTyAPICommandDecl,
+        kNTyConstDecl, kNTyStructureDecl, kNTyFunctorDecl, kNTyFunctionDecl,
+        kNTyProgSetDecl, kNTyAPICommandDecl,
 
         kNTyStatement,
         kNTyIfStmt, kNTyStatementBlock, kNTyWhileStmt, kNTyRangeForStmt,
@@ -239,6 +239,7 @@ namespace rexlang {
         virtual bool isGlobalVariableFile() const ;
         virtual bool isDataStructureFile () const ;
         virtual bool isAPIDeclareFile    () const ;
+        virtual bool isConstDeclareFile  () const ;
     };
 
     /**
@@ -326,6 +327,23 @@ namespace rexlang {
         static const NodeType GetClassId () ;
     };
 
+    class ConstDeclareFile : public SourceFile {
+    public:
+        typedef ordered_map<StringRef, ConstDecl *> ConstDeclMapTy;
+    private:
+        ConstDeclMapTy consts_declares_;
+
+    public:
+        void                    appendConstDeclare(ConstDecl *constDecl) ;
+        const ConstDeclMapTy &  getConstDeclMap   () const ;
+
+    public:
+        bool isConstDeclareFile() const override ;
+
+    public:
+        static const NodeType GetClassId () ;
+    };
+
     /**
      * @brief 定义基类
      */
@@ -407,8 +425,6 @@ namespace rexlang {
      * 描述参数
      */
     class ParameterDecl : public BaseVariDecl {
-        // 可选参数为：参考、可空、数组
-
         // 是否引用类型
         bool     is_reference_ = false;
         // 是否可空
@@ -417,7 +433,7 @@ namespace rexlang {
         bool     is_array_     = false;
 
     public:
-        void applyAttribute (const TString &attribute)               override ;
+        void applyAttribute (const TString &attribute)  override ;
 
     public:
         unsigned getParamIndex      () const ;
@@ -430,6 +446,17 @@ namespace rexlang {
     public:
         static const NodeType GetClassId () ;
 
+    };
+
+    // 描述常量值定义
+    class ConstDecl : public BaseVariDecl {
+    private:
+        TString const_name_;
+        Value * const_value_ = nullptr;
+    public:
+        ConstDecl(const TString &name, Value *value) ;
+    public:
+        static const NodeType GetClassId () ;
     };
 
     /*
@@ -1228,7 +1255,7 @@ namespace rexlang {
         virtual TypeDecl *getExpressionTypeInternal() const = 0 ;
 
     public:
-        virtual TypeDecl *CheckExpression() = 0 ;    // 检查表达式
+        virtual TypeDecl *CheckExpression() { return expression_type_ = CheckExpressionInternal(); }
         TypeDecl *getExpressionTy() const ;
         TypeDecl *getExpressionTy() ;
         ExprUsage getLRType      () const;    // 获取表达式自身的引用类型，依赖父节点的 getSubExprAccessType 实现
@@ -1620,7 +1647,7 @@ namespace rexlang {
     class TranslateUnit : public Node {
     private:
         unsigned int                edition_ = 0;   // 语法版本号
-        std::vector<SourceFile*>    source_file_;   // 资源文件列表（包括全局变量定义、数据结构定义、类模块定义、DLL接口定义、子程序集合）
+        std::vector<SourceFile*>    source_file_;   // 资源文件列表（包括全局变量定义、数据结构定义、类模块定义、DLL接口定义、子程序集合、常量资源）
 
         /********************** 符号表需要用到的公共信息 **********************/
 
@@ -1628,6 +1655,7 @@ namespace rexlang {
         ordered_map<StringRef, GlobalVariableDecl *>    global_variables_;  /* 全局变量索引表 */
         std::set<TString>                               libraries_list_;    /* 支持库引用列表 */
         ordered_map<StringRef, FunctorDecl*>            functor_declares_;  /* 函数定义表和DLL声明表的合并 */
+        ordered_map<StringRef, ConstDecl *>             consts_declares_;   /* 常量定义索引表 */
 
         /****************************************************************/
 
@@ -1648,6 +1676,7 @@ namespace rexlang {
         bool    addProgSet      (ProgSetDecl *  progSetDecl) const ;    // 添加程序集和程序集中的公开函数声明
         bool    addType         (TypeDecl *     typeDecl)    const ;    // 添加类型
         bool    addGlobalVari   (BaseVariDecl * variDecl)    const ;    // 添加全局变量
+        bool    addConstVal     (ConstDecl *    constDecl)   const ;    // 添加常量定义
         bool    addRefLib       (const TString &libName)     const ;    // 添加引用库
 
         TypeDecl *              getType         (const StringRef &name) const ;

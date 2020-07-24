@@ -129,6 +129,17 @@ namespace rexlang {
     const APIDeclareFile::DllDefMapTy & APIDeclareFile::getAPIDefMap () const { return api_declares_; }
 
     /***************************************************
+     * ConstDeclareFile
+     ***************************************************/
+
+    void ConstDeclareFile::appendConstDeclare(ConstDecl *constDecl) {
+        consts_declares_[constDecl->getNameRef()] = constDecl;
+        setChild(constDecl);
+    }
+
+    const ConstDeclareFile::ConstDeclMapTy & ConstDeclareFile::getConstDeclMap () const { return consts_declares_; }
+
+    /***************************************************
      * Decl
      ***************************************************/
 
@@ -162,9 +173,10 @@ namespace rexlang {
     const TString &     TagDecl::getComment      () const                   { return comment_; }
     const StringRef &   TagDecl::getCommentRef   () const                   { return comment_.string_; }
 
-    const std::set<Identifier *> &TagDecl::getReferenceTable() const                { return reference_table_; }
-    int                           TagDecl::addReference     (Identifier *reference) { reference_table_.insert(reference); }
-    int                           TagDecl::removeReference  (Identifier *reference) { reference_table_.erase(reference); }
+    const std::set<Identifier *> &TagDecl::getReferenceTable() const        { return reference_table_; }
+
+    int TagDecl::addReference     (Identifier *reference) { reference_table_.insert(reference); return 0; }
+    int TagDecl::removeReference  (Identifier *reference) { reference_table_.erase(reference);  return 0; }
 
     /***************************************************
      * BaseVariDecl
