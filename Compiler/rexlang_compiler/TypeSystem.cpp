@@ -177,10 +177,10 @@ namespace rexlang {
     bool BuiltinDataSetType ::isIndexable() const { return true; }
     bool ArrayDecl          ::isIndexable() const { return true; }
 
-    TypeDecl *VariTypeDecl       ::getIndexedElementTy() const { return nullptr; }
-    TypeDecl *BuiltinStringType  ::getIndexedElementTy() const { return this->getTranslateUnit()->getCharTy(); }
-    TypeDecl *BuiltinDataSetType ::getIndexedElementTy() const { return this->getTranslateUnit()->getCharTy(); }
-    TypeDecl *ArrayDecl          ::getIndexedElementTy() const { return this->base_type_; }
+    TypeDecl *VariTypeDecl       ::evalIndexedElementTy() const { return nullptr; }
+    TypeDecl *BuiltinStringType  ::evalIndexedElementTy() const { return this->getTranslateUnit()->getCharTy(); }
+    TypeDecl *BuiltinDataSetType ::evalIndexedElementTy() const { return this->getTranslateUnit()->getCharTy(); }
+    TypeDecl *ArrayDecl          ::evalIndexedElementTy() const { return this->base_type_; }
 
     /************************************************
      * 获取定义的索引维度
@@ -197,10 +197,10 @@ namespace rexlang {
      * 字符串和字节集维度总是固定为1
      **********************************************************/
 
-    bool VariTypeDecl       ::isFixedDimensions() const { return false; }
-    bool ArrayDecl          ::isFixedDimensions() const { return true; }
-    bool BuiltinStringType  ::isFixedDimensions() const { return false; }
-    bool BuiltinDataSetType ::isFixedDimensions() const { return false; }
+    bool VariTypeDecl       ::isFixedDimensions() const { return true; }
+    bool ArrayDecl          ::isFixedDimensions() const { return false; }
+    bool BuiltinStringType  ::isFixedDimensions() const { return true; }
+    bool BuiltinDataSetType ::isFixedDimensions() const { return true; }
 
     /************************************************
      * 注册及获取一个翻译单元中的内建类型
@@ -262,21 +262,21 @@ namespace rexlang {
 
     const TString &BaseVariDecl::getTypeName() const { return type_name_; }
 
-    void BaseVariDecl::setTypeDecl(VariTypeDecl *variType) {
+    void BaseVariDecl::setValType(VariTypeDecl *variType) {
         vari_type_decl_ = variType;
         type_name_ = variType->getName();
     }
 
-    VariTypeDecl * BaseVariDecl::getTypeDecl() {
-        vari_type_decl_ = const_cast<const BaseVariDecl *>(this)->getTypeDecl();
+    VariTypeDecl * BaseVariDecl::getValType() {
+        vari_type_decl_ = const_cast<const BaseVariDecl *>(this)->evalValType();
         return vari_type_decl_;
     }
 
-    VariTypeDecl * BaseVariDecl::getTypeDecl() const {
+    VariTypeDecl * BaseVariDecl::evalValType() const {
         return findDeclWithNameString(type_name_.string_)->as<VariTypeDecl>();
     }
 
-    VariTypeDecl *BaseVariDecl::takeTypeDecl () {
+    VariTypeDecl *BaseVariDecl::takeValType () {
         VariTypeDecl *type = vari_type_decl_;
         vari_type_decl_ = nullptr;
         return type;
@@ -286,7 +286,7 @@ namespace rexlang {
      * NameComponent 族
      ******************************************/
 
-    TypeDecl * BaseVariDecl::getType() const { return this->getTypeDecl(); }
+    TypeDecl * BaseVariDecl::getType() const { return this->evalValType(); }
     TypeDecl * TypeDecl    ::getType() const { return const_cast<TypeDecl *>(this); }
     TypeDecl * ProgSetDecl ::getType() const { return nullptr; }
 
@@ -295,7 +295,7 @@ namespace rexlang {
         TypeDecl *type = getBaseId()->getExpressionTy();
         if (VariTypeDecl *vari_type_decl = type->as<VariTypeDecl>()) {
             if (vari_type_decl->isIndexable()) {
-                return vari_type_decl->getIndexedElementTy();
+                return vari_type_decl->evalIndexedElementTy();
             }
             else {
                 assert(false);

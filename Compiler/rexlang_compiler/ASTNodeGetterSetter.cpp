@@ -44,37 +44,8 @@ namespace rexlang {
     }
 
     void TranslateUnit::appendSourceFile(rexlang::SourceFile *sourceFile) {
-        if (ProgramSetFile *program_set_file = sourceFile->as<ProgramSetFile>()) {
-            if (ProgSetDecl *prog_set_decl = program_set_file->getProgramSetDecl()) {
-                addProgSet(prog_set_decl);
-                for (FunctorDecl *signature : prog_set_decl->getFuncSignatures()) {
-                    addFunctor(signature);
-                }
-            }
-            for (const TString &lib : program_set_file->getRefLibs()) {
-                addRefLib(lib);
-            }
-        }
-        else if (DataStructureFile *data_structure_file = sourceFile->as<DataStructureFile>()) {
-            for (auto &item : data_structure_file->getTypes()) {
-                addType(item.second);
-            }
-        }
-        else if (GlobalVariableFile *global_variable_file = sourceFile->as<GlobalVariableFile>()) {
-            for (auto &item : global_variable_file->getGlobalVariMap()) {
-                addGlobalVari(item.second);
-            }
-        }
-        else if (APIDeclareFile *dll_define_file = sourceFile->as<APIDeclareFile>()) {
-            for (auto &item : dll_define_file->getAPIDefMap()) {
-                addFunctor(item.second);
-            }
-        }
-        else {
-            assert(false);
-            return;
-        }
-        source_file_.emplace_back(sourceFile);
+        sourceFile->registResourceTo(this);
+        source_files_.emplace_back(sourceFile);
         setChild(sourceFile);
     }
 
@@ -211,16 +182,19 @@ namespace rexlang {
 
     void VariableDecl::setDimensionsText(const TString &dimStr) {
         dimensions_decl_ = dimStr;
-        auto err_or_dims = Str2Attr::str2Dimension(dimStr.string_);
-        if (err_or_dims.HadError()) {
-            assert(false);
-            return;
+        if (!dimensions_decl_.string_.empty()) {
+            auto err_or_dims = Str2Attr::str2Dimension(dimensions_decl_.string_);
+            if (err_or_dims.HadError()) {
+                assert(false);
+                return;
+            }
+            is_array_ = true;
+            dimensions_ = err_or_dims.Value();
         }
-        dimensions_ = err_or_dims.Value();
-    }
-
-    const TString &VariableDecl::getDimensionsText() const {
-        return dimensions_decl_;
+        else {
+            is_array_ = false;
+            dimensions_ = {};
+        }
     }
 
     /***************************************************
@@ -244,6 +218,8 @@ namespace rexlang {
         if (Str2Attr::isNameOfStatic(attribute.string_)) { is_static_ = true; }
         else { VariableDecl::applyAttribute(attribute); }
     }
+
+    bool LocalVariableDecl::isStatic() const { return is_static_; }
 
     /***************************************************
      * FunctorDecl
@@ -316,6 +292,10 @@ namespace rexlang {
     void StatementBlock::appendStatement(Statement *statement) {
         statements_.push_back(statement);
         setChild(statement);
+    }
+
+    const std::vector<Statement *> &StatementBlock::getStatements() const {
+        return statements_;
     }
 
     /***************************************************

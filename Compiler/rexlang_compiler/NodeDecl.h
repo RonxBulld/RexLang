@@ -30,6 +30,7 @@ namespace rexlang {
     };
 
     class ASTContext;
+    class SemaContext;
 
     // Base
 
@@ -126,8 +127,8 @@ namespace rexlang {
 
     // 传值方式
     enum class ValueTransferMode {
-        kVTMValue /* 传值 */,
-        kVTMReference /* 传址 */,
+        kVTMValue,      // 传值
+        kVTMReference,  // 传址
     };
 
     // 运算符类型
@@ -224,13 +225,16 @@ namespace rexlang {
 
     public:
         virtual TagDecl * findDeclWithNameString(const StringRef &name) const ;
+        virtual void sematicAnalysisInternal(SemaContext &semaCtx) = 0;
+
     };
 
     /**
      * @brief 资源文件基类
      */
     class SourceFile : public Node {
-//        enum FileType {kProgramSetFile, kGlobalVariableFile, kDataStructureFile, kAPIDeclareFile} file_type_;
+    public:
+        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -240,6 +244,8 @@ namespace rexlang {
         virtual bool isDataStructureFile () const ;
         virtual bool isAPIDeclareFile    () const ;
         virtual bool isConstDeclareFile  () const ;
+
+        virtual void registResourceTo   (TranslateUnit *translateUnit) const = 0;
     };
 
     /**
@@ -251,10 +257,11 @@ namespace rexlang {
         ProgSetDecl *        program_set_declares_ = nullptr;
 
     public:
-        static const NodeType GetClassId () ;
+        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
         bool isProgramSetFile() const override ;
+        void registResourceTo(TranslateUnit *translateUnit) const override ;
 
     public:
         void appendReferenceLibName (const TString &libraryName) ;
@@ -263,6 +270,9 @@ namespace rexlang {
         ProgSetDecl *                getProgramSetDecl() const ;
         const std::vector<TString> & getRefLibs       () const ;
 
+    public:
+        static const NodeType GetClassId () ;
+
     };
 
     /**
@@ -270,10 +280,13 @@ namespace rexlang {
      */
     class GlobalVariableFile : public SourceFile {
     public:
-        typedef ordered_map<StringRef, GlobalVariableDecl*> GlobalVariMapTy;
+        typedef ordered_map<StringRef, GlobalVariableDecl *> GlobalVariMapTy;
 
     private:
         GlobalVariMapTy global_variable_map_;
+
+    public:
+        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
         void                    appendGlobalVariableDecl(GlobalVariableDecl *globalVariableDecl) ;
@@ -281,6 +294,7 @@ namespace rexlang {
 
     public:
         bool isGlobalVariableFile() const override ;
+        void registResourceTo(TranslateUnit *translateUnit) const override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -291,10 +305,13 @@ namespace rexlang {
      */
     class DataStructureFile : public SourceFile {
     public:
-        typedef ordered_map<StringRef, StructureDecl*> StructDeclMapTy;
+        typedef ordered_map<StringRef, StructureDecl *> StructDeclMapTy;
 
     private:
         StructDeclMapTy structure_decl_map_;
+
+    public:
+        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
         void                    appendStructureDecl(StructureDecl *structureDecl) ;
@@ -302,6 +319,7 @@ namespace rexlang {
 
     public:
         bool isDataStructureFile() const override ;
+        void registResourceTo(TranslateUnit *translateUnit) const override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -312,9 +330,13 @@ namespace rexlang {
      */
     class APIDeclareFile : public SourceFile {
     public:
-        typedef ordered_map<StringRef, APICommandDecl*> DllDefMapTy;
+        typedef ordered_map<StringRef, APICommandDecl *> DllDefMapTy;
+
     private:
         DllDefMapTy api_declares_;
+
+    public:
+        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
         void                appendAPIDeclare(APICommandDecl *apiCommandDecl) ;
@@ -322,6 +344,7 @@ namespace rexlang {
 
     public:
         bool isAPIDeclareFile() const override ;
+        void registResourceTo(TranslateUnit *translateUnit) const override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -330,8 +353,12 @@ namespace rexlang {
     class ConstDeclareFile : public SourceFile {
     public:
         typedef ordered_map<StringRef, ConstDecl *> ConstDeclMapTy;
+
     private:
         ConstDeclMapTy consts_declares_;
+
+    public:
+        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
         void                    appendConstDeclare(ConstDecl *constDecl) ;
@@ -339,6 +366,7 @@ namespace rexlang {
 
     public:
         bool isConstDeclareFile() const override ;
+        void registResourceTo(TranslateUnit *translateUnit) const override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -379,9 +407,9 @@ namespace rexlang {
 
     public:
 
-        void                setName         (const TString &name)    ;
-        const TString &     getName         () const                 ;
-        const StringRef &   getNameRef      () const                 ;
+        void                setName         (const TString &name)   ;
+        const TString &     getName         () const                ;
+        const StringRef &   getNameRef      () const                ;
 
         void                setComment      (const TString &comment) ;
         const TString &     getComment      () const                 ;
@@ -397,7 +425,7 @@ namespace rexlang {
     };
 
     /*
-     * 描述成员变量、全局变量、局部变量、参数等带有类型的基本结构
+     * 描述成员变量、全局变量、局部变量、参数、常量等带有类型的基本结构
      */
     class BaseVariDecl : public TagDecl {
     private:
@@ -407,13 +435,16 @@ namespace rexlang {
         VariTypeDecl *vari_type_decl_ = nullptr;
 
     public:
+        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+
+    public:
         void            setTypeName(const TString &typeName) ;
         const TString & getTypeName() const ;
 
-        void                  setTypeDecl  (VariTypeDecl *variType) ;
-        virtual VariTypeDecl *getTypeDecl  () ;
-        virtual VariTypeDecl *getTypeDecl  () const ;
-        virtual VariTypeDecl *takeTypeDecl () ;
+        void                  setValType  (VariTypeDecl *variType) ;
+        virtual VariTypeDecl *getValType  () ;
+        virtual VariTypeDecl *evalValType () const ;
+        virtual VariTypeDecl *takeValType () ;
 
         TypeDecl* getType () const override ;
 
@@ -425,20 +456,21 @@ namespace rexlang {
      * 描述参数
      */
     class ParameterDecl : public BaseVariDecl {
-        // 是否引用类型
-        bool     is_reference_ = false;
-        // 是否可空
-        bool     is_nullable_  = false;
-        // 是否数组
-        bool     is_array_     = false;
+    private:
+        bool is_reference_ = false; // 是否引用类型
+        bool is_nullable_  = false; // 是否可空
+        bool is_array_     = false; // 是否数组
+
+    public:
+        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
         void applyAttribute (const TString &attribute)  override ;
 
     public:
-        unsigned getParamIndex      () const ;
-        bool     isNullable         () const ;
-        bool     isArray            () const ;
+        unsigned getParamIndex  () const ;
+        bool     isNullable     () const ;
+        bool     isArray        () const ;
 
         // 判断该参数是否应该以引用的方式传递，如果是数组、字符串、字节集、自定义类型或 is_reference 为真时则为真
         bool     shouldBeReference  () const ;
@@ -464,14 +496,15 @@ namespace rexlang {
      */
     class VariableDecl : public BaseVariDecl {
     private:
-        // 维度声明
-        TString dimensions_decl_;
-        // 解析后的维度定义
-        std::vector<size_t> dimensions_;
+        bool                is_array_ = false;
+        TString             dimensions_decl_;   // 维度声明
+        std::vector<size_t> dimensions_;        // 解析后的维度定义
 
     public:
-        void            setDimensionsText(const TString &dimStr) ;
-        const TString & getDimensionsText() const ;
+        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+
+    public:
+        void    setDimensionsText(const TString &dimStr) ;
 
     public:
         static const NodeType GetClassId () ;
@@ -482,6 +515,8 @@ namespace rexlang {
      */
     class GlobalVariableDecl : public VariableDecl {
     public:
+        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+
     public:
         static const NodeType GetClassId () ;
     };
@@ -490,11 +525,16 @@ namespace rexlang {
      * 描述成员变量
      */
     class MemberVariableDecl : public VariableDecl {
-        size_t index_of_struct_ = 0;
+    private:
+        int    index_of_struct_ = -1;
         bool   is_reference_    = false;
 
     public:
         void applyAttribute (const TString &attribute) override ;
+
+        // 判断该参数是否应该以引用的方式传递，如果是数组、字符串、字节集、自定义类型或 is_reference 为真时则为真
+        bool    shouldBeReference   () const ;
+        int     indexOfStruct       () ;
 
     public:
         static const NodeType GetClassId () ;
@@ -505,6 +545,9 @@ namespace rexlang {
      */
     class FileVariableDecl : public VariableDecl {
     public:
+        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+
+    public:
         static const NodeType GetClassId () ;
     };
 
@@ -512,13 +555,15 @@ namespace rexlang {
      * 描述局部变量
      */
     class LocalVariableDecl : public VariableDecl {
-        /*
-         * 是否为静态
-         */
-        bool is_static_ = false;
+    private:
+        bool is_static_ = false;    // 是否为静态
+
+    public:
+        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
         void applyAttribute (const TString &attribute) override ;
+        bool isStatic() const ;
 
     public:
         static const NodeType GetClassId () ;
@@ -527,6 +572,7 @@ namespace rexlang {
     /*
      * 类型定义分支
      */
+
     class TypeDecl : public TagDecl {
     public:
         TypeDecl* getType () const override ;
@@ -573,8 +619,8 @@ namespace rexlang {
          ********************************************************/
 
         [[nodiscard]] virtual bool       isIndexable         () const ;   // 类型是否可索引
-        [[nodiscard]] virtual bool       isFixedDimensions   () const ;   // 维度数量是否可变
-        [[nodiscard]] virtual TypeDecl * getIndexedElementTy () const ;   // 获取索引的类型
+        [[nodiscard]] virtual bool       isFixedDimensions   () const ;   // 维度数量是否不可变
+        [[nodiscard]] virtual TypeDecl * evalIndexedElementTy () const ;   // 获取索引的类型
 
         [[nodiscard]] virtual std::vector<size_t> getDimensions () const ;  // 获取定义的索引维度
 
@@ -608,6 +654,9 @@ namespace rexlang {
     class BuiltinTypeDecl : public VariTypeDecl {
     protected:
         BuiltinTypeDecl(const char *typeName, EnumOfBuiltinType typeEnum) ;
+
+    public:
+        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
         virtual EnumOfBuiltinType GetBuiltinType() const = 0;
@@ -718,7 +767,7 @@ namespace rexlang {
         std::vector<size_t> getDimensions           () const override ;
         bool                isBinOptValid           (OperatorType opt, VariTypeDecl *otherType) const override ;
 
-        TypeDecl *          getIndexedElementTy     () const override ;
+        TypeDecl *          evalIndexedElementTy     () const override ;
 
         static EnumOfBuiltinType    BuiltinType     () ;
         static const char *         TypeText        () ;
@@ -737,7 +786,7 @@ namespace rexlang {
         std::vector<size_t> getDimensions           () const override ;
         bool                isBinOptValid           (OperatorType opt, VariTypeDecl *otherType) const override ;
 
-        TypeDecl *          getIndexedElementTy     () const override ;
+        TypeDecl *          evalIndexedElementTy     () const override ;
 
         static EnumOfBuiltinType    BuiltinType     () ;
         static const char *         TypeText        () ;
@@ -817,8 +866,11 @@ namespace rexlang {
      * 数据结构定义
      */
     class StructureDecl : public VariTypeDecl {
+    private:
+        ordered_map<StringRef, MemberVariableDecl *> members_;
+
     public:
-        ordered_map<StringRef, MemberVariableDecl*> members_;
+        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -829,27 +881,32 @@ namespace rexlang {
         void            appendElement       (MemberVariableDecl *element) ;
         BaseVariDecl *  getElementWithIndex () ;
         BaseVariDecl *  getElementWithName  (const StringRef &variable_name) const ;
+
+        bool            isMemberOfThis      (MemberVariableDecl *memberVariDecl) const ;
+        int             indexMemberOfThis   (MemberVariableDecl *memberVariDecl) const ;
+
     };
 
     /*
      * 数组类型
+     * 该节点不会在语法分析阶段产生，在语义分析阶段根据 VariableDecl 生成
      */
     class ArrayDecl : public VariTypeDecl {
-        TString base_type_str;
-
-        // === 下面是经过语义分析后的数据 ===
-
-        TypeDecl* base_type_ = nullptr;
-        // 数组维度定义，如果不是数组，则为空
+    private:
+        TypeDecl * base_type_ = nullptr;
+        // 数组维度定义
         std::vector<size_t> dimensions_;
 
     public:
         bool                isIndexable             () const override ;
         bool                isFixedDimensions       () const override ;
         bool                isArray                 () const override ;
-        TypeDecl *          getIndexedElementTy     () const override ;
+        TypeDecl *          evalIndexedElementTy    () const override ;
         std::vector<size_t> getDimensions           () const override ;
         bool                isBinOptValid           (OperatorType opt, VariTypeDecl *otherType) const override ;
+
+    public:
+        static ArrayDecl *  get (TypeDecl *elementType, const std::vector<size_t> dimensions) ;
 
     public:
         static const NodeType GetClassId () ;
@@ -863,10 +920,13 @@ namespace rexlang {
     private:
         // 返回值类型名
         TString return_type_name_;
-        // 参数列表
-        std::vector<ParameterDecl *> parameters_;
         // 返回值类型
         TypeDecl* return_type_ = nullptr;
+        // 参数列表
+        std::vector<ParameterDecl *> parameters_;
+
+    public:
+        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
                 void setReturnTypeName  (const TString &typeName) ;
@@ -894,15 +954,19 @@ namespace rexlang {
         // 局部变量列表
         ordered_map<StringRef, LocalVariableDecl*> local_vari_;
         // 语句列表
-        StatementBlock* statement_list_ = nullptr;
+        StatementBlock *statement_list_ = nullptr;
         // 所属程序集
-        ProgSetDecl* super_set_ = nullptr;
+        ProgSetDecl *super_set_ = nullptr;
+
+    public:
+        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
         void     appendLocalVariable(LocalVariableDecl * variableDecl) ;
         void     setStatementBlock  (StatementBlock *    statementBlock) ;
 
-        LocalVariableDecl *getLocalVari (const StringRef &   name) const ;
+        LocalVariableDecl * getLocalVari    (const StringRef &name) const ;
+        StatementBlock *    getFunctionBody () const ;
 
     public:
         bool    isStaticLibraryAPI  () const override ;
@@ -953,17 +1017,26 @@ namespace rexlang {
         TString library_file_;
         // API库类型
         LibraryType library_type_ = LibraryType::kLTDynamic;
-        // 原生函数名称
+        // API函数名称
         TString api_name_;
         // 参数传递方式
         ArgumentPassModel argument_pass_model_ = ArgumentPassModel::kDirect;
-        // 原生参数名称
+        // API参数名称
         std::vector<StringRef> mapping_names_;
+
+    public:
+        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
         APICommandDecl(const TString &library, LibraryType libraryType, const TString &name, const TString &apiName);
 
     public:
+        const StringRef &   getApiNameRef() const ;
+        void                setApiNameRef(const StringRef &apiName) ;
+
+        ArgumentPassModel   getArguPassModel() const ;
+        void                setArguPassModel(ArgumentPassModel model) ;
+
         void appendParameter    (ParameterDecl *parameterDecl) override ;
 
     public:
@@ -1116,7 +1189,7 @@ namespace rexlang {
     class IfStmt : public Statement {
     private:
         // 选择分支，每个pair第一个元素为测试表达式，第二个元素为相应的语句块
-        std::vector<std::pair<Expression*, Statement*>> switches_;
+        std::vector<std::pair<Expression *, Statement *>> switches_;
         // 默认分支
         Statement* default_statement_ = nullptr;
 
@@ -1124,8 +1197,12 @@ namespace rexlang {
         ExprUsage getSubExprAccessType(const Expression *expr) const override ;
 
     public:
-        void appendBranch(Expression *condition, Statement *statement) ;
-        void setDefault  (Statement *statement) ;
+        void        appendBranch    (Expression *condition, Statement *statement) ;
+        void        setDefault      (Statement *statement) ;
+        size_t      branchesCount   () const ;
+        Expression *conditionAt     (size_t idx) const ;
+        Statement * branchBodyAt    (size_t idx) const ;
+        Statement * defaultBody     () const ;
 
     public:
         static const NodeType GetClassId () ;
@@ -1228,13 +1305,14 @@ namespace rexlang {
      */
     class StatementBlock : public Statement {
     private:
-        std::vector<Statement*> statements_;
+        std::vector<Statement *> statements_;
 
     protected:
         ExprUsage getSubExprAccessType(const Expression *expr) const override ;
 
     public:
         void appendStatement(Statement *statement) ;
+        const std::vector<Statement *> &getStatements() const ;
 
     public:
         static const NodeType GetClassId () ;
@@ -1517,6 +1595,9 @@ namespace rexlang {
         TypeDecl *  getExpressionTypeInternal   () const override ;
 
     public:
+        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+
+    public:
         void setResourceName(const TString &resourceName) ;
         ExprUsage getSubExprAccessType(const Expression *expr) const override ;
 
@@ -1533,6 +1614,9 @@ namespace rexlang {
     protected:
         TypeDecl *  CheckExpressionInternal     () override ;
         TypeDecl *  getExpressionTypeInternal   () const override ;
+
+    public:
+        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
         void setRefFuncName(Identifier *functionName) ;
@@ -1552,7 +1636,10 @@ namespace rexlang {
         static const NodeType GetClassId () ;
 
     protected:
-        ExprUsage getSubExprAccessType(const Expression *expr) const override ;
+        ExprUsage   getSubExprAccessType    (const Expression *expr) const override ;
+
+    public:
+        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
     };
 
     class ValueOfDataSet : public Value {
@@ -1562,6 +1649,9 @@ namespace rexlang {
     protected:
         TypeDecl *  CheckExpressionInternal     () override ;
         TypeDecl *  getExpressionTypeInternal   () const override ;
+
+    public:
+        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
         void appendElement(Expression *element) ;
@@ -1580,6 +1670,9 @@ namespace rexlang {
         TypeDecl *  getExpressionTypeInternal   () const override ;
 
     public:
+        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+
+    public:
         void setTime(time_t time) ;
 
     public:
@@ -1594,6 +1687,9 @@ namespace rexlang {
     protected:
         TypeDecl *  CheckExpressionInternal     () override ;
         TypeDecl *  getExpressionTypeInternal   () const override ;
+
+    public:
+        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
         void setBool(bool boolValue) ;
@@ -1616,6 +1712,9 @@ namespace rexlang {
         TypeDecl *  getExpressionTypeInternal   () const override ;
 
     public:
+        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+
+    public:
         void setIntValue  (int   value) ;
         void setFloatValue(float value) ;
 
@@ -1633,6 +1732,9 @@ namespace rexlang {
         TypeDecl *  getExpressionTypeInternal   () const override ;
 
     public:
+        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+
+    public:
         void setStringLiteral(const TString &literal) ;
 
     public:
@@ -1647,25 +1749,27 @@ namespace rexlang {
     class TranslateUnit : public Node {
     private:
         unsigned int                edition_ = 0;   // 语法版本号
-        std::vector<SourceFile*>    source_file_;   // 资源文件列表（包括全局变量定义、数据结构定义、类模块定义、DLL接口定义、子程序集合、常量资源）
+        std::vector<SourceFile *>   source_files_;  // 资源文件列表（包括全局变量定义、数据结构定义、类模块定义、DLL接口定义、子程序集合、常量资源）
 
         /********************** 符号表需要用到的公共信息 **********************/
 
-        ordered_map<StringRef, TypeDecl *>              global_type_;       /* 全局类型索引表 */
-        ordered_map<StringRef, GlobalVariableDecl *>    global_variables_;  /* 全局变量索引表 */
-        std::set<TString>                               libraries_list_;    /* 支持库引用列表 */
-        ordered_map<StringRef, FunctorDecl*>            functor_declares_;  /* 函数定义表和DLL声明表的合并 */
-        ordered_map<StringRef, ConstDecl *>             consts_declares_;   /* 常量定义索引表 */
+        ordered_map<StringRef, TypeDecl *>              global_type_;       // 全局类型索引表
+        ordered_map<StringRef, GlobalVariableDecl *>    global_variables_;  // 全局变量索引表
+        std::set<TString>                               libraries_list_;    // 支持库引用列表
+        ordered_map<StringRef, FunctorDecl*>            functor_declares_;  // 函数定义表和DLL声明表的合并
+        ordered_map<StringRef, ConstDecl *>             consts_declares_;   // 常量定义索引表
+        ordered_map<StringRef, ProgSetDecl *>           program_sets_;      // 程序集索引表
 
         /****************************************************************/
 
-
-        ordered_map<StringRef, ProgSetDecl *>               program_sets_;          // 程序集索引表
         FunctorDecl *                                       main_entry_ = nullptr;  // 程序入口
         ordered_map<EnumOfBuiltinType, BuiltinTypeDecl *>   builtin_type_map_;      // 内建类型索引
 
+    private:
+        void setMainEnrty(FunctorDecl *functorDecl) ;
+
     public:
-        static const NodeType GetClassId () ;
+        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
         void    appendSourceFile(SourceFile* sourceFile) ;
@@ -1685,11 +1789,11 @@ namespace rexlang {
         ConstDecl *             getConst        (const StringRef &name) const ;
 
     public:
-        void     setSourceEdition(unsigned edition) { assert(edition == 2); edition_ = edition; }
+        void     setSourceEdition(unsigned edition) { edition_ = edition; }
         unsigned getSourceEdition() const           { return edition_; }
 
         const std::set<TString> &getReferenceLibraries () const ;
-
+        FunctorDecl *getMainEntry() const ;
 
     private:
         bool RegistBuiltinType(BuiltinTypeDecl *builtinTypeDecl);
@@ -1714,6 +1818,10 @@ namespace rexlang {
         BuiltinDoubleType *     getDoubleTy     () const ;
 
         TagDecl *findDeclWithNameString(const StringRef &name) const override ;
+
+    public:
+        static const NodeType GetClassId () ;
+
     };
 
     class NodeWarp {

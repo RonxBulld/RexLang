@@ -38,4 +38,33 @@ namespace rexlang {
         return MakeNoErrVal(indexes);
     }
 
+    int MemberVariableDecl::indexOfStruct() {
+        if (index_of_struct_ >= 0) {
+            int tmp = index_of_struct_;
+            assert((index_of_struct_ = -1, tmp == indexOfStruct()));
+            return index_of_struct_;
+        }
+        else {
+            StructureDecl *structure_decl = getParent()->as<StructureDecl>();
+            int index = structure_decl->indexMemberOfThis(this);
+            assert(index >= 0);
+            index_of_struct_ = index;
+            return index;
+        }
+    }
+
+    bool StructureDecl::isMemberOfThis(MemberVariableDecl *memberVariDecl) const {
+        return indexMemberOfThis(memberVariDecl) >= 0;
+    }
+
+    int StructureDecl::indexMemberOfThis(MemberVariableDecl *memberVariDecl) const {
+        int idx = 0;
+        for (auto & member_item : members_) {
+            if (member_item.second == memberVariDecl) {
+                return idx;
+            }
+            idx++;
+        }
+        return -1;
+    }
 }

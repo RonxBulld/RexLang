@@ -195,9 +195,18 @@ namespace rexlang {
     bool ParameterDecl::shouldBeReference() const {
              if (this->is_reference_)                   { return true; }
         else if (this->isArray())                       { return true; }
-        else if (this->getTypeDecl()->isStringType())   { return true; }
-        else if (this->getTypeDecl()->isDataSetType())  { return true; }
-        else if (this->getTypeDecl()->isStructType())   { return true; }
+        else if (this->evalValType()->isStringType())   { return true; }
+        else if (this->evalValType()->isDataSetType())  { return true; }
+        else if (this->evalValType()->isStructType())   { return true; }
+        else                                            { return false; }
+    }
+
+    bool MemberVariableDecl::shouldBeReference() const {
+             if (this->is_reference_)                   { return true; }
+        else if (this->evalValType()->isArray())        { return true; }
+        else if (this->evalValType()->isStringType())   { return true; }
+        else if (this->evalValType()->isDataSetType())  { return true; }
+        else if (this->evalValType()->isStructType())   { return true; }
         else                                            { return false; }
     }
 

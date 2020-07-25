@@ -71,7 +71,6 @@ namespace rexlang {
              if (TypeDecl *          type    = getType      (name)) { return type;    }
         else if (GlobalVariableDecl *gvari   = getGlobalVari(name)) { return gvari;   }
         else if (FunctorDecl *       functor = getFunctor   (name)) { return functor; }
-        else if (ConstDecl *         constv  = getConst     (name)) { return constv;  }
         else { return nullptr; }
     }
 }

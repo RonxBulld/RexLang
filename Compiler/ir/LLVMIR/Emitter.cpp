@@ -296,7 +296,7 @@ namespace rexlang {
 
         // 文件变量
 
-        for (auto &file_item : translateUnit->source_file_) {
+        for (auto &file_item : translateUnit->source_files_) {
             if (ProgramSetFile *program_set_file = file_item->as<ProgramSetFile>()) {
 //                RexDbgMgr.GetOrCreateDICompileUnit(program_set_file);
                 for (auto &prog_vari_item : program_set_file->program_set_declares_->file_static_variables_) {

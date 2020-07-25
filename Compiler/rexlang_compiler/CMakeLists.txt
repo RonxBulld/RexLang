@@ -36,16 +36,7 @@ IF(EXISTS ${PROJECT_SOURCE_DIR}/rexLang.g4)
             )
 ENDIF()
 
-#SET(SematicAnalysis-Src
-#        sematic_analysis/SematicAnalysis.cpp
-#        sematic_analysis/SematicAnalysis.h
-#        sematic_analysis/SematicAnalysisContext.cpp
-#        sematic_analysis/SematicAnalysisContext.h
-#        sematic_analysis/SematicAnalysisUtils.cpp
-#        sematic_analysis/SematicAnalysisTypeAssert.cpp
-#        sematic_analysis/SematicAnalysisNameMangle.cpp
-#        sematic_analysis/SematicAnalysisNameMangle.h
-#        )
+ADD_SUBDIRECTORY(sematic_analysis)
 
 SET(Utilities-Src
         utilities/Diagnostic.cpp
