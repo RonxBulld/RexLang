@@ -16,6 +16,7 @@ digraph G {
 	"MemberVariableDecl" -> "VariableDecl"
 	"FileVariableDecl" -> "VariableDecl"
 	"LocalVariableDecl" -> "VariableDecl"
+	"ConstDecl" -> "TagDecl"
 	"TypeDecl" -> "TagDecl"
 	"VariTypeDecl"->"TypeDecl"
 	"BuiltinTypeDecl" -> "VariTypeDecl"

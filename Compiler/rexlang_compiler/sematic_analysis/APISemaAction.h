@@ -20,7 +20,9 @@ namespace rexlang {
             APISemaAction() ;
 
         public:
+            // 判断是否需要执行动作
             virtual bool need(const APICommandDecl *apiCommandDecl, SemaContext &semaCtx) const = 0;
+            // 执行动作
             virtual bool doAction(APICommandDecl *apiCommandDecl, SemaContext &semaCtx) = 0;
         };
 

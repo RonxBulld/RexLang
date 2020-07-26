@@ -313,6 +313,13 @@ namespace rexlang {
     }
 
     /***************************************************
+     * LoopControlStmt
+     ***************************************************/
+
+    void           LoopControlStmt::setControlledLoop(LoopStatement *loopStatement) { controlled_loop_ = loopStatement; }
+    LoopStatement *LoopControlStmt::getControlledLoop() const                       { return controlled_loop_; }
+
+    /***************************************************
      * IfStmt
      ***************************************************/
 
@@ -333,7 +340,11 @@ namespace rexlang {
 
     void LoopStatement::setLoopBody(Statement *loopBody) {
         loop_body_ = loopBody;
-        setChild(loopBody);
+        setChild(loop_body_);
+    }
+
+    Statement * LoopStatement::getLoopBody() const {
+        return loop_body_;
     }
 
     /***************************************************
@@ -343,6 +354,10 @@ namespace rexlang {
     void WhileStmt::setLoopCondition(Expression *condition) {
         condition_ = condition;
         setChild(condition);
+    }
+
+    Expression * WhileStmt::getLoopCondition() const {
+        return condition_;
     }
 
     /***************************************************
@@ -372,6 +387,8 @@ namespace rexlang {
      ***************************************************/
 
     void ReturnStmt::setReturnValue(Expression *returnValue) { return_value_ = returnValue; setChild(returnValue); }
+
+    Expression * ReturnStmt::getReturnValue() const { return return_value_; }
 
     /***************************************************
      * FunctionCall

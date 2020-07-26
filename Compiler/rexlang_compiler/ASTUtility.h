@@ -6,21 +6,20 @@
 #define REXLANG_ASTUTILITY_H
 
 #include "NodeDecl.h"
-#include "../../lite_util/ErrOr.h"
-#include "sematic_analysis/SematicAnalysisContext.h"
+#include "rtti.h"
 
 namespace rexlang {
 
-    class ASTUtility {
-    public:
-        static void FixNodeParent(Node *root);
+    namespace utility {
+
+        void FixNodeParent(Node *root);
 
         template <typename Ty, typename = typename std::enable_if_t<std::is_base_of_v<Node, Ty>>>
         static Ty *FindSpecifyTypeParent(Node *base) {
-            while (base && !base->is<Ty>()) {
+            while (base && !rtti::dyn_cast<Ty>(base)) {
                 base = base->getParent();
             }
-            return base->as<Ty>();
+            return rtti::dyn_cast<Ty>(base);
         }
 
     };

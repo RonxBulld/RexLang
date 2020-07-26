@@ -3,9 +3,11 @@
 //
 
 #include "../NodeDecl.h"
+#include "../rtti.h"
 #include "SemaContext.h"
 #include "APISemaAction.h"
 #include "SemaCFG.h"
+#include "../ASTUtility.h"
 
 template <typename MapTy>
 void SemaNamedMap(MapTy &namedMap, rexlang::SemaContext &semaCtx) {
@@ -38,6 +40,29 @@ namespace rexlang {
         return implicit_local_vari;
     }
 
+    TypeDecl *semaExprAndRetType(Expression *expr, SemaContext &semaCtx) {
+        if (expr) {
+            expr->sematicAnalysisInternal(semaCtx);
+            return expr->getExpressionType();
+        }
+        else {
+            return nullptr;
+        }
+    }
+
+    template <bool (TypeDecl::*pmf)() const>
+    bool semaExprAndCheckTypeFeature(Expression *expr, SemaContext &semaCtx) {
+        if (TypeDecl *ty = semaExprAndRetType(expr, semaCtx)) {
+            return (ty->*pmf)();
+        }
+        else {
+            return false;
+        }
+    }
+
+    bool semaExprAndIsInt   (Expression *expr, SemaContext &semaCtx) { return semaExprAndCheckTypeFeature<&TypeDecl::isIntegerClass>(expr, semaCtx); }
+    bool semaExprAndIsBoolEx(Expression *expr, SemaContext &semaCtx) { return semaExprAndCheckTypeFeature<&TypeDecl::isExtendBooleanType>(expr, semaCtx); }
+
     template <typename Ptr>
     void clarifyNamedType(Ptr & typePtr, const StringRef &typeName, Node *in) {
         if (typePtr) {
@@ -52,6 +77,10 @@ namespace rexlang {
     void Node::sematicAnalysisInternal(SemaContext &semaCtx) {
         assert(false);
     }
+
+    /********************************************************
+     * TranslateUnit
+     ********************************************************/
 
     void TranslateUnit::sematicAnalysisInternal(SemaContext &semaCtx) {
         semaCtx.setTranslateUnit(getTranslateUnit());
@@ -74,9 +103,14 @@ namespace rexlang {
         // TODO: 检查所有父节点指针是否被正确设置
     }
 
+    /********************************************************
+     * SourceFile
+     ********************************************************/
+
     void SourceFile::sematicAnalysisInternal(SemaContext &semaCtx) {
         registResourceTo(semaCtx.getTranslateUnit());
     }
+
     void ProgramSetFile::sematicAnalysisInternal(SemaContext &semaCtx) {
         SourceFile::sematicAnalysisInternal(semaCtx);
 
@@ -84,30 +118,45 @@ namespace rexlang {
             program_set_declares_->sematicAnalysisInternal(semaCtx);
         }
     }
+
     void GlobalVariableFile::sematicAnalysisInternal(SemaContext &semaCtx) {
         SourceFile::sematicAnalysisInternal(semaCtx);
         SemaNamedMap(global_variable_map_, semaCtx);
     }
+
     void DataStructureFile::sematicAnalysisInternal(SemaContext &semaCtx) {
         SourceFile::sematicAnalysisInternal(semaCtx);
         SemaNamedMap(structure_decl_map_, semaCtx);
     }
+
     void APIDeclareFile::sematicAnalysisInternal(SemaContext &semaCtx) {
         SourceFile::sematicAnalysisInternal(semaCtx);
         SemaNamedMap(api_declares_, semaCtx);
     }
+
     void ConstDeclareFile::sematicAnalysisInternal(SemaContext &semaCtx) {
         SourceFile::sematicAnalysisInternal(semaCtx);
         SemaNamedMap(consts_declares_, semaCtx);
     }
 
-    void Decl::sematicAnalysisInternal(SemaContext &semaCtx) {}
+    /********************************************************
+     * Decl
+     ********************************************************/
 
-    void TagDecl::sematicAnalysisInternal(SemaContext &semaCtx) {}
+    void Decl::sematicAnalysisInternal(SemaContext &semaCtx) {
+    }
 
-    void TypeDecl::sematicAnalysisInternal(SemaContext &semaCtx) {}
+    void TagDecl::sematicAnalysisInternal(SemaContext &semaCtx) {
+        Decl::sematicAnalysisInternal(semaCtx);
+    }
 
-    void VariTypeDecl::sematicAnalysisInternal(SemaContext &semaCtx) {}
+    void TypeDecl::sematicAnalysisInternal(SemaContext &semaCtx) {
+        TagDecl::sematicAnalysisInternal(semaCtx);
+    }
+
+    void VariTypeDecl::sematicAnalysisInternal(SemaContext &semaCtx) {
+        TypeDecl::sematicAnalysisInternal(semaCtx);
+    }
 
     void StructureDecl::sematicAnalysisInternal(SemaContext &semaCtx) {
         VariTypeDecl::sematicAnalysisInternal(semaCtx);
@@ -118,11 +167,21 @@ namespace rexlang {
         VariTypeDecl::sematicAnalysisInternal(semaCtx);
     }
 
-    void ArrayDecl::sematicAnalysisInternal(SemaContext &semaCtx) {}
+    void ArrayDecl::sematicAnalysisInternal(SemaContext &semaCtx) {
+        VariTypeDecl::sematicAnalysisInternal(semaCtx);
 
-    void ConstDecl::sematicAnalysisInternal(SemaContext &semaCtx) {}
+        assert(base_type_);
+    }
+
+    void ConstDecl::sematicAnalysisInternal(SemaContext &semaCtx) {
+        TagDecl::sematicAnalysisInternal(semaCtx);
+
+        assert(getValue());
+    }
 
     void BaseVariDecl::sematicAnalysisInternal(SemaContext &semaCtx) {
+        TagDecl::sematicAnalysisInternal(semaCtx);
+
         // 明确类型指针
         clarifyNamedType(vari_type_decl_, type_name_.string_, this);
     }
@@ -140,10 +199,17 @@ namespace rexlang {
     void GlobalVariableDecl::sematicAnalysisInternal(SemaContext &semaCtx) { VariableDecl::sematicAnalysisInternal(semaCtx); }
     void LocalVariableDecl ::sematicAnalysisInternal(SemaContext &semaCtx) { VariableDecl::sematicAnalysisInternal(semaCtx); }
     void FileVariableDecl  ::sematicAnalysisInternal(SemaContext &semaCtx) { VariableDecl::sematicAnalysisInternal(semaCtx); }
+    void MemberVariableDecl::sematicAnalysisInternal(SemaContext &semaCtx) { VariableDecl::sematicAnalysisInternal(semaCtx); }
 
     void ParameterDecl     ::sematicAnalysisInternal(SemaContext &semaCtx) { BaseVariDecl::sematicAnalysisInternal(semaCtx); }
 
-    void MemberVariableDecl::sematicAnalysisInternal(SemaContext &semaCtx) {}
+    void ProgSetDecl       ::sematicAnalysisInternal(SemaContext &semaCtx) {
+        TagDecl::sematicAnalysisInternal(semaCtx);
+
+        SemaNamedMap(file_static_variables_,  semaCtx);
+        SemaNamedMap(function_decls_,         semaCtx);
+        SemaNamedMap(signature_of_functions_, semaCtx);
+    }
 
     void FunctorDecl::sematicAnalysisInternal(SemaContext &semaCtx) {
         TypeDecl::sematicAnalysisInternal(semaCtx);
@@ -170,8 +236,6 @@ namespace rexlang {
         }
     }
 
-    void ProgSetDecl::sematicAnalysisInternal(SemaContext &semaCtx) {}
-
     void APICommandDecl::sematicAnalysisInternal(SemaContext &semaCtx) {
         FunctorDecl::sematicAnalysisInternal(semaCtx);
 
@@ -179,55 +243,236 @@ namespace rexlang {
         sa::ExecuteAllAPISemaAction(this, semaCtx);
     }
 
-    void Statement::sematicAnalysisInternal(SemaContext &semaCtx) {}
+    /********************************************************
+     * Statement
+     ********************************************************/
 
-    void IfStmt::sematicAnalysisInternal(SemaContext &semaCtx) {}
+    void Statement::sematicAnalysisInternal(SemaContext &semaCtx) {
+    }
 
-    void StatementBlock::sematicAnalysisInternal(SemaContext &semaCtx) {}
+    void IfStmt::sematicAnalysisInternal(SemaContext &semaCtx) {
+        Statement::sematicAnalysisInternal(semaCtx);
 
-    void LoopStatement::sematicAnalysisInternal(SemaContext &semaCtx) {}
+        // 检查是否有分支
+        if (branchesCount() == 0) {
+            assert(false);
+            return;
+        }
 
-    void WhileStmt::sematicAnalysisInternal(SemaContext &semaCtx) {}
+        // 检查条件语句的条件表达式是否为扩展布尔类型
+        for (size_t idx = 0, count = branchesCount(); idx < count; idx++) {
+            Expression *condition = conditionAt(idx);       assert(condition);
+            Statement *branch_body = branchBodyAt(idx);     assert(branch_body);
 
-    void RangeForStmt::sematicAnalysisInternal(SemaContext &semaCtx) {}
+            if (semaExprAndIsBoolEx(condition, semaCtx)) { assert(false); return; }
+            branch_body->sematicAnalysisInternal(semaCtx);
+        }
+        if (defaultBody()) {
+            defaultBody()->sematicAnalysisInternal(semaCtx);
+        }
+    }
 
-    void ForStmt::sematicAnalysisInternal(SemaContext &semaCtx) {}
+    void StatementBlock::sematicAnalysisInternal(SemaContext &semaCtx) {
+        Statement::sematicAnalysisInternal(semaCtx);
 
-    void DoWhileStmt::sematicAnalysisInternal(SemaContext &semaCtx) {}
+        // 直接遍历列表进行检查
+        for (Statement* stmt : getStatements()) {
+            stmt->sematicAnalysisInternal(semaCtx);
+        }
+    }
 
-    void AssignStmt::sematicAnalysisInternal(SemaContext &semaCtx) {}
+    void LoopStatement::sematicAnalysisInternal(SemaContext &semaCtx) {
+        Statement::sematicAnalysisInternal(semaCtx);
 
-    void ControlStmt::sematicAnalysisInternal(SemaContext &semaCtx) {}
+        if (Statement *loop_body = getLoopBody()) {
+            loop_body->sematicAnalysisInternal(semaCtx);
+        }
+    }
 
-    void LoopControlStmt::sematicAnalysisInternal(SemaContext &semaCtx) {}
+    void WhileStmt::sematicAnalysisInternal(SemaContext &semaCtx) {
+        LoopStatement::sematicAnalysisInternal(semaCtx);
 
-    void ContinueStmt::sematicAnalysisInternal(SemaContext &semaCtx) {}
+        // 检查循环条件语句的条件表达式是否为扩展布尔类型
+        if (semaExprAndIsBoolEx(getLoopCondition(), semaCtx)) { assert(false); return; }
+    }
 
-    void BreakStmt::sematicAnalysisInternal(SemaContext &semaCtx) {}
+    void RangeForStmt::sematicAnalysisInternal(SemaContext &semaCtx) {
+        LoopStatement::sematicAnalysisInternal(semaCtx);
 
-    void ReturnStmt::sematicAnalysisInternal(SemaContext &semaCtx) {}
+        // 检查次数表达式类型是否为整数族
+        Expression *range_expr = getRangeSize();
+        if (!semaExprAndIsInt(range_expr, semaCtx)) { assert(false); return; }
 
-    void ExitStmt::sematicAnalysisInternal(SemaContext &semaCtx) {}
+        // 如果循环变量存在则检查变量类型是否为整数族
+        if (HierarchyIdentifier *loop_vari = getLoopVari()) {
+            if (!semaExprAndIsInt(loop_vari, semaCtx)) { assert(false); return; }
+        }
+    }
 
-    void Expression::sematicAnalysisInternal(SemaContext &semaCtx) {}
+    void ForStmt::sematicAnalysisInternal(SemaContext &semaCtx) {
+        LoopStatement::sematicAnalysisInternal(semaCtx);
 
-    void HierarchyIdentifier::sematicAnalysisInternal(SemaContext &semaCtx) {}
+        // 检查初值表达式、终值表达式、步长表达式类型是否为整数族
+        if (!semaExprAndIsInt(getStartValue(), semaCtx)) { assert(false); return; }
+        if (!semaExprAndIsInt(getStopValue(),  semaCtx)) { assert(false); return; }
+        if (!semaExprAndIsInt(getStepValue(),  semaCtx)) { assert(false); return; }
 
-    void NameComponent::sematicAnalysisInternal(SemaContext &semaCtx) {}
+        // 检查循环变量
+        if (HierarchyIdentifier *loop_vari = getLoopVari()) {
+            if (!semaExprAndIsInt(loop_vari, semaCtx)) { assert(false); return; }
+        }
+    }
 
-    void Identifier::sematicAnalysisInternal(SemaContext &semaCtx) {}
+    void DoWhileStmt::sematicAnalysisInternal(SemaContext &semaCtx) {
+        LoopStatement::sematicAnalysisInternal(semaCtx);
 
-    void ArrayIndex::sematicAnalysisInternal(SemaContext &semaCtx) {}
+        // 检查循环条件语句的条件表达式是否为扩展布尔类型
+        if (!semaExprAndIsBoolEx(getCondition(), semaCtx)) { assert(false); return; }
+    }
 
-    void FunctionCall::sematicAnalysisInternal(SemaContext &semaCtx) {}
+    void AssignStmt::sematicAnalysisInternal(SemaContext &semaCtx) {
+        Statement::sematicAnalysisInternal(semaCtx);
 
-    void UnaryExpression::sematicAnalysisInternal(SemaContext &semaCtx) {}
+        // 检查赋值语句左右子式类型是否匹配或兼容
 
-    void BinaryExpression::sematicAnalysisInternal(SemaContext &semaCtx) {}
+        TypeDecl *lhs_type = semaExprAndRetType(getLHS(), semaCtx);
+        if (!lhs_type) { assert(false); return; }
 
-    void _OperatorExpression::sematicAnalysisInternal(SemaContext &semaCtx) {}
+        TypeDecl *rhs_type = semaExprAndRetType(getRHS(), semaCtx);
+        if (!rhs_type) { assert(false); return; }
 
-    void TypeConvert::sematicAnalysisInternal(SemaContext &semaCtx) {}
+        if (!lhs_type->isAssginValidFrom(rhs_type)) {
+            assert(false);
+            return;
+        }
+
+        if (Expression *casted = getRHS()->castTo(lhs_type)) {
+            setRHS(casted);
+        }
+        else {
+            assert(nullptr);
+        }
+    }
+
+    void ControlStmt::sematicAnalysisInternal(SemaContext &semaCtx) {
+        Statement::sematicAnalysisInternal(semaCtx);
+    }
+
+    void LoopControlStmt::sematicAnalysisInternal(SemaContext &semaCtx) {
+        ControlStmt::sematicAnalysisInternal(semaCtx);
+
+        // 检查是否在循环内
+
+        setControlledLoop(utility::FindSpecifyTypeParent<LoopStatement>(this));
+        assert(getControlledLoop());
+
+    }
+
+    void ContinueStmt::sematicAnalysisInternal(SemaContext &semaCtx) {
+        LoopControlStmt::sematicAnalysisInternal(semaCtx);
+    }
+
+    void BreakStmt::sematicAnalysisInternal(SemaContext &semaCtx) {
+        LoopControlStmt::sematicAnalysisInternal(semaCtx);
+    }
+
+    void ReturnStmt::sematicAnalysisInternal(SemaContext &semaCtx) {
+        ControlStmt::sematicAnalysisInternal(semaCtx);
+
+        // 检查是否在函数定义内
+
+        FunctionDecl *function_decl = utility::FindSpecifyTypeParent<FunctionDecl>(this);
+        if (function_decl == nullptr) {
+            assert(false);
+            return;
+        }
+
+        // 检查返回值表达式类型是否和函数返回值匹配
+
+        // 首先检查是否存在
+
+        Expression *return_value = getReturnValue();
+
+        if ((function_decl->getReturnType() != nullptr) ^ (return_value != nullptr)) {
+            assert(false);
+            return;
+        }
+
+        // 然后检查匹配问题
+
+        if (return_value) {
+            TypeDecl *act_ret_type = semaExprAndRetType(return_value, semaCtx);
+            if (!act_ret_type) { assert(false); return; }
+
+            VariTypeDecl *decl_ret_type = rtti::dyn_cast<VariTypeDecl>(function_decl->getReturnType());
+            if (!decl_ret_type) { assert(false); return; }
+
+            if (decl_ret_type->isAssginValidFrom(act_ret_type)) {
+                return_value = return_value->castTo(decl_ret_type);
+                if (return_value) {
+                    setReturnValue(return_value);
+                }
+                else {
+                    assert(false);
+                }
+            }
+            else {
+                assert(false);
+            }
+        }
+    }
+
+    void ExitStmt::sematicAnalysisInternal(SemaContext &semaCtx) {
+        ControlStmt::sematicAnalysisInternal(semaCtx);
+    }
+
+    /********************************************************
+     * Expression
+     ********************************************************/
+
+    void Expression::sematicAnalysisInternal(SemaContext &semaCtx) {
+        Statement::sematicAnalysisInternal(semaCtx);
+
+        CheckExpression();
+    }
+
+    void HierarchyIdentifier::sematicAnalysisInternal(SemaContext &semaCtx) {
+        Expression::sematicAnalysisInternal(semaCtx);
+
+        SemaVector(name_components_, semaCtx);
+    }
+
+    void NameComponent::sematicAnalysisInternal(SemaContext &semaCtx) {
+        Expression::sematicAnalysisInternal(semaCtx);
+    }
+
+    void Identifier::sematicAnalysisInternal(SemaContext &semaCtx) {
+        NameComponent::sematicAnalysisInternal(semaCtx);
+    }
+
+    void ArrayIndex::sematicAnalysisInternal(SemaContext &semaCtx) {
+        NameComponent::sematicAnalysisInternal(semaCtx);
+    }
+
+    void FunctionCall::sematicAnalysisInternal(SemaContext &semaCtx) {
+        NameComponent::sematicAnalysisInternal(semaCtx);
+    }
+
+    void UnaryExpression::sematicAnalysisInternal(SemaContext &semaCtx) {
+        _OperatorExpression::sematicAnalysisInternal(semaCtx);
+    }
+
+    void BinaryExpression::sematicAnalysisInternal(SemaContext &semaCtx) {
+        _OperatorExpression::sematicAnalysisInternal(semaCtx);
+    }
+
+    void _OperatorExpression::sematicAnalysisInternal(SemaContext &semaCtx) {
+        Expression::sematicAnalysisInternal(semaCtx);
+    }
+
+    void TypeConvert::sematicAnalysisInternal(SemaContext &semaCtx) {
+        Expression::sematicAnalysisInternal(semaCtx);
+    }
 
     void Value                ::sematicAnalysisInternal(SemaContext &semaCtx) { Expression::sematicAnalysisInternal(semaCtx); }
     void FuncAddrExpression   ::sematicAnalysisInternal(SemaContext &semaCtx) { Expression::sematicAnalysisInternal(semaCtx); }

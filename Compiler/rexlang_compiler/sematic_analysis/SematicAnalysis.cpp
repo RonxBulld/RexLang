@@ -14,232 +14,6 @@
 #include "APISemaActions/APIArguPackAction.h"
 
 namespace rexlang {
-    bool SematicAnalysis::CheckStatementsAndExpression(Statement *statement) {
-        if (statement == nullptr) {
-            return true;
-        }
-        if (IfStmt* if_stmt = statement->as<IfStmt>()) {
-
-            // 检查是否有分支
-
-            if (if_stmt->switches_.empty()) {
-                assert(false);
-                return false;
-            }
-
-            // 检查条件语句的条件表达式是否为扩展布尔类型
-
-            for (auto & branch : if_stmt->switches_) {
-                TypeDecl* switch_expr_type = this->CheckExpression(branch.first);
-                if (switch_expr_type->IsExternBooleanType() == false) {
-                    assert(false);
-                    return false;
-                }
-
-                if (this->CheckStatementsAndExpression(branch.second) ==  false) {
-                    return false;
-                }
-            }
-            if (if_stmt->default_statement_) {
-                if (this->CheckStatementsAndExpression(if_stmt->default_statement_) ==  false) {
-                    return false;
-                }
-            }
-            return true;
-
-        } else if (StatementBlock* statement_list = statement->as<StatementBlock>()) {
-
-            // 直接遍历列表进行检查
-
-            for (Statement* stmt : statement_list->statements_) {
-                if (this->CheckStatementsAndExpression(stmt) == false) {
-                    return false;
-                }
-            }
-            return true;
-
-        } else if (WhileStmt* while_stmt = statement->as<WhileStmt>()) {
-
-            // 检查循环条件语句的条件表达式是否为扩展布尔类型
-
-            TypeDecl* while_expr_type = this->CheckExpression(while_stmt->condition_);
-            if (while_expr_type->IsExternBooleanType() == false) {
-                assert(false);
-                return false;
-            }
-
-            if (this->CheckStatementsAndExpression(while_stmt->loop_body_) == false) {
-                assert(false);
-                return false;
-            }
-            return true;
-
-        } else if (LoopStatement* loop_statement = statement->as<LoopStatement>()) {
-            return this->CheckLoopStatement(loop_statement);
-
-        } else if (AssignStmt* assign_stmt = statement->as<AssignStmt>()) {
-
-            // 检查赋值语句左右子式类型是否匹配或兼容
-
-            TypeDecl* lhs_type = this->CheckExpression(assign_stmt->lhs_);
-            TypeDecl* rhs_type = this->CheckExpression(assign_stmt->rhs_);
-            SetupHierarchyReferenceType(assign_stmt->lhs_, ExprUsage::kAsLeftValue);
-            ErrOr<Expression*> implicit_convert = this->MakeImplicitConvertIfNeccessary(lhs_type, assign_stmt->rhs_);
-            if (implicit_convert.HadError()) { return false; }
-            assign_stmt->rhs_ = implicit_convert.Value();
-            assign_stmt->rhs_->parent_node_ = assign_stmt;
-            return true;
-
-        } else if (Expression *expression = statement->as<Expression>()) {
-            return this->CheckExpression(expression) != nullptr;
-
-        } else if (LoopControlStmt *loop_control_stmt = statement->as<LoopControlStmt>()) {
-
-            // 检查是否在循环内
-
-            loop_control_stmt->loop_statement_ = ASTUtility::FindSpecifyTypeParent<LoopStatement>(loop_control_stmt);
-            return loop_control_stmt->loop_statement_ != nullptr;
-
-        } else if (ReturnStmt *return_stmt = statement->as<ReturnStmt>()) {
-
-            // 检查是否在函数定义内
-
-            FunctionDecl *function_decl = ASTUtility::FindSpecifyTypeParent<FunctionDecl>(return_stmt);
-            if (function_decl == nullptr) {
-                assert(false);
-                return false;
-            }
-
-            // 检查返回值表达式类型是否和函数返回值匹配
-
-            // 首先检查是否存在
-
-            if ((function_decl->return_type_ != nullptr) ^ (return_stmt->return_value_ != nullptr)) {
-                assert(false);
-                return false;
-            }
-
-            // 然后检查匹配问题
-
-            if (return_stmt->return_value_) {
-                TypeDecl *act_ret_type = this->CheckExpression(return_stmt->return_value_);
-                TypeDecl *decl_ret_type = function_decl->return_type_;
-                ErrOr<Expression*> implicit_convert = this->MakeImplicitConvertIfNeccessary(decl_ret_type, return_stmt->return_value_);
-                if (implicit_convert.NoError()) {
-                    return_stmt->return_value_ = implicit_convert.Value();
-                    return true;
-                } else {
-                    assert(false);
-                    return false;
-                }
-            }
-            return true;
-
-        } else if (ExitStmt *exit_stmt = statement->as<ExitStmt>()) {
-            (void) exit_stmt;
-
-        } else {
-            assert(false);
-            return false;
-        }
-
-        return true;
-    }
-
-    bool SematicAnalysis::CheckIfExprTypeIsIntegerClass(Expression *expression) {
-        if (expression == nullptr) {
-            assert(false);
-            return false;
-        }
-        TypeDecl *expr_type = this->CheckExpression(expression);
-        if (expr_type == nullptr) {
-            assert(false);
-            return false;
-        }
-        bool is_integer_class = expr_type->IsIntegerClass();
-        if (is_integer_class == false) {
-            assert(false);
-            return false;
-        }
-        return true;
-    }
-
-    bool SematicAnalysis::CheckLoopStatement(LoopStatement *loopStatement) {
-        if (RangeForStmt* range_for_stmt = loopStatement->as<RangeForStmt>()) {
-            // 检查次数表达式类型是否为整数族
-            if (this->CheckIfExprTypeIsIntegerClass(range_for_stmt->range_size_) == false) { assert(false); return false; }
-            // 如果循环变量存在则检查变量类型是否为整数族
-            if (range_for_stmt->loop_vari_) {
-                TypeDecl *loop_vari_type = this->GetHierarchyIdentifierQualifiedType(range_for_stmt->loop_vari_);
-                if (loop_vari_type->IsIntegerClass() == false) {
-                    assert(false);
-                    return false;
-                }
-            }
-        } else if (ForStmt* for_stmt = loopStatement->as<ForStmt>()) {
-            // 检查初值表达式、终值表达式、步长表达式类型是否为整数族
-            if (this->CheckIfExprTypeIsIntegerClass(for_stmt->start_value_) == false) { assert(false); return false; }
-            if (this->CheckIfExprTypeIsIntegerClass(for_stmt->stop_value_) == false) { assert(false); return false; }
-            if (this->CheckIfExprTypeIsIntegerClass(for_stmt->step_value_) == false) { assert(false); return false; }
-            if (for_stmt->loop_vari_) {
-                // 如果循环变量存在则检查变量类型是否为整数族
-                TypeDecl *loop_vari_type = this->GetHierarchyIdentifierQualifiedType(for_stmt->loop_vari_);
-                if (loop_vari_type->IsIntegerClass() == false) {
-                    assert(false);
-                    return false;
-                }
-            } else {
-                // 如果循环变量不存在则隐式创建循环变量
-//                FunctionDecl *function_decl = ASTUtility::FindSpecifyTypeParent<FunctionDecl>(loopStatement);
-//                assert(function_decl);
-//                StringRef reference_name = loopStatement->ast_context_->createString("implicit_loop_vari");
-//                ASTContext *ast_context = loopStatement->ast_context_;
-//                LocalVariableDecl *implicit_lv_decl = this->InsertLocalVariable(reference_name, ast_context, function_decl);
-//                for_stmt->loop_vari_ = CreateNode<HierarchyIdentifier>(ast_context);
-//                Identifier *implicit_lv = CreateNode<Identifier>(ast_context);
-//                implicit_lv->name_.string_ = implicit_lv_decl->name_.string_;
-//                for_stmt->loop_vari_->name_components_.push_back(implicit_lv);
-//                for_stmt->loop_vari_->qualified_type_ = implicit_lv_decl->type_decl_ptr_;
-            }
-        } else if (DoWhileStmt* do_while_stmt = loopStatement->as<DoWhileStmt>()) {
-            // 检查条件表达式类型是否为布尔类型
-            TypeDecl *condition_expr_type = this->CheckExpression(do_while_stmt->conditon_);
-            bool is_boolean = condition_expr_type->IsBoolType();
-            if (is_boolean == false) {
-                assert(false);
-                return false;
-            }
-        } else {
-            assert(false);
-            return false;
-        }
-        this->CheckStatementsAndExpression(loopStatement->loop_body_);
-        return true;
-    }
-
-    TypeDecl *SematicAnalysis::CheckExpression(Expression *expression) {
-        return expression->CheckExpression();
-    }
-
-    TypeDecl *Expression::CheckExpression() {
-        this->expression_type_ = this->CheckExpressionInternal();
-        return this->expression_type_;
-    }
-
-    TypeDecl *HierarchyIdentifier::CheckExpressionInternal() {
-        SetupHierarchyReferenceType(this, ExprUsage::kAsRightValue);
-
-        // 可能是直接名称、函数引用、数组组合的序列
-
-        TypeDecl *qualified_type = this->GetHierarchyIdentifierQualifiedType(this);
-        if (qualified_type == nullptr) {
-            assert(false);
-            return nullptr;
-        }
-        return qualified_type;
-
-    }
-
     TypeDecl *TypeConvert::CheckExpressionInternal() {
         TypeDecl *expr_type = this->CheckExpression(type_convert->from_expression_);
         type_convert->source_type_ = expr_type;
@@ -393,22 +167,22 @@ namespace rexlang {
 
     ErrOr<Expression *> SematicAnalysis::MakeImplicitConvertIfNeccessary(TypeDecl *targetType, Expression *convertExpression) {
         // 先判断赋值性
-        if (!this->IsAssignableBetweenType(targetType, convertExpression->getExpressionTy())) {
+        if (!this->IsAssignableBetweenType(targetType, convertExpression->getExpressionType())) {
             // 两边类型不可赋值
             return ErrOr<Expression*>::CreateError(1);
         }
         // 再判断是否转换
-        if (convertExpression->getExpressionTy() == targetType) {
+        if (convertExpression->getExpressionType() == targetType) {
             // 类型一致，无需转换
             return MakeNoErrVal(convertExpression);
-        } else if (!targetType->is<BuiltinTypeDecl>() || !convertExpression->getExpressionTy()->is<BuiltinTypeDecl>()) {
+        } else if (!targetType->is<BuiltinTypeDecl>() || !convertExpression->getExpressionType()->is<BuiltinTypeDecl>()) {
             // 其中有非内置类型，无法转换
             return MakeNoErrVal(convertExpression);
         } else {
             TypeConvert *type_convert = CreateNode<TypeConvert>(convertExpression->ast_context_);
             type_convert->from_expression_ = convertExpression;
-            type_convert->getExpressionTy() = targetType;
-            type_convert->source_type_ = convertExpression->getExpressionTy();
+            type_convert->getExpressionType() = targetType;
+            type_convert->source_type_ = convertExpression->getExpressionType();
             type_convert->target_type_ = targetType;
             type_convert->parent_node_ = convertExpression;
             convertExpression->parent_node_ = type_convert;
@@ -533,7 +307,7 @@ namespace rexlang {
             /*else*/ if (arguments[idx] != nullptr) {
 
                 // 5.4. 如果形参不具备上述属性
-                TypeDecl *argu_type = arguments[idx]->getExpressionTy();
+                TypeDecl *argu_type = arguments[idx]->getExpressionType();
                 assert(argu_type);
                 TypeDecl *param_type = parameters[idx]->vari_type_decl_;
                 ErrOr<Expression*> implicit_convert = this->MakeImplicitConvertIfNeccessary(param_type, arguments[idx]);

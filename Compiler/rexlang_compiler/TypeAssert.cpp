@@ -112,24 +112,26 @@ namespace rexlang {
      * 内置分类的特定类型断言
      **********************************************************/
 
-    bool    VariTypeDecl        :: isVoidType           () const { return false; }
-    bool    VariTypeDecl        :: isCommonType         () const { return false; }
-    bool    VariTypeDecl        :: isCharType           () const { return false; }
-    bool    VariTypeDecl        :: isIntegerType        () const { return false; }
-    bool    VariTypeDecl        :: isFloatType          () const { return false; }
-    bool    VariTypeDecl        :: isBoolType           () const { return false; }
-    bool    VariTypeDecl        :: isStringType         () const { return false; }
-    bool    VariTypeDecl        :: isDataSetType        () const { return false; }
-    bool    VariTypeDecl        :: isShortType          () const { return false; }
-    bool    VariTypeDecl        :: isLongType           () const { return false; }
-    bool    VariTypeDecl        :: isDatetimeType       () const { return false; }
-    bool    VariTypeDecl        :: isFuncPtrType        () const { return false; }
-    bool    VariTypeDecl        :: isDoubleType         () const { return false; }
-    bool    VariTypeDecl        :: isStructType         () const { return false; }
-    bool    VariTypeDecl        :: isExternBooleanType  () const { return false; }
-    bool    VariTypeDecl        :: isNumerical          () const { return false; }
-    bool    VariTypeDecl        :: isIntegerClass       () const { return false; }
-    bool    VariTypeDecl        :: isArray              () const { return false; }
+    bool    TypeDecl            :: isVoidType           () const { return false; }
+    bool    TypeDecl            :: isCommonType         () const { return false; }
+    bool    TypeDecl            :: isCharType           () const { return false; }
+    bool    TypeDecl            :: isIntegerType        () const { return false; }
+    bool    TypeDecl            :: isFloatType          () const { return false; }
+    bool    TypeDecl            :: isBoolType           () const { return false; }
+    bool    TypeDecl            :: isStringType         () const { return false; }
+    bool    TypeDecl            :: isDataSetType        () const { return false; }
+    bool    TypeDecl            :: isShortType          () const { return false; }
+    bool    TypeDecl            :: isLongType           () const { return false; }
+    bool    TypeDecl            :: isDatetimeType       () const { return false; }
+    bool    TypeDecl            :: isFuncPtrType        () const { return false; }
+    bool    TypeDecl            :: isDoubleType         () const { return false; }
+    bool    TypeDecl            :: isStructType         () const { return false; }
+    bool    TypeDecl            :: isExtendBooleanType  () const { return false; }
+    bool    TypeDecl            :: isNumerical          () const { return false; }
+    bool    TypeDecl            :: isIntegerClass       () const { return false; }
+    bool    TypeDecl            :: isArrayType          () const { return false; }
+    bool    TypeDecl            :: isFunctionType       () const { return false; }
+    bool    TypeDecl            :: isAPICommandType     () const { return false; }
 
     bool    BuiltinVoidType     :: isVoidType           () const { return true; }
     bool    BuiltinCommonType   :: isCommonType         () const { return true; }
@@ -145,9 +147,11 @@ namespace rexlang {
     bool    BuiltinFuncPtrType  :: isFuncPtrType        () const { return true; }
     bool    BuiltinDoubleType   :: isDoubleType         () const { return true; }
     bool    StructureDecl       :: isStructType         () const { return true; }
-    bool    ArrayDecl           :: isArray              () const { return true; }
+    bool    ArrayDecl           :: isArrayType          () const { return true; }
+    bool    FunctionDecl        :: isFunctionType       () const { return true; }
+    bool    APICommandDecl      :: isAPICommandType     () const { return true; }
 
-    bool BuiltinTypeDecl::isExternBooleanType() const {
+    bool BuiltinTypeDecl::isExtendBooleanType() const {
         if (this->isBoolType()) { return true; }
         if (this->isNumerical()) { return true; }
         if (this->isFuncPtrType()) { return true; }
@@ -190,11 +194,11 @@ namespace rexlang {
      **********************************************************/
 
     bool     ParameterDecl::isNullable         () const { return is_nullable_; }
-    bool     ParameterDecl::isArray            () const { return is_array_; }
+    bool     ParameterDecl::isArrayType        () const { return is_array_; }
 
     bool ParameterDecl::shouldBeReference() const {
              if (this->is_reference_)                   { return true; }
-        else if (this->isArray())                       { return true; }
+        else if (this->isArrayType())                   { return true; }
         else if (this->evalValType()->isStringType())   { return true; }
         else if (this->evalValType()->isDataSetType())  { return true; }
         else if (this->evalValType()->isStructType())   { return true; }
@@ -203,7 +207,7 @@ namespace rexlang {
 
     bool MemberVariableDecl::shouldBeReference() const {
              if (this->is_reference_)                   { return true; }
-        else if (this->evalValType()->isArray())        { return true; }
+        else if (this->evalValType()->isArrayType())    { return true; }
         else if (this->evalValType()->isStringType())   { return true; }
         else if (this->evalValType()->isDataSetType())  { return true; }
         else if (this->evalValType()->isStructType())   { return true; }
@@ -299,7 +303,7 @@ namespace rexlang {
      * 赋值有效性判定
      **********************************************************/
 
-    bool VariTypeDecl::isAssginFromValid(TypeDecl *fromType) const { return false; }
+    bool VariTypeDecl::isAssginValidFrom(TypeDecl *fromType) const { return false; }
 
     /**********************************************************
      *

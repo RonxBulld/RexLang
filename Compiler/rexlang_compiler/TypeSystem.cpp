@@ -292,7 +292,7 @@ namespace rexlang {
 
     TagDecl * ArrayIndex::EvalBaseNameComponentType() { return getElementTy(); }
     TypeDecl * ArrayIndex::getElementTy() const {
-        TypeDecl *type = getBaseId()->getExpressionTy();
+        TypeDecl *type = getBaseId()->getExpressionType();
         if (VariTypeDecl *vari_type_decl = type->as<VariTypeDecl>()) {
             if (vari_type_decl->isIndexable()) {
                 return vari_type_decl->evalIndexedElementTy();
@@ -312,7 +312,7 @@ namespace rexlang {
      * TypeConvert
      ******************************************/
 
-    TypeDecl * TypeConvert::getSourceType () const { return from_expression_->getExpressionTy(); }
+    TypeDecl * TypeConvert::getSourceType () const { return from_expression_->getExpressionType(); }
     TypeDecl * TypeConvert::getTargetType () const { assert(target_type_); return target_type_; }
 
 }

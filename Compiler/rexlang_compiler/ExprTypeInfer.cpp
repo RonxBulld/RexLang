@@ -6,7 +6,7 @@
 
 namespace rexlang {
 
-    TypeDecl *Expression::getExpressionTy() const {
+    TypeDecl *Expression::getExpressionType() const {
         if (expression_type_) {
             assert(expression_type_ == getExpressionTypeInternal());
             return expression_type_;
@@ -15,8 +15,8 @@ namespace rexlang {
         }
     }
 
-    TypeDecl *Expression::getExpressionTy() {
-        expression_type_ = const_cast<const Expression *>(this)->getExpressionTy();
+    TypeDecl *Expression::getExpressionType() {
+        expression_type_ = const_cast<const Expression *>(this)->getExpressionType();
         return expression_type_;
     }
 
@@ -31,7 +31,7 @@ namespace rexlang {
 
         TypeDecl *type = nullptr;
         for (NameComponent *name_component : name_components_) {
-            type = name_component->getExpressionTy();
+            type = name_component->getExpressionType();
         }
         return type;
     }
@@ -56,7 +56,7 @@ namespace rexlang {
     }
 
     TypeDecl *UnaryExpression::getExpressionTypeInternal ()  const {
-        return operand_value_->getExpressionTy();
+        return operand_value_->getExpressionType();
     }
 
     TypeDecl *BinaryExpression::getExpressionTypeInternal ()  const {

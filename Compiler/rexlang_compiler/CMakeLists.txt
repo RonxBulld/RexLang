@@ -68,7 +68,7 @@ SET(REXCompilerParse-Source
         ASTNodeGetterSetter.cpp
         Symbols.cpp
         ${SematicAnalysis-Src}
-        ExprTypeInfer.cpp)
+        ExprTypeInfer.cpp rtti.cpp rtti.h)
 
 if(NOT CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
     set (flags_1 "-Wno-overloaded-virtual")
