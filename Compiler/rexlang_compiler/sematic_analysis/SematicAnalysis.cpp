@@ -14,39 +14,8 @@
 #include "APISemaActions/APIArguPackAction.h"
 
 namespace rexlang {
-    TypeDecl *TypeConvert::CheckExpressionInternal() {
-        TypeDecl *expr_type = this->CheckExpression(type_convert->from_expression_);
-        type_convert->source_type_ = expr_type;
-
-        // 检查从源类型到目标类型是否可行
-
-        if (!this->IsAssignableBetweenType(type_convert->target_type_, type_convert->source_type_)) {
-            assert(false);
-            return nullptr;
-        }
-        return type_convert->target_type_;
-    }
-
     TypeDecl *FunctionCall::CheckExpressionInternal() {
 
-        // 检查函数实参是否符合形参定义
-
-        std::vector<Expression*> &arguments = function_call->arguments_;
-        FunctorDecl *functor_decl = ASTUtility::GetFunctionDeclare(function_call);
-        if (functor_decl == nullptr) {
-            assert(false);
-            return nullptr;
-        }
-        std::vector<ParameterDecl*> &parameters = functor_decl->parameters_;
-        if (this->CheckIfArgumentMatch(arguments, parameters) == false) {
-            assert(false);
-            return nullptr;
-        }
-
-        // 将函数返回值类型作为返回类型
-
-        assert(functor_decl->return_type_);
-        return functor_decl->return_type_;
     }
 
     VariTypeDecl *UnaryExpression::CheckExpressionInternal() {
@@ -323,10 +292,10 @@ namespace rexlang {
         return true;
     }
 
-    bool FunctionCall::IsArgument(Expression *expr)       const { return IsArgument(const_cast<const Expression *>(expr)); }
-    bool FunctionCall::IsArgument(const Expression *expr) const { return IndexOfArgument(expr) >= 0; }
+    bool FunctionCall::isArgument(Expression *expr)       const { return isArgument(const_cast<const Expression *>(expr)); }
+    bool FunctionCall::isArgument(const Expression *expr) const { return indexOfArgument(expr) >= 0; }
 
-    int FunctionCall::IndexOfArgument(const Expression *expr) const {
+    int FunctionCall::indexOfArgument(const Expression *expr) const {
         for (unsigned idx = 0, count = arguments_.size(); idx < count; ++idx) {
             if (expr == arguments_[idx]) {
                 return idx;
@@ -335,6 +304,6 @@ namespace rexlang {
         return -1;
     }
 
-    int FunctionCall::IndexOfArgument(Expression *expr) const { return IndexOfArgument(const_cast<const Expression *>(expr)); }
+    int FunctionCall::indexOfArgument(Expression *expr) const { return indexOfArgument(const_cast<const Expression *>(expr)); }
 
 }

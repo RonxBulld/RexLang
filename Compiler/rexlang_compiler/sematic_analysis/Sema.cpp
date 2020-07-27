@@ -219,6 +219,7 @@ namespace rexlang {
 
         // 明确参数类型
         SemaVector(parameters_, semaCtx);
+
     }
 
     void FunctionDecl::sematicAnalysisInternal(SemaContext &semaCtx) {
@@ -456,6 +457,29 @@ namespace rexlang {
 
     void FunctionCall::sematicAnalysisInternal(SemaContext &semaCtx) {
         NameComponent::sematicAnalysisInternal(semaCtx);
+
+        getCallee()->sematicAnalysisInternal(semaCtx);
+        FunctorDecl *functor_decl = getFunctionDeclare();
+        if (functor_decl == nullptr) {
+            assert(false);
+            return;
+        }
+        functor_decl->sematicAnalysisInternal(semaCtx);
+
+        // 检查函数实参是否符合形参定义
+
+        for (size_t idx = 0, count = getArgumentsCount(); idx < count; ++idx) {
+            Expression *argu = getArgumentAt(idx);
+            argu->sematicAnalysisInternal(semaCtx);
+        }
+
+        if (!matchFunctor(functor_decl)) {
+            assert(false);
+            return;
+        }
+
+        assert(functor_decl->getReturnType());
+
     }
 
     void UnaryExpression::sematicAnalysisInternal(SemaContext &semaCtx) {
@@ -472,6 +496,18 @@ namespace rexlang {
 
     void TypeConvert::sematicAnalysisInternal(SemaContext &semaCtx) {
         Expression::sematicAnalysisInternal(semaCtx);
+
+        getSourceExpr()->sematicAnalysisInternal(semaCtx);
+        TypeDecl *src_ty = getSourceType();
+        TypeDecl *tgt_ty = getTargetType();
+
+        // 检查从源类型到目标类型是否可行
+
+        if (!tgt_ty->isAssginValidFrom(src_ty)) {
+            assert(false);
+            return;
+        }
+
     }
 
     void Value                ::sematicAnalysisInternal(SemaContext &semaCtx) { Expression::sematicAnalysisInternal(semaCtx); }

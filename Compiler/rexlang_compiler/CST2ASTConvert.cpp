@@ -344,6 +344,7 @@ namespace rexlang {
         parameter_decl->setTypeName( GetTextIfExist(context->type));
         parameter_decl->applyAttributes(GetTextVecIfExist(context->attributes));
         parameter_decl->setComment(GetFromCtxIfExist<TString>(context->table_comment()));
+        parameter_decl->setDynamicFlag(true);
         return NodeWarp(parameter_decl);
     }
 

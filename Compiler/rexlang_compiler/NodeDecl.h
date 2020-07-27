@@ -464,12 +464,15 @@ namespace rexlang {
         bool is_reference_ = false; // 是否引用类型
         bool is_nullable_  = false; // 是否可空
         bool is_array_     = false; // 是否数组
+        bool is_dynamic_   = false; // 是否动态参数
 
     public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
         void applyAttribute (const TString &attribute)  override ;
+        void setDynamicFlag (bool flag = true) ;
+        bool isDynamicParam () const ;
 
     public:
         unsigned getParamIndex  () const ;
@@ -953,14 +956,18 @@ namespace rexlang {
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
-                void setReturnTypeName  (const TString &typeName) ;
+        void setReturnTypeName          (const TString &typeName) ;
         virtual void appendParameter    (ParameterDecl *parameterDecl) ;
 
     public:
+        std::vector<ParameterDecl *> getParameters() const ;
+
         ParameterDecl * getParameterAt  (unsigned idx)                       const ;
         ParameterDecl * getParameter    (const StringRef &name)              const ;
         int             getIndexOf      (const ParameterDecl *parameterDecl) const ;
-        TypeDecl *      getReturnType   ()                                   const ;
+
+        TypeDecl *getReturnType() const ;
+        bool      isDynamicArgs() const ;
 
         virtual bool    isStaticLibraryAPI  () const = 0;
         virtual bool    isDynamicLibraryAPI () const = 0;
@@ -1574,17 +1581,25 @@ namespace rexlang {
         TypeDecl *getExpressionTypeInternal ()                       const override ;
 
     public:
+        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+
         TagDecl *       EvalBaseNameComponentType   ()       override ;
         Identifier *    getBaseId                   () const override ;
 
-        void setCallName(NameComponent *funcName) ;
-        void appendArgument(Expression *argument) ;
-        FunctorDecl *   getFunctionDeclare  () const ;
+        bool matchFunctor       (FunctorDecl *  functorDecl) const ;
+        void setCallName        (NameComponent *funcName) ;
+        void appendArgument     (Expression *   argument) ;
 
-        bool    IsArgument      (      Expression *expr) const ;    // 判定表达式是否为实参，依赖 IndexOfArgument 实现
-        bool    IsArgument      (const Expression *expr) const ;    // 判定表达式是否为实参，依赖 IndexOfArgument 实现
-        int     IndexOfArgument (      Expression *expr) const ;    // 若表达式是实参则返回是第几个参数，否则返回-1
-        int     IndexOfArgument (const Expression *expr) const ;    // 若表达式是实参则返回是第几个参数，否则返回-1
+        NameComponent *             getCallee           () const ;
+        FunctorDecl *               getFunctionDeclare  () const ;
+        size_t                      getArgumentsCount   () const ;
+        Expression *                getArgumentAt       (size_t idx) const ;
+        std::vector<Expression *> & getArguments        () const ;
+
+        bool    isArgument      (      Expression *expr) const ;    // 判定表达式是否为实参，依赖 IndexOfArgument 实现
+        bool    isArgument      (const Expression *expr) const ;    // 判定表达式是否为实参，依赖 IndexOfArgument 实现
+        int     indexOfArgument (      Expression *expr) const ;    // 若表达式是实参则返回是第几个参数，否则返回-1
+        int     indexOfArgument (const Expression *expr) const ;    // 若表达式是实参则返回是第几个参数，否则返回-1
 
     public:
         static const NodeType GetClassId () ;
@@ -1595,6 +1610,7 @@ namespace rexlang {
      * 类型转换
      */
     class TypeConvert : public Expression {
+    private:
         enum ConvertType { kCTImplicit, kCTExplicit };
         ConvertType convert_type_ = ConvertType::kCTImplicit;
 
@@ -1609,8 +1625,10 @@ namespace rexlang {
         ExprUsage   getSubExprAccessType    (const Expression *expr) const override ;
         void        sematicAnalysisInternal (SemaContext &semaCtx) override ;
 
-        TypeDecl * getSourceType () const ;
-        TypeDecl * getTargetType () const ;
+        Expression *getSourceExpr () const ;
+
+        TypeDecl *  getSourceType () const ;
+        TypeDecl *  getTargetType () const ;
 
     public:
         static const NodeType GetClassId () ;

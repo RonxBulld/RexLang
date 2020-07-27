@@ -312,7 +312,8 @@ namespace rexlang {
      * TypeConvert
      ******************************************/
 
-    TypeDecl * TypeConvert::getSourceType () const { return from_expression_->getExpressionType(); }
-    TypeDecl * TypeConvert::getTargetType () const { assert(target_type_); return target_type_; }
+    TypeDecl *   TypeConvert::getSourceType () const { return from_expression_->getExpressionType(); }
+    TypeDecl *   TypeConvert::getTargetType () const { assert(target_type_); return target_type_; }
+    Expression * TypeConvert::getSourceExpr () const { assert(from_expression_); return from_expression_; }
 
 }
