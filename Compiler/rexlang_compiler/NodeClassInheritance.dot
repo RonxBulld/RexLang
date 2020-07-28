@@ -44,7 +44,7 @@ digraph G {
 	"Expression" -> "Statement"
 	"HierarchyIdentifier" -> "Expression"
 	"NameComponent" -> "Expression"
-	"Identifier" -> "NameComponent"
+	"IdentRefer" -> "NameComponent"
 	"ArrayIndex" -> "NameComponent"
 	"FunctionCall" -> "NameComponent"
 	"TypeConvert" -> "Expression"
@@ -72,5 +72,6 @@ digraph G {
 	"BuiltinDatetimeType" -> "BuiltinTypeDecl"
 	"BuiltinFuncPtrType" -> "BuiltinTypeDecl"
 	"BuiltinDoubleType" -> "BuiltinTypeDecl"
+	"IdentDef" -> "Node"
 	"Node"[shape=ellipse fillcolor=gold style=filled];
 }

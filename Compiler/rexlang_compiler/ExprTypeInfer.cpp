@@ -36,7 +36,7 @@ namespace rexlang {
         return type;
     }
 
-    TypeDecl *Identifier::getExpressionTypeInternal() const {
+    TypeDecl *IdentRefer::getExpressionTypeInternal() const {
         TagDecl *tag_decl = this->getDecl();
         return tag_decl->getType();
     }

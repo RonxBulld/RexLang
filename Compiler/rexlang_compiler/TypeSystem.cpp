@@ -61,7 +61,7 @@ namespace rexlang {
     const NodeType Expression           ::GetClassId() { return NodeType::kNTyExpression; }
     const NodeType HierarchyIdentifier  ::GetClassId() { return NodeType::kNTyHierarchyIdentifier; }
     const NodeType NameComponent        ::GetClassId() { return NodeType::kNTyNameComponent; }
-    const NodeType Identifier           ::GetClassId() { return NodeType::kNTyIdentifier; }
+    const NodeType IdentRefer           ::GetClassId() { return NodeType::kNTyIdentRefer; }
     const NodeType ArrayIndex           ::GetClassId() { return NodeType::kNTyArrayIndex; }
     const NodeType FunctionCall         ::GetClassId() { return NodeType::kNTyFunctionCall; }
     const NodeType TypeConvert          ::GetClassId() { return NodeType::kNTyTypeConvert; }

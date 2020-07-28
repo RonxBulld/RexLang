@@ -47,6 +47,8 @@ namespace rexlang {
 
     // Declare
 
+    class IdentDef;
+
     // Type declare
 
     class Decl;                 class TagDecl;                  class TypeDecl;
@@ -71,7 +73,7 @@ namespace rexlang {
     // Expression
 
     class Expression;           class HierarchyIdentifier;      class NameComponent;
-    class Identifier;           class ArrayIndex;               class FunctionCall;
+    class IdentRefer;           class ArrayIndex;               class FunctionCall;
     class UnaryExpression;      class BinaryExpression;         class _OperatorExpression;
     class TypeConvert;
 
@@ -94,6 +96,7 @@ namespace rexlang {
         kNTyAPIDeclareFile, kNTyConstDeclareFile,
 
         kNTyDecl,
+        kNTyIdentDef,
         kNTyTagDecl, kNTyVariableDecl, kNTyBaseVariDecl, kNTyGlobalVariableDecl,
         kNTyParameterDecl, kNTyMemberVariableDecl, kNTyFileVariableDecl, kNTyLocalVariableDecl,
         kNTyTypeDecl, kNTyVariTypeDecl, kNTyBuiltinTypeDecl, kNTyArrayDecl,
@@ -107,7 +110,7 @@ namespace rexlang {
         kNTyExitStmt,
 
         kNTyExpression,
-        kNTyHierarchyIdentifier, kNTyNameComponent, kNTyIdentifier, kNTyArrayIndex,
+        kNTyHierarchyIdentifier, kNTyNameComponent, kNTyIdentRefer, kNTyArrayIndex,
         kNTyFunctionCall, kNTyUnaryExpression, kNTyBinaryExpression, kNTy_OperatorExpression,
 
         kNTyTypeConvert, kNTyFuncAddrExpression, kNTyResourceRefExpression,
@@ -127,8 +130,28 @@ namespace rexlang {
 
     // 传值方式
     enum class ValueTransferMode {
-        kVTMValue,      // 传值
-        kVTMReference,  // 传址
+        // 传值
+        kVTMValue,
+        // 传址
+        kVTMReference,
+    };
+
+    // 程序库类型
+    enum LibraryType {
+        // 动态链接库函数
+        kLTDynamic,
+        // 静态链接库函数
+        kLTStatic,
+    };
+
+    /*
+     * 参数传递模型
+     */
+    enum ArgumentPassModel {
+        // 直接传递
+        kDirect,
+        // 简单RTTI参数包
+        kSimpleRTTIPack,
     };
 
     // 运算符类型
@@ -370,6 +393,30 @@ namespace rexlang {
 
     public:
         static const NodeType GetClassId () ;
+
+    };
+
+    /*
+     * Id的定义节点，专用于各种具名定义
+     */
+    class IdentDef : public Node {
+    private:
+        StringRef id_;
+        std::set<IdentRefer *> reference_table_;
+        TagDecl *back_point_to_decl_ = nullptr;
+
+    public:
+        IdentDef(const char *id) ;
+        IdentDef(const std::string &id) ;
+        IdentDef(const StringRef &id) ;
+        IdentDef(const IdentDef &other) ;
+
+    public:
+        TagDecl *decl() const ;
+
+    public:
+        static const NodeType GetClassId () ;
+
     };
 
     /**
@@ -401,70 +448,63 @@ namespace rexlang {
     class TagDecl : public Decl {
     private:
         // 定义名称
-        TString name_;
+        IdentDef *name_ = nullptr;
         // 注释
         TString comment_;
         // 引用表
-        std::set<Identifier *> reference_table_;
+        std::set<IdentRefer *> reference_table_;
+        // 未完成定义
+        bool forward_decl_ = false;
+
+    public:
+        TagDecl(IdentDef *name) ;
 
     public:
 
-        void                setName         (const TString &name)   ;
-        const TString &     getName         () const                ;
-        const StringRef &   getNameRef      () const                ;
+        IdentDef *      getName    () const         ;
+        const char *    getNameStr () const         ;
 
-        void                setComment      (const TString &comment) ;
-        const TString &     getComment      () const                 ;
-        const StringRef &   getCommentRef   () const                 ;
+        void            setComment      (const TString &comment) ;
+        const TString & getComment      () const                 ;
+        const char *    getCommentStr   () const                 ;
 
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
-        const std::set<Identifier *> &  getReferenceTable   () const ;
-        int                             addReference        (Identifier *reference) ;
-        int                             removeReference     (Identifier *reference) ;
+        const std::set<IdentRefer *> &  getReferenceTable   () const ;
+        int                             addReference        (IdentRefer *reference) ;
+        int                             removeReference     (IdentRefer *reference) ;
 
     public:
         static const NodeType GetClassId () ;
     };
 
     /*
-     * 描述成员变量、全局变量、局部变量、参数、常量等带有类型的基本结构
+     * 描述成员变量、全局变量、局部变量、参数等带有明确类型的基本结构
      */
     class BaseVariDecl : public TagDecl {
     private:
-        // 类型名称
-        TString type_name_;
-        // 类型指针
-        VariTypeDecl *vari_type_decl_ = nullptr;
+        IdentRefer *type_;  // 类型
 
     public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
-        void            setTypeName(const TString &typeName) ;
-        const TString & getTypeName() const ;
-
-                void          setValType  (VariTypeDecl *variType) ;
-        virtual VariTypeDecl *getValType  () ;
-        virtual VariTypeDecl *evalValType () const ;
-        virtual VariTypeDecl *takeValType () ;
-
-        TypeDecl* getType () const override ;
+        void        setType (IdentRefer *typeName) ;
+        TypeDecl *  getType () const override ;
 
     public:
         static const NodeType GetClassId () ;
+
     };
 
     /*
-     * 描述参数
+     * 描述参数结构
      */
     class ParameterDecl : public BaseVariDecl {
     private:
         bool is_reference_ = false; // 是否引用类型
         bool is_nullable_  = false; // 是否可空
-        bool is_array_     = false; // 是否数组
-        bool is_dynamic_   = false; // 是否动态参数
 
     public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
@@ -473,6 +513,7 @@ namespace rexlang {
         void applyAttribute (const TString &attribute)  override ;
         void setDynamicFlag (bool flag = true) ;
         bool isDynamicParam () const ;
+        void enableReference(bool enable = true) ;
 
     public:
         unsigned getParamIndex  () const ;
@@ -490,15 +531,15 @@ namespace rexlang {
     // 描述常量值定义
     class ConstDecl : public TagDecl {
     private:
-        TString const_name_;
         Value * const_value_ = nullptr;
 
     public:
-        ConstDecl(const TString &name, Value *value) ;
+        ConstDecl(IdentDef *name, Value *value) ;
 
     public:
         Value *getValue() ;
 
+    public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
@@ -510,16 +551,8 @@ namespace rexlang {
      * 描述成员变量、全局变量、局部变量、文件变量
      */
     class VariableDecl : public BaseVariDecl {
-    private:
-        bool                is_array_ = false;
-        TString             dimensions_decl_;   // 维度声明
-        std::vector<size_t> dimensions_;        // 解析后的维度定义
-
     public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
-
-    public:
-        void    setDimensionsText(const TString &dimStr) ;
 
     public:
         static const NodeType GetClassId () ;
@@ -541,8 +574,7 @@ namespace rexlang {
      */
     class MemberVariableDecl : public VariableDecl {
     private:
-        int    index_of_struct_ = -1;
-        bool   is_reference_    = false;
+        bool is_reference_ = false;
 
     public:
         void applyAttribute (const TString &attribute) override ;
@@ -945,25 +977,25 @@ namespace rexlang {
      */
     class FunctorDecl : public TypeDecl {
     private:
-        // 返回值类型名
-        TString return_type_name_;
         // 返回值类型
-        TypeDecl* return_type_ = nullptr;
+        IdentRefer *return_type_ = nullptr;
         // 参数列表
         std::vector<ParameterDecl *> parameters_;
+
+    protected:
+        FunctorDecl(IdentRefer *namedRetType, IdentDef *name, const std::vector<ParameterDecl *> &parameters) ;
 
     public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
-        void setReturnTypeName          (const TString &typeName) ;
-        virtual void appendParameter    (ParameterDecl *parameterDecl) ;
+        void appendParameter(ParameterDecl *parameterDecl) ;
 
     public:
-        std::vector<ParameterDecl *> getParameters() const ;
+        std::vector<ParameterDecl *> &getParameters() const ;
 
         ParameterDecl * getParameterAt  (unsigned idx)                       const ;
-        ParameterDecl * getParameter    (const StringRef &name)              const ;
+        ParameterDecl * getParamByName  (const StringRef &name)              const ;
         int             getIndexOf      (const ParameterDecl *parameterDecl) const ;
 
         TypeDecl *getReturnType() const ;
@@ -990,6 +1022,9 @@ namespace rexlang {
         ProgSetDecl *super_set_ = nullptr;
 
     public:
+        FunctionDecl(IdentRefer *namedRetType, IdentDef *name, const std::vector<ParameterDecl *> &parameters) ;
+
+    public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
@@ -1012,34 +1047,6 @@ namespace rexlang {
 
     };
 
-    /*!
-     * @brief 程序库类型
-     */
-    enum LibraryType {
-        /*!
-         * @brief 动态链接库函数
-         */
-        kLTDynamic,
-        /*!
-         * @brief 静态链接库函数
-         */
-        kLTStatic,
-    };
-
-    /*
-     * 参数传递模型
-     */
-    enum ArgumentPassModel {
-        /*!
-         * @brief 直接传递
-         */
-        kDirect,
-        /*!
-         * @brief 简单RTTI参数包
-         */
-        kSimpleRTTIPack,
-    };
-
     /**
      * @brief DLL函数声明
      */
@@ -1050,26 +1057,31 @@ namespace rexlang {
         // API库类型
         LibraryType library_type_ = LibraryType::kLTDynamic;
         // API函数名称
-        TString api_name_;
+        IdentDef *api_name_ = nullptr;
         // 参数传递方式
         ArgumentPassModel argument_pass_model_ = ArgumentPassModel::kDirect;
         // API参数名称
         std::vector<StringRef> mapping_names_;
 
     public:
+        APICommandDecl(IdentRefer *namedRetType, IdentDef *name, const std::vector<ParameterDecl *> &parameters, IdentDef *apiName) ;
+
+    public:
+        void            setLibraryName(const TString &name) ;
+        const TString & getLibraryName() const ;
+
+        void        setLibraryType(LibraryType type) ;
+        LibraryType getLibraryType() const ;
+
+    public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
-        APICommandDecl(const TString &library, LibraryType libraryType, const TString &name, const TString &apiName);
-
-    public:
-        const StringRef &   getApiNameRef() const ;
-        void                setApiNameRef(const StringRef &apiName) ;
+        IdentDef *  getApiNameRef() const ;
+        void        setApiNameRef(IdentDef *apiName) ;
 
         ArgumentPassModel   getArguPassModel() const ;
         void                setArguPassModel(ArgumentPassModel model) ;
-
-        void appendParameter    (ParameterDecl *parameterDecl) override ;
 
     public:
         bool    isStaticLibraryAPI  () const override ;
@@ -1427,7 +1439,9 @@ namespace rexlang {
 
         TypeDecl *getExpressionType() const ;
         TypeDecl *getExpressionType() ;
-        ExprUsage getLRType      () const;    // 获取表达式自身的引用类型，依赖父节点的 getSubExprAccessType 实现
+        ExprUsage getLRType     () const ;    // 获取表达式自身的引用类型，依赖父节点的 getSubExprAccessType 实现
+        bool      isLeftUsage   () const ;    // 本表达式具有左值属性
+        bool      isRightUsage  () const ;    // 本表达式具有右值属性
 
         // 创建类型转换将表达式转换为目标类型
         // 如果无需转换则返回原表达式
@@ -1483,18 +1497,18 @@ namespace rexlang {
         virtual TagDecl *      EvalBaseNameComponentType   () = 0;
 
     public:
-        virtual Identifier *getBaseId() const = 0;    // 获取组件的确切名称对象
+        virtual IdentRefer *getBaseId() const = 0;    // 获取组件的确切名称对象
     };
 
     /**
      * @brief 普通名称组件
      */
-    class Identifier : public NameComponent {
+    class IdentRefer : public NameComponent {
     private:
         // 引用名
-        TString name_;
+        StringRef name_;
         // 引用目标
-        TagDecl * reference_    = nullptr;
+        IdentDef *reference_ = nullptr;
 
     protected:
         TypeDecl *CheckExpressionInternal   () override;
@@ -1502,16 +1516,16 @@ namespace rexlang {
         TypeDecl *getExpressionTypeInternal ()                       const override ;
 
     public:
-        Identifier() ;
-        Identifier(const TString &name) ;
+        IdentRefer() ;
+        IdentRefer(const StringRef &name) ;
 
     public:
-        void                setName         (const TString &name) ;
+        IdentDef * def() const ;
         const TString &     getName         () const ;
         const StringRef &   getNameRef      () const ;
 
         TagDecl *       EvalBaseNameComponentType   ()       override ;
-        Identifier *    getBaseId                   () const override ;
+        IdentRefer *    getBaseId                   () const override ;
         TagDecl *       getDecl                     () ;
         TagDecl *       getDecl                     () const ;
 
@@ -1557,7 +1571,7 @@ namespace rexlang {
          */
         TypeDecl * getElementTy() const ;
 
-        Identifier *getBaseId() const override ;
+        IdentRefer *getBaseId() const override ;
 
         ErrOr<std::vector<Expression *>> getIndexesList() const ;
 
@@ -1584,7 +1598,7 @@ namespace rexlang {
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
         TagDecl *       EvalBaseNameComponentType   ()       override ;
-        Identifier *    getBaseId                   () const override ;
+        IdentRefer *    getBaseId                   () const override ;
 
         bool matchFunctor       (FunctorDecl *  functorDecl) const ;
         void setCallName        (NameComponent *funcName) ;
@@ -1722,7 +1736,7 @@ namespace rexlang {
 
     class FuncAddrExpression : public Expression {
     private:
-        Identifier *  function_name_;
+        IdentRefer *  function_name_;
         FunctorDecl * functor_declare_ = nullptr;
 
     protected:
@@ -1733,7 +1747,7 @@ namespace rexlang {
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
-        void setRefFuncName(Identifier *functionName) ;
+        void setRefFuncName(IdentRefer *functionName) ;
         ExprUsage getSubExprAccessType(const Expression *expr) const override ;
 
     public:
@@ -1901,6 +1915,8 @@ namespace rexlang {
         GlobalVariableDecl *    getGlobalVari   (const StringRef &name) const ;
         FunctorDecl *           getFunctor      (const StringRef &name) const ;
         ConstDecl *             getConst        (const StringRef &name) const ;
+
+        TypeDecl * getOrCreateType(IdentRefer *idRef) ; // 获取或创建类型预定义
 
     public:
         void     setSourceEdition(unsigned edition) { edition_ = edition; }

@@ -520,7 +520,7 @@ namespace rexlang {
     }
 
     antlrcpp::Any CST2ASTConvert::visitIdentifier(rexLangParser::IdentifierContext *context) {
-        Identifier* identifier = CreateNode<Identifier>(context, GetTextIfExist(context->IDENTIFIER()->getSymbol()));
+        IdentRefer* identifier = CreateNode<IdentRefer>(context, GetTextIfExist(context->IDENTIFIER()->getSymbol()));
         return NodeWarp(identifier);
     }
 
@@ -688,7 +688,7 @@ namespace rexlang {
 
     antlrcpp::Any CST2ASTConvert::visitFunc_ptr(rexLangParser::Func_ptrContext *context) {
         FuncAddrExpression *func_addr_expression = CreateNode<FuncAddrExpression>(context);
-        Identifier *reference = CreateNode<Identifier>(context, GetTextIfExist(context->IDENTIFIER()->getSymbol()));
+        IdentRefer *reference = CreateNode<IdentRefer>(context, GetTextIfExist(context->IDENTIFIER()->getSymbol()));
         func_addr_expression->setRefFuncName(reference);
         return NodeWarp(func_addr_expression);
     }

@@ -1071,7 +1071,7 @@ namespace rexlang {
 
         // 目标类型是单名称组件
 
-        if (Identifier *identifier = nameComponent->as<Identifier>()) {
+        if (IdentRefer *identifier = nameComponent->as<IdentRefer>()) {
             if (forwardInstance) {
 
                 // 作为成员解析
@@ -1239,7 +1239,7 @@ namespace rexlang {
             // 将名称组件当左值使用
         }
         // 如果是一个引用参数则需要加载它实际的内存地址
-        if (Identifier *identifier = nameComponent->as<Identifier>()) {
+        if (IdentRefer *identifier = nameComponent->as<IdentRefer>()) {
             if (ParameterDecl *parameter_decl = identifier->reference_->as<ParameterDecl>()) {
                 if (parameter_decl->is_reference_) {
                     this_value = Builder.CreateLoad(this_value->getType()->getPointerElementType(), this_value);

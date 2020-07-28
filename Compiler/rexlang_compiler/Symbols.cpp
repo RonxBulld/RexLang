@@ -10,16 +10,16 @@ namespace rexlang {
      * Identifier查找符号定义例程
      ********************************************/
 
-    TagDecl * Identifier::getDecl() {
+    TagDecl * IdentRefer::getDecl() {
         if (reference_) {
-            assert(reference_ == const_cast<const Identifier *>(this)->getDecl());
+            assert(reference_ == const_cast<const IdentRefer *>(this)->getDecl());
         } else {
-            reference_ = const_cast<const Identifier *>(this)->getDecl();
+            reference_ = const_cast<const IdentRefer *>(this)->getDecl();
         }
         return reference_;
     }
 
-    TagDecl * Identifier::getDecl() const {
+    TagDecl * IdentRefer::getDecl() const {
         Node *    scope = getNearstScope();
         TagDecl * decl  = nullptr;
         if (FunctionDecl *function_decl = scope->as<FunctionDecl>()) {
@@ -36,7 +36,7 @@ namespace rexlang {
             decl = nullptr;
         }
 
-        if (decl) { decl->addReference(const_cast<Identifier *>(this)); }
+        if (decl) { decl->addReference(const_cast<IdentRefer *>(this)); }
 
         return decl;
     }

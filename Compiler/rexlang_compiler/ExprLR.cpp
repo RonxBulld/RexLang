@@ -170,7 +170,7 @@ namespace rexlang {
         return this->getLRType();
     }
 
-    ExprUsage Identifier::getSubExprAccessType(const Expression *expr) const {
+    ExprUsage IdentRefer::getSubExprAccessType(const Expression *expr) const {
         return this->getLRType();
     }
 

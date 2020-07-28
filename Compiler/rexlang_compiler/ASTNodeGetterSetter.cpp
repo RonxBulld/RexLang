@@ -144,10 +144,10 @@ namespace rexlang {
     const TString &     TagDecl::getComment      () const                   { return comment_; }
     const StringRef &   TagDecl::getCommentRef   () const                   { return comment_.string_; }
 
-    const std::set<Identifier *> &TagDecl::getReferenceTable() const        { return reference_table_; }
+    const std::set<IdentRefer *> &TagDecl::getReferenceTable() const        { return reference_table_; }
 
-    int TagDecl::addReference     (Identifier *reference) { reference_table_.insert(reference); return 0; }
-    int TagDecl::removeReference  (Identifier *reference) { reference_table_.erase(reference);  return 0; }
+    int TagDecl::addReference     (IdentRefer *reference) { reference_table_.insert(reference); return 0; }
+    int TagDecl::removeReference  (IdentRefer *reference) { reference_table_.erase(reference);  return 0; }
 
     /***************************************************
      * BaseVariDecl
@@ -170,10 +170,18 @@ namespace rexlang {
     }
 
     void ParameterDecl::applyAttribute(const TString &attribute) {
-             if (Str2Attr::isNameOfReference(attribute.string_)) { is_reference_ = true; }
-        else if (Str2Attr::isNameOfNullable(attribute.string_))  { is_nullable_  = true; }
-        else if (Str2Attr::isNameOfArray(attribute.string_))     { is_array_     = true; }
-        else { Decl::applyAttribute(attribute); }
+        if (Str2Attr::isNameOfReference(attribute.string_)) {
+            is_reference_ = true;
+        }
+        else if (Str2Attr::isNameOfNullable(attribute.string_)) {
+            is_nullable_  = true;
+        }
+        else if (Str2Attr::isNameOfArray(attribute.string_)) {
+            setValType(ArrayDecl::get(getValType(), {}));
+        }
+        else {
+            Decl::applyAttribute(attribute);
+        }
     }
 
     /***************************************************
@@ -402,12 +410,12 @@ namespace rexlang {
     }
 
     /***************************************************
-     * Identifier
+     * IdentRefer
      ***************************************************/
 
-         Identifier::Identifier () = default;
-         Identifier::Identifier (const TString &name)   { setName(name); }
-    void Identifier::setName    (const TString &name)   { name_ = name; }
+         IdentRefer::IdentRefer () = default;
+         IdentRefer::IdentRefer (const TString &name)   { setName(name); }
+    void IdentRefer::setName    (const TString &name)   { name_ = name; }
 
     /***************************************************
      * ArrayIndex
@@ -460,7 +468,7 @@ namespace rexlang {
      * FuncAddrExpression
      ***************************************************/
 
-    void FuncAddrExpression::setRefFuncName(Identifier *functionName) { function_name_ = functionName; }
+    void FuncAddrExpression::setRefFuncName(IdentRefer *functionName) { function_name_ = functionName; }
 
     /***************************************************
      * ValueOfBool

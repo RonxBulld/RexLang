@@ -447,7 +447,7 @@ namespace rexlang {
         Expression::sematicAnalysisInternal(semaCtx);
     }
 
-    void Identifier::sematicAnalysisInternal(SemaContext &semaCtx) {
+    void IdentRefer::sematicAnalysisInternal(SemaContext &semaCtx) {
         NameComponent::sematicAnalysisInternal(semaCtx);
     }
 
