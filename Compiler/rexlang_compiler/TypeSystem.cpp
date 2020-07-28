@@ -3,6 +3,7 @@
 //
 
 #include "TypeSystem.h"
+#include "rtti.h"
 
 namespace rexlang {
 
@@ -286,7 +287,7 @@ namespace rexlang {
      * NameComponent 族
      ******************************************/
 
-    TypeDecl * BaseVariDecl::getType() const { return this->evalValType(); }
+    TypeDecl * BaseVariDecl::getType() const { return type_; }
     TypeDecl * TypeDecl    ::getType() const { return const_cast<TypeDecl *>(this); }
     TypeDecl * ProgSetDecl ::getType() const { return nullptr; }
 

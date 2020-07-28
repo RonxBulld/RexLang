@@ -6,39 +6,34 @@
 
 namespace rexlang {
 
-    /********************************************
-     * Identifier查找符号定义例程
-     ********************************************/
-
-    TagDecl * IdentRefer::getDecl() {
-        if (reference_) {
-            assert(reference_ == const_cast<const IdentRefer *>(this)->getDecl());
-        } else {
-            reference_ = const_cast<const IdentRefer *>(this)->getDecl();
+    IdentRefer::IdentRefer(const StringRef &name) {
+        // 查找定义
+        if (TagDecl * decl = Node::findDeclWithNameString(name)) {
+            reference_ = decl->getName();
         }
-        return reference_;
+        else {
+            // 找不到定义则创建占位符
+            IdentDef *ident_def = Create<IdentDef>(getAstContext(), name);
+            getAstContext()->getTranslateUnit()->addPlaceholder(ident_def);
+            reference_ = ident_def;
+        }
+        reference_->addReference(this);
     }
 
+    /********************************************
+     * IdentRefer查找符号定义例程
+     ********************************************/
+
     TagDecl * IdentRefer::getDecl() const {
-        Node *    scope = getNearstScope();
-        TagDecl * decl  = nullptr;
-        if (FunctionDecl *function_decl = scope->as<FunctionDecl>()) {
-            decl = function_decl->findDeclWithNameString(getNameRef());
-        }
-        else if (ProgSetDecl *prog_set_decl = scope->as<ProgSetDecl>()) {
-            decl = prog_set_decl->findDeclWithNameString(getNameRef());
-        }
-        else if (TranslateUnit *translate_unit = scope->as<TranslateUnit>()) {
-            decl = translate_unit->findDeclWithNameString(getNameRef());
+        if (reference_) {
+            TagDecl *decl = reference_->decl();
+            assert(decl);
+            return decl;
         }
         else {
             assert(false);
-            decl = nullptr;
+            return nullptr;
         }
-
-        if (decl) { decl->addReference(const_cast<IdentRefer *>(this)); }
-
-        return decl;
     }
 
     /********************************************

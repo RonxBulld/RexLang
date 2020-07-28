@@ -18,6 +18,7 @@
 
 namespace rexlang {
 
+    // 有序字典
     template <typename _Key, typename _Val>
     class ordered_map : public tsl::ordered_map<_Key, _Val> {
     public:
@@ -28,6 +29,10 @@ namespace rexlang {
         ~ordered_map() {}
         ordered_map<_Key, _Val> &operator=(const ordered_map<_Key, _Val> &other) = default;
     };
+
+    // 命名有序字典
+    template <typename _Val>
+    using NamedOrderDict = ordered_map<StringRef, _Val>;
 
     class ASTContext;
     class SemaContext;
@@ -53,7 +58,7 @@ namespace rexlang {
 
     class Decl;                 class TagDecl;                  class TypeDecl;
     class VariTypeDecl;         class StructureDecl;            class BuiltinTypeDecl;
-    class ArrayDecl;            class ConstDecl;
+    class ArrayDecl;            class ReferenceDecl;            class ConstDecl;
 
     // Entity declare
 
@@ -96,12 +101,11 @@ namespace rexlang {
         kNTyAPIDeclareFile, kNTyConstDeclareFile,
 
         kNTyDecl,
-        kNTyIdentDef,
-        kNTyTagDecl, kNTyVariableDecl, kNTyBaseVariDecl, kNTyGlobalVariableDecl,
-        kNTyParameterDecl, kNTyMemberVariableDecl, kNTyFileVariableDecl, kNTyLocalVariableDecl,
-        kNTyTypeDecl, kNTyVariTypeDecl, kNTyBuiltinTypeDecl, kNTyArrayDecl,
-        kNTyConstDecl, kNTyStructureDecl, kNTyFunctorDecl, kNTyFunctionDecl,
-        kNTyProgSetDecl, kNTyAPICommandDecl,
+        kNTyIdentDef, kNTyTagDecl, kNTyVariableDecl, kNTyBaseVariDecl,
+        kNTyGlobalVariableDecl, kNTyParameterDecl, kNTyMemberVariableDecl, kNTyFileVariableDecl,
+        kNTyLocalVariableDecl, kNTyTypeDecl, kNTyVariTypeDecl, kNTyBuiltinTypeDecl,
+        kNTyArrayDecl, kNTyConstDecl, kNTyStructureDecl, kNTReferenceDecl,
+        kNTyFunctorDecl, kNTyFunctionDecl, kNTyProgSetDecl, kNTyAPICommandDecl,
 
         kNTyStatement,
         kNTyIfStmt, kNTyStatementBlock, kNTyWhileStmt, kNTyRangeForStmt,
@@ -154,6 +158,24 @@ namespace rexlang {
         kSimpleRTTIPack,
     };
 
+    // 内置类型枚举
+    enum class EnumOfBuiltinType {
+        kBTypeVoid,        // 空
+        kBTypeCommon,      // 通用型
+        kBTypeChar,        // 字节型
+        kBTypeInteger,     // 整数型
+        kBTypeFloat,       // 小数型
+        kBTypeBool,        // 逻辑型
+        kBTypeString,      // 文本型
+        kBTypeDataSet,     // 字节集
+        kBTypeShort,       // 短整型
+        kBTypeLong,        // 长整型
+        kBTypeDatetime,    // 日期时间型
+        kBTypeFuncPtr,     // 子程序指针
+        kBTypeDouble,      // 双精度小数型
+        kBTypeEND,
+    };
+
     // 运算符类型
     class OperatorType {
     public:
@@ -188,8 +210,8 @@ namespace rexlang {
         Opt opt_;
     };
 
-    /**
-     * @brief 节点基类
+    /*
+     * 节点基类
      */
     class Node {
     private:
@@ -252,8 +274,12 @@ namespace rexlang {
 
     };
 
-    /**
-     * @brief 资源文件基类
+    /***===------------------------------------------------===***
+     * 文件
+     ***===------------------------------------------------===***/
+
+    /*
+     * 资源文件基类
      */
     class SourceFile : public Node {
     public:
@@ -271,8 +297,8 @@ namespace rexlang {
         virtual void registResourceTo   (TranslateUnit *translateUnit) const = 0;
     };
 
-    /**
-     * @brief 函数声明文件
+    /*
+     * 函数声明文件
      */
     class ProgramSetFile : public SourceFile {
     private:
@@ -298,12 +324,12 @@ namespace rexlang {
 
     };
 
-    /**
-     * @brief 全局变量声明文件
+    /*
+     * 全局变量声明文件
      */
     class GlobalVariableFile : public SourceFile {
     public:
-        typedef ordered_map<StringRef, GlobalVariableDecl *> GlobalVariMapTy;
+        typedef NamedOrderDict<GlobalVariableDecl *> GlobalVariMapTy;
 
     private:
         GlobalVariMapTy global_variable_map_;
@@ -323,12 +349,12 @@ namespace rexlang {
         static const NodeType GetClassId () ;
     };
 
-    /**
-     * @brief 数据结构定义文件
+    /*
+     * 数据结构定义文件
      */
     class DataStructureFile : public SourceFile {
     public:
-        typedef ordered_map<StringRef, StructureDecl *> StructDeclMapTy;
+        typedef NamedOrderDict<StructureDecl *> StructDeclMapTy;
 
     private:
         StructDeclMapTy structure_decl_map_;
@@ -348,12 +374,12 @@ namespace rexlang {
         static const NodeType GetClassId () ;
     };
 
-    /**
-     * @brief DLL函数接口声明文件
+    /*
+     * DLL函数接口声明文件
      */
     class APIDeclareFile : public SourceFile {
     public:
-        typedef ordered_map<StringRef, APICommandDecl *> DllDefMapTy;
+        typedef NamedOrderDict<APICommandDecl *> DllDefMapTy;
 
     private:
         DllDefMapTy api_declares_;
@@ -373,9 +399,12 @@ namespace rexlang {
         static const NodeType GetClassId () ;
     };
 
+    /*
+     * 常量资源定义文件
+     */
     class ConstDeclareFile : public SourceFile {
     public:
-        typedef ordered_map<StringRef, ConstDecl *> ConstDeclMapTy;
+        typedef NamedOrderDict<ConstDecl *> ConstDeclMapTy;
 
     private:
         ConstDeclMapTy consts_declares_;
@@ -396,14 +425,18 @@ namespace rexlang {
 
     };
 
+    /***===------------------------------------------------===***
+     *
+     ***===------------------------------------------------===***/
+
     /*
-     * Id的定义节点，专用于各种具名定义
+     * Id的定义节点
+     * 一般用于各种具名定义的名称字段
      */
-    class IdentDef : public Node {
+    class IdentDef final : public Node {
     private:
         StringRef id_;
         std::set<IdentRefer *> reference_table_;
-        TagDecl *back_point_to_decl_ = nullptr;
 
     public:
         IdentDef(const char *id) ;
@@ -412,15 +445,23 @@ namespace rexlang {
         IdentDef(const IdentDef &other) ;
 
     public:
+        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+
+    public:
         TagDecl *decl() const ;
+        void addReference(IdentRefer *ref) ;
 
     public:
         static const NodeType GetClassId () ;
 
     };
 
-    /**
-     * @brief 定义基类
+    /***===------------------------------------------------===***
+     * 声明
+     ***===------------------------------------------------===***/
+
+    /*
+     * 声明节点族基类
      */
     class Decl : public Node {
     private:
@@ -431,11 +472,15 @@ namespace rexlang {
         virtual void applyAttribute (const TString &attribute) ;
         virtual void applyAttributes(const std::vector<TString> &attributes) ;
 
+    public:
         void        setAccessLevel(AccessLevel accessLevel) ;
         AccessLevel getAccessLevel() const ;
 
-        virtual TypeDecl* getType () const = 0;    // 获取定义的类型，若为实例则获取实例类型，若为类型则返回自身
+    public:
+        // 获取定义的类型，若为实例则获取实例类型，若为类型则返回自身
+        virtual TypeDecl* getType () const = 0;
 
+    public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
@@ -443,24 +488,21 @@ namespace rexlang {
     };
 
     /*
-     * 带有名称和注释的命名定义基本结构
+     * 带有名称和注释的命名声明基本结构
      */
     class TagDecl : public Decl {
     private:
-        // 定义名称
+        // 声明名称
         IdentDef *name_ = nullptr;
         // 注释
         TString comment_;
         // 引用表
         std::set<IdentRefer *> reference_table_;
-        // 未完成定义
-        bool forward_decl_ = false;
 
     public:
-        TagDecl(IdentDef *name) ;
+        explicit TagDecl(IdentDef *name) ;
 
     public:
-
         IdentDef *      getName    () const         ;
         const char *    getNameStr () const         ;
 
@@ -468,6 +510,7 @@ namespace rexlang {
         const TString & getComment      () const                 ;
         const char *    getCommentStr   () const                 ;
 
+    public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
@@ -479,19 +522,26 @@ namespace rexlang {
         static const NodeType GetClassId () ;
     };
 
+    /***===------------------------------------------------===***
+     * 变量声明
+     ***===------------------------------------------------===***/
+
     /*
-     * 描述成员变量、全局变量、局部变量、参数等带有明确类型的基本结构
+     * 描述带有明确类型的具名实例的基本结构
+     * 例如：成员变量、全局变量、局部变量、参数等
      */
     class BaseVariDecl : public TagDecl {
     private:
-        IdentRefer *type_;  // 类型
+        VariTypeDecl *type_ = nullptr;    // 类型
+
+    public:
+        BaseVariDecl(VariTypeDecl *type, IdentDef *name);
 
     public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
-        void        setType (IdentRefer *typeName) ;
-        TypeDecl *  getType () const override ;
+        TypeDecl *  getType () const override ;     // 通过 type_ 指针获取实例的类型
 
     public:
         static const NodeType GetClassId () ;
@@ -503,20 +553,21 @@ namespace rexlang {
      */
     class ParameterDecl : public BaseVariDecl {
     private:
-        bool is_reference_ = false; // 是否引用类型
         bool is_nullable_  = false; // 是否可空
+
+    public:
+        ParameterDecl(VariTypeDecl *type, IdentDef *name) ;
 
     public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
-        void applyAttribute (const TString &attribute)  override ;
-        void setDynamicFlag (bool flag = true) ;
+        void applyAttribute (const TString &attribute) override ;
         bool isDynamicParam () const ;
         void enableReference(bool enable = true) ;
 
     public:
-        unsigned getParamIndex  () const ;
+        int      getParamIndex  () const ;
         bool     isNullable     () const ;
         bool     isArray        () const ;
 
@@ -676,6 +727,9 @@ namespace rexlang {
     };
 
     class VariTypeDecl : public TypeDecl {
+    private:
+        bool is_reference_ = false;
+
     public:
         ArrayDecl *getArrayToWithDimStr(const std::vector<size_t> dims) ;
 
@@ -684,24 +738,6 @@ namespace rexlang {
     public:
         static const NodeType GetClassId () ;
 
-    };
-
-    // 内置类型枚举
-    enum class EnumOfBuiltinType {
-        kBTypeVoid,        // 空
-        kBTypeCommon,      // 通用型
-        kBTypeChar,        // 字节型
-        kBTypeInteger,     // 整数型
-        kBTypeFloat,       // 小数型
-        kBTypeBool,        // 逻辑型
-        kBTypeString,      // 文本型
-        kBTypeDataSet,     // 字节集
-        kBTypeShort,       // 短整型
-        kBTypeLong,        // 长整型
-        kBTypeDatetime,    // 日期时间型
-        kBTypeFuncPtr,     // 子程序指针
-        kBTypeDouble,      // 双精度小数型
-        kBTypeEND,
     };
 
     /*
@@ -923,7 +959,7 @@ namespace rexlang {
      */
     class StructureDecl : public VariTypeDecl {
     private:
-        ordered_map<StringRef, MemberVariableDecl *> members_;
+        NamedOrderDict<MemberVariableDecl *> members_;
 
     public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
@@ -969,10 +1005,11 @@ namespace rexlang {
 
     public:
         static const NodeType GetClassId () ;
+
     };
 
-    /**
-     * @brief 具有函数性的定义
+    /*
+     * 具有函数性的定义
      * 包含子函数定义和DLL函数定义
      */
     class FunctorDecl : public TypeDecl {
@@ -1015,7 +1052,7 @@ namespace rexlang {
     class FunctionDecl : public FunctorDecl {
     private:
         // 局部变量列表
-        ordered_map<StringRef, LocalVariableDecl*> local_vari_;
+        NamedOrderDict<LocalVariableDecl*> local_vari_;
         // 语句列表
         StatementBlock *statement_list_ = nullptr;
         // 所属程序集
@@ -1032,6 +1069,7 @@ namespace rexlang {
         void     setStatementBlock  (StatementBlock *    statementBlock) ;
 
         LocalVariableDecl * getLocalVari    (const StringRef &name) const ;
+        ParameterDecl *     getParameter    (const StringRef &name) const ;
         StatementBlock *    getFunctionBody () const ;
 
     public:
@@ -1098,9 +1136,9 @@ namespace rexlang {
      */
     class ProgSetDecl : public TagDecl {
     private:
-        ordered_map<StringRef, FileVariableDecl *>  file_static_variables_;
-        ordered_map<StringRef, FunctionDecl *>      function_decls_;
-        ordered_map<StringRef, FunctorDecl *>       signature_of_functions_;
+        NamedOrderDict<FileVariableDecl *>  file_static_variables_;
+        NamedOrderDict<FunctionDecl *>      function_decls_;
+        NamedOrderDict<FunctorDecl *>       signature_of_functions_;
 
     public:
         void appendFileStaticVari(FileVariableDecl *variable) ;
@@ -1500,13 +1538,11 @@ namespace rexlang {
         virtual IdentRefer *getBaseId() const = 0;    // 获取组件的确切名称对象
     };
 
-    /**
-     * @brief 普通名称组件
+    /*
+     * 普通名称组件
      */
     class IdentRefer : public NameComponent {
     private:
-        // 引用名
-        StringRef name_;
         // 引用目标
         IdentDef *reference_ = nullptr;
 
@@ -1516,18 +1552,15 @@ namespace rexlang {
         TypeDecl *getExpressionTypeInternal ()                       const override ;
 
     public:
-        IdentRefer() ;
-        IdentRefer(const StringRef &name) ;
+        IdentRefer(const StringRef &name) ;     // 创建指向 IdentDef 的对象，不存在则创建占位符
 
     public:
-        IdentDef * def() const ;
-        const TString &     getName         () const ;
-        const StringRef &   getNameRef      () const ;
+        IdentDef *          def     () const ;  // 获取指向的定义
+        const StringRef &   getName () const ;  // 获取引用的名称
 
         TagDecl *       EvalBaseNameComponentType   ()       override ;
         IdentRefer *    getBaseId                   () const override ;
-        TagDecl *       getDecl                     () ;
-        TagDecl *       getDecl                     () const ;
+        TagDecl *       getDecl                     () const ;  // 获取被引用的定义
 
     public:
         static const NodeType GetClassId () ;
@@ -1881,12 +1914,12 @@ namespace rexlang {
 
         /********************** 符号表需要用到的公共信息 **********************/
 
-        ordered_map<StringRef, TypeDecl *>              global_type_;       // 全局类型索引表
-        ordered_map<StringRef, GlobalVariableDecl *>    global_variables_;  // 全局变量索引表
-        std::set<TString>                               libraries_list_;    // 支持库引用列表
-        ordered_map<StringRef, FunctorDecl*>            functor_declares_;  // 函数定义表和DLL声明表的合并
-        ordered_map<StringRef, ConstDecl *>             consts_declares_;   // 常量定义索引表
-        ordered_map<StringRef, ProgSetDecl *>           program_sets_;      // 程序集索引表
+        NamedOrderDict<TypeDecl *>              global_type_;       // 全局类型索引表
+        NamedOrderDict<GlobalVariableDecl *>    global_variables_;  // 全局变量索引表
+        std::set<TString>                     libraries_list_;    // 支持库引用列表
+        NamedOrderDict<FunctorDecl*>            functor_declares_;  // 函数定义表和DLL声明表的合并
+        NamedOrderDict<ConstDecl *>             consts_declares_;   // 常量定义索引表
+        NamedOrderDict<ProgSetDecl *>           program_sets_;      // 程序集索引表
 
         /****************************************************************/
 
@@ -1910,6 +1943,7 @@ namespace rexlang {
         bool    addGlobalVari   (BaseVariDecl * variDecl)    const ;    // 添加全局变量
         bool    addConstVal     (ConstDecl *    constDecl)   const ;    // 添加常量定义
         bool    addRefLib       (const TString &libName)     const ;    // 添加引用库
+        bool    addPlaceholder  (IdentDef *     phName)      const ;    // 添加占位符
 
         TypeDecl *              getType         (const StringRef &name) const ;
         GlobalVariableDecl *    getGlobalVari   (const StringRef &name) const ;
