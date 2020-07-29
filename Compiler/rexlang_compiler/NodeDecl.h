@@ -148,9 +148,7 @@ namespace rexlang {
         kLTStatic,
     };
 
-    /*
-     * 参数传递模型
-     */
+    // 参数传递模型
     enum ArgumentPassModel {
         // 直接传递
         kDirect,
@@ -191,9 +189,9 @@ namespace rexlang {
 
     public:
 
-        /***********************************************
+        /*===---------------------------------------===*
          * 基本符号特性判定
-         ***********************************************/
+         *===---------------------------------------===*/
 
         [[nodiscard]] bool isUnaryOpt      () const ;   // -
         [[nodiscard]] bool isBinaryOpt     () const ;   // + - * / \ % == != > < >= <= ?= && ||
@@ -210,18 +208,18 @@ namespace rexlang {
         Opt opt_;
     };
 
-    /*
+    /*===---------------------------------------===*
      * 节点基类
-     */
+     *===---------------------------------------===*/
     class Node {
     private:
-        size_t          node_id_            = 0;
-        ASTContext *    ast_context_        = nullptr;
-        Node *          parent_scope_       = nullptr;
-        Node *          parent_node_        = nullptr;
-        NodeType        node_type_          = NodeType::kNTyBadType;
-        size_t          location_start_     = 0;
-        size_t          location_end_       = 0;
+        size_t          node_id_            = 0;        // 节点ID
+        ASTContext *    ast_context_        = nullptr;  // 语法树编译上下文
+        Node *          parent_scope_       = nullptr;  // 最近的父域
+        Node *          parent_node_        = nullptr;  // 父节点
+        NodeType        node_type_          = NodeType::kNTyBadType;    // 节点类型
+        size_t          location_start_     = 0;        // 起始位置
+        size_t          location_end_       = 0;        // 终止位置
 
     protected:
         void setParent(Node *parent) ;
@@ -269,24 +267,23 @@ namespace rexlang {
         size_t          getRightColumn() const ;
 
     public:
-        virtual TagDecl * findDeclWithNameString(const StringRef &name) const ;
-        virtual void sematicAnalysisInternal(SemaContext &semaCtx) = 0;
+        virtual TagDecl * findDeclWithNameString(const StringRef &name) const ; // 沿着语法树搜索指定名称的定义
+
+    public:
+        virtual void sematicAnalysisInternal(SemaContext &semaCtx) = 0;     // 在节点上执行语义分析
 
     };
 
-    /***===------------------------------------------------===***
+    /*===---------------------------------------===*
      * 文件
-     ***===------------------------------------------------===***/
+     *===---------------------------------------===*/
 
-    /*
+    /**
      * 资源文件基类
      */
     class SourceFile : public Node {
     public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
-
-    public:
-        static const NodeType GetClassId () ;
 
         virtual bool isProgramSetFile    () const ;
         virtual bool isGlobalVariableFile() const ;
@@ -294,10 +291,14 @@ namespace rexlang {
         virtual bool isAPIDeclareFile    () const ;
         virtual bool isConstDeclareFile  () const ;
 
-        virtual void registResourceTo   (TranslateUnit *translateUnit) const = 0;
+        virtual void registResourceTo   (TranslateUnit *translateUnit) const = 0;   // 将资源注册到翻译单元
+
+    public:
+        static const NodeType GetClassId () ;
+
     };
 
-    /*
+    /**
      * 函数声明文件
      */
     class ProgramSetFile : public SourceFile {
@@ -324,7 +325,7 @@ namespace rexlang {
 
     };
 
-    /*
+    /**
      * 全局变量声明文件
      */
     class GlobalVariableFile : public SourceFile {
@@ -349,7 +350,7 @@ namespace rexlang {
         static const NodeType GetClassId () ;
     };
 
-    /*
+    /**
      * 数据结构定义文件
      */
     class DataStructureFile : public SourceFile {
@@ -374,7 +375,7 @@ namespace rexlang {
         static const NodeType GetClassId () ;
     };
 
-    /*
+    /**
      * DLL函数接口声明文件
      */
     class APIDeclareFile : public SourceFile {
@@ -399,7 +400,7 @@ namespace rexlang {
         static const NodeType GetClassId () ;
     };
 
-    /*
+    /**
      * 常量资源定义文件
      */
     class ConstDeclareFile : public SourceFile {
@@ -425,11 +426,11 @@ namespace rexlang {
 
     };
 
-    /***===------------------------------------------------===***
+    /*===---------------------------------------===*
      *
-     ***===------------------------------------------------===***/
+     *===---------------------------------------===*/
 
-    /*
+    /**
      * Id的定义节点
      * 一般用于各种具名定义的名称字段
      */
@@ -448,19 +449,24 @@ namespace rexlang {
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
+        const char *name() const ;
+
         TagDecl *decl() const ;
-        void addReference(IdentRefer *ref) ;
+
+        void addReference(IdentRefer *idRef) ;
+        void removeReference(IdentRefer *idRef) ;
+        std::set<IdentRefer *> &getReferenceTable() const ;
 
     public:
         static const NodeType GetClassId () ;
 
     };
 
-    /***===------------------------------------------------===***
+    /*===---------------------------------------===*
      * 声明
-     ***===------------------------------------------------===***/
+     *===---------------------------------------===*/
 
-    /*
+    /**
      * 声明节点族基类
      */
     class Decl : public Node {
@@ -473,8 +479,8 @@ namespace rexlang {
         virtual void applyAttributes(const std::vector<TString> &attributes) ;
 
     public:
-        void        setAccessLevel(AccessLevel accessLevel) ;
-        AccessLevel getAccessLevel() const ;
+        void        setAccessLevel(AccessLevel accessLevel) ;   // 设置访问级别
+        AccessLevel getAccessLevel() const ;        // 获取访问级别
 
     public:
         // 获取定义的类型，若为实例则获取实例类型，若为类型则返回自身
@@ -487,7 +493,7 @@ namespace rexlang {
         static const NodeType GetClassId () ;
     };
 
-    /*
+    /**
      * 带有名称和注释的命名声明基本结构
      */
     class TagDecl : public Decl {
@@ -496,8 +502,6 @@ namespace rexlang {
         IdentDef *name_ = nullptr;
         // 注释
         TString comment_;
-        // 引用表
-        std::set<IdentRefer *> reference_table_;
 
     public:
         explicit TagDecl(IdentDef *name) ;
@@ -514,7 +518,7 @@ namespace rexlang {
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
-        const std::set<IdentRefer *> &  getReferenceTable   () const ;
+        std::set<IdentRefer *> &        getReferenceTable   () ;
         int                             addReference        (IdentRefer *reference) ;
         int                             removeReference     (IdentRefer *reference) ;
 
@@ -526,16 +530,18 @@ namespace rexlang {
      * 变量声明
      ***===------------------------------------------------===***/
 
-    /*
+    /**
      * 描述带有明确类型的具名实例的基本结构
      * 例如：成员变量、全局变量、局部变量、参数等
      */
     class BaseVariDecl : public TagDecl {
     private:
-        VariTypeDecl *type_ = nullptr;    // 类型
+        IdentRefer   *type_name_ = nullptr; // 类型名称
+        VariTypeDecl *type_      = nullptr; // 类型
 
     public:
-        BaseVariDecl(VariTypeDecl *type, IdentDef *name);
+        BaseVariDecl(VariTypeDecl *type, IdentDef *name) ;
+        BaseVariDecl(IdentRefer *  type, IdentDef *name) ;
 
     public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
@@ -548,7 +554,7 @@ namespace rexlang {
 
     };
 
-    /*
+    /**
      * 描述参数结构
      */
     class ParameterDecl : public BaseVariDecl {
@@ -557,6 +563,7 @@ namespace rexlang {
 
     public:
         ParameterDecl(VariTypeDecl *type, IdentDef *name) ;
+        ParameterDecl(IdentRefer *  type, IdentDef *name) ;
 
     public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
@@ -579,7 +586,9 @@ namespace rexlang {
 
     };
 
-    // 描述常量值定义
+    /*
+     * 描述常量值定义
+     */
     class ConstDecl : public TagDecl {
     private:
         Value * const_value_ = nullptr;
@@ -1540,6 +1549,8 @@ namespace rexlang {
 
     /*
      * 普通名称组件
+     * 组件被创建后会主动寻找名称中指定的定义并且绑定
+     * 如果找不到定义，则会将自身注册到TU中相应的位置，并等待具有该名字的定义出现
      */
     class IdentRefer : public NameComponent {
     private:
@@ -1903,8 +1914,8 @@ namespace rexlang {
 
     };
 
-    /**
-     * @brief 翻译单元
+    /*
+     * 翻译单元
      * 翻译单元结构将所有可编译数据打包，提供一致的索引方式，同时应对可能的名称冲突。
      */
     class TranslateUnit : public Node {
@@ -1916,10 +1927,11 @@ namespace rexlang {
 
         NamedOrderDict<TypeDecl *>              global_type_;       // 全局类型索引表
         NamedOrderDict<GlobalVariableDecl *>    global_variables_;  // 全局变量索引表
-        std::set<TString>                     libraries_list_;    // 支持库引用列表
+        std::set<TString>                       libraries_list_;    // 支持库引用列表
         NamedOrderDict<FunctorDecl*>            functor_declares_;  // 函数定义表和DLL声明表的合并
         NamedOrderDict<ConstDecl *>             consts_declares_;   // 常量定义索引表
         NamedOrderDict<ProgSetDecl *>           program_sets_;      // 程序集索引表
+        NamedOrderDict<IdentDef *>              placeholders_;      // 占位符索引表
 
         /****************************************************************/
 

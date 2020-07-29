@@ -136,18 +136,17 @@ namespace rexlang {
      * TagDecl
      ***************************************************/
 
-    void                TagDecl::setName         (const TString &name)      { name_ = name; }
-    const TString &     TagDecl::getName         () const                   { return name_; }
-    const StringRef &   TagDecl::getNameRef      () const                   { return name_.string_; }
+    IdentDef *      TagDecl::getName    () const    { return name_; }
+    const char *    TagDecl::getNameStr () const    { return name_->name(); }
 
     void                TagDecl::setComment      (const TString &comment)   { comment_ = comment; }
     const TString &     TagDecl::getComment      () const                   { return comment_; }
-    const StringRef &   TagDecl::getCommentRef   () const                   { return comment_.string_; }
+    const char *        TagDecl::getCommentStr   () const                   { return comment_.string_.c_str(); }
 
-    const std::set<IdentRefer *> &TagDecl::getReferenceTable() const        { return reference_table_; }
+    std::set<IdentRefer *> &TagDecl::getReferenceTable()    { return name_->getReferenceTable(); }
 
-    int TagDecl::addReference     (IdentRefer *reference) { reference_table_.insert(reference); return 0; }
-    int TagDecl::removeReference  (IdentRefer *reference) { reference_table_.erase(reference);  return 0; }
+    int TagDecl::addReference     (IdentRefer *reference) { name_->addReference(reference);    return 0; }
+    int TagDecl::removeReference  (IdentRefer *reference) { name_->removeReference(reference); return 0; }
 
     /***************************************************
      * BaseVariDecl

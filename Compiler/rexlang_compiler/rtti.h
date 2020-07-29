@@ -11,7 +11,9 @@ namespace rexlang {
     namespace rtti {
 
         template <typename T>
-        T *dyn_cast(Node *n) {}
+        T *dyn_cast(Node *n) {
+            return dynamic_cast<T *>(n);
+        }
 
     }
 }

@@ -287,7 +287,7 @@ namespace rexlang {
      * NameComponent 族
      ******************************************/
 
-    TypeDecl * BaseVariDecl::getType() const { return type_; }
+    TypeDecl * BaseVariDecl::getType() const { return type_ ? type_ : rtti::dyn_cast<TypeDecl>(type_name_->getDecl()); }
     TypeDecl * TypeDecl    ::getType() const { return const_cast<TypeDecl *>(this); }
     TypeDecl * ProgSetDecl ::getType() const { return nullptr; }
 
