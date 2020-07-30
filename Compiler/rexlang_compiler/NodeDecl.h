@@ -687,6 +687,9 @@ namespace rexlang {
 
     class TypeDecl : public TagDecl {
     public:
+        TypeDecl(IdentDef *name) ;
+
+    public:
         TypeDecl* getType () const override ;
 
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
@@ -738,13 +741,25 @@ namespace rexlang {
 
     };
 
-    /*
+    /**
      * 引用类型包装
      */
-    class ReferenceType : public TypeDecl {
+    class ReferenceType final : public TypeDecl {
+        friend class Node;
     private:
         IdentRefer * type_name_    = nullptr;
         TypeDecl *   pointee_type_ = nullptr;
+
+    private:
+        ReferenceType(IdentRefer * typeName) ;
+        ReferenceType(TypeDecl *   pointeeType) ;
+
+    public:
+        static ReferenceType *get(IdentRefer * typeName) ;
+        static ReferenceType *get(TypeDecl *   pointeeType) ;
+
+    public:
+        TypeDecl *getPointee() const ;
 
     public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;

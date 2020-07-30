@@ -58,17 +58,15 @@ SET(REXCompilerParse-Source
         CST2ASTConvert.cpp
         CST2ASTConvert.h
         TypeAssert.cpp
-        TypeAssert.h
         ASTUtility.cpp
         ASTUtility.h
         TypeSystem.cpp
-        TypeSystem.h
         HierarchyIdentifier.cpp
         ExprLR.cpp
         ASTNodeGetterSetter.cpp
         Symbols.cpp
         ${SematicAnalysis-Src}
-        ExprTypeInfer.cpp rtti.cpp rtti.h Decl.cpp)
+        ExprTypeInfer.cpp rtti.cpp rtti.h Decl.cpp TypeConvert.cpp)
 
 if(NOT CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
     set (flags_1 "-Wno-overloaded-virtual")

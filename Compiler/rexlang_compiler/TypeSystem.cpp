@@ -2,7 +2,6 @@
 // Created by rex on 2020/1/31.
 //
 
-#include "TypeSystem.h"
 #include "rtti.h"
 
 namespace rexlang {
@@ -281,6 +280,15 @@ namespace rexlang {
         VariTypeDecl *type = vari_type_decl_;
         vari_type_decl_ = nullptr;
         return type;
+    }
+
+    TypeDecl * ReferenceType::getPointee() const {
+        if (pointee_type_) {
+            return pointee_type_;
+        }
+        else {
+            return rtti::dyn_cast<TypeDecl>(type_name_->getDecl());
+        }
     }
 
     /******************************************

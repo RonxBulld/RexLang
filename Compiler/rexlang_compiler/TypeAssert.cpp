@@ -4,7 +4,6 @@
 
 #include <cassert>
 
-#include "TypeAssert.h"
 #include "ASTUtility.h"
 
 namespace rexlang {
