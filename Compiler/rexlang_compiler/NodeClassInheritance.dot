@@ -23,6 +23,7 @@ digraph G {
 	"StructureDecl" -> "VariTypeDecl"
 	"ArrayDecl" -> "VariTypeDecl"
 	"FunctorDecl" -> "TypeDecl"
+	"ReferenceType" -> "TypeDecl"
 	"FunctionDecl" -> "FunctorDecl"
 	"APICommandDecl" -> "FunctorDecl"
 	"ProgSetDecl" -> "TagDecl"

@@ -58,7 +58,7 @@ namespace rexlang {
 
     class Decl;                 class TagDecl;                  class TypeDecl;
     class VariTypeDecl;         class StructureDecl;            class BuiltinTypeDecl;
-    class ArrayDecl;            class ReferenceDecl;            class ConstDecl;
+    class ArrayDecl;            class ReferenceType;            class ConstDecl;
 
     // Entity declare
 
@@ -104,7 +104,7 @@ namespace rexlang {
         kNTyIdentDef, kNTyTagDecl, kNTyVariableDecl, kNTyBaseVariDecl,
         kNTyGlobalVariableDecl, kNTyParameterDecl, kNTyMemberVariableDecl, kNTyFileVariableDecl,
         kNTyLocalVariableDecl, kNTyTypeDecl, kNTyVariTypeDecl, kNTyBuiltinTypeDecl,
-        kNTyArrayDecl, kNTyConstDecl, kNTyStructureDecl, kNTReferenceDecl,
+        kNTyArrayDecl, kNTyConstDecl, kNTyStructureDecl, kNTReferenceType,
         kNTyFunctorDecl, kNTyFunctionDecl, kNTyProgSetDecl, kNTyAPICommandDecl,
 
         kNTyStatement,
@@ -536,6 +536,9 @@ namespace rexlang {
      */
     class BaseVariDecl : public TagDecl {
     private:
+
+        // 名称和类型同时只能存在一个
+
         IdentRefer   *type_name_ = nullptr; // 类型名称
         VariTypeDecl *type_      = nullptr; // 类型
 
@@ -729,6 +732,22 @@ namespace rexlang {
         [[nodiscard]] virtual bool       isUnyOptValid       (OperatorType opt) const ;                      // 判断一元计算有效性
         [[nodiscard]] virtual bool       isBinOptValid       (OperatorType opt, VariTypeDecl *otherType) const ; // 判断二元计算有效性
         [[nodiscard]] virtual bool       isAssginValidFrom   (TypeDecl *fromType) const ;                    // 判断赋值有效性
+
+    public:
+        static const NodeType GetClassId () ;
+
+    };
+
+    /*
+     * 引用类型包装
+     */
+    class ReferenceType : public TypeDecl {
+    private:
+        IdentRefer * type_name_    = nullptr;
+        TypeDecl *   pointee_type_ = nullptr;
+
+    public:
+        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -1010,7 +1029,8 @@ namespace rexlang {
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
-        static ArrayDecl *  get (TypeDecl *elementType, const std::vector<size_t> dimensions) ;
+        static ArrayDecl *  get (TypeDecl *  elementType, const std::vector<size_t> dimensions) ;
+        static ArrayDecl *  get (IdentRefer *elementName, const std::vector<size_t> dimensions) ;
 
     public:
         static const NodeType GetClassId () ;
