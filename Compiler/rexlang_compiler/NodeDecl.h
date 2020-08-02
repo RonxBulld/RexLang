@@ -536,9 +536,6 @@ namespace rexlang {
      */
     class BaseVariDecl : public TagDecl {
     private:
-
-        // 名称和类型同时只能存在一个
-
         IdentRefer   *type_name_ = nullptr; // 类型名称
         VariTypeDecl *type_      = nullptr; // 类型
 
@@ -550,6 +547,7 @@ namespace rexlang {
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
+        void        updateType (VariTypeDecl *type) ;
         TypeDecl *  getType () const override ;     // 获取变量实例的类型
 
     public:
@@ -741,10 +739,24 @@ namespace rexlang {
 
     };
 
+    class VariTypeDecl : public TypeDecl {
+    public:
+        VariTypeDecl(IdentDef *name);
+
+    public:
+        ArrayDecl *getArrayToWithDimStr(const std::vector<size_t> dims) ;
+
+        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+
+    public:
+        static const NodeType GetClassId () ;
+
+    };
+
     /**
      * 引用类型包装
      */
-    class ReferenceType final : public TypeDecl {
+    class ReferenceType final : public VariTypeDecl {
         friend class Node;
     private:
         IdentRefer * type_name_    = nullptr;
@@ -762,20 +774,6 @@ namespace rexlang {
         TypeDecl *getPointee() const ;
 
     public:
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
-
-    public:
-        static const NodeType GetClassId () ;
-
-    };
-
-    class VariTypeDecl : public TypeDecl {
-    private:
-        bool is_reference_ = false;
-
-    public:
-        ArrayDecl *getArrayToWithDimStr(const std::vector<size_t> dims) ;
-
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:

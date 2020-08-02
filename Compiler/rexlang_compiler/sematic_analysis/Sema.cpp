@@ -139,9 +139,9 @@ namespace rexlang {
         SemaNamedMap(consts_declares_, semaCtx);
     }
 
-    /********************************************************
+    /*===------------------------------------------------===*
      * Decl
-     ********************************************************/
+     *===------------------------------------------------===*/
 
     void Decl::sematicAnalysisInternal(SemaContext &semaCtx) {
     }
@@ -183,7 +183,10 @@ namespace rexlang {
         TagDecl::sematicAnalysisInternal(semaCtx);
 
         // 明确类型指针
-        clarifyNamedType(vari_type_decl_, type_name_.string_, this);
+        if (type_name_ && !type_) {
+            type_ = rtti::dyn_cast<VariTypeDecl>(this->getType());
+        }
+        assert(type_);
     }
 
     void VariableDecl::sematicAnalysisInternal(SemaContext &semaCtx) {

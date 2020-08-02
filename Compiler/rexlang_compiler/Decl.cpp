@@ -44,7 +44,7 @@ namespace rexlang {
      * ReferenceType
      ******************************************************************/
 
-    ReferenceType::ReferenceType(IdentRefer * typeName)    : TypeDecl(nullptr), type_name_(typeName), pointee_type_(nullptr) {}
-    ReferenceType::ReferenceType(TypeDecl *   pointeeType) : TypeDecl(nullptr), type_name_(nullptr),  pointee_type_(pointeeType) {}
+    ReferenceType::ReferenceType(IdentRefer * typeName)    : VariTypeDecl(nullptr), type_name_(typeName), pointee_type_(nullptr) {}
+    ReferenceType::ReferenceType(TypeDecl *   pointeeType) : VariTypeDecl(nullptr), type_name_(nullptr),  pointee_type_(pointeeType) {}
 
 }

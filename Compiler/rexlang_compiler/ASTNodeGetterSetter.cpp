@@ -170,7 +170,7 @@ namespace rexlang {
 
     void ParameterDecl::applyAttribute(const TString &attribute) {
         if (Str2Attr::isNameOfReference(attribute.string_)) {
-            is_reference_ = true;
+            updateType(ReferenceType::get(getType()));
         }
         else if (Str2Attr::isNameOfNullable(attribute.string_)) {
             is_nullable_  = true;
