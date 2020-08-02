@@ -172,12 +172,12 @@ namespace rexlang {
      * 类型的可索引性及索引元素类型
      ************************************************/
 
-    bool VariTypeDecl       ::isIndexable() const { return false; }
+    bool TypeDecl           ::isIndexable() const { return false; }
     bool BuiltinStringType  ::isIndexable() const { return true; }
     bool BuiltinDataSetType ::isIndexable() const { return true; }
     bool ArrayDecl          ::isIndexable() const { return true; }
 
-    TypeDecl *VariTypeDecl       ::evalIndexedElementTy() const { return nullptr; }
+    TypeDecl *TypeDecl           ::evalIndexedElementTy() const { return nullptr; }
     TypeDecl *BuiltinStringType  ::evalIndexedElementTy() const { return this->getTranslateUnit()->getCharTy(); }
     TypeDecl *BuiltinDataSetType ::evalIndexedElementTy() const { return this->getTranslateUnit()->getCharTy(); }
     TypeDecl *ArrayDecl          ::evalIndexedElementTy() const { return this->base_type_; }
@@ -186,7 +186,7 @@ namespace rexlang {
      * 获取定义的索引维度
      ************************************************/
 
-    std::vector<size_t> VariTypeDecl       ::getDimensions() const { return {}; }
+    std::vector<size_t> TypeDecl           ::getDimensions() const { return {}; }
     std::vector<size_t> BuiltinStringType  ::getDimensions() const { return {0}; }
     std::vector<size_t> BuiltinDataSetType ::getDimensions() const { return {0}; }
     std::vector<size_t> ArrayDecl          ::getDimensions() const { return this->dimensions_; }
@@ -197,7 +197,7 @@ namespace rexlang {
      * 字符串和字节集维度总是固定为1
      **********************************************************/
 
-    bool VariTypeDecl       ::isFixedDimensions() const { return true; }
+    bool TypeDecl           ::isFixedDimensions() const { return true; }
     bool ArrayDecl          ::isFixedDimensions() const { return false; }
     bool BuiltinStringType  ::isFixedDimensions() const { return true; }
     bool BuiltinDataSetType ::isFixedDimensions() const { return true; }
@@ -226,7 +226,7 @@ namespace rexlang {
     BuiltinDoubleType *   TranslateUnit::getDoubleTy   () const { BuiltinTypeDecl *BT = builtin_type_map_.at(BuiltinDoubleType  ::BuiltinType()); assert(BT); return (BuiltinDoubleType *  ) BT; }
 
     bool TranslateUnit::RegistBuiltinType(BuiltinTypeDecl *builtinTypeDecl) {
-        global_type_[builtinTypeDecl->getNameRef()] = builtinTypeDecl;
+        global_type_[StringPool::Create(builtinTypeDecl->GetTypeText())] = builtinTypeDecl;
         builtin_type_map_[builtinTypeDecl->GetBuiltinType()] = builtinTypeDecl;
         return true;
     }
@@ -251,36 +251,8 @@ namespace rexlang {
 
 
     /************************************************
-     * 符号类型提取
+     * 类型提取
      ************************************************/
-
-    void BaseVariDecl::setTypeName(const TString &typeName) {
-        type_name_ = typeName;
-        // 重新查找类型
-        vari_type_decl_ = findDeclWithNameString(typeName.string_)->as<VariTypeDecl>();
-    }
-
-    const TString &BaseVariDecl::getTypeName() const { return type_name_; }
-
-    void BaseVariDecl::setValType(VariTypeDecl *variType) {
-        vari_type_decl_ = variType;
-        type_name_ = variType->getName();
-    }
-
-    VariTypeDecl * BaseVariDecl::getValType() {
-        vari_type_decl_ = const_cast<const BaseVariDecl *>(this)->evalValType();
-        return vari_type_decl_;
-    }
-
-    VariTypeDecl * BaseVariDecl::evalValType() const {
-        return findDeclWithNameString(type_name_.string_)->as<VariTypeDecl>();
-    }
-
-    VariTypeDecl *BaseVariDecl::takeValType () {
-        VariTypeDecl *type = vari_type_decl_;
-        vari_type_decl_ = nullptr;
-        return type;
-    }
 
     TypeDecl * ReferenceType::getPointee() const {
         if (pointee_type_) {

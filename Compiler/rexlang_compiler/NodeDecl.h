@@ -89,7 +89,7 @@ namespace rexlang {
     class ValueOfDecimal;       class ValueOfString;
 
     /**
-     * @brief 节点类型枚举
+     * 节点类型枚举
      */
     typedef enum class NodeType {
         kNTyBadType,
@@ -211,7 +211,7 @@ namespace rexlang {
     /*===---------------------------------------===*
      * 节点基类
      *===---------------------------------------===*/
-    class Node {
+    class __attribute__((annotate("BaseAstNode"))) Node {
     private:
         size_t          node_id_            = 0;        // 节点ID
         ASTContext *    ast_context_        = nullptr;  // 语法树编译上下文
@@ -550,7 +550,7 @@ namespace rexlang {
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
-        TypeDecl *  getType () const override ;     // 通过 type_ 指针获取实例的类型
+        TypeDecl *  getType () const override ;     // 获取变量实例的类型
 
     public:
         static const NodeType GetClassId () ;
