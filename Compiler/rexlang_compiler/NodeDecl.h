@@ -550,6 +550,9 @@ namespace rexlang {
         void        updateType (VariTypeDecl *type) ;
         TypeDecl *  getType () const override ;     // 获取变量实例的类型
 
+        IdentRefer *    id  () const ;
+        VariTypeDecl *  type() const ;
+
     public:
         static const NodeType GetClassId () ;
 
@@ -587,7 +590,7 @@ namespace rexlang {
 
     };
 
-    /*
+    /**
      * 描述常量值定义
      */
     class ConstDecl : public TagDecl {
@@ -608,7 +611,7 @@ namespace rexlang {
 
     };
 
-    /*
+    /**
      * 描述成员变量、全局变量、局部变量、文件变量
      */
     class VariableDecl : public BaseVariDecl {
@@ -619,7 +622,7 @@ namespace rexlang {
         static const NodeType GetClassId () ;
     };
 
-    /*
+    /**
      * 描述全局变量
      */
     class GlobalVariableDecl : public VariableDecl {

@@ -111,6 +111,12 @@ namespace rexlang {
     const ConstDeclareFile::ConstDeclMapTy & ConstDeclareFile::getConstDeclMap () const { return consts_declares_; }
 
     /***************************************************
+     * ConstDecl
+     ***************************************************/
+
+    ConstDecl::ConstDecl(IdentDef *name, Value *value) : TagDecl(name), const_value_(value) {}
+
+    /***************************************************
      * Decl
      ***************************************************/
 
@@ -152,11 +158,21 @@ namespace rexlang {
      * BaseVariDecl
      ***************************************************/
 
+    void BaseVariDecl::updateType(VariTypeDecl *type) {
+        type_      = type;
+
+        delete type_name_;
+        type_name_ = nullptr;
+    }
+
+    IdentRefer *   BaseVariDecl::id  () const { return type_name_; }
+    VariTypeDecl * BaseVariDecl::type() const { return type_; }
+
     /***************************************************
      * ParameterDecl
      ***************************************************/
 
-    unsigned ParameterDecl::getParamIndex() const {
+    int ParameterDecl::getParamIndex() const {
         FunctorDecl *parent_func = getParent()->as<FunctorDecl>();
         if (parent_func) {
             int idx = parent_func->getIndexOf(this);
@@ -176,7 +192,12 @@ namespace rexlang {
             is_nullable_  = true;
         }
         else if (Str2Attr::isNameOfArray(attribute.string_)) {
-            setValType(ArrayDecl::get(getValType(), {}));
+            if (IdentRefer *__id = id()) {
+                updateType(ArrayDecl::get(__id, {}));
+            }
+            else if (VariTypeDecl *__type = type()) {
+                updateType(ArrayDecl::get(__type, {}));
+            }
         }
         else {
             Decl::applyAttribute(attribute);
