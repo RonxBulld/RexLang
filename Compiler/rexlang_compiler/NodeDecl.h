@@ -554,6 +554,26 @@ namespace rexlang {
         VariTypeDecl *  type() const ;
 
     public:
+        /*===-----------------------------------------------------------===*
+         * 使用其他类型来包装原有类型
+         * 其他类型节点必须有两个签名如下的静态成员方法：
+         * static VariTypeDecl *get(TypeDecl *  elementType, ...);
+         * static VariTypeDecl *get(IdentRefer *elementName, ...);
+         *===-----------------------------------------------------------===*/
+        template <typename NewTy, typename ... Args>
+        void wrapTypeUse(Args && ... args) {
+            if (IdentRefer *__id = id()) {
+                updateType(NewTy::get(__id, args...));
+            }
+            else if (VariTypeDecl *__type = type()) {
+                updateType(NewTy::get(__type, args...));
+            }
+            else {
+                assert(false);
+            }
+        }
+
+    public:
         static const NodeType GetClassId () ;
 
     };
@@ -633,13 +653,10 @@ namespace rexlang {
         static const NodeType GetClassId () ;
     };
 
-    /*
+    /**
      * 描述成员变量
      */
     class MemberVariableDecl : public VariableDecl {
-    private:
-        bool is_reference_ = false;
-
     public:
         void applyAttribute (const TString &attribute) override ;
 
@@ -653,7 +670,7 @@ namespace rexlang {
         static const NodeType GetClassId () ;
     };
 
-    /*
+    /**
      * 描述文件变量
      */
     class FileVariableDecl : public VariableDecl {
@@ -664,7 +681,7 @@ namespace rexlang {
         static const NodeType GetClassId () ;
     };
 
-    /*
+    /**
      * 描述局部变量
      */
     class LocalVariableDecl : public VariableDecl {
@@ -685,7 +702,6 @@ namespace rexlang {
     /*
      * 类型定义分支
      */
-
     class TypeDecl : public TagDecl {
     public:
         TypeDecl(IdentDef *name) ;
@@ -1069,6 +1085,8 @@ namespace rexlang {
 
     public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+
+        bool isCallable             () const override ;
 
     public:
         void appendParameter(ParameterDecl *parameterDecl) ;

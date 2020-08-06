@@ -186,18 +186,13 @@ namespace rexlang {
 
     void ParameterDecl::applyAttribute(const TString &attribute) {
         if (Str2Attr::isNameOfReference(attribute.string_)) {
-            updateType(ReferenceType::get(getType()));
+            wrapTypeUse<ReferenceType>();
         }
         else if (Str2Attr::isNameOfNullable(attribute.string_)) {
             is_nullable_  = true;
         }
         else if (Str2Attr::isNameOfArray(attribute.string_)) {
-            if (IdentRefer *__id = id()) {
-                updateType(ArrayDecl::get(__id, {}));
-            }
-            else if (VariTypeDecl *__type = type()) {
-                updateType(ArrayDecl::get(__type, {}));
-            }
+            wrapTypeUse<ArrayDecl>(std::vector<size_t>());
         }
         else {
             Decl::applyAttribute(attribute);
@@ -234,8 +229,12 @@ namespace rexlang {
      ***************************************************/
 
     void MemberVariableDecl::applyAttribute(const TString &attribute) {
-        if (Str2Attr::isNameOfReference(attribute.string_)) { is_reference_ = true; }
-        else { VariableDecl::applyAttribute(attribute); }
+        if (Str2Attr::isNameOfReference(attribute.string_)) {
+            wrapTypeUse<ReferenceType>();
+        }
+        else {
+            VariableDecl::applyAttribute(attribute);
+        }
     }
 
     /***************************************************

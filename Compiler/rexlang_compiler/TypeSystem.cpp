@@ -169,6 +169,13 @@ namespace rexlang {
     const char * BuiltinDoubleType  ::GetTypeText() const { return BuiltinDoubleType  ::TypeText(); }
 
     /************************************************
+     * 类型的可调用性
+     ************************************************/
+
+    bool TypeDecl   ::isCallable() const { return false; }
+    bool FunctorDecl::isCallable() const { return false; }
+
+    /************************************************
      * 类型的可索引性及索引元素类型
      ************************************************/
 
