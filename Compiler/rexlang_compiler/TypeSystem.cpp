@@ -187,7 +187,7 @@ namespace rexlang {
     TypeDecl *TypeDecl           ::evalIndexedElementTy() const { return nullptr; }
     TypeDecl *BuiltinStringType  ::evalIndexedElementTy() const { return this->getTranslateUnit()->getCharTy(); }
     TypeDecl *BuiltinDataSetType ::evalIndexedElementTy() const { return this->getTranslateUnit()->getCharTy(); }
-    TypeDecl *ArrayDecl          ::evalIndexedElementTy() const { return this->base_type_; }
+    TypeDecl *ArrayDecl          ::evalIndexedElementTy() const { assert(base_type_); return base_type_; }
 
     /************************************************
      * 获取定义的索引维度

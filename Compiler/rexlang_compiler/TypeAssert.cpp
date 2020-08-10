@@ -328,11 +328,23 @@ namespace rexlang {
     bool BuiltinFuncPtrType::isBinOptValid(OperatorType opt, VariTypeDecl *otherType) const { return false; }
 
     /*===-----------------------------------------------------===*
+     * 类型比较判定
+     *===-----------------------------------------------------===*/
+
+    bool  TypeDecl ::compareTo(TypeDecl *otherType) const { return otherType == this; }
+    bool  ArrayDecl::compareTo(TypeDecl *otherType) const {
+        if (!otherType->isArrayType()) { return false; }
+        if (evalIndexedElementTy() == otherType->evalIndexedElementTy()) { return false; }
+        return false;
+    }
+
+    /*===-----------------------------------------------------===*
      * 赋值有效性判定
      *===-----------------------------------------------------===*/
 
     bool TypeDecl   ::isAssginValidFrom(TypeDecl *fromType) const { return false; }
     bool FunctorDecl::isAssginValidFrom(TypeDecl *fromType) const { return false; }
+    bool ArrayDecl  ::isAssginValidFrom(TypeDecl *fromType) const ;
 
     /*===-----------------------------------------------------===*
      * 可调用对象库类型断言

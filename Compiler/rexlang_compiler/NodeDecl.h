@@ -749,6 +749,7 @@ namespace rexlang {
 
         [[nodiscard]] virtual std::vector<size_t> getDimensions () const ;  // 获取定义的索引维度
 
+        [[nodiscard]] virtual bool  compareTo        (TypeDecl *otherType) const ;      // 比较类型
         [[nodiscard]] virtual bool  isUnyOptValid    (OperatorType opt) const ;                      // 判断一元计算有效性
         [[nodiscard]] virtual bool  isBinOptValid    (OperatorType opt, VariTypeDecl *otherType) const ; // 判断二元计算有效性
         [[nodiscard]] virtual bool  isAssginValidFrom(TypeDecl *fromType) const ;                    // 判断赋值有效性
@@ -1051,7 +1052,7 @@ namespace rexlang {
      */
     class ArrayDecl : public VariTypeDecl {
     private:
-        // 元素类型定义
+        // 元素类型
         TypeDecl * base_type_ = nullptr;
         // 数组维度定义
         std::vector<size_t> dimensions_;
@@ -1093,6 +1094,7 @@ namespace rexlang {
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
         bool isCallable             () const override ;
+        bool isAssginValidFrom      (TypeDecl *fromType) const override ;
 
     public:
         void appendParameter(ParameterDecl *parameterDecl) ;
