@@ -15,16 +15,16 @@
 #include "CST2ASTConvert.h"
 
 namespace rexlang {
-    TranslateUnit * AstGenerate::BuildASTFromCode(const std::string &code,
-                                      const std::string &filename,
-                                      const std::string &toolname) {
-        return this->BuildASTFromCodeWithArgs(code, {}, filename, toolname);
+    bool AstGenerate::buildCstFromCode(const std::string &code,
+                                       const std::string &filename,
+                                       const std::string &toolname) {
+        return this->buildCstFromCodeWithArgs(code, {}, filename, toolname);
     }
 
-    TranslateUnit * AstGenerate::BuildASTFromCodeWithArgs(const std::string &code,
-                                              const std::vector<std::string> &args,
-                                              const std::string &filename,
-                                              const std::string &toolname) {
+    bool AstGenerate::buildCstFromCodeWithArgs(const std::string &code,
+                                               const std::vector<std::string> &args,
+                                               const std::string &filename,
+                                               const std::string &toolname) {
 
         // 配置解析源
 
@@ -41,21 +41,38 @@ namespace rexlang {
         __parser.removeErrorListeners();
         __parser.addErrorListener(diagnostic_);
 
-        // 执行语法分析。
+        // 执行语法分析，生成语法分析树
 
-        antlr4::tree::ParseTree* __tree = __parser.rexlang_src();
-        if (__tree == nullptr) {
+        if (antlr4::tree::ParseTree* __tree = __parser.rexlang_src()) {
+            this->parse_trees_.push_back(__tree);
+            return true;
+        } else {
             assert(false);
-            return nullptr;
+            return false;
         }
+
+    }
+
+    TranslateUnit * AstGenerate::buildAstFromCsts() {
 
         // 遍历树以生成抽象语法树
 
         CST2ASTConvert ast_builder(ast_context_, diagnostic_);
-        return ast_builder.BuildTranslateUnitFromParseTree(__tree);
+        return ast_builder.buildTUFromParseTrees(this->parse_trees_);
     }
 
-    AstGenerate::AstGenerate() {
+    TranslateUnit *AstGenerate::buildAstFromCode(const std::string &code, const std::string &filename, const std::string &toolname) {
+        buildCstFromCode(code, filename, toolname);
+        return buildAstFromCsts();
+    }
+
+    TranslateUnit *AstGenerate::buildAstFromCodeWithArgs(const std::string &code, const std::vector<std::string> &args, const std::string &filename, const std::string &toolname) {
+        buildCstFromCodeWithArgs(code, args, filename, toolname);
+        return buildAstFromCsts();
+    }
+
+    AstGenerate::AstGenerate(REXCompilerInstance *compiler_instance)
+        : compiler_instance_(compiler_instance) {
         diagnostic_  = new Diagnostic();
         ast_context_ = new ASTContext();
     }

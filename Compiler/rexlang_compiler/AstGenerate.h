@@ -14,13 +14,18 @@
 
 namespace rexlang {
 
+    class REXCompilerInstance;
+
     class AstGenerate {
     private:
         Diagnostic *diagnostic_  = nullptr;
         ASTContext *ast_context_ = nullptr;
+        REXCompilerInstance *compiler_instance_ = nullptr;
+
+        std::vector<antlr4::tree::ParseTree *> parse_trees_;
 
     public:
-        AstGenerate();
+        explicit AstGenerate(REXCompilerInstance *compiler_instance);
         ~AstGenerate();
 
     public:
@@ -28,8 +33,22 @@ namespace rexlang {
         void setDiagnosticRoutine   (Diagnostic *   diagnostic) ;
 
     public:
-        TranslateUnit * BuildASTFromCode(const std::string &code, const std::string &filename, const std::string &toolname);
-        TranslateUnit * BuildASTFromCodeWithArgs(const std::string &code, const std::vector<std::string> &args, const std::string &filename, const std::string &toolname);
+        /*===---------------------------------------===*
+         * 从代码文本中创建CST
+         */
+        bool buildCstFromCode        (const std::string &code, const std::string &filename, const std::string &toolname);
+        bool buildCstFromCodeWithArgs(const std::string &code, const std::vector<std::string> &args, const std::string &filename, const std::string &toolname);
+
+        /*===---------------------------------------===*
+         * 从保存的CST列表中构建AST并清空保存的CST
+         */
+        TranslateUnit *buildAstFromCsts() ;
+
+        /*===---------------------------------------===*
+         * 从代码文本中创建AST
+         */
+        TranslateUnit *buildAstFromCode        (const std::string &code, const std::string &filename, const std::string &toolname);
+        TranslateUnit *buildAstFromCodeWithArgs(const std::string &code, const std::vector<std::string> &args, const std::string &filename, const std::string &toolname);
     };
 
 }

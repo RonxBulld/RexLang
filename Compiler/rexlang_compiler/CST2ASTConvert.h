@@ -14,9 +14,13 @@
 #include "ASTContext.h"
 
 namespace rexlang {
+
+    class REXCompilerInstance;
+
     class CST2ASTConvert : public rexLangVisitor {
     private:
         ASTContext *ast_context_ = nullptr;
+        REXCompilerInstance *compiler_instance_ = nullptr;
 
     private:
         TString              GetTextIfExist   (const antlr4::Token *token, const std::string &hint = "") const;
@@ -111,8 +115,12 @@ namespace rexlang {
         antlrcpp::Any visitReturnStmt                   (rexLangParser::ReturnStmtContext *                   context) override;
         antlrcpp::Any visitExitStmt                     (rexLangParser::ExitStmtContext *                     context) override;
     public:
-        CST2ASTConvert(ASTContext *ast_context, Diagnostic *diagnostic);
-        TranslateUnit * BuildTranslateUnitFromParseTree(antlr4::tree::ParseTree* tree);
+        CST2ASTConvert(ASTContext *ast_context, Diagnostic *diagnostic, REXCompilerInstance *compiler_instance);
+
+        /*===---------------------------------------------===*
+         * 从CST森林中构建AST
+         */
+        TranslateUnit * buildTUFromParseTrees(const std::vector<antlr4::tree::ParseTree *> &trees);
     };
 }
 

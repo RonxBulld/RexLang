@@ -11,6 +11,7 @@
 #include "CST2ASTConvert.h"
 #include "NodeDecl.h"
 #include "ASTContext.h"
+#include "../compile_driver.h"
 
 namespace rexlang {
 
@@ -114,6 +115,10 @@ namespace rexlang {
         return CreateNode<NodeTy, Args...>(parserRuleContext->getStart(), parserRuleContext->getStop(), args...);
     }
 
+    /*===---------------------------------------------------------===*
+     * 转换
+     *===---------------------------------------------------------===*/
+
     antlrcpp::Any CST2ASTConvert::visitRexlang_src(rexLangParser::Rexlang_srcContext *context) {
         TranslateUnit * translate_unit = ast_context_->getTranslateUnit();
         if(!translate_unit) translate_unit = CreateNode<TranslateUnit>(context);
@@ -144,7 +149,9 @@ namespace rexlang {
         auto program_set_file = CreateNode<ProgramSetFile>(context);
         for (antlr4::Token *token : context->libraries) {
             TString library_name = GetTextIfExist(token);
-            program_set_file->appendReferenceLibName(library_name);
+            /// 此处调用 CompilerInstance 分析引用的库
+            compiler_instance_->processExternLibrary(library_name.string_);
+//            program_set_file->appendReferenceLibName(library_name);
         }
         program_set_file->appendProgramSetDecl(GetFromCtxIfExist<ProgSetDecl*>(context->prog_set()));
         return NodeWarp(program_set_file);
@@ -723,24 +730,21 @@ namespace rexlang {
         return NodeWarp(value_of_string);
     }
 
-    CST2ASTConvert::CST2ASTConvert(ASTContext *ast_context, Diagnostic *diagnostic)
-        : ast_context_(ast_context) {
+    CST2ASTConvert::CST2ASTConvert(ASTContext *ast_context, Diagnostic *diagnostic, REXCompilerInstance *compiler_instance)
+        : ast_context_(ast_context), compiler_instance_(compiler_instance) {
     }
 
-    TranslateUnit * CST2ASTConvert::BuildTranslateUnitFromParseTree(antlr4::tree::ParseTree *tree) {
-        antlrcpp::Any build_result = this->visit(tree);
-        TranslateUnit * translate_unit = nullptr;
-        if (build_result.is<NodeWarp>()) {
-            if ((translate_unit = build_result.as<NodeWarp>())) {
-                return translate_unit;
-            } else {
-                assert(false);
-                return nullptr;
-            }
-        } else {
-            assert(false);
-            return nullptr;
+    TranslateUnit * CST2ASTConvert::buildTUFromParseTrees(const std::vector<antlr4::tree::ParseTree *> &trees) {
+
+        // TODO: 这里可以尝试合并一下树，或者给树排序
+        // TODO: 在编译过程中遇到外部文件引用会重入这个函数
+        // TODO: 分层的遍历CST，而不是一次性遍历整个树
+
+        for (antlr4::tree::ParseTree *tree : trees) {
+            this->visit(tree);
         }
+
+        return ast_context_->getTranslateUnit();
     }
 
 }

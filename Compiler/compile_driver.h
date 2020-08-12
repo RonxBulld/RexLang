@@ -44,11 +44,12 @@ namespace rexlang {
         std::string code_filename_;
         std::string parse_code_;
 
-        std::vector<TranslateUnit *> translate_units_;
         TranslateUnit * major_translate_unit_ = nullptr;
-        std::set<StringRef> libraries_name;
 
     private:
+        /*===-------------------------------------===*
+         * 将所有的CST转换为AST
+         */
         bool assembleTranslates();
 
     public:
@@ -65,20 +66,45 @@ namespace rexlang {
          * 编译时执行例程
          *************************************************************/
 
-        TranslateUnit * runParser            ();                            // 根据实例中的信息执行分析过程
-        TranslateUnit * parseOnFile          (const FileEntry &fileEntry);  // 从文件进行分析
-        FileEntry       detectLibraryFile    (const StringRef &filePath);   // 探测库是否存在
-        int             processExternLibrary (const StringRef &filePath);   // 处理外部引用库
+        /*===-------------------------------------===*
+         * 分析源代码，并生成CST
+         * 根据实例中的信息执行分析过程
+         */
+        bool runParser();
 
-        /*************************************************************
+        /*===-------------------------------------===*
+         * 分析源代码，并生成CST
+         * 根据输入的参数执行分析过程
+         */
+        bool runParser(const std::string &code, const std::string &file);
+
+        /*===-------------------------------------===*
+         * 分析一个指定文件名的文件
+         * 依赖 runParser 的实现
+         */
+        bool parseOnFile(const FileEntry &fileEntry);
+
+        /*===-------------------------------------===*
+         * 探测库是否存在
+         * 若存在，则返回一个有效的文件对象
+         */
+        FileEntry detectLibraryFile(const StringRef &filePath);
+
+        /*===-------------------------------------===*
+         * 处理外部引用库
+         * 调用 detectLibraryFile 获取文件对象，并通过 parseOnFile 生成AST
+         */
+        int processExternLibrary(const StringRef &filePath);
+
+        /*===-------------------------------------===*
          * 其他分析动作
-         *************************************************************/
+         */
 
         bool runSematicAnalysis();
 
-        /*************************************************************
+        /*===-------------------------------------===*
          * 编译生成信息提取
-         *************************************************************/
+         */
 
         TranslateUnit * getTranslateUnit();
     };

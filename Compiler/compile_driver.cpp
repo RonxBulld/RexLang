@@ -99,27 +99,20 @@ namespace rexlang {
     int REXCompilerInstance::setParseCode       (const std::string &code)       { this->parse_code_    = code;     return 0; }
     int REXCompilerInstance::setParseFilename   (const std::string &filename)   { this->code_filename_ = filename; return 0; }
 
-    TranslateUnit * REXCompilerInstance::runParser() {
-
-        // 分析指定的源代码文件
-
-        TranslateUnit * translate_unit = this->ast_generate_.BuildASTFromCode(this->parse_code_, this->code_filename_, this->instance_name_);
-        this->translate_units_.push_back(translate_unit);
-
-        // 对于源代码文件中引入的外部库进行分析
-
-        for (const TString &library : translate_unit->getReferenceLibraries()) {
-            processExternLibrary(library.string_);
-        }
-
-        return translate_unit;
+    bool REXCompilerInstance::runParser() {
+        return this->runParser(this->parse_code_, this->code_filename_);
     }
 
-    TranslateUnit * REXCompilerInstance::parseOnFile(const FileEntry &fileEntry) {
+    bool REXCompilerInstance::runParser(const std::string &code, const std::string &file) {
+
+        // 分析指定的源代码
+
+        return this->ast_generate_.buildCstFromCode(code, file, this->instance_name_);
+    }
+
+    bool REXCompilerInstance::parseOnFile(const FileEntry &fileEntry) {
         std::cout << "分析文件：" << fileEntry.GetFilename() << std::endl;
-        this->setParseFilename(fileEntry.GetFilename());
-        this->setParseCode(fileEntry.GetCode());
-        return this->runParser();
+        return this->runParser(fileEntry.GetCode(), fileEntry.GetFilename());
     }
 
     FileEntry REXCompilerInstance::detectLibraryFile(const rexlang::StringRef &filePath) {
@@ -139,20 +132,13 @@ namespace rexlang {
     int REXCompilerInstance::processExternLibrary(const rexlang::StringRef &filePath) {
         FileEntry file_entry = detectLibraryFile(filePath);
         assert(file_entry.Valid());
-        TranslateUnit *library_tu = this->parseOnFile(file_entry);
-        assert(library_tu);
+        bool suc = this->parseOnFile(file_entry);
+        assert(suc);
         return 0;
     }
 
     bool REXCompilerInstance::assembleTranslates() {
-
-        // 将翻译单元列表中的项目进行依次组装，并解决冲突
-
-        if (this->translate_units_.empty()) { return true; }
-        this->major_translate_unit_ = this->translate_units_[0];
-        for (size_t idx = 1; idx < this->translate_units_.size(); idx++) {
-            this->major_translate_unit_->merge(this->translate_units_[idx]);
-        }
+        this->major_translate_unit_ = this->ast_generate_.buildAstFromCsts();
         return true;
     }
 
