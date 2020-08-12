@@ -213,21 +213,50 @@ namespace rexlang {
         else                                            { return false; }
     }
 
-    /**********************************************************
+    /*===-----------------------------------------------------===*
      * 计算有效性判定
-     **********************************************************/
+     *===-----------------------------------------------------===*/
 
-    bool VariTypeDecl::isBinOptValid(OperatorType opt, VariTypeDecl *otherType) const { return false; }
+    bool TypeDecl::isUnyOptValid(OperatorType opt) const { return false; }
+    bool TypeDecl::isBinOptValid(OperatorType opt, VariTypeDecl *otherType) const { return false; }
 
-    // 数组类型不接受任何二元运算
+    bool BinaryExpression::IsBinaryOperateValid() const {
+        // 只有内置类型才能执行二元运算
+        BuiltinTypeDecl *lhsBuiltinType = this->lhs_->as<BuiltinTypeDecl>();
+        BuiltinTypeDecl *rhsBuiltinType = this->rhs_->as<BuiltinTypeDecl>();
+        if (lhsBuiltinType == nullptr || rhsBuiltinType == nullptr) {
+            assert(false);
+            return false;
+        }
+        return lhsBuiltinType->isBinOptValid(getOperator(), rhsBuiltinType);
+    }
+
+    /*===-----------------------------------------------------===*
+     * 只有数值型接受一元求反操作
+     */
+
+    bool BuiltinCharType    ::isUnyOptValid(OperatorType opt) const { return opt.getOperate() == OperatorType::Opt::kOptSub; }
+    bool BuiltinIntegerType ::isUnyOptValid(OperatorType opt) const { return opt.getOperate() == OperatorType::Opt::kOptSub; }
+    bool BuiltinShortType   ::isUnyOptValid(OperatorType opt) const { return opt.getOperate() == OperatorType::Opt::kOptSub; }
+    bool BuiltinLongType    ::isUnyOptValid(OperatorType opt) const { return opt.getOperate() == OperatorType::Opt::kOptSub; }
+    bool BuiltinFloatType   ::isUnyOptValid(OperatorType opt) const { return opt.getOperate() == OperatorType::Opt::kOptSub; }
+    bool BuiltinDoubleType  ::isUnyOptValid(OperatorType opt) const { return opt.getOperate() == OperatorType::Opt::kOptSub; }
+
+    /*===-----------------------------------------------------===*
+     * 数组类型不接受任何二元运算
+     */
 
     bool ArrayDecl::isBinOptValid(OperatorType opt, VariTypeDecl *otherType) const { return false; }
 
-    // 结构体类型不接受任何二元运算
+    /*===-----------------------------------------------------===*
+     * 结构体类型不接受任何二元运算
+     */
 
     bool StructureDecl::isBinOptValid(OperatorType opt, VariTypeDecl *otherType) const { return false; }
 
-    // 数值型的二元操作，仅要求另一个操作数也具有数值性即可
+    /*===-----------------------------------------------------===*
+     * 数值型的二元操作，仅要求另一个操作数也具有数值性即可
+     */
 
     bool BuiltinCharType    ::isBinOptValid(OperatorType opt, VariTypeDecl *otherType) const { return otherType->isNumerical(); }
     bool BuiltinIntegerType ::isBinOptValid(OperatorType opt, VariTypeDecl *otherType) const { return otherType->isNumerical(); }
@@ -236,7 +265,9 @@ namespace rexlang {
     bool BuiltinFloatType   ::isBinOptValid(OperatorType opt, VariTypeDecl *otherType) const { return otherType->isNumerical(); }
     bool BuiltinDoubleType  ::isBinOptValid(OperatorType opt, VariTypeDecl *otherType) const { return otherType->isNumerical(); }
 
-    // 字符串型仅接受其它字节集型的扩展关系运算、加法运算
+    /*===-----------------------------------------------------===*
+     * 字符串型仅接受其它字节集型的扩展关系运算、加法运算
+     */
 
     bool BuiltinStringType::isBinOptValid(OperatorType opt, VariTypeDecl *otherType) const {
         if (!otherType->isDataSetType()) { return false; }
@@ -249,7 +280,9 @@ namespace rexlang {
         }
     }
 
-    // 字节集型仅接受其它字节集型的扩展关系运算、加法运算
+    /*===-----------------------------------------------------===*
+     * 字节集型仅接受其它字节集型的扩展关系运算、加法运算
+     */
 
     bool BuiltinDataSetType::isBinOptValid(OperatorType opt, VariTypeDecl *otherType) const {
         if (!otherType->isDataSetType()) { return false; }
@@ -262,7 +295,9 @@ namespace rexlang {
         }
     }
 
-    // 逻辑型仅接受其它逻辑型的布尔运算和相等关系运算
+    /*===-----------------------------------------------------===*
+     * 逻辑型仅接受其它逻辑型的布尔运算和相等关系运算
+     */
 
     bool BuiltinBoolType::isBinOptValid(OperatorType opt, VariTypeDecl *otherType) const {
         if (!otherType->isBoolType()) { return false; }
@@ -271,7 +306,9 @@ namespace rexlang {
         return false;
     }
 
-    // 日期时间型仅接受其它日期时间型的加减运算
+    /*===-----------------------------------------------------===*
+     * 日期时间型仅接受其它日期时间型的加减运算
+     */
 
     bool BuiltinDatetimeType::isBinOptValid(OperatorType opt, VariTypeDecl *otherType) const {
         if (!otherType->isDatetimeType()) { return false; }
@@ -284,39 +321,39 @@ namespace rexlang {
         }
     }
 
-    // 函数指针不接受任何二元运算
+    /*===-----------------------------------------------------===*
+     * 函数指针不接受任何二元运算
+     */
 
     bool BuiltinFuncPtrType::isBinOptValid(OperatorType opt, VariTypeDecl *otherType) const { return false; }
 
-    /**********************************************************
+    /*===-----------------------------------------------------===*
+     * 类型比较判定
+     *===-----------------------------------------------------===*/
+
+    bool  TypeDecl ::compareTo(TypeDecl *otherType) const { return otherType == this; }
+    bool  ArrayDecl::compareTo(TypeDecl *otherType) const {
+        if (!otherType->isArrayType()) { return false; }
+        if (evalIndexedElementTy() == otherType->evalIndexedElementTy()) { return false; }
+        return false;
+    }
+
+    /*===-----------------------------------------------------===*
+     * 赋值有效性判定
+     *===-----------------------------------------------------===*/
+
+    bool TypeDecl   ::isAssginValidFrom(TypeDecl *fromType) const { return false; }
+    bool FunctorDecl::isAssginValidFrom(TypeDecl *fromType) const { return false; }
+    bool ArrayDecl  ::isAssginValidFrom(TypeDecl *fromType) const ;
+
+    /*===-----------------------------------------------------===*
      * 可调用对象库类型断言
-     **********************************************************/
+     *===-----------------------------------------------------===*/
 
     bool FunctionDecl::isStaticLibraryAPI  () const { return false; }
     bool FunctionDecl::isDynamicLibraryAPI () const { return false; }
 
     bool APICommandDecl::isStaticLibraryAPI  () const { return library_type_ == LibraryType::kLTStatic; }
     bool APICommandDecl::isDynamicLibraryAPI () const { return library_type_ == LibraryType::kLTDynamic; }
-
-    /**********************************************************
-     * 赋值有效性判定
-     **********************************************************/
-
-    bool VariTypeDecl::isAssginValidFrom(TypeDecl *fromType) const { return false; }
-
-    /**********************************************************
-     *
-     **********************************************************/
-
-    bool BinaryExpression::IsBinaryOperateValid() const {
-        // 只有内置类型才能执行二元运算
-        BuiltinTypeDecl *lhsBuiltinType = this->lhs_->as<BuiltinTypeDecl>();
-        BuiltinTypeDecl *rhsBuiltinType = this->rhs_->as<BuiltinTypeDecl>();
-        if (lhsBuiltinType == nullptr || rhsBuiltinType == nullptr) {
-            assert(false);
-            return false;
-        }
-        return lhsBuiltinType->isBinOptValid(getOperator(), rhsBuiltinType);
-    }
 
 }

@@ -81,20 +81,20 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">Node</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">* setParent(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">* setChild(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getTranslateUnit(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getAstContext(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getNearstScope(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getParent(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ setLocation(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getFileName(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getLeftLine(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getLeftColumn(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getRightLine(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getRightColumn(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ findDeclWithNameString(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ sematicAnalysisInternal(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">* setParent(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">* setChild(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getTranslateUnit(...) -&gt; TranslateUnit *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getAstContext(...) -&gt; ASTContext *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getNearstScope(...) -&gt; Node *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getParent(...) -&gt; Node *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ setLocation(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getFileName(...) -&gt; const char *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getLeftLine(...) -&gt; size_t</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getLeftColumn(...) -&gt; size_t</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getRightLine(...) -&gt; size_t</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getRightColumn(...) -&gt; size_t</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ findDeclWithNameString(...) -&gt; TagDecl *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ sematicAnalysisInternal(...) -&gt; void</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- node_id_ : size_t</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- ast_context_ : ASTContext *</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- parent_scope_ : Node *</td></tr>
@@ -109,13 +109,13 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">SourceFile</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ isProgramSetFile(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ isGlobalVariableFile(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ isDataStructureFile(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ isAPIDeclareFile(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ isConstDeclareFile(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ registResourceTo(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ isProgramSetFile(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ isGlobalVariableFile(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ isDataStructureFile(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ isAPIDeclareFile(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ isConstDeclareFile(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ registResourceTo(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
         </table>>
     ];
     "ProgramSetFile"
@@ -123,11 +123,11 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">ProgramSetFile</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ appendReferenceLibName(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ appendProgramSetDecl(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getProgramSetDecl(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getRefLibs(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ appendReferenceLibName(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ appendProgramSetDecl(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getProgramSetDecl(...) -&gt; ProgSetDecl *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getRefLibs(...) -&gt; const vector&lt;TString&gt; &amp;</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- libraries_ : vector&lt;TString&gt;</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- program_set_declares_ : ProgSetDecl *</td></tr>
         </table>>
@@ -137,9 +137,9 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">GlobalVariableFile</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ appendGlobalVariableDecl(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getGlobalVariMap(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ appendGlobalVariableDecl(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getGlobalVariMap(...) -&gt; const GlobalVariableFile::GlobalVariMapTy &amp;</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- global_variable_map_ : GlobalVariableFile::GlobalVariMapTy</td></tr>
         </table>>
     ];
@@ -148,9 +148,9 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">DataStructureFile</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ appendStructureDecl(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getTypes(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ appendStructureDecl(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getTypes(...) -&gt; const DataStructureFile::StructDeclMapTy &amp;</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- structure_decl_map_ : DataStructureFile::StructDeclMapTy</td></tr>
         </table>>
     ];
@@ -159,9 +159,9 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">APIDeclareFile</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ appendAPIDeclare(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getAPIDefMap(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ appendAPIDeclare(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getAPIDefMap(...) -&gt; const APIDeclareFile::DllDefMapTy &amp;</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- api_declares_ : APIDeclareFile::DllDefMapTy</td></tr>
         </table>>
     ];
@@ -170,9 +170,9 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">ConstDeclareFile</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ appendConstDeclare(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getConstDeclMap(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ appendConstDeclare(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getConstDeclMap(...) -&gt; const ConstDeclareFile::ConstDeclMapTy &amp;</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- consts_declares_ : ConstDeclareFile::ConstDeclMapTy</td></tr>
         </table>>
     ];
@@ -181,12 +181,12 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">IdentDef</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ name(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ decl(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ addReference(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ removeReference(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getReferenceTable(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ name(...) -&gt; const char *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ decl(...) -&gt; TagDecl *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ addReference(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ removeReference(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getReferenceTable(...) -&gt; set&lt;IdentRefer *&gt; &amp;</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- id_ : StringRef</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- reference_table_ : set&lt;IdentRefer *&gt;</td></tr>
         </table>>
@@ -196,12 +196,12 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">Decl</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ applyAttribute(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ applyAttributes(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ setAccessLevel(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getAccessLevel(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getType(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ applyAttribute(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ applyAttributes(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ setAccessLevel(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getAccessLevel(...) -&gt; AccessLevel</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getType(...) -&gt; TypeDecl *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- access_level_ : AccessLevel</td></tr>
         </table>>
     ];
@@ -210,15 +210,15 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">TagDecl</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getName(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getNameStr(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ setComment(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getComment(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getCommentStr(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getReferenceTable(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ addReference(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ removeReference(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getName(...) -&gt; IdentDef *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getNameStr(...) -&gt; const char *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ setComment(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getComment(...) -&gt; const TString &amp;</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getCommentStr(...) -&gt; const char *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getReferenceTable(...) -&gt; set&lt;IdentRefer *&gt; &amp;</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ addReference(...) -&gt; int</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ removeReference(...) -&gt; int</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- name_ : IdentDef *</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- comment_ : TString</td></tr>
         </table>>
@@ -228,8 +228,10 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">BaseVariDecl</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ updateType(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ updateType(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ id(...) -&gt; IdentRefer *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ type(...) -&gt; VariTypeDecl *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- type_name_ : IdentRefer *</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- type_ : VariTypeDecl *</td></tr>
         </table>>
@@ -239,13 +241,13 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">ParameterDecl</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ isDynamicParam(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ enableReference(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getParamIndex(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ isNullable(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ isArray(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ shouldBeReference(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ isDynamicParam(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ enableReference(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getParamIndex(...) -&gt; int</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ isNullable(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ isArray(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ shouldBeReference(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- is_nullable_ : _Bool</td></tr>
         </table>>
     ];
@@ -254,8 +256,8 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">ConstDecl</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getValue(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getValue(...) -&gt; Value *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- const_value_ : Value *</td></tr>
         </table>>
     ];
@@ -264,7 +266,7 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">VariableDecl</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
         </table>>
     ];
     "GlobalVariableDecl"
@@ -272,7 +274,7 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">GlobalVariableDecl</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
         </table>>
     ];
     "MemberVariableDecl"
@@ -280,10 +282,9 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">MemberVariableDecl</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ shouldBeReference(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ indexOfStruct(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
-            <tr><td border="1" bgcolor="AntiqueWhite">- is_reference_ : _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ shouldBeReference(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ indexOfStruct(...) -&gt; int</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
         </table>>
     ];
     "FileVariableDecl"
@@ -291,7 +292,7 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">FileVariableDecl</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
         </table>>
     ];
     "LocalVariableDecl"
@@ -299,8 +300,8 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">LocalVariableDecl</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ isStatic(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ isStatic(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- is_static_ : _Bool</td></tr>
         </table>>
     ];
@@ -309,35 +310,35 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">TypeDecl</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ isVoidType(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ isCommonType(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ isCharType(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ isIntegerType(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ isFloatType(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ isBoolType(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ isStringType(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ isDataSetType(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ isShortType(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ isLongType(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ isDatetimeType(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ isFuncPtrType(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ isDoubleType(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ isStructType(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ isExtendBooleanType(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ isNumerical(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ isIntegerClass(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ isArrayType(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ isFunctionType(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ isAPICommandType(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ isCallable(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ isIndexable(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ isFixedDimensions(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ evalIndexedElementTy(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getDimensions(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ isUnyOptValid(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ isBinOptValid(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ isAssginValidFrom(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ isVoidType(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ isCommonType(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ isCharType(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ isIntegerType(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ isFloatType(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ isBoolType(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ isStringType(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ isDataSetType(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ isShortType(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ isLongType(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ isDatetimeType(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ isFuncPtrType(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ isDoubleType(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ isStructType(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ isExtendBooleanType(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ isNumerical(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ isIntegerClass(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ isArrayType(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ isFunctionType(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ isAPICommandType(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ isCallable(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ isIndexable(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ isFixedDimensions(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ evalIndexedElementTy(...) -&gt; TypeDecl *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getDimensions(...) -&gt; vector&lt;size_t&gt;</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ isUnyOptValid(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ isBinOptValid(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ isAssginValidFrom(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
         </table>>
     ];
     "VariTypeDecl"
@@ -345,9 +346,8 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">VariTypeDecl</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getArrayToWithDimStr(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
-            <tr><td border="1" bgcolor="AntiqueWhite">- is_reference_ : _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getArrayToWithDimStr(...) -&gt; ArrayDecl *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
         </table>>
     ];
     "ReferenceType"
@@ -355,10 +355,10 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">ReferenceType</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ get(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ get(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getPointee(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ get(...) -&gt; ReferenceType *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ get(...) -&gt; ReferenceType *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getPointee(...) -&gt; TypeDecl *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- type_name_ : IdentRefer *</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- pointee_type_ : TypeDecl *</td></tr>
         </table>>
@@ -368,9 +368,9 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">BuiltinTypeDecl</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetBuiltinType(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetTypeText(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetBuiltinType(...) -&gt; EnumOfBuiltinType</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetTypeText(...) -&gt; const char *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
         </table>>
     ];
     "BuiltinVoidType"
@@ -378,8 +378,8 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">BuiltinVoidType</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ BuiltinType(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ TypeText(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ BuiltinType(...) -&gt; EnumOfBuiltinType</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ TypeText(...) -&gt; const char *</td></tr>
         </table>>
     ];
     "BuiltinCommonType"
@@ -387,8 +387,8 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">BuiltinCommonType</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ BuiltinType(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ TypeText(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ BuiltinType(...) -&gt; EnumOfBuiltinType</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ TypeText(...) -&gt; const char *</td></tr>
         </table>>
     ];
     "BuiltinCharType"
@@ -396,8 +396,8 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">BuiltinCharType</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ BuiltinType(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ TypeText(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ BuiltinType(...) -&gt; EnumOfBuiltinType</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ TypeText(...) -&gt; const char *</td></tr>
         </table>>
     ];
     "BuiltinIntegerType"
@@ -405,8 +405,8 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">BuiltinIntegerType</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ BuiltinType(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ TypeText(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ BuiltinType(...) -&gt; EnumOfBuiltinType</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ TypeText(...) -&gt; const char *</td></tr>
         </table>>
     ];
     "BuiltinFloatType"
@@ -414,8 +414,8 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">BuiltinFloatType</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ BuiltinType(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ TypeText(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ BuiltinType(...) -&gt; EnumOfBuiltinType</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ TypeText(...) -&gt; const char *</td></tr>
         </table>>
     ];
     "BuiltinBoolType"
@@ -423,8 +423,8 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">BuiltinBoolType</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ BuiltinType(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ TypeText(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ BuiltinType(...) -&gt; EnumOfBuiltinType</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ TypeText(...) -&gt; const char *</td></tr>
         </table>>
     ];
     "BuiltinStringType"
@@ -432,8 +432,8 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">BuiltinStringType</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ BuiltinType(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ TypeText(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ BuiltinType(...) -&gt; EnumOfBuiltinType</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ TypeText(...) -&gt; const char *</td></tr>
         </table>>
     ];
     "BuiltinDataSetType"
@@ -441,8 +441,8 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">BuiltinDataSetType</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ BuiltinType(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ TypeText(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ BuiltinType(...) -&gt; EnumOfBuiltinType</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ TypeText(...) -&gt; const char *</td></tr>
         </table>>
     ];
     "BuiltinShortType"
@@ -450,8 +450,8 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">BuiltinShortType</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ BuiltinType(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ TypeText(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ BuiltinType(...) -&gt; EnumOfBuiltinType</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ TypeText(...) -&gt; const char *</td></tr>
         </table>>
     ];
     "BuiltinLongType"
@@ -459,8 +459,8 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">BuiltinLongType</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ BuiltinType(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ TypeText(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ BuiltinType(...) -&gt; EnumOfBuiltinType</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ TypeText(...) -&gt; const char *</td></tr>
         </table>>
     ];
     "BuiltinDatetimeType"
@@ -468,8 +468,8 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">BuiltinDatetimeType</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ BuiltinType(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ TypeText(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ BuiltinType(...) -&gt; EnumOfBuiltinType</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ TypeText(...) -&gt; const char *</td></tr>
         </table>>
     ];
     "BuiltinFuncPtrType"
@@ -477,8 +477,8 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">BuiltinFuncPtrType</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ BuiltinType(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ TypeText(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ BuiltinType(...) -&gt; EnumOfBuiltinType</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ TypeText(...) -&gt; const char *</td></tr>
         </table>>
     ];
     "BuiltinDoubleType"
@@ -486,8 +486,8 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">BuiltinDoubleType</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ BuiltinType(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ TypeText(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ BuiltinType(...) -&gt; EnumOfBuiltinType</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ TypeText(...) -&gt; const char *</td></tr>
         </table>>
     ];
     "StructureDecl"
@@ -495,12 +495,12 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">StructureDecl</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ appendElement(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getElementWithIndex(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getElementWithName(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ isMemberOfThis(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ indexMemberOfThis(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ appendElement(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getElementWithIndex(...) -&gt; BaseVariDecl *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getElementWithName(...) -&gt; BaseVariDecl *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ isMemberOfThis(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ indexMemberOfThis(...) -&gt; int</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- members_ : NamedOrderDict&lt;MemberVariableDecl *&gt;</td></tr>
         </table>>
     ];
@@ -509,9 +509,9 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">ArrayDecl</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ get(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ get(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ get(...) -&gt; ArrayDecl *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ get(...) -&gt; ArrayDecl *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- base_type_ : TypeDecl *</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- dimensions_ : vector&lt;size_t&gt;</td></tr>
         </table>>
@@ -521,16 +521,16 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">FunctorDecl</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ appendParameter(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getParameters(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getParameterAt(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getParamByName(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getIndexOf(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getReturnType(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ isDynamicArgs(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ isStaticLibraryAPI(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ isDynamicLibraryAPI(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ appendParameter(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getParameters(...) -&gt; vector&lt;ParameterDecl *&gt; &amp;</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getParameterAt(...) -&gt; ParameterDecl *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getParamByName(...) -&gt; ParameterDecl *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getIndexOf(...) -&gt; int</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getReturnType(...) -&gt; TypeDecl *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ isDynamicArgs(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ isStaticLibraryAPI(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ isDynamicLibraryAPI(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- return_type_ : IdentRefer *</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- parameters_ : vector&lt;ParameterDecl *&gt;</td></tr>
         </table>>
@@ -540,12 +540,12 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">FunctionDecl</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ appendLocalVariable(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ setStatementBlock(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getLocalVari(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getParameter(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getFunctionBody(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ appendLocalVariable(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ setStatementBlock(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getLocalVari(...) -&gt; LocalVariableDecl *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getParameter(...) -&gt; ParameterDecl *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getFunctionBody(...) -&gt; StatementBlock *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- local_vari_ : NamedOrderDict&lt;LocalVariableDecl *&gt;</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- statement_list_ : StatementBlock *</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- super_set_ : ProgSetDecl *</td></tr>
@@ -556,15 +556,15 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">APICommandDecl</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ setLibraryName(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getLibraryName(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ setLibraryType(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getLibraryType(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getApiNameRef(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ setApiNameRef(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getArguPassModel(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ setArguPassModel(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ setLibraryName(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getLibraryName(...) -&gt; const TString &amp;</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ setLibraryType(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getLibraryType(...) -&gt; LibraryType</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getApiNameRef(...) -&gt; IdentDef *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ setApiNameRef(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getArguPassModel(...) -&gt; ArgumentPassModel</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ setArguPassModel(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- library_file_ : TString</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- library_type_ : LibraryType</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- api_name_ : IdentDef *</td></tr>
@@ -577,12 +577,12 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">ProgSetDecl</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ appendFileStaticVari(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ appendFunctionDecl(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getFileVariableDecl(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getFunctionDecl(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getFuncSignatures(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ appendFileStaticVari(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ appendFunctionDecl(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getFileVariableDecl(...) -&gt; FileVariableDecl *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getFunctionDecl(...) -&gt; FunctionDecl *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getFuncSignatures(...) -&gt; vector&lt;FunctorDecl *&gt;</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- file_static_variables_ : NamedOrderDict&lt;FileVariableDecl *&gt;</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- function_decls_ : NamedOrderDict&lt;FunctionDecl *&gt;</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- signature_of_functions_ : NamedOrderDict&lt;FunctorDecl *&gt;</td></tr>
@@ -593,8 +593,8 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">Statement</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">* getSubExprAccessType(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">* getSubExprAccessType(...) -&gt; ExprUsage</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
         </table>>
     ];
     "AssignStmt"
@@ -602,11 +602,11 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">AssignStmt</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ setLHS(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ setRHS(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getLHS(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getRHS(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ setLHS(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ setRHS(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getLHS(...) -&gt; HierarchyIdentifier *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getRHS(...) -&gt; Expression *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- lhs_ : HierarchyIdentifier *</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- rhs_ : Expression *</td></tr>
         </table>>
@@ -616,7 +616,7 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">ControlStmt</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
         </table>>
     ];
     "LoopControlStmt"
@@ -624,9 +624,9 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">LoopControlStmt</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ setControlledLoop(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getControlledLoop(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ setControlledLoop(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getControlledLoop(...) -&gt; LoopStatement *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- controlled_loop_ : LoopStatement *</td></tr>
         </table>>
     ];
@@ -635,7 +635,7 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">ContinueStmt</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
         </table>>
     ];
     "BreakStmt"
@@ -643,7 +643,7 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">BreakStmt</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
         </table>>
     ];
     "ReturnStmt"
@@ -651,9 +651,9 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">ReturnStmt</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ setReturnValue(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getReturnValue(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ setReturnValue(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getReturnValue(...) -&gt; Expression *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- return_value_ : Expression *</td></tr>
         </table>>
     ];
@@ -662,7 +662,7 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">ExitStmt</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
         </table>>
     ];
     "IfStmt"
@@ -670,13 +670,13 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">IfStmt</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ appendBranch(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ setDefault(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ branchesCount(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ conditionAt(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ branchBodyAt(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ defaultBody(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ appendBranch(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ setDefault(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ branchesCount(...) -&gt; size_t</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ conditionAt(...) -&gt; Expression *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ branchBodyAt(...) -&gt; Statement *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ defaultBody(...) -&gt; Statement *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- switches_ : vector&lt;pair&lt;Expression *, Statement *&gt; &gt;</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- default_statement_ : Statement *</td></tr>
         </table>>
@@ -686,8 +686,8 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">LoopStatement</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ setLoopBody(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getLoopBody(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ setLoopBody(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getLoopBody(...) -&gt; Statement *</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- loop_body_ : Statement *</td></tr>
         </table>>
     ];
@@ -696,9 +696,9 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">WhileStmt</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ setLoopCondition(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getLoopCondition(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ setLoopCondition(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getLoopCondition(...) -&gt; Expression *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- condition_ : Expression *</td></tr>
         </table>>
     ];
@@ -707,11 +707,11 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">RangeForStmt</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ setRangeSize(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ setLoopVariable(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getRangeSize(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getLoopVari(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ setRangeSize(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ setLoopVariable(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getRangeSize(...) -&gt; Expression *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getLoopVari(...) -&gt; HierarchyIdentifier *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- range_size_ : Expression *</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- loop_vari_ : HierarchyIdentifier *</td></tr>
         </table>>
@@ -721,15 +721,15 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">ForStmt</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ setStartValue(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ setStopValue(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ setStepValue(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ setLoopVari(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getStartValue(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getStopValue(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getStepValue(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getLoopVari(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ setStartValue(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ setStopValue(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ setStepValue(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ setLoopVari(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getStartValue(...) -&gt; Expression *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getStopValue(...) -&gt; Expression *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getStepValue(...) -&gt; Expression *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getLoopVari(...) -&gt; HierarchyIdentifier *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- start_value_ : Expression *</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- stop_value_ : Expression *</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- step_value_ : Expression *</td></tr>
@@ -741,9 +741,9 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">DoWhileStmt</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ setCondition(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getCondition(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ setCondition(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getCondition(...) -&gt; Expression *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- condition_ : Expression *</td></tr>
         </table>>
     ];
@@ -752,9 +752,9 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">StatementBlock</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ appendStatement(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getStatements(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ appendStatement(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getStatements(...) -&gt; const vector&lt;Statement *&gt; &amp;</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- statements_ : vector&lt;Statement *&gt;</td></tr>
         </table>>
     ];
@@ -763,16 +763,16 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">Expression</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">* CheckExpressionInternal(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">* getExpressionTypeInternal(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ CheckExpression(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getExpressionType(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getExpressionType(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getLRType(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ isLeftUsage(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ isRightUsage(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ castTo(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">* CheckExpressionInternal(...) -&gt; TypeDecl *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">* getExpressionTypeInternal(...) -&gt; TypeDecl *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ CheckExpression(...) -&gt; TypeDecl *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getExpressionType(...) -&gt; TypeDecl *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getExpressionType(...) -&gt; TypeDecl *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getLRType(...) -&gt; ExprUsage</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ isLeftUsage(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ isRightUsage(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ castTo(...) -&gt; Expression *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- expression_type_ : TypeDecl *</td></tr>
         </table>>
     ];
@@ -781,8 +781,8 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">HierarchyIdentifier</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ AppendComponent(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ AppendComponent(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- name_components_ : vector&lt;NameComponent *&gt;</td></tr>
         </table>>
     ];
@@ -791,13 +791,13 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">NameComponent</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ SetForward(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ SetBackward(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ Forward(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ Backward(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ EvalBaseNameComponentType(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getBaseId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ SetForward(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ SetBackward(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ Forward(...) -&gt; NameComponent *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ Backward(...) -&gt; NameComponent *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ EvalBaseNameComponentType(...) -&gt; TagDecl *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getBaseId(...) -&gt; IdentRefer *</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- forward_name_component_ : NameComponent *</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- backward_name_component_ : NameComponent *</td></tr>
         </table>>
@@ -807,10 +807,10 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">IdentRefer</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ def(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getName(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getDecl(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ def(...) -&gt; IdentDef *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getName(...) -&gt; const StringRef &amp;</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getDecl(...) -&gt; TagDecl *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- reference_ : IdentDef *</td></tr>
         </table>>
     ];
@@ -819,12 +819,12 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">ArrayIndex</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ setBaseComponent(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ setIndexExpr(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getIndexBase(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getElementTy(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getIndexesList(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ setBaseComponent(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ setIndexExpr(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getIndexBase(...) -&gt; NameComponent *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getElementTy(...) -&gt; TypeDecl *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getIndexesList(...) -&gt; ErrOr&lt;vector&lt;Expression *&gt; &gt;</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- base_ : NameComponent *</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- index_ : Expression *</td></tr>
         </table>>
@@ -834,19 +834,19 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">FunctionCall</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ matchFunctor(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ setCallName(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ appendArgument(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getCallee(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getFunctionDeclare(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getArgumentsCount(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getArgumentAt(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getArguments(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ isArgument(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ isArgument(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ indexOfArgument(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ indexOfArgument(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ matchFunctor(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ setCallName(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ appendArgument(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getCallee(...) -&gt; NameComponent *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getFunctionDeclare(...) -&gt; FunctorDecl *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getArgumentsCount(...) -&gt; size_t</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getArgumentAt(...) -&gt; Expression *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getArguments(...) -&gt; vector&lt;Expression *&gt; &amp;</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ isArgument(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ isArgument(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ indexOfArgument(...) -&gt; int</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ indexOfArgument(...) -&gt; int</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- function_name_ : NameComponent *</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- arguments_ : vector&lt;Expression *&gt;</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- functor_declare_ : FunctorDecl *</td></tr>
@@ -857,10 +857,10 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">TypeConvert</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getSourceExpr(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getSourceType(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getTargetType(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getSourceExpr(...) -&gt; Expression *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getSourceType(...) -&gt; TypeDecl *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getTargetType(...) -&gt; TypeDecl *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- convert_type_ : TypeConvert::ConvertType</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- from_expression_ : Expression *</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- target_type_ : TypeDecl *</td></tr>
@@ -871,11 +871,11 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">_OperatorExpression</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ setOperatorText(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ setOperator(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ setOperator(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getOperator(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ setOperatorText(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ setOperator(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ setOperator(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getOperator(...) -&gt; const OperatorType &amp;</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- operator_type_ : OperatorType</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- operator_ : TString</td></tr>
         </table>>
@@ -885,8 +885,8 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">UnaryExpression</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ setOperand(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ setOperand(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- operand_value_ : Expression *</td></tr>
         </table>>
     ];
@@ -895,11 +895,11 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">BinaryExpression</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ setLHS(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ setRHS(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ IsBinaryOperateValid(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getBinaryOperateUpgradeType(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ setLHS(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ setRHS(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ IsBinaryOperateValid(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getBinaryOperateUpgradeType(...) -&gt; VariTypeDecl *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- lhs_ : Expression *</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- rhs_ : Expression *</td></tr>
         </table>>
@@ -909,8 +909,8 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">ResourceRefExpression</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ setResourceName(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ setResourceName(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- resource_name_ : TString</td></tr>
         </table>>
     ];
@@ -919,8 +919,8 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">FuncAddrExpression</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ setRefFuncName(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ setRefFuncName(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- function_name_ : IdentRefer *</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- functor_declare_ : FunctorDecl *</td></tr>
         </table>>
@@ -930,7 +930,7 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">Value</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
         </table>>
     ];
     "ValueOfDataSet"
@@ -938,8 +938,8 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">ValueOfDataSet</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ appendElement(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ appendElement(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- elements_ : vector&lt;Expression *&gt;</td></tr>
         </table>>
     ];
@@ -948,8 +948,8 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">ValueOfDatetime</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ setTime(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ setTime(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- time_ : time_t</td></tr>
         </table>>
     ];
@@ -958,8 +958,8 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">ValueOfBool</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ setBool(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ setBool(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- value_ : _Bool</td></tr>
         </table>>
     ];
@@ -968,10 +968,10 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">ValueOfDecimal</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ setIntValue(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ setFloatValue(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
-            <tr><td border="1" bgcolor="AntiqueWhite">-  : union ValueOfDecimal::(anonymous at /home/rexfield/RexLang/Compiler/rexlang_compiler/NodeDecl.h:1909:9)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ setIntValue(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ setFloatValue(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
+            <tr><td border="1" bgcolor="AntiqueWhite">-  : union ValueOfDecimal::(anonymous at /mnt/d/Project/RexLang/Compiler/rexlang_compiler/NodeDecl.h:1936:9)</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- type_ : type</td></tr>
         </table>>
     ];
@@ -980,8 +980,8 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">ValueOfString</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ setStringLiteral(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ setStringLiteral(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- string_literal_ : TString</td></tr>
         </table>>
     ];
@@ -990,42 +990,42 @@ digraph G {
         shape=none
         label=<<table border="0" cellspacing="0">
             <tr><td port="head" border="1" bgcolor="pink">TranslateUnit</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">- setMainEnrty(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ appendSourceFile(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ merge(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ addFunctor(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ addProgSet(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ addType(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ addGlobalVari(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ addConstVal(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ addRefLib(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ addPlaceholder(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getType(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getGlobalVari(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getFunctor(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getConst(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getOrCreateType(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ setSourceEdition(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getSourceEdition(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getReferenceLibraries(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getMainEntry(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">- RegistBuiltinType(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ InitBuiltinTypes(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getBuiltinTy(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getVoidTy(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getCommonTy(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getCharTy(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getIntegerTy(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getFloatTy(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getBoolTy(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getStringTy(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getDataSetTy(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getShortTy(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getLongTy(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getDatetimeTy(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getFuncPtrTy(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getDoubleTy(...)</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...)</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">- setMainEnrty(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ appendSourceFile(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ merge(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ addFunctor(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ addProgSet(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ addType(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ addGlobalVari(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ addConstVal(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ addRefLib(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ addPlaceholder(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getType(...) -&gt; TypeDecl *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getGlobalVari(...) -&gt; GlobalVariableDecl *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getFunctor(...) -&gt; FunctorDecl *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getConst(...) -&gt; ConstDecl *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getOrCreateType(...) -&gt; TypeDecl *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ setSourceEdition(...) -&gt; void</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getSourceEdition(...) -&gt; unsigned int</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getReferenceLibraries(...) -&gt; const set&lt;TString&gt; &amp;</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getMainEntry(...) -&gt; FunctorDecl *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">- RegistBuiltinType(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ InitBuiltinTypes(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getBuiltinTy(...) -&gt; BuiltinTypeDecl *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getVoidTy(...) -&gt; BuiltinVoidType *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getCommonTy(...) -&gt; BuiltinCommonType *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getCharTy(...) -&gt; BuiltinCharType *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getIntegerTy(...) -&gt; BuiltinIntegerType *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getFloatTy(...) -&gt; BuiltinFloatType *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getBoolTy(...) -&gt; BuiltinBoolType *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getStringTy(...) -&gt; BuiltinStringType *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getDataSetTy(...) -&gt; BuiltinDataSetType *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getShortTy(...) -&gt; BuiltinShortType *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getLongTy(...) -&gt; BuiltinLongType *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getDatetimeTy(...) -&gt; BuiltinDatetimeType *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getFuncPtrTy(...) -&gt; BuiltinFuncPtrType *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getDoubleTy(...) -&gt; BuiltinDoubleType *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- edition_ : unsigned int</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- source_files_ : vector&lt;SourceFile *&gt;</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- global_type_ : NamedOrderDict&lt;TypeDecl *&gt;</td></tr>
