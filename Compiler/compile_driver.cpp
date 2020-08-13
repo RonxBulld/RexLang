@@ -68,10 +68,10 @@ namespace rexlang {
         bool all_parse_success = true;
         for (const FileEntry &entry : entries) {
             assert(entry.Valid());
-            all_parse_success &= (compilerInstance.parseOnFile(entry) != nullptr);
+            all_parse_success &= compilerInstance.parseOnFile(entry);
         }
         if (all_parse_success) {
-            if (compilerInstance.runSematicAnalysis() == false) {
+            if (!compilerInstance.runSematicAnalysis()) {
                 return nullptr;
             }
         }
@@ -93,24 +93,26 @@ namespace rexlang {
     }
 }
 
+/*===---------------------------------------------===*
+ * REXCompilerInstance 实现部分
+ *===---------------------------------------------===*/
+
 namespace rexlang {
 
-    int REXCompilerInstance::setInstanceName    (const std::string &name)       { this->instance_name_ = name;     return 0; }
-    int REXCompilerInstance::setParseCode       (const std::string &code)       { this->parse_code_    = code;     return 0; }
-    int REXCompilerInstance::setParseFilename   (const std::string &filename)   { this->code_filename_ = filename; return 0; }
-
-    bool REXCompilerInstance::runParser() {
-        return this->runParser(this->parse_code_, this->code_filename_);
+    REXCompilerInstance::REXCompilerInstance()
+        : ast_generate_(this) {
     }
 
-    bool REXCompilerInstance::runParser(const std::string &code, const std::string &file) {
+    int REXCompilerInstance::setInstanceName    (const std::string &name)       { this->instance_name_ = name;     return 0; }
+
+    antlr4::tree::ParseTree *REXCompilerInstance::runParser(const std::string &code, const std::string &file) {
 
         // 分析指定的源代码
 
         return this->ast_generate_.buildCstFromCode(code, file, this->instance_name_);
     }
 
-    bool REXCompilerInstance::parseOnFile(const FileEntry &fileEntry) {
+    antlr4::tree::ParseTree *REXCompilerInstance::parseOnFile(const FileEntry &fileEntry) {
         std::cout << "分析文件：" << fileEntry.GetFilename() << std::endl;
         return this->runParser(fileEntry.GetCode(), fileEntry.GetFilename());
     }
@@ -129,12 +131,12 @@ namespace rexlang {
         return file_entry;
     }
 
-    int REXCompilerInstance::processExternLibrary(const rexlang::StringRef &filePath) {
+    antlr4::tree::ParseTree *REXCompilerInstance::processExternLibrary(const rexlang::StringRef &filePath) {
         FileEntry file_entry = detectLibraryFile(filePath);
         assert(file_entry.Valid());
-        bool suc = this->parseOnFile(file_entry);
-        assert(suc);
-        return 0;
+        antlr4::tree::ParseTree *parse_tree = this->parseOnFile(file_entry);
+        assert(parse_tree);
+        return parse_tree;
     }
 
     bool REXCompilerInstance::assembleTranslates() {
@@ -143,7 +145,7 @@ namespace rexlang {
     }
 
     bool REXCompilerInstance::runSematicAnalysis() {
-        if (this->assembleTranslates() == false) {
+        if (!this->assembleTranslates()) {
             assert(false);
             return false;
         }

@@ -13,10 +13,14 @@
 #include "ASTContext.h"
 #include "../compile_driver.h"
 
+/*===---------------------------------------------------------===*
+ * 辅助函数
+ *===---------------------------------------------------------===*/
+
 namespace rexlang {
 
     static void RemoveRoundQuotes(TString &tString) {
-        if (!tString.string_.empty()&& tString.string_.str().front() == '"' && tString.string_.str().back() == '"') {
+        if (!tString.string_.empty() && tString.string_.str().front() == '"' && tString.string_.str().back() == '"') {
             std::string _string = tString.string_.str();
             _string = _string.substr(1, _string.length() - 2);
             tString.string_ = StringPool::Create(_string);
@@ -59,7 +63,7 @@ namespace rexlang {
         }
     }
 
-    std::vector<TString> CST2ASTConvert::GetTextVecIfExist(const std::vector<antlr4::Token *> tokens, const std::string &hint) const {
+    std::vector<TString> CST2ASTConvert::GetTextVecIfExist(const std::vector<antlr4::Token *> &tokens, const std::string &hint) const {
         std::vector<TString> tokens_str_vec;
         for (auto *tk : tokens) {
             tokens_str_vec.emplace_back(GetTextIfExist(tk, hint));
@@ -97,7 +101,7 @@ namespace rexlang {
     }
 
     template<typename NodeTy, typename ... Args, typename>
-    NodeTy *CST2ASTConvert::CreateNode(antlr4::Token *start_token, antlr4::Token *end_token, Args && ... args) {
+    NodeTy *CST2ASTConvert::CreateNode(antlr4::Token *start_token, antlr4::Token *end_token, Args &&... args) {
         NodeTy *node = rexlang::CreateNode<NodeTy, Args...>(this->ast_context_, args...);
         Node *base_node = node;
         base_node->setLocation(
@@ -106,35 +110,99 @@ namespace rexlang {
                 start_token->getCharPositionInLine(),
                 end_token->getLine(),
                 end_token->getCharPositionInLine()
-                );
+        );
         return node;
     }
 
     template<typename NodeTy, typename ... Args, typename = typename std::enable_if_t<std::is_base_of_v<Node, NodeTy>>>
-    NodeTy *CreateNode(antlr4::ParserRuleContext *parserRuleContext, Args && ... args) {
+    NodeTy *CreateNode(antlr4::ParserRuleContext *parserRuleContext, Args &&... args) {
         return CreateNode<NodeTy, Args...>(parserRuleContext->getStart(), parserRuleContext->getStop(), args...);
     }
 
-    /*===---------------------------------------------------------===*
-     * 转换
-     *===---------------------------------------------------------===*/
+    template <typename T>
+    std::vector<T *> CST2ASTConvert::filterSources() {
+        std::vector<T *> source_list;
+        for (rexLangParser::Src_contentContext * ctx : source_cache_) {
+            if (T *tgt_ctx = ctx->getRuleContext<T>(0)) {
+                source_list.push_back(tgt_ctx);
+            }
+        }
+        return source_list;
+    }
+
+}
+
+/*===---------------------------------------------------------===*
+ * 转换
+ *===---------------------------------------------------------===*/
+
+namespace rexlang {
 
     antlrcpp::Any CST2ASTConvert::visitRexlang_src(rexLangParser::Rexlang_srcContext *context) {
         TranslateUnit * translate_unit = ast_context_->getTranslateUnit();
-        if(!translate_unit) translate_unit = CreateNode<TranslateUnit>(context);
+        if(!translate_unit) {
+            translate_unit = CreateNode<TranslateUnit>(context);
+            ast_context_->setTranslateUnit(translate_unit);
+        }
 
         ast_context_->cleanScopeStack();
         ast_context_->pushScope(translate_unit);
 
-        ast_context_->setTranslateUnit(translate_unit);
-        // 分析版本号
-        translate_unit->setSourceEdition(GetFromCtxIfExist<unsigned int, true>(context->edition_spec(), 2));
-        // 分析文件具体内容
-        auto *src_ctx = context->src_content();
-        translate_unit->appendSourceFile(GetFromCtxIfExist<SourceFile*, true>(src_ctx));
+        // 分析版本号并检查兼容性
+        unsigned int edition = GetFromCtxIfExist<unsigned int, true>(context->edition_spec(), 2);
+        assert(edition == 2);
+        translate_unit->setSourceEdition(edition);
+
+        // 将源文件上下文添加到待处理池中，以便于后续分类处理
+        rexLangParser::Src_contentContext *src_ctx = context->src_content();
+        this->source_cache_.insert(src_ctx);
+
+//        translate_unit->appendSourceFile(GetFromCtxIfExist<SourceFile*, true>(src_ctx));
 
         ast_context_->popScope(translate_unit);
         return NodeWarp(translate_unit);
+    }
+
+    bool CST2ASTConvert::buildTranslateUnitAndFetchSrc(const std::vector<antlr4::tree::ParseTree *> &trees) {
+
+        for (antlr4::tree::ParseTree *tree : trees) {
+            this->visit(tree);
+        }
+
+        return true;
+    }
+
+    bool CST2ASTConvert::importLibraries() {
+        std::vector<rexLangParser::Program_set_fileContext *> ctx_list = this->filterSources<rexLangParser::Program_set_fileContext>();
+        for (rexLangParser::Program_set_fileContext * ctx : ctx_list) {
+            for (antlr4::Token *token : ctx->libraries) {
+                TString library_name = GetTextIfExist(token);
+                /// 此处调用 CompilerInstance 分析引用的库
+                antlr4::tree::ParseTree *parse_tree = compiler_instance_->processExternLibrary(library_name.string_);
+                assert(parse_tree);
+                /// 就地对引用库进行进一步分析（一般情况下引用库接口文件是一组定义文件）
+                this->buildTUFromParseTrees({parse_tree});
+            }
+        }
+    }
+
+    bool CST2ASTConvert::parseDataStructFiles() {
+        std::vector<StructureDecl *> structures;
+        std::vector<rexLangParser::Data_structure_fileContext *> ctx_list = this->filterSources<rexLangParser::Data_structure_fileContext>();
+        for (rexLangParser::Data_structure_fileContext *ctx : ctx_list) {
+            // 扫描数据结构列表并创建空声明
+            for (rexLangParser::Struct_declareContext *struct_decl_ctx : ctx->struct_declare()) {
+                antlr4::Token *name_tk = struct_decl_ctx->name;
+                TString name = GetTextIfExist(name_tk, "");
+                assert(name.string_ != "");
+                IdentDef *     struct_name    = CreateNode<IdentDef>     (name_tk, name_tk, name.string_);
+                StructureDecl *structure_decl = CreateNode<StructureDecl>(struct_decl_ctx,  struct_name);
+                // 注册到类型池中
+                ast_context_->getTranslateUnit()->addType(structure_decl);
+                structures.push_back(structure_decl);
+            }
+        }
+        // TODO:对每个空定义创建定义实体并检查循环引用问题
     }
 
     antlrcpp::Any CST2ASTConvert::visitSrc_content(rexLangParser::Src_contentContext *context) {
@@ -147,12 +215,7 @@ namespace rexlang {
 
     antlrcpp::Any CST2ASTConvert::visitProgram_set_file(rexLangParser::Program_set_fileContext *context) {
         auto program_set_file = CreateNode<ProgramSetFile>(context);
-        for (antlr4::Token *token : context->libraries) {
-            TString library_name = GetTextIfExist(token);
-            /// 此处调用 CompilerInstance 分析引用的库
-            compiler_instance_->processExternLibrary(library_name.string_);
-//            program_set_file->appendReferenceLibName(library_name);
-        }
+        // 依赖库已经在 importLibraries 被提取，此处不再处理
         program_set_file->appendProgramSetDecl(GetFromCtxIfExist<ProgSetDecl*>(context->prog_set()));
         return NodeWarp(program_set_file);
     }
@@ -740,9 +803,10 @@ namespace rexlang {
         // TODO: 在编译过程中遇到外部文件引用会重入这个函数
         // TODO: 分层的遍历CST，而不是一次性遍历整个树
 
-        for (antlr4::tree::ParseTree *tree : trees) {
-            this->visit(tree);
-        }
+        this->buildTranslateUnitAndFetchSrc(trees);
+        this->importLibraries();
+
+        this->parseDataStructFiles();
 
         return ast_context_->getTranslateUnit();
     }

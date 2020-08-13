@@ -41,8 +41,6 @@ namespace rexlang {
         AstGenerate ast_generate_;
 
         std::string instance_name_;
-        std::string code_filename_;
-        std::string parse_code_;
 
         TranslateUnit * major_translate_unit_ = nullptr;
 
@@ -53,14 +51,15 @@ namespace rexlang {
         bool assembleTranslates();
 
     public:
+        REXCompilerInstance() ;
+
+    public:
 
         /*************************************************************
          * 编译前参数设定
          *************************************************************/
 
         int setInstanceName (const std::string &name);
-        int setParseFilename(const std::string &filename);
-        int setParseCode    (const std::string &code);
 
         /*************************************************************
          * 编译时执行例程
@@ -68,21 +67,15 @@ namespace rexlang {
 
         /*===-------------------------------------===*
          * 分析源代码，并生成CST
-         * 根据实例中的信息执行分析过程
-         */
-        bool runParser();
-
-        /*===-------------------------------------===*
-         * 分析源代码，并生成CST
          * 根据输入的参数执行分析过程
          */
-        bool runParser(const std::string &code, const std::string &file);
+        antlr4::tree::ParseTree *runParser(const std::string &code, const std::string &file);
 
         /*===-------------------------------------===*
          * 分析一个指定文件名的文件
          * 依赖 runParser 的实现
          */
-        bool parseOnFile(const FileEntry &fileEntry);
+        antlr4::tree::ParseTree *parseOnFile(const FileEntry &fileEntry);
 
         /*===-------------------------------------===*
          * 探测库是否存在
@@ -94,7 +87,7 @@ namespace rexlang {
          * 处理外部引用库
          * 调用 detectLibraryFile 获取文件对象，并通过 parseOnFile 生成AST
          */
-        int processExternLibrary(const StringRef &filePath);
+        antlr4::tree::ParseTree *processExternLibrary(const StringRef &filePath);
 
         /*===-------------------------------------===*
          * 其他分析动作

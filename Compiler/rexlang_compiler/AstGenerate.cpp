@@ -15,13 +15,13 @@
 #include "CST2ASTConvert.h"
 
 namespace rexlang {
-    bool AstGenerate::buildCstFromCode(const std::string &code,
+    antlr4::tree::ParseTree *AstGenerate::buildCstFromCode(const std::string &code,
                                        const std::string &filename,
                                        const std::string &toolname) {
         return this->buildCstFromCodeWithArgs(code, {}, filename, toolname);
     }
 
-    bool AstGenerate::buildCstFromCodeWithArgs(const std::string &code,
+    antlr4::tree::ParseTree *AstGenerate::buildCstFromCodeWithArgs(const std::string &code,
                                                const std::vector<std::string> &args,
                                                const std::string &filename,
                                                const std::string &toolname) {
@@ -43,12 +43,12 @@ namespace rexlang {
 
         // 执行语法分析，生成语法分析树
 
-        if (antlr4::tree::ParseTree* __tree = __parser.rexlang_src()) {
+        if (antlr4::tree::ParseTree *__tree = __parser.rexlang_src()) {
             this->parse_trees_.push_back(__tree);
-            return true;
+            return __tree;
         } else {
             assert(false);
-            return false;
+            return nullptr;
         }
 
     }

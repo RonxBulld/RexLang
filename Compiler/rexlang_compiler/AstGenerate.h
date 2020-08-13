@@ -36,8 +36,8 @@ namespace rexlang {
         /*===---------------------------------------===*
          * 从代码文本中创建CST
          */
-        bool buildCstFromCode        (const std::string &code, const std::string &filename, const std::string &toolname);
-        bool buildCstFromCodeWithArgs(const std::string &code, const std::vector<std::string> &args, const std::string &filename, const std::string &toolname);
+        antlr4::tree::ParseTree *buildCstFromCode        (const std::string &code, const std::string &filename, const std::string &toolname);
+        antlr4::tree::ParseTree *buildCstFromCodeWithArgs(const std::string &code, const std::vector<std::string> &args, const std::string &filename, const std::string &toolname);
 
         /*===---------------------------------------===*
          * 从保存的CST列表中构建AST并清空保存的CST

@@ -1029,6 +1029,9 @@ namespace rexlang {
         NamedOrderDict<MemberVariableDecl *> members_;
 
     public:
+        StructureDecl(IdentDef *name) ;
+
+    public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:

@@ -21,12 +21,16 @@ namespace rexlang {
     private:
         ASTContext *ast_context_ = nullptr;
         REXCompilerInstance *compiler_instance_ = nullptr;
+        /*
+         * 待处理文件缓存
+         */
+        std::set<rexLangParser::Src_contentContext *> source_cache_;
 
     private:
         TString              GetTextIfExist   (const antlr4::Token *token, const std::string &hint = "") const;
         long                 GetLongIfExist   (const antlr4::Token *token, int hint = 0) const;
         float                GetFloatIfExist  (const antlr4::Token *token, float hint = 0.0f) const;
-        std::vector<TString> GetTextVecIfExist(const std::vector<antlr4::Token *> tokens, const std::string &hint = "") const;
+        std::vector<TString> GetTextVecIfExist(const std::vector<antlr4::Token *> &tokens, const std::string &hint = "") const;
 
         template<
                 typename T,
@@ -49,6 +53,25 @@ namespace rexlang {
     private:
         ValueOfDatetime* TimeNodeBuilder(time_t ntm, antlr4::ParserRuleContext *parserRuleContext);
         tm TimeBuilder(unsigned year, unsigned month, unsigned day, unsigned hour, unsigned minute, unsigned second);
+
+    private:
+        template <typename T, typename = typename std::enable_if_t<std::is_base_of_v<antlr4::ParserRuleContext, T>>>
+        std::vector<T *> filterSources() ;
+
+        /*===----------------------------------------------------===*
+         * 从 ParseTree 森林中构建唯一的翻译单元，并提取资源内容
+         */
+        bool buildTranslateUnitAndFetchSrc(const std::vector<antlr4::tree::ParseTree *> &trees);
+
+        /*===----------------------------------------------------===*
+         * 导入依赖库文件
+         */
+        bool importLibraries();
+
+        /*===----------------------------------------------------===*
+         * 从资源缓存中分析结构体定义
+         */
+        bool parseDataStructFiles();
 
     public:
         antlrcpp::Any visitRexlang_src                  (rexLangParser::Rexlang_srcContext *                  context) override;
