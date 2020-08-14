@@ -443,6 +443,8 @@ namespace rexlang {
         IdentDef(const char *id) ;
         IdentDef(const std::string &id) ;
         IdentDef(const StringRef &id) ;
+        IdentDef(const TString &id) ;
+
         IdentDef(const IdentDef &other) ;
 
     public:
@@ -536,12 +538,10 @@ namespace rexlang {
      */
     class BaseVariDecl : public TagDecl {
     private:
-        IdentRefer   *type_name_ = nullptr; // 类型名称
         VariTypeDecl *type_      = nullptr; // 类型
 
     public:
         BaseVariDecl(VariTypeDecl *type, IdentDef *name) ;
-        BaseVariDecl(IdentRefer *  type, IdentDef *name) ;
 
     public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
@@ -550,7 +550,6 @@ namespace rexlang {
         void        updateType (VariTypeDecl *type) ;
         TypeDecl *  getType () const override ;     // 获取变量实例的类型
 
-        IdentRefer *    id  () const ;
         VariTypeDecl *  type() const ;
 
     public:
@@ -636,6 +635,9 @@ namespace rexlang {
      */
     class VariableDecl : public BaseVariDecl {
     public:
+        VariableDecl(VariTypeDecl *type, IdentDef *name) ;
+
+    public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
@@ -657,6 +659,9 @@ namespace rexlang {
      * 描述成员变量
      */
     class MemberVariableDecl : public VariableDecl {
+    public:
+        MemberVariableDecl(VariTypeDecl *type, IdentDef *name) ;
+
     public:
         void applyAttribute (const TString &attribute) override ;
 

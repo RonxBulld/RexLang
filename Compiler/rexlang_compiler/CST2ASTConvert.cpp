@@ -12,6 +12,8 @@
 #include "NodeDecl.h"
 #include "ASTContext.h"
 #include "../compile_driver.h"
+#include "rtti.h"
+#include "utilities/Str2Attr.h"
 
 /*===---------------------------------------------------------===*
  * 辅助函数
@@ -119,7 +121,7 @@ namespace rexlang {
         return CreateNode<NodeTy, Args...>(parserRuleContext->getStart(), parserRuleContext->getStop(), args...);
     }
 
-    template <typename T>
+    template <typename T, typename>
     std::vector<T *> CST2ASTConvert::filterSources() {
         std::vector<T *> source_list;
         for (rexLangParser::Src_contentContext * ctx : source_cache_) {
@@ -184,10 +186,11 @@ namespace rexlang {
                 this->buildTUFromParseTrees({parse_tree});
             }
         }
+        return true;
     }
 
     bool CST2ASTConvert::parseDataStructFiles() {
-        std::vector<StructureDecl *> structures;
+        std::map<StructureDecl *, rexLangParser::Struct_declareContext *> structures;
         std::vector<rexLangParser::Data_structure_fileContext *> ctx_list = this->filterSources<rexLangParser::Data_structure_fileContext>();
         for (rexLangParser::Data_structure_fileContext *ctx : ctx_list) {
             // 扫描数据结构列表并创建空声明
@@ -199,10 +202,21 @@ namespace rexlang {
                 StructureDecl *structure_decl = CreateNode<StructureDecl>(struct_decl_ctx,  struct_name);
                 // 注册到类型池中
                 ast_context_->getTranslateUnit()->addType(structure_decl);
-                structures.push_back(structure_decl);
+                structures.insert(std::make_pair(structure_decl, struct_decl_ctx));
             }
         }
-        // TODO:对每个空定义创建定义实体并检查循环引用问题
+        // 对每个空声明创建定义实体并检查循环引用问题
+        for (auto &item : structures) {
+            StructureDecl *struct_decl = item.first;
+            rexLangParser::Struct_declareContext * struct_decl_ctx = item.second;
+            struct_decl->applyAttribute(GetTextIfExist(struct_decl_ctx->access));
+            struct_decl->setComment    (GetFromCtxIfExist<TString>(struct_decl_ctx->table_comment()));
+            for (auto *mem_ctx : struct_decl_ctx->struct_mems) {
+                MemberVariableDecl *member = GetFromCtxIfExist<MemberVariableDecl *>(mem_ctx);
+                struct_decl->appendElement(member);
+            }
+        }
+        return true;
     }
 
     antlrcpp::Any CST2ASTConvert::visitSrc_content(rexLangParser::Src_contentContext *context) {
@@ -347,12 +361,22 @@ namespace rexlang {
     }
 
     antlrcpp::Any CST2ASTConvert::visitVariable_decl(rexLangParser::Variable_declContext *context) {
-        VariableDecl* variable_decl = CreateNode<VariableDecl>(context);
-        variable_decl->setName(GetTextIfExist(context->name));
-        variable_decl->setTypeName(GetTextIfExist(context->type));
+
+        IdentDef *name = CreateNode<IdentDef>(context, GetTextIfExist(context->name));
+
+        TString type_name = GetTextIfExist(context->type);
+        VariTypeDecl *type = rtti::dyn_cast<VariTypeDecl>(ast_context_->getTranslateUnit()->getType(type_name.string_));
+        TString dimension_str = GetTextIfExist(context->dimension);
+        if (!dimension_str.string_.empty()) {
+            auto err_or_dims = Str2Attr::str2Dimension(dimension_str.string_);
+            assert(err_or_dims.NoError());
+            type = ArrayDecl::get(type, err_or_dims.Value());
+        }
+
+        VariableDecl *variable_decl = CreateNode<VariableDecl>(context, type, name);
         variable_decl->applyAttributes(GetTextVecIfExist(context->attributes));
-        variable_decl->setDimensionsText(GetTextIfExist(context->dimension));
         variable_decl->setComment(GetFromCtxIfExist<TString>(context->table_comment()));
+
         return NodeWarp(variable_decl);
     }
 
@@ -419,15 +443,11 @@ namespace rexlang {
     }
 
     antlrcpp::Any CST2ASTConvert::visitMember_vari_decl(rexLangParser::Member_vari_declContext *context) {
-        VariableDecl* variable_decl = GetFromCtxIfExist<VariableDecl*>(context->variable_decl());
+        VariableDecl* variable_decl = GetFromCtxIfExist<VariableDecl *>(context->variable_decl());
         MemberVariableDecl* member_variable_decl = nullptr;
         if (variable_decl) {
-            member_variable_decl = CreateNode<MemberVariableDecl>(context);
-            member_variable_decl->setDimensionsText(variable_decl->getDimensionsText());
-            member_variable_decl->setTypeName      (variable_decl->getTypeName());
-            member_variable_decl->setValType(variable_decl->takeValType());
-            member_variable_decl->setName          (variable_decl->getName());
-            member_variable_decl->setComment       (variable_decl->getComment());
+            member_variable_decl = CreateNode<MemberVariableDecl>(context, variable_decl->type(), variable_decl->getName());
+            member_variable_decl->setComment(variable_decl->getComment());
             delete variable_decl;
         }
         return NodeWarp(member_variable_decl);
