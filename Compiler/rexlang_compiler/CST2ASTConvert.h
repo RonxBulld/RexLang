@@ -58,6 +58,9 @@ namespace rexlang {
         template <typename T, typename = typename std::enable_if_t<std::is_base_of_v<antlr4::ParserRuleContext, T>>>
         std::vector<T *> filterSources() ;
 
+        template <typename N, typename T, typename = typename std::enable_if_t<std::is_base_of_v<antlr4::ParserRuleContext, T>>>
+        N *buildVariableDecl(T *ctx);
+
         /*===----------------------------------------------------===*
          * 从 ParseTree 森林中构建唯一的翻译单元，并提取资源内容
          */
@@ -72,6 +75,11 @@ namespace rexlang {
          * 从资源缓存中分析结构体定义
          */
         bool parseDataStructFiles();
+
+        /*===----------------------------------------------------===*
+         * 从资源缓存中分析全局变量定义
+         */
+        bool parseGlobalVariableFiles();
 
     public:
         antlrcpp::Any visitRexlang_src                  (rexLangParser::Rexlang_srcContext *                  context) override;

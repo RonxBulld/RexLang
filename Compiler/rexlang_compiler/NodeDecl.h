@@ -649,6 +649,9 @@ namespace rexlang {
      */
     class GlobalVariableDecl : public VariableDecl {
     public:
+        GlobalVariableDecl(VariTypeDecl *type, IdentDef *name) ;
+
+    public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
