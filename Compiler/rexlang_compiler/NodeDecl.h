@@ -586,7 +586,6 @@ namespace rexlang {
 
     public:
         ParameterDecl(VariTypeDecl *type, IdentDef *name) ;
-        ParameterDecl(IdentRefer *  type, IdentDef *name) ;
 
     public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;

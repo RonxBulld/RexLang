@@ -61,6 +61,9 @@ namespace rexlang {
         template <typename N, typename T, typename = typename std::enable_if_t<std::is_base_of_v<antlr4::ParserRuleContext, T>>>
         N *buildVariableDecl(T *ctx);
 
+        template <typename T, typename = typename std::enable_if_t<std::is_base_of_v<rexLangParser::Parameter_declContext, T> || std::is_base_of_v<rexLangParser::Vari_parameter_declContext, T>>>
+        ParameterDecl *buildParameterDecl(T *ctx);
+
         /*===----------------------------------------------------===*
          * 从 ParseTree 森林中构建唯一的翻译单元，并提取资源内容
          */

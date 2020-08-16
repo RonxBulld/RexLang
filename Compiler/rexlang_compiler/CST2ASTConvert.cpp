@@ -132,6 +132,11 @@ namespace rexlang {
         return source_list;
     }
 
+    /*===----------------------------------------------------===*
+     * 从分析树上下文对象中构建变量定义
+     * 内部自动处理：变量名称、变量类型、数组声明、注释信息
+     * 需要外部处理：属性列表
+     */
     template <typename N, typename T, typename>
     N *CST2ASTConvert::buildVariableDecl(T *ctx) {
 
@@ -156,6 +161,23 @@ namespace rexlang {
         variable_decl->setComment(GetFromCtxIfExist<TString>(ctx->table_comment()));
 
         return variable_decl;
+    }
+
+    /*===----------------------------------------------------===*
+     * 从分析树上下文对象中构建参数定义
+     */
+    template <typename T, typename>
+    ParameterDecl *CST2ASTConvert::buildParameterDecl(T *ctx) {
+        IdentDef *name = CreateNode<IdentDef>(ctx, GetTextIfExist(ctx->name));
+
+        TString type_name = GetTextIfExist(ctx->type);
+        VariTypeDecl *type = rtti::dyn_cast<VariTypeDecl>(ast_context_->getTranslateUnit()->getType(type_name.string_));
+
+        ParameterDecl *parameter_decl = CreateNode<ParameterDecl>(ctx, type, name);
+        parameter_decl->applyAttributes(GetTextVecIfExist(ctx->attributes));
+        parameter_decl->setComment(GetFromCtxIfExist<TString>(ctx->table_comment()));
+
+        return parameter_decl;
     }
 
 }
@@ -235,8 +257,8 @@ namespace rexlang {
         for (auto &item : structures) {
             StructureDecl *struct_decl = item.first;
             rexLangParser::Struct_declareContext * struct_decl_ctx = item.second;
-            for (auto *mem_ctx : struct_decl_ctx->struct_mems) {
-                MemberVariableDecl *member = GetFromCtxIfExist<MemberVariableDecl *>(mem_ctx);
+            for (rexLangParser::Member_vari_declContext *mem_ctx : struct_decl_ctx->struct_mems) {
+                MemberVariableDecl *member = visitMember_vari_decl(mem_ctx);
                 struct_decl->appendElement(member);
             }
         }
@@ -271,10 +293,45 @@ namespace rexlang {
         return NodeWarp(global_variable_decl);
     }
 
-    antlrcpp::Any CST2ASTConvert::visitVariable_decl(rexLangParser::Variable_declContext *context) {
-        VariableDecl *variable_decl = buildVariableDecl<VariableDecl>(context);
-        variable_decl->applyAttributes(GetTextVecIfExist(context->attributes));
-        return NodeWarp(variable_decl);
+    antlrcpp::Any CST2ASTConvert::visitMember_vari_decl(rexLangParser::Member_vari_declContext *context) {
+        MemberVariableDecl* member_variable_decl = buildVariableDecl<MemberVariableDecl>(context->variable_decl());
+        member_variable_decl->applyAttributes(GetTextVecIfExist(context->variable_decl()->attributes));
+        return NodeWarp(member_variable_decl);
+    }
+
+    antlrcpp::Any CST2ASTConvert::visitFile_vari_decl(rexLangParser::File_vari_declContext *context) {
+        FileVariableDecl* file_variable_decl = buildVariableDecl<FileVariableDecl>(context->variable_decl());
+        file_variable_decl->applyAttributes(GetTextVecIfExist(context->variable_decl()->attributes));
+        return NodeWarp(file_variable_decl);
+    }
+
+    antlrcpp::Any CST2ASTConvert::visitLocal_variable_decl(rexLangParser::Local_variable_declContext *context) {
+        LocalVariableDecl* local_variable_decl = buildVariableDecl<LocalVariableDecl>(context);
+        local_variable_decl->applyAttribute(GetTextIfExist(context->attribute));
+        return NodeWarp(local_variable_decl);
+    }
+
+    antlrcpp::Any CST2ASTConvert::visitParameter_decl_list(rexLangParser::Parameter_decl_listContext *context) {
+        std::vector<ParameterDecl*> params;
+        for (rexLangParser::Parameter_declContext *param_vari_ctx : context->parameter_decl()) {
+            ParameterDecl* parameter_decl = visitParameter_decl(param_vari_ctx);
+            params.emplace_back(parameter_decl);
+        }
+        if (rexLangParser::Vari_parameter_declContext *vari_param_ctx = context->vari_parameter_decl()) {
+            ParameterDecl* vari_parameter_decl = visitVari_parameter_decl(vari_param_ctx);
+            params.emplace_back(vari_parameter_decl);
+        }
+        return params;
+    }
+
+    antlrcpp::Any CST2ASTConvert::visitParameter_decl(rexLangParser::Parameter_declContext *context) {
+        ParameterDecl* parameter_decl = buildParameterDecl(context);
+        return NodeWarp(parameter_decl);
+    }
+
+    antlrcpp::Any CST2ASTConvert::visitVari_parameter_decl(rexLangParser::Vari_parameter_declContext *context) {
+        ParameterDecl* parameter_decl = buildParameterDecl(context);
+        return NodeWarp(parameter_decl);
     }
 
     /******************************************************************************************************************/
@@ -357,7 +414,7 @@ namespace rexlang {
         prog_set_decl->setName(GetTextIfExist(context->name));
         prog_set_decl->applyAttribute(GetTextIfExist(context->access));
         prog_set_decl->setComment(GetFromCtxIfExist<TString>(context->table_comment()));
-        for (auto *vari_ctx : context->prog_set_varis) {
+        for (rexLangParser::File_vari_declContext *vari_ctx : context->prog_set_varis) {
             FileVariableDecl* vari_decl = GetFromCtxIfExist<FileVariableDecl*>(vari_ctx);
             prog_set_decl->appendFileStaticVari(vari_decl);
         }
@@ -389,73 +446,6 @@ namespace rexlang {
 
         ast_context_->popScope(sub_prog_decl);
         return NodeWarp(sub_prog_decl);
-    }
-
-    antlrcpp::Any CST2ASTConvert::visitLocal_variable_decl(rexLangParser::Local_variable_declContext *context) {
-        LocalVariableDecl* local_variable_decl = CreateNode<LocalVariableDecl>(context);
-        local_variable_decl->setName(GetTextIfExist(context->name));
-        local_variable_decl->setTypeName(GetTextIfExist(context->type));
-        local_variable_decl->setDimensionsText(GetTextIfExist(context->dimension));
-        local_variable_decl->setComment(GetFromCtxIfExist<TString>(context->table_comment()));
-        return NodeWarp(local_variable_decl);
-    }
-
-    antlrcpp::Any CST2ASTConvert::visitParameter_decl_list(rexLangParser::Parameter_decl_listContext *context) {
-        std::vector<ParameterDecl*> params;
-        for (auto *param_vari_ctx : context->parameter_decl()) {
-            ParameterDecl* parameter_decl = GetFromCtxIfExist<ParameterDecl*>(param_vari_ctx);
-            params.emplace_back(parameter_decl);
-        }
-        if (auto *vari_param_ctx = context->vari_parameter_decl()) {
-            ParameterDecl* vari_parameter_decl = GetFromCtxIfExist<ParameterDecl*>(vari_param_ctx);
-            params.emplace_back(vari_parameter_decl);
-        }
-        return params;
-    }
-
-    antlrcpp::Any CST2ASTConvert::visitParameter_decl(rexLangParser::Parameter_declContext *context) {
-        ParameterDecl* parameter_decl = CreateNode<ParameterDecl>(context);
-        parameter_decl->setName(GetTextIfExist(context->name));
-        parameter_decl->setTypeName(GetTextIfExist(context->type));
-        parameter_decl->applyAttributes(GetTextVecIfExist(context->attributes));
-        parameter_decl->setComment(GetFromCtxIfExist<TString>(context->table_comment()));
-        return NodeWarp(parameter_decl);
-    }
-
-    antlrcpp::Any CST2ASTConvert::visitVari_parameter_decl(rexLangParser::Vari_parameter_declContext *context) {
-        ParameterDecl* parameter_decl = CreateNode<ParameterDecl>(context);
-        parameter_decl->setName(GetTextIfExist(context->name));
-        parameter_decl->setTypeName( GetTextIfExist(context->type));
-        parameter_decl->applyAttributes(GetTextVecIfExist(context->attributes));
-        parameter_decl->setComment(GetFromCtxIfExist<TString>(context->table_comment()));
-        parameter_decl->setDynamicFlag(true);
-        return NodeWarp(parameter_decl);
-    }
-
-    antlrcpp::Any CST2ASTConvert::visitMember_vari_decl(rexLangParser::Member_vari_declContext *context) {
-        VariableDecl* variable_decl = GetFromCtxIfExist<VariableDecl *>(context->variable_decl());
-        MemberVariableDecl* member_variable_decl = nullptr;
-        if (variable_decl) {
-            member_variable_decl = CreateNode<MemberVariableDecl>(context, variable_decl->type(), variable_decl->getName());
-            member_variable_decl->setComment(variable_decl->getComment());
-            delete variable_decl;
-        }
-        return NodeWarp(member_variable_decl);
-    }
-
-    antlrcpp::Any CST2ASTConvert::visitFile_vari_decl(rexLangParser::File_vari_declContext *context) {
-        VariableDecl* variable_decl = GetFromCtxIfExist<VariableDecl*>(context->variable_decl());
-        FileVariableDecl* file_variable_decl = nullptr;
-        if (variable_decl) {
-            file_variable_decl = CreateNode<FileVariableDecl>(context);
-            file_variable_decl->setDimensionsText(variable_decl->getDimensionsText());
-            file_variable_decl->setTypeName      (variable_decl->getTypeName());
-            file_variable_decl->setValType(variable_decl->takeValType());
-            file_variable_decl->setName          (variable_decl->getName());
-            file_variable_decl->setComment       (variable_decl->getComment());
-            delete variable_decl;
-        }
-        return NodeWarp(file_variable_decl);
     }
 
     antlrcpp::Any CST2ASTConvert::visitStatement_list(rexLangParser::Statement_listContext *context) {
