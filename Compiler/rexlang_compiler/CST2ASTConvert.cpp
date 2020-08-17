@@ -334,6 +334,31 @@ namespace rexlang {
         return NodeWarp(parameter_decl);
     }
 
+    bool CST2ASTConvert::parseGlobalFuntors() {
+        // 先处理DLL定义文件中DLL与LIB声明
+        std::vector<rexLangParser::Dll_define_fileContext *> dll_ctx_list = this->filterSources<rexLangParser::Dll_define_fileContext>();
+        for (rexLangParser::Dll_define_fileContext *ctx : dll_ctx_list) {
+            // TODO:创建容器
+            for (rexLangParser::Dll_commandContext *dll_ctx : ctx->dll_command()) {
+                // TODO:创建声明
+            }
+            for (rexLangParser::Lib_commandContext *lib_ctx : ctx->lib_command()) {
+                // TODO:创建声明
+            }
+        }
+        // 然后处理各个程序集中的函数声明
+        std::vector<rexLangParser::Program_set_fileContext *> prg_ctx_list = this->filterSources<rexLangParser::Program_set_fileContext>();
+        for (rexLangParser::Program_set_fileContext *ctx : prg_ctx_list) {
+            // TODO:创建容器
+            if (rexLangParser::Prog_setContext *prog_set_ctx = ctx->prog_set()) {
+                for (rexLangParser::Sub_programContext *prog_ctx : prog_set_ctx->functions) {
+                    // TODO:创建声明
+                }
+            }
+        }
+        return true;
+    }
+
     /******************************************************************************************************************/
 
     antlrcpp::Any CST2ASTConvert::visitSrc_content(rexLangParser::Src_contentContext *context) {

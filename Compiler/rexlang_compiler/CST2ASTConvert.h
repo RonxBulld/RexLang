@@ -84,6 +84,11 @@ namespace rexlang {
          */
         bool parseGlobalVariableFiles();
 
+        /*===----------------------------------------------------===*
+         * 从资源缓存中分析全局可调用对象
+         */
+        bool parseGlobalFuntors();
+
     public:
         antlrcpp::Any visitRexlang_src                  (rexLangParser::Rexlang_srcContext *                  context) override;
         antlrcpp::Any visitSrc_content                  (rexLangParser::Src_contentContext *                  context) override;
