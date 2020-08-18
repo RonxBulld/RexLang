@@ -361,6 +361,9 @@ namespace rexlang {
         StructDeclMapTy structure_decl_map_;
 
     public:
+        DataStructureFile() ;
+
+    public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
