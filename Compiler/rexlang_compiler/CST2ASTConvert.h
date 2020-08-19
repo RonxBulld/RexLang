@@ -95,7 +95,7 @@ namespace rexlang {
         antlrcpp::Any visitProgram_set_file             (rexLangParser::Program_set_fileContext *             context) override;
         antlrcpp::Any visitData_structure_file          (rexLangParser::Data_structure_fileContext *          context) override;
         antlrcpp::Any visitGlobal_variable_file         (rexLangParser::Global_variable_fileContext *         context) override;
-        antlrcpp::Any visitDll_define_file              (rexLangParser::Dll_define_fileContext *              context) override;
+        antlrcpp::Any visitDll_define_file              (rexLangParser::Api_define_fileContext *              context) override;
         antlrcpp::Any visitDll_command                  (rexLangParser::Dll_commandContext *                  context) override;
         antlrcpp::Any visitLib_command                  (rexLangParser::Lib_commandContext *                  context) override;
         antlrcpp::Any visitGlobal_variable_list         (rexLangParser::Global_variable_listContext *         context) override;

@@ -33,8 +33,8 @@ public:
   virtual void enterGlobal_variable_file(rexLangParser::Global_variable_fileContext * /*ctx*/) override { }
   virtual void exitGlobal_variable_file(rexLangParser::Global_variable_fileContext * /*ctx*/) override { }
 
-  virtual void enterDll_define_file(rexLangParser::Dll_define_fileContext * /*ctx*/) override { }
-  virtual void exitDll_define_file(rexLangParser::Dll_define_fileContext * /*ctx*/) override { }
+  virtual void enterDll_define_file(rexLangParser::Api_define_fileContext * /*ctx*/) override { }
+  virtual void exitDll_define_file(rexLangParser::Api_define_fileContext * /*ctx*/) override { }
 
   virtual void enterDll_command(rexLangParser::Dll_commandContext * /*ctx*/) override { }
   virtual void exitDll_command(rexLangParser::Dll_commandContext * /*ctx*/) override { }

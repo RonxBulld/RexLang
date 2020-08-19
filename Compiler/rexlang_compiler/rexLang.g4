@@ -50,7 +50,7 @@ src_content
     : program_set_file
     | data_structure_file
     | global_variable_file
-    | dll_define_file
+    | api_define_file
     ;
 
 program_set_file
@@ -66,7 +66,7 @@ global_variable_file
     : global_variable_list
     ;
 
-dll_define_file
+api_define_file
     : dll_command*
     | lib_command*
     ;

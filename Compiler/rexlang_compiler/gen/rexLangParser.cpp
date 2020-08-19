@@ -152,8 +152,8 @@ rexLangParser::Global_variable_fileContext* rexLangParser::Src_contentContext::g
   return getRuleContext<rexLangParser::Global_variable_fileContext>(0);
 }
 
-rexLangParser::Dll_define_fileContext* rexLangParser::Src_contentContext::dll_define_file() {
-  return getRuleContext<rexLangParser::Dll_define_fileContext>(0);
+rexLangParser::Api_define_fileContext* rexLangParser::Src_contentContext::dll_define_file() {
+  return getRuleContext<rexLangParser::Api_define_fileContext>(0);
 }
 
 
@@ -460,53 +460,53 @@ rexLangParser::Global_variable_fileContext* rexLangParser::global_variable_file(
 
 //----------------- Dll_define_fileContext ------------------------------------------------------------------
 
-rexLangParser::Dll_define_fileContext::Dll_define_fileContext(ParserRuleContext *parent, size_t invokingState)
+rexLangParser::Api_define_fileContext::Api_define_fileContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-std::vector<rexLangParser::Dll_commandContext *> rexLangParser::Dll_define_fileContext::dll_command() {
+std::vector<rexLangParser::Dll_commandContext *> rexLangParser::Api_define_fileContext::dll_command() {
   return getRuleContexts<rexLangParser::Dll_commandContext>();
 }
 
-rexLangParser::Dll_commandContext* rexLangParser::Dll_define_fileContext::dll_command(size_t i) {
+rexLangParser::Dll_commandContext* rexLangParser::Api_define_fileContext::dll_command(size_t i) {
   return getRuleContext<rexLangParser::Dll_commandContext>(i);
 }
 
-std::vector<rexLangParser::Lib_commandContext *> rexLangParser::Dll_define_fileContext::lib_command() {
+std::vector<rexLangParser::Lib_commandContext *> rexLangParser::Api_define_fileContext::lib_command() {
   return getRuleContexts<rexLangParser::Lib_commandContext>();
 }
 
-rexLangParser::Lib_commandContext* rexLangParser::Dll_define_fileContext::lib_command(size_t i) {
+rexLangParser::Lib_commandContext* rexLangParser::Api_define_fileContext::lib_command(size_t i) {
   return getRuleContext<rexLangParser::Lib_commandContext>(i);
 }
 
 
-size_t rexLangParser::Dll_define_fileContext::getRuleIndex() const {
+size_t rexLangParser::Api_define_fileContext::getRuleIndex() const {
   return rexLangParser::RuleDll_define_file;
 }
 
-void rexLangParser::Dll_define_fileContext::enterRule(tree::ParseTreeListener *listener) {
+void rexLangParser::Api_define_fileContext::enterRule(tree::ParseTreeListener *listener) {
   auto parserListener = dynamic_cast<rexLangListener *>(listener);
   if (parserListener != nullptr)
     parserListener->enterDll_define_file(this);
 }
 
-void rexLangParser::Dll_define_fileContext::exitRule(tree::ParseTreeListener *listener) {
+void rexLangParser::Api_define_fileContext::exitRule(tree::ParseTreeListener *listener) {
   auto parserListener = dynamic_cast<rexLangListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitDll_define_file(this);
 }
 
 
-antlrcpp::Any rexLangParser::Dll_define_fileContext::accept(tree::ParseTreeVisitor *visitor) {
+antlrcpp::Any rexLangParser::Api_define_fileContext::accept(tree::ParseTreeVisitor *visitor) {
   if (auto parserVisitor = dynamic_cast<rexLangVisitor*>(visitor))
     return parserVisitor->visitDll_define_file(this);
   else
     return visitor->visitChildren(this);
 }
 
-rexLangParser::Dll_define_fileContext* rexLangParser::dll_define_file() {
-  Dll_define_fileContext *_localctx = _tracker.createInstance<Dll_define_fileContext>(_ctx, getState());
+rexLangParser::Api_define_fileContext* rexLangParser::dll_define_file() {
+  Api_define_fileContext *_localctx = _tracker.createInstance<Api_define_fileContext>(_ctx, getState());
   enterRule(_localctx, 10, rexLangParser::RuleDll_define_file);
   size_t _la = 0;
 

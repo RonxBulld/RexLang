@@ -61,7 +61,7 @@ public:
   class Program_set_fileContext;
   class Data_structure_fileContext;
   class Global_variable_fileContext;
-  class Dll_define_fileContext;
+  class Api_define_fileContext;
   class Dll_commandContext;
   class Lib_commandContext;
   class Global_variable_listContext;
@@ -122,7 +122,7 @@ public:
     Program_set_fileContext *program_set_file();
     Data_structure_fileContext *data_structure_file();
     Global_variable_fileContext *global_variable_file();
-    Dll_define_fileContext *dll_define_file();
+    Api_define_fileContext *dll_define_file();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -185,9 +185,9 @@ public:
 
   Global_variable_fileContext* global_variable_file();
 
-  class  Dll_define_fileContext : public antlr4::ParserRuleContext {
+  class  Api_define_fileContext : public antlr4::ParserRuleContext {
   public:
-    Dll_define_fileContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    Api_define_fileContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     std::vector<Dll_commandContext *> dll_command();
     Dll_commandContext* dll_command(size_t i);
@@ -201,7 +201,7 @@ public:
    
   };
 
-  Dll_define_fileContext* dll_define_file();
+  Api_define_fileContext* dll_define_file();
 
   class  Dll_commandContext : public antlr4::ParserRuleContext {
   public:

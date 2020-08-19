@@ -37,7 +37,7 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitDll_define_file(rexLangParser::Dll_define_fileContext *ctx) override {
+  virtual antlrcpp::Any visitDll_define_file(rexLangParser::Api_define_fileContext *ctx) override {
     return visitChildren(ctx);
   }
 

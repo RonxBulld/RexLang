@@ -293,6 +293,10 @@ namespace rexlang {
     }
 
     // --- 全局变量 ---------------------------------------------------------------------------------
+    // GlobalVariableFiles
+    //      `---global_variable_file
+    //              `---global_variable_list
+    //                      `---global_variable_item
 
     bool CST2ASTConvert::parseGlobalVariableFiles() {
         TranslateUnit *TU = ast_context_->getTranslateUnit();
@@ -348,69 +352,35 @@ namespace rexlang {
 
     bool CST2ASTConvert::parseGlobalFuntors() {
         // 先处理DLL定义文件中DLL与LIB声明
-        std::vector<rexLangParser::Dll_define_fileContext *> dll_ctx_list = this->filterSources<rexLangParser::Dll_define_fileContext>();
-        for (rexLangParser::Dll_define_fileContext *ctx : dll_ctx_list) {
-            // TODO:创建容器
+        TranslateUnit *TU = ast_context_->getTranslateUnit();
+        std::vector<rexLangParser::Api_define_fileContext *> dll_ctx_list = this->filterSources<rexLangParser::Api_define_fileContext>();
+        for (rexLangParser::Api_define_fileContext *ctx : dll_ctx_list) {
+            APIDeclareFile *api_declare_file = CreateNode<APIDeclareFile>(ctx);
             for (rexLangParser::Dll_commandContext *dll_ctx : ctx->dll_command()) {
-                // TODO:创建声明
+                APICommandDecl *dll_command_decl = GetFromCtxIfExist<APICommandDecl *>(dll_ctx);
+                api_declare_file->appendAPIDeclare(dll_command_decl);
             }
             for (rexLangParser::Lib_commandContext *lib_ctx : ctx->lib_command()) {
-                // TODO:创建声明
+                APICommandDecl *lib_command_decl = GetFromCtxIfExist<APICommandDecl *>(lib_ctx);
+                api_declare_file->appendAPIDeclare(lib_command_decl);
             }
+            api_declare_file->registResourceTo(TU);
         }
         // 然后处理各个程序集中的函数声明
         std::vector<rexLangParser::Program_set_fileContext *> prg_ctx_list = this->filterSources<rexLangParser::Program_set_fileContext>();
         for (rexLangParser::Program_set_fileContext *ctx : prg_ctx_list) {
-            // TODO:创建容器
+            ProgramSetFile *program_set_file = CreateNode<ProgramSetFile>(ctx);
             if (rexLangParser::Prog_setContext *prog_set_ctx = ctx->prog_set()) {
                 for (rexLangParser::Sub_programContext *prog_ctx : prog_set_ctx->functions) {
                     // TODO:创建声明
                 }
             }
+            program_set_file->registResourceTo(TU);
         }
         return true;
     }
 
-    antlrcpp::Any CST2ASTConvert::visitParameter_decl_list(rexLangParser::Parameter_decl_listContext *context) {
-        std::vector<ParameterDecl*> params;
-        for (rexLangParser::Parameter_declContext *param_vari_ctx : context->parameter_decl()) {
-            ParameterDecl* parameter_decl = visitParameter_decl(param_vari_ctx);
-            params.emplace_back(parameter_decl);
-        }
-        if (rexLangParser::Vari_parameter_declContext *vari_param_ctx = context->vari_parameter_decl()) {
-            ParameterDecl* vari_parameter_decl = visitVari_parameter_decl(vari_param_ctx);
-            params.emplace_back(vari_parameter_decl);
-        }
-        return params;
-    }
-
-    antlrcpp::Any CST2ASTConvert::visitParameter_decl(rexLangParser::Parameter_declContext *context) {
-        ParameterDecl* parameter_decl = buildParameterDecl(context);
-        return NodeWarp(parameter_decl);
-    }
-
-    antlrcpp::Any CST2ASTConvert::visitVari_parameter_decl(rexLangParser::Vari_parameter_declContext *context) {
-        ParameterDecl* parameter_decl = buildParameterDecl(context);
-        return NodeWarp(parameter_decl);
-    }
-
-    /******************************************************************************************************************/
-
-    antlrcpp::Any CST2ASTConvert::visitSrc_content(rexLangParser::Src_contentContext *context) {
-               if (auto *program_set_file_ctx     = context->program_set_file())     { return NodeWarp(GetFromCtxIfExist<ProgramSetFile*,     true>(program_set_file_ctx));
-        } else if (auto *global_variable_file_ctx = context->global_variable_file()) { return NodeWarp(GetFromCtxIfExist<GlobalVariableFile*, true>(global_variable_file_ctx));
-        } else if (auto *dll_define_file_ctx      = context->dll_define_file())      { return NodeWarp(GetFromCtxIfExist<APIDeclareFile*,     true>(dll_define_file_ctx));
-        } else { return NodeWarp(nullptr); }
-    }
-
-    antlrcpp::Any CST2ASTConvert::visitProgram_set_file(rexLangParser::Program_set_fileContext *context) {
-        auto program_set_file = CreateNode<ProgramSetFile>(context);
-        // 依赖库已经在 importLibraries 被提取，此处不再处理
-        program_set_file->appendProgramSetDecl(GetFromCtxIfExist<ProgSetDecl*>(context->prog_set()));
-        return NodeWarp(program_set_file);
-    }
-
-    antlrcpp::Any CST2ASTConvert::visitDll_define_file(rexLangParser::Dll_define_fileContext *context) {
+    antlrcpp::Any CST2ASTConvert::visitDll_define_file(rexLangParser::Api_define_fileContext *context) {
         APIDeclareFile* dll_define_file = CreateNode<APIDeclareFile>(context);
         for (auto *dll_func_decl_ctx : context->dll_command()) {
             APICommandDecl* dll_command_decl = GetFromCtxIfExist<APICommandDecl*>(dll_func_decl_ctx);
@@ -457,6 +427,45 @@ namespace rexlang {
             lib_api_decl->appendParameter(parameter);
         }
         return NodeWarp(lib_api_decl);
+    }
+
+    antlrcpp::Any CST2ASTConvert::visitParameter_decl_list(rexLangParser::Parameter_decl_listContext *context) {
+        std::vector<ParameterDecl*> params;
+        for (rexLangParser::Parameter_declContext *param_vari_ctx : context->parameter_decl()) {
+            ParameterDecl* parameter_decl = visitParameter_decl(param_vari_ctx);
+            params.emplace_back(parameter_decl);
+        }
+        if (rexLangParser::Vari_parameter_declContext *vari_param_ctx = context->vari_parameter_decl()) {
+            ParameterDecl* vari_parameter_decl = visitVari_parameter_decl(vari_param_ctx);
+            params.emplace_back(vari_parameter_decl);
+        }
+        return params;
+    }
+
+    antlrcpp::Any CST2ASTConvert::visitParameter_decl(rexLangParser::Parameter_declContext *context) {
+        ParameterDecl* parameter_decl = buildParameterDecl(context);
+        return NodeWarp(parameter_decl);
+    }
+
+    antlrcpp::Any CST2ASTConvert::visitVari_parameter_decl(rexLangParser::Vari_parameter_declContext *context) {
+        ParameterDecl* parameter_decl = buildParameterDecl(context);
+        return NodeWarp(parameter_decl);
+    }
+
+    /******************************************************************************************************************/
+
+    antlrcpp::Any CST2ASTConvert::visitSrc_content(rexLangParser::Src_contentContext *context) {
+               if (auto *program_set_file_ctx     = context->program_set_file())     { return NodeWarp(GetFromCtxIfExist<ProgramSetFile*,     true>(program_set_file_ctx));
+        } else if (auto *global_variable_file_ctx = context->global_variable_file()) { return NodeWarp(GetFromCtxIfExist<GlobalVariableFile*, true>(global_variable_file_ctx));
+        } else if (auto *dll_define_file_ctx      = context->dll_define_file())      { return NodeWarp(GetFromCtxIfExist<APIDeclareFile*,     true>(dll_define_file_ctx));
+        } else { return NodeWarp(nullptr); }
+    }
+
+    antlrcpp::Any CST2ASTConvert::visitProgram_set_file(rexLangParser::Program_set_fileContext *context) {
+        auto program_set_file = CreateNode<ProgramSetFile>(context);
+        // 依赖库已经在 importLibraries 被提取，此处不再处理
+        program_set_file->appendProgramSetDecl(GetFromCtxIfExist<ProgSetDecl*>(context->prog_set()));
+        return NodeWarp(program_set_file);
     }
 
     antlrcpp::Any CST2ASTConvert::visitEdition_spec(rexLangParser::Edition_specContext *context) {
@@ -868,6 +877,7 @@ namespace rexlang {
 
         this->parseDataStructFiles();
         this->parseGlobalVariableFiles();
+        this->parseGlobalFuntors();
 
         return ast_context_->getTranslateUnit();
     }

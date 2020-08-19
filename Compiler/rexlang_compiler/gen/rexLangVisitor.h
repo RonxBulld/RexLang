@@ -30,7 +30,7 @@ public:
 
     virtual antlrcpp::Any visitGlobal_variable_file(rexLangParser::Global_variable_fileContext *context) = 0;
 
-    virtual antlrcpp::Any visitDll_define_file(rexLangParser::Dll_define_fileContext *context) = 0;
+    virtual antlrcpp::Any visitDll_define_file(rexLangParser::Api_define_fileContext *context) = 0;
 
     virtual antlrcpp::Any visitDll_command(rexLangParser::Dll_commandContext *context) = 0;
 
