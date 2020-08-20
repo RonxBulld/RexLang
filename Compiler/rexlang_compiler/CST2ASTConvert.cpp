@@ -384,9 +384,11 @@ namespace rexlang {
         for (rexLangParser::Program_set_fileContext *ctx : prg_ctx_list) {
             ProgramSetFile *program_set_file = CreateNode<ProgramSetFile>(ctx);
             if (rexLangParser::Prog_setContext *prog_set_ctx = ctx->prog_set()) {
+                ProgSetDecl *prog_set_decl = CreateNode<ProgSetDecl>(prog_set_ctx);
                 for (rexLangParser::Sub_programContext *prog_ctx : prog_set_ctx->functions) {
                     // TODO:创建声明
                 }
+                program_set_file->appendProgramSetDecl(prog_set_decl);
             }
             program_set_file->registResourceTo(TU);
         }
