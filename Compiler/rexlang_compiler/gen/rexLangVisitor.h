@@ -1,5 +1,5 @@
 
-// Generated from /mnt/d/Project/RexLang/Compiler/rexlang_compiler/rexLang.g4 by ANTLR 4.7.2
+// Generated from /home/rexfield/RexLang/Compiler/rexlang_compiler/rexLang.g4 by ANTLR 4.7.2
 
 #pragma once
 
@@ -30,7 +30,7 @@ public:
 
     virtual antlrcpp::Any visitGlobal_variable_file(rexLangParser::Global_variable_fileContext *context) = 0;
 
-    virtual antlrcpp::Any visitDll_define_file(rexLangParser::Api_define_fileContext *context) = 0;
+    virtual antlrcpp::Any visitApi_define_file(rexLangParser::Api_define_fileContext *context) = 0;
 
     virtual antlrcpp::Any visitDll_command(rexLangParser::Dll_commandContext *context) = 0;
 

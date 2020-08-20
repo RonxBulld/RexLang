@@ -59,10 +59,13 @@ namespace rexlang {
         std::vector<T *> filterSources() ;
 
         template <typename N, typename T, typename = typename std::enable_if_t<std::is_base_of_v<antlr4::ParserRuleContext, T>>>
-        N *buildVariableDecl(T *ctx);
+        N *buildVariableDecl(T *ctx) ;
 
         template <typename T, typename = typename std::enable_if_t<std::is_base_of_v<rexLangParser::Parameter_declContext, T> || std::is_base_of_v<rexLangParser::Vari_parameter_declContext, T>>>
-        ParameterDecl *buildParameterDecl(T *ctx);
+        ParameterDecl *buildParameterDecl(T *ctx) ;
+
+
+        std::vector<ParameterDecl *> getParameterDecl(rexLangParser::Parameter_decl_listContext *paramsCtx) ;
 
         /*===----------------------------------------------------===*
          * 从 ParseTree 森林中构建唯一的翻译单元，并提取资源内容
@@ -95,7 +98,7 @@ namespace rexlang {
         antlrcpp::Any visitProgram_set_file             (rexLangParser::Program_set_fileContext *             context) override;
         antlrcpp::Any visitData_structure_file          (rexLangParser::Data_structure_fileContext *          context) override;
         antlrcpp::Any visitGlobal_variable_file         (rexLangParser::Global_variable_fileContext *         context) override;
-        antlrcpp::Any visitDll_define_file              (rexLangParser::Api_define_fileContext *              context) override;
+        antlrcpp::Any visitApi_define_file              (rexLangParser::Api_define_fileContext *              context) override;
         antlrcpp::Any visitDll_command                  (rexLangParser::Dll_commandContext *                  context) override;
         antlrcpp::Any visitLib_command                  (rexLangParser::Lib_commandContext *                  context) override;
         antlrcpp::Any visitGlobal_variable_list         (rexLangParser::Global_variable_listContext *         context) override;

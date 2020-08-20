@@ -1,5 +1,5 @@
 
-// Generated from /mnt/d/Project/RexLang/Compiler/rexlang_compiler/rexLang.g4 by ANTLR 4.7.2
+// Generated from /home/rexfield/RexLang/Compiler/rexlang_compiler/rexLang.g4 by ANTLR 4.7.2
 
 #pragma once
 
@@ -32,7 +32,7 @@ public:
 
   enum {
     RuleRexlang_src = 0, RuleSrc_content = 1, RuleProgram_set_file = 2, 
-    RuleData_structure_file = 3, RuleGlobal_variable_file = 4, RuleDll_define_file = 5, 
+    RuleData_structure_file = 3, RuleGlobal_variable_file = 4, RuleApi_define_file = 5, 
     RuleDll_command = 6, RuleLib_command = 7, RuleGlobal_variable_list = 8, 
     RuleGlobal_variable_item = 9, RuleEdition_spec = 10, RuleStruct_declare = 11, 
     RuleTable_comment = 12, RuleProg_set = 13, RuleVariable_decl = 14, RuleMember_vari_decl = 15, 
@@ -122,7 +122,7 @@ public:
     Program_set_fileContext *program_set_file();
     Data_structure_fileContext *data_structure_file();
     Global_variable_fileContext *global_variable_file();
-    Api_define_fileContext *dll_define_file();
+    Api_define_fileContext *api_define_file();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -201,7 +201,7 @@ public:
    
   };
 
-  Api_define_fileContext* dll_define_file();
+  Api_define_fileContext* api_define_file();
 
   class  Dll_commandContext : public antlr4::ParserRuleContext {
   public:

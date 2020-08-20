@@ -180,6 +180,14 @@ namespace rexlang {
         return parameter_decl;
     }
 
+    /*===----------------------------------------------------===*
+     * 从分析树上下文获取形式参数列表
+     */
+    std::vector<ParameterDecl *> CST2ASTConvert::getParameterDecl(rexLangParser::Parameter_decl_listContext *paramsCtx) {
+        std::vector<ParameterDecl *> parameters = GetFromCtxIfExist<std::vector<ParameterDecl*>>(paramsCtx);
+        return parameters
+    }
+
 }
 
 /*===---------------------------------------------------------===*
@@ -356,14 +364,6 @@ namespace rexlang {
         std::vector<rexLangParser::Api_define_fileContext *> dll_ctx_list = this->filterSources<rexLangParser::Api_define_fileContext>();
         for (rexLangParser::Api_define_fileContext *ctx : dll_ctx_list) {
             APIDeclareFile *api_declare_file = CreateNode<APIDeclareFile>(ctx);
-            for (rexLangParser::Dll_commandContext *dll_ctx : ctx->dll_command()) {
-                APICommandDecl *dll_command_decl = GetFromCtxIfExist<APICommandDecl *>(dll_ctx);
-                api_declare_file->appendAPIDeclare(dll_command_decl);
-            }
-            for (rexLangParser::Lib_commandContext *lib_ctx : ctx->lib_command()) {
-                APICommandDecl *lib_command_decl = GetFromCtxIfExist<APICommandDecl *>(lib_ctx);
-                api_declare_file->appendAPIDeclare(lib_command_decl);
-            }
             api_declare_file->registResourceTo(TU);
         }
         // 然后处理各个程序集中的函数声明
@@ -380,7 +380,7 @@ namespace rexlang {
         return true;
     }
 
-    antlrcpp::Any CST2ASTConvert::visitDll_define_file(rexLangParser::Api_define_fileContext *context) {
+    antlrcpp::Any CST2ASTConvert::visitApi_define_file(rexLangParser::Api_define_fileContext *context) {
         APIDeclareFile* dll_define_file = CreateNode<APIDeclareFile>(context);
         for (auto *dll_func_decl_ctx : context->dll_command()) {
             APICommandDecl* dll_command_decl = GetFromCtxIfExist<APICommandDecl*>(dll_func_decl_ctx);
@@ -394,51 +394,60 @@ namespace rexlang {
     }
 
     antlrcpp::Any CST2ASTConvert::visitDll_command(rexLangParser::Dll_commandContext *context) {
-        TString     library_file  = RemoveRoundQuotes(GetTextIfExist(context->file));
-        TString     name          = RemoveRoundQuotes(GetTextIfExist(context->name));
-        LibraryType library_type  = LibraryType::kLTDynamic;
-        TString     api_name      = RemoveRoundQuotes(GetTextIfExist(context->cmd));
-        TString     ret_type_name = GetTextIfExist(context->type);
+        TranslateUnit *TU            = ast_context_->getTranslateUnit();
+        TString        library_file  = RemoveRoundQuotes(GetTextIfExist(context->file));
+        TString        name          = RemoveRoundQuotes(GetTextIfExist(context->name));
+        TString        api_name      = RemoveRoundQuotes(GetTextIfExist(context->cmd));
+        TString        ret_type_name = GetTextIfExist(context->type);
+        VariTypeDecl * ret_type      = rtti::dyn_cast<VariTypeDecl>(TU->getType(ret_type_name.string_));
 
-        APICommandDecl* dll_api_decl = CreateNode<APICommandDecl>(context, library_file, library_type, name, api_name);
-
-        dll_api_decl->setReturnTypeName(ret_type_name);
+        APICommandDecl *dll_api_decl = CreateNode<APICommandDecl>(context,
+                /*retType*/     ret_type,
+                /*name*/        CreateNode<IdentDef>(context, name),
+                /*parameters*/  getParameterDecl(context->params),
+                /*libraryType*/ LibraryType::kLTDynamic,
+                /*libraryName*/ library_file,
+                /*apiName*/     api_name
+        );
         dll_api_decl->setComment(GetFromCtxIfExist<TString>(context->table_comment()));
-        auto parameters = GetFromCtxIfExist<std::vector<ParameterDecl*>>(context->params);
-        for (auto *parameter : parameters) {
-            dll_api_decl->appendParameter(parameter);
-        }
         return NodeWarp(dll_api_decl);
     }
 
     antlrcpp::Any CST2ASTConvert::visitLib_command(rexLangParser::Lib_commandContext *context) {
-        TString     library_file  = RemoveRoundQuotes(GetTextIfExist(context->file));
-        TString     name          = RemoveRoundQuotes(GetTextIfExist(context->name));
-        LibraryType library_type  = LibraryType::kLTStatic;
-        TString     api_name      = RemoveRoundQuotes(GetTextIfExist(context->cmd));
-        TString     ret_type_name = GetTextIfExist(context->type);
+        TranslateUnit *TU            = ast_context_->getTranslateUnit();
+        TString        library_file  = RemoveRoundQuotes(GetTextIfExist(context->file));
+        TString        name          = RemoveRoundQuotes(GetTextIfExist(context->name));
+        TString        api_name      = RemoveRoundQuotes(GetTextIfExist(context->cmd));
+        TString        ret_type_name = GetTextIfExist(context->type);
+        VariTypeDecl * ret_type      = rtti::dyn_cast<VariTypeDecl>(TU->getType(ret_type_name.string_));
 
-        APICommandDecl* lib_api_decl = CreateNode<APICommandDecl>(context, library_file, library_type, name, api_name);
-
-        lib_api_decl->setReturnTypeName(ret_type_name);
+        APICommandDecl* lib_api_decl = CreateNode<APICommandDecl>(context,
+                /*retType*/     ret_type,
+                /*name*/        CreateNode<IdentDef>(context, name),
+                /*parameters*/  getParameterDecl(context->params),
+                /*libraryType*/ LibraryType::kLTStatic,
+                /*libraryName*/ library_file,
+                /*apiName*/     api_name
+        );
         lib_api_decl->setComment(GetFromCtxIfExist<TString>(context->table_comment()));
-        auto parameters = GetFromCtxIfExist<std::vector<ParameterDecl*>>(context->params);
-        for (auto *parameter : parameters) {
-            lib_api_decl->appendParameter(parameter);
-        }
         return NodeWarp(lib_api_decl);
     }
 
     antlrcpp::Any CST2ASTConvert::visitParameter_decl_list(rexLangParser::Parameter_decl_listContext *context) {
         std::vector<ParameterDecl*> params;
+
+        // 常规参数表
         for (rexLangParser::Parameter_declContext *param_vari_ctx : context->parameter_decl()) {
-            ParameterDecl* parameter_decl = visitParameter_decl(param_vari_ctx);
+            ParameterDecl *parameter_decl = GetFromCtxIfExist<ParameterDecl *>(param_vari_ctx);
             params.emplace_back(parameter_decl);
         }
+
+        // 可变参数项
         if (rexLangParser::Vari_parameter_declContext *vari_param_ctx = context->vari_parameter_decl()) {
-            ParameterDecl* vari_parameter_decl = visitVari_parameter_decl(vari_param_ctx);
+            ParameterDecl *vari_parameter_decl = GetFromCtxIfExist<ParameterDecl *>(vari_param_ctx);
             params.emplace_back(vari_parameter_decl);
         }
+
         return params;
     }
 

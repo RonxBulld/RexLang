@@ -1,5 +1,5 @@
 
-// Generated from /mnt/d/Project/RexLang/Compiler/rexlang_compiler/rexLang.g4 by ANTLR 4.7.2
+// Generated from /home/rexfield/RexLang/Compiler/rexlang_compiler/rexLang.g4 by ANTLR 4.7.2
 
 #pragma once
 
@@ -37,7 +37,7 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitDll_define_file(rexLangParser::Api_define_fileContext *ctx) override {
+  virtual antlrcpp::Any visitApi_define_file(rexLangParser::Api_define_fileContext *ctx) override {
     return visitChildren(ctx);
   }
 

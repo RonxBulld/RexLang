@@ -67,8 +67,7 @@ global_variable_file
     ;
 
 api_define_file
-    : dll_command*
-    | lib_command*
+    : (dll_command | lib_command)*
     ;
 
 dll_command

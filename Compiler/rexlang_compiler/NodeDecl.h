@@ -1096,12 +1096,12 @@ namespace rexlang {
     class FunctorDecl : public TypeDecl {
     private:
         // 返回值类型
-        IdentRefer *return_type_ = nullptr;
+        VariTypeDecl *return_type_ = nullptr;
         // 参数列表
         std::vector<ParameterDecl *> parameters_;
 
     protected:
-        FunctorDecl(IdentRefer *namedRetType, IdentDef *name, const std::vector<ParameterDecl *> &parameters) ;
+        FunctorDecl(VariTypeDecl *retType, IdentDef *name, const std::vector<ParameterDecl *> &parameters) ;
 
     public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
@@ -1186,7 +1186,13 @@ namespace rexlang {
         std::vector<StringRef> mapping_names_;
 
     public:
-        APICommandDecl(IdentRefer *namedRetType, IdentDef *name, const std::vector<ParameterDecl *> &parameters, IdentDef *apiName) ;
+        APICommandDecl(VariTypeDecl *retType,
+                       IdentDef *name,
+                       const std::vector<ParameterDecl *> &parameters,
+                       LibraryType libraryType,
+                       const TString &libraryName,
+                       const TString &apiName
+                       ) ;
 
     public:
         void            setLibraryName(const TString &name) ;
