@@ -363,7 +363,7 @@ namespace rexlang {
         TranslateUnit *TU = ast_context_->getTranslateUnit();
         std::vector<rexLangParser::Api_define_fileContext *> dll_ctx_list = this->filterSources<rexLangParser::Api_define_fileContext>();
         for (rexLangParser::Api_define_fileContext *ctx : dll_ctx_list) {
-            APIDeclareFile *api_declare_file = CreateNode<APIDeclareFile>(ctx);
+            APIDeclareFile *api_declare_file = GetFromCtxIfExist<APIDeclareFile *>(ctx);
             api_declare_file->registResourceTo(TU);
         }
         // 然后处理各个程序集中的函数声明
