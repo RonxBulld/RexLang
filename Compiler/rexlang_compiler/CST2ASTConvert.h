@@ -67,6 +67,11 @@ namespace rexlang {
 
         std::vector<ParameterDecl *> getParameterDecl(rexLangParser::Parameter_decl_listContext *paramsCtx) ;
 
+        template <typename T, typename = typename std::enable_if_t<std::is_base_of_v<antlr4::ParserRuleContext, T>>>
+        TString getTableComment(T *ctx) ;
+
+        TString getTableComment(rexLangParser::Table_commentContext *commentCtx) ;
+
         /*===----------------------------------------------------===*
          * 从 ParseTree 森林中构建唯一的翻译单元，并提取资源内容
          */

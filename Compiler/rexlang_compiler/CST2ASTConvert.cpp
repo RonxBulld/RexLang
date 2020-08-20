@@ -132,6 +132,15 @@ namespace rexlang {
         return source_list;
     }
 
+    template <typename T, typename>
+    TString CST2ASTConvert::getTableComment(T *ctx) {
+        return GetFromCtxIfExist<TString>(ctx->table_comment());
+    }
+
+    TString CST2ASTConvert::getTableComment(rexLangParser::Table_commentContext *commentCtx) {
+        return GetFromCtxIfExist<TString>(commentCtx);
+    }
+
     /*===----------------------------------------------------===*
      * 从分析树上下文对象中构建变量定义
      * 内部自动处理：变量名称、变量类型、数组声明、注释信息
@@ -158,7 +167,7 @@ namespace rexlang {
         // 构造变量定义
 
         N *variable_decl = CreateNode<N>(ctx, type, name);
-        variable_decl->setComment(GetFromCtxIfExist<TString>(ctx->table_comment()));
+        variable_decl->setComment(getTableComment(ctx));
 
         return variable_decl;
     }
@@ -175,7 +184,7 @@ namespace rexlang {
 
         ParameterDecl *parameter_decl = CreateNode<ParameterDecl>(ctx, type, name);
         parameter_decl->applyAttributes(GetTextVecIfExist(ctx->attributes));
-        parameter_decl->setComment(GetFromCtxIfExist<TString>(ctx->table_comment()));
+        parameter_decl->setComment(getTableComment(ctx));
 
         return parameter_decl;
     }
@@ -185,7 +194,7 @@ namespace rexlang {
      */
     std::vector<ParameterDecl *> CST2ASTConvert::getParameterDecl(rexLangParser::Parameter_decl_listContext *paramsCtx) {
         std::vector<ParameterDecl *> parameters = GetFromCtxIfExist<std::vector<ParameterDecl*>>(paramsCtx);
-        return parameters
+        return parameters;
     }
 
 }
@@ -195,6 +204,10 @@ namespace rexlang {
  *===---------------------------------------------------------===*/
 
 namespace rexlang {
+
+    antlrcpp::Any CST2ASTConvert::visitTable_comment(rexLangParser::Table_commentContext *context) {
+        return GetTextIfExist(context->comment);
+    }
 
     // --- 加载待解析资源 ---------------------------------------------------------------------------------
 
@@ -270,7 +283,7 @@ namespace rexlang {
 
                 // 设置公有属性
                 structure_decl->applyAttribute(GetTextIfExist(struct_decl_ctx->access));
-                structure_decl->setComment(GetFromCtxIfExist<TString>(struct_decl_ctx->table_comment()));
+                structure_decl->setComment(getTableComment(struct_decl_ctx));
 
                 // 注册到类型池中
                 ds_file->appendStructureDecl(structure_decl);
@@ -409,7 +422,7 @@ namespace rexlang {
                 /*libraryName*/ library_file,
                 /*apiName*/     api_name
         );
-        dll_api_decl->setComment(GetFromCtxIfExist<TString>(context->table_comment()));
+        dll_api_decl->setComment(getTableComment(context));
         return NodeWarp(dll_api_decl);
     }
 
@@ -429,7 +442,7 @@ namespace rexlang {
                 /*libraryName*/ library_file,
                 /*apiName*/     api_name
         );
-        lib_api_decl->setComment(GetFromCtxIfExist<TString>(context->table_comment()));
+        lib_api_decl->setComment(getTableComment(context));
         return NodeWarp(lib_api_decl);
     }
 
@@ -481,17 +494,13 @@ namespace rexlang {
         return (unsigned int) strtoul(context->INTEGER_LITERAL()->getText().c_str(), nullptr, 10);
     }
 
-    antlrcpp::Any CST2ASTConvert::visitTable_comment(rexLangParser::Table_commentContext *context) {
-        return GetTextIfExist(context->comment);
-    }
-
     antlrcpp::Any CST2ASTConvert::visitProg_set(rexLangParser::Prog_setContext *context) {
         ProgSetDecl* prog_set_decl = CreateNode<ProgSetDecl>(context);
         ast_context_->pushScope(prog_set_decl);
 
         prog_set_decl->setName(GetTextIfExist(context->name));
         prog_set_decl->applyAttribute(GetTextIfExist(context->access));
-        prog_set_decl->setComment(GetFromCtxIfExist<TString>(context->table_comment()));
+        prog_set_decl->setComment(getTableComment(context));
         for (rexLangParser::File_vari_declContext *vari_ctx : context->prog_set_varis) {
             FileVariableDecl* vari_decl = GetFromCtxIfExist<FileVariableDecl*>(vari_ctx);
             prog_set_decl->appendFileStaticVari(vari_decl);
@@ -512,7 +521,7 @@ namespace rexlang {
         sub_prog_decl->setName(GetTextIfExist(context->name));
         sub_prog_decl->setReturnTypeName(GetTextIfExist(context->type));
         sub_prog_decl->applyAttribute(GetTextIfExist(context->access));
-        sub_prog_decl->setComment(GetFromCtxIfExist<TString>(context->table_comment()));
+        sub_prog_decl->setComment(getTableComment(context));
         for (ParameterDecl *parameter_decl : GetFromCtxIfExist<std::vector<ParameterDecl *>>(context->params)) {
             sub_prog_decl->appendParameter(parameter_decl);
         }
