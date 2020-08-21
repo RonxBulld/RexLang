@@ -98,9 +98,16 @@ namespace rexlang {
         bool parseGlobalFuntorsDeclare();
 
         /*===----------------------------------------------------===*
+         * 处理文件局部变量
+         */
+        bool parseFileLocalVariableDecls();
+
+        /*===----------------------------------------------------===*
          * 从子程序定义上下文中生成函数声明
          */
         FunctionDecl *createFunctionDeclareFromCtx(rexLangParser::Sub_programContext *context);
+
+        bool loadAllFunctionDefine();
 
     public:
         antlrcpp::Any visitRexlang_src                  (rexLangParser::Rexlang_srcContext *                  context) override;
