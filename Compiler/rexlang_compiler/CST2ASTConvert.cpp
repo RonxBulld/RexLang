@@ -371,7 +371,7 @@ namespace rexlang {
 
     // --- 函数声明及参数定义 ---------------------------------------------------------------------------------
 
-    bool CST2ASTConvert::parseGlobalFuntors() {
+    bool CST2ASTConvert::parseGlobalFuntorsDeclare() {
         // 先处理DLL定义文件中DLL与LIB声明
         TranslateUnit *TU = ast_context_->getTranslateUnit();
         std::vector<rexLangParser::Api_define_fileContext *> dll_ctx_list = this->filterSources<rexLangParser::Api_define_fileContext>();
@@ -384,9 +384,12 @@ namespace rexlang {
         for (rexLangParser::Program_set_fileContext *ctx : prg_ctx_list) {
             ProgramSetFile *program_set_file = CreateNode<ProgramSetFile>(ctx);
             if (rexLangParser::Prog_setContext *prog_set_ctx = ctx->prog_set()) {
-                ProgSetDecl *prog_set_decl = CreateNode<ProgSetDecl>(prog_set_ctx);
+                antlr4::Token *ps_name_tk = prog_set_ctx->name;
+                IdentDef *prog_set_name = CreateNode<IdentDef>(ps_name_tk, ps_name_tk, GetTextIfExist(ps_name_tk));
+                ProgSetDecl *prog_set_decl = CreateNode<ProgSetDecl>(prog_set_ctx, prog_set_name);
                 for (rexLangParser::Sub_programContext *prog_ctx : prog_set_ctx->functions) {
-                    // TODO:创建声明
+                    FunctionDecl *function_decl = createFunctionDeclareFromCtx(prog_ctx);
+                    prog_set_decl->appendFunctionDecl(function_decl);
                 }
                 program_set_file->appendProgramSetDecl(prog_set_decl);
             }
@@ -436,7 +439,7 @@ namespace rexlang {
         TString        ret_type_name = GetTextIfExist(context->type);
         VariTypeDecl * ret_type      = rtti::dyn_cast<VariTypeDecl>(TU->getType(ret_type_name.string_));
 
-        APICommandDecl* lib_api_decl = CreateNode<APICommandDecl>(context,
+        APICommandDecl *lib_api_decl = CreateNode<APICommandDecl>(context,
                 /*retType*/     ret_type,
                 /*name*/        CreateNode<IdentDef>(context, name),
                 /*parameters*/  getParameterDecl(context->params),
@@ -474,6 +477,21 @@ namespace rexlang {
     antlrcpp::Any CST2ASTConvert::visitVari_parameter_decl(rexLangParser::Vari_parameter_declContext *context) {
         ParameterDecl* parameter_decl = buildParameterDecl(context);
         return NodeWarp(parameter_decl);
+    }
+
+    FunctionDecl *CST2ASTConvert::createFunctionDeclareFromCtx(rexLangParser::Sub_programContext *context) {
+        TranslateUnit * TU              = ast_context_->getTranslateUnit();
+        TString         name            = RemoveRoundQuotes(GetTextIfExist(context->name));
+        TString         ret_type_name   = GetTextIfExist(context->type);
+        VariTypeDecl *  ret_type        = rtti::dyn_cast<VariTypeDecl>(TU->getType(ret_type_name.string_));
+
+        FunctionDecl *function_decl = CreateNode<FunctionDecl>(context,
+                /*retType*/    ret_type,
+                /*name*/       CreateNode<IdentDef>(context, name),
+                /*parameters*/ getParameterDecl(context->params)
+        );
+        function_decl->setComment(getTableComment(context));
+        return function_decl;
     }
 
     /******************************************************************************************************************/
@@ -897,7 +915,7 @@ namespace rexlang {
 
         this->parseDataStructFiles();
         this->parseGlobalVariableFiles();
-        this->parseGlobalFuntors();
+        this->parseGlobalFuntorsDeclare();
 
         return ast_context_->getTranslateUnit();
     }

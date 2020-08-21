@@ -1143,7 +1143,7 @@ namespace rexlang {
         ProgSetDecl *super_set_ = nullptr;
 
     public:
-        FunctionDecl(IdentRefer *namedRetType, IdentDef *name, const std::vector<ParameterDecl *> &parameters) ;
+        FunctionDecl(VariTypeDecl *retType, IdentDef *name, const std::vector<ParameterDecl *> &parameters) ;
 
     public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
@@ -1229,6 +1229,9 @@ namespace rexlang {
         NamedOrderDict<FileVariableDecl *>  file_static_variables_;
         NamedOrderDict<FunctionDecl *>      function_decls_;
         NamedOrderDict<FunctorDecl *>       signature_of_functions_;
+
+    public:
+        explicit ProgSetDecl(IdentDef *name) ;
 
     public:
         void appendFileStaticVari(FileVariableDecl *variable) ;

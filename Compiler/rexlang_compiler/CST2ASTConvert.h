@@ -95,7 +95,12 @@ namespace rexlang {
         /*===----------------------------------------------------===*
          * 从资源缓存中分析全局可调用对象
          */
-        bool parseGlobalFuntors();
+        bool parseGlobalFuntorsDeclare();
+
+        /*===----------------------------------------------------===*
+         * 从子程序定义上下文中生成函数声明
+         */
+        FunctionDecl *createFunctionDeclareFromCtx(rexLangParser::Sub_programContext *context);
 
     public:
         antlrcpp::Any visitRexlang_src                  (rexLangParser::Rexlang_srcContext *                  context) override;
