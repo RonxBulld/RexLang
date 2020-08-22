@@ -197,6 +197,14 @@ namespace rexlang {
         return parameters;
     }
 
+    /*===----------------------------------------------------===*
+     * 获取有指定名称的程序集
+     */
+    ProgSetDecl *CST2ASTConvert::getProgramSetDecl(const StringRef &programSetName) {
+        TranslateUnit *TU = ast_context_->getTranslateUnit();
+        return TU->getProgSet(programSetName);
+    }
+
 }
 
 /*===---------------------------------------------------------===*
@@ -353,20 +361,41 @@ namespace rexlang {
         return NodeWarp(global_variable_decl);
     }
 
-    // --- 文件静态变量 ---------------------------------------------------------------------------------
-
-    antlrcpp::Any CST2ASTConvert::visitFile_vari_decl(rexLangParser::File_vari_declContext *context) {
-        FileVariableDecl* file_variable_decl = buildVariableDecl<FileVariableDecl>(context->variable_decl());
-        file_variable_decl->applyAttributes(GetTextVecIfExist(context->variable_decl()->attributes));
-        return NodeWarp(file_variable_decl);
-    }
-
     // --- 局部变量 ---------------------------------------------------------------------------------
 
     antlrcpp::Any CST2ASTConvert::visitLocal_variable_decl(rexLangParser::Local_variable_declContext *context) {
         LocalVariableDecl* local_variable_decl = buildVariableDecl<LocalVariableDecl>(context);
         local_variable_decl->applyAttribute(GetTextIfExist(context->attribute));
         return NodeWarp(local_variable_decl);
+    }
+
+    // --- 文件变量 ---------------------------------------------------------------------------------
+
+    bool CST2ASTConvert::parseFileLocalVariableDecls() {
+        TranslateUnit *TU = ast_context_->getTranslateUnit();
+        std::vector<rexLangParser::Program_set_fileContext *> prg_ctx_list = this->filterSources<rexLangParser::Program_set_fileContext>();
+        for (rexLangParser::Program_set_fileContext *file_ctx : prg_ctx_list) {
+            // 创建程序集
+            rexLangParser::Prog_setContext *prog_set_context = file_ctx->prog_set();
+            ProgSetDecl *prog_set_decl = CreateNode<ProgSetDecl>(prog_set_context, GetTextIfExist(prog_set_context->name));
+            prog_set_decl->setComment(getTableComment(prog_set_context));
+            // 创建变量
+            for (rexLangParser::File_vari_declContext *file_vari_decl_context : prog_set_context->prog_set_varis) {
+                FileVariableDecl *file_variable_decl = GetFromCtxIfExist<FileVariableDecl *>(file_vari_decl_context);
+                prog_set_decl->appendFileStaticVari(file_variable_decl);
+            }
+            // 创建程序文件容器
+            ProgramSetFile *program_set_file = CreateNode<ProgramSetFile>(file_ctx);
+            program_set_file->appendProgramSetDecl(prog_set_decl);
+            program_set_file->registResourceTo(TU);
+        }
+        return true;
+    }
+
+    antlrcpp::Any CST2ASTConvert::visitFile_vari_decl(rexLangParser::File_vari_declContext *context) {
+        FileVariableDecl* file_variable_decl = buildVariableDecl<FileVariableDecl>(context->variable_decl());
+        file_variable_decl->applyAttributes(GetTextVecIfExist(context->variable_decl()->attributes));
+        return NodeWarp(file_variable_decl);
     }
 
     // --- 函数声明及参数定义 ---------------------------------------------------------------------------------
@@ -382,18 +411,14 @@ namespace rexlang {
         // 然后处理各个程序集中的函数声明
         std::vector<rexLangParser::Program_set_fileContext *> prg_ctx_list = this->filterSources<rexLangParser::Program_set_fileContext>();
         for (rexLangParser::Program_set_fileContext *ctx : prg_ctx_list) {
-            ProgramSetFile *program_set_file = CreateNode<ProgramSetFile>(ctx);
             if (rexLangParser::Prog_setContext *prog_set_ctx = ctx->prog_set()) {
-                antlr4::Token *ps_name_tk = prog_set_ctx->name;
-                IdentDef *prog_set_name = CreateNode<IdentDef>(ps_name_tk, ps_name_tk, GetTextIfExist(ps_name_tk));
-                ProgSetDecl *prog_set_decl = CreateNode<ProgSetDecl>(prog_set_ctx, prog_set_name);
+                ProgSetDecl *prog_set_decl = getProgramSetDecl(GetTextIfExist(prog_set_ctx->name).string_);
+                assert(prog_set_decl);
                 for (rexLangParser::Sub_programContext *prog_ctx : prog_set_ctx->functions) {
                     FunctionDecl *function_decl = createFunctionDeclareFromCtx(prog_ctx);
                     prog_set_decl->appendFunctionDecl(function_decl);
                 }
-                program_set_file->appendProgramSetDecl(prog_set_decl);
             }
-            program_set_file->registResourceTo(TU);
         }
         return true;
     }
@@ -495,12 +520,6 @@ namespace rexlang {
         return function_decl;
     }
 
-    // --- 文件变量 ---------------------------------------------------------------------------------
-
-    bool CST2ASTConvert::parseFileLocalVariableDecls() {
-        // TODO:
-    }
-
     // --- 函数定义 ---------------------------------------------------------------------------------
 
     bool CST2ASTConvert::loadAllFunctionDefine() {
@@ -530,13 +549,6 @@ namespace rexlang {
         } else if (auto *global_variable_file_ctx = context->global_variable_file()) { return NodeWarp(GetFromCtxIfExist<GlobalVariableFile*, true>(global_variable_file_ctx));
         } else if (auto *dll_define_file_ctx      = context->dll_define_file())      { return NodeWarp(GetFromCtxIfExist<APIDeclareFile*,     true>(dll_define_file_ctx));
         } else { return NodeWarp(nullptr); }
-    }
-
-    antlrcpp::Any CST2ASTConvert::visitProgram_set_file(rexLangParser::Program_set_fileContext *context) {
-        auto program_set_file = CreateNode<ProgramSetFile>(context);
-        // 依赖库已经在 importLibraries 被提取，此处不再处理
-        program_set_file->appendProgramSetDecl(GetFromCtxIfExist<ProgSetDecl*>(context->prog_set()));
-        return NodeWarp(program_set_file);
     }
 
     antlrcpp::Any CST2ASTConvert::visitEdition_spec(rexLangParser::Edition_specContext *context) {
@@ -935,9 +947,8 @@ namespace rexlang {
 
     TranslateUnit *CST2ASTConvert::buildTUFromParseTrees(const std::vector<antlr4::tree::ParseTree *> &trees) {
 
-        // TODO: 这里可以尝试合并一下树，或者给树排序
-        // TODO: 在编译过程中遇到外部文件引用会重入这个函数
-        // TODO: 分层的遍历CST，而不是一次性遍历整个树
+        // 在编译过程中遇到外部文件引用会重入这个函数
+        // 分层的遍历CST，而不是一次性遍历整个树
 
         this->buildTranslateUnitAndFetchSrc(trees);
         this->importLibraries();
@@ -946,11 +957,11 @@ namespace rexlang {
 
         this->parseDataStructFiles();
         this->parseGlobalVariableFiles();
+        this->parseFileLocalVariableDecls();    // 需要在分析可调用对象之前调用，因为需要创造程序集文件对象
         this->parseGlobalFuntorsDeclare();
 
         // 处理各程序文件
 
-        this->parseFileLocalVariableDecls();
         this->loadAllFunctionDefine();
 
         return ast_context_->getTranslateUnit();

@@ -72,6 +72,8 @@ namespace rexlang {
 
         TString getTableComment(rexLangParser::Table_commentContext *commentCtx) ;
 
+        ProgSetDecl *getProgramSetDecl(const StringRef &programSetName) ;
+
         /*===----------------------------------------------------===*
          * 从 ParseTree 森林中构建唯一的翻译单元，并提取资源内容
          */

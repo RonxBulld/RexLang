@@ -2038,12 +2038,11 @@ namespace rexlang {
         bool    addType         (TypeDecl *     typeDecl)    const ;    // 添加类型
         bool    addGlobalVari   (BaseVariDecl * variDecl)    const ;    // 添加全局变量
         bool    addConstVal     (ConstDecl *    constDecl)   const ;    // 添加常量定义
-        bool    addRefLib       (const TString &libName)     const ;    // 添加引用库
-        bool    addPlaceholder  (IdentDef *     phName)      const ;    // 添加占位符
 
+        FunctorDecl *           getFunctor      (const StringRef &name) const ;
+        ProgSetDecl *           getProgSet      (const StringRef &name) const ;
         TypeDecl *              getType         (const StringRef &name) const ;
         GlobalVariableDecl *    getGlobalVari   (const StringRef &name) const ;
-        FunctorDecl *           getFunctor      (const StringRef &name) const ;
         ConstDecl *             getConst        (const StringRef &name) const ;
 
         TypeDecl * getOrCreateType(IdentRefer *idRef) ; // 获取或创建类型预定义
