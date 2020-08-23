@@ -1284,6 +1284,9 @@ namespace rexlang {
         ExprUsage getSubExprAccessType(const Expression *expr) const override ;
 
     public:
+        AssignStmt(HierarchyIdentifier *lhs, Expression *rhs) ;
+
+    public:
         void setLHS(HierarchyIdentifier *lhs) ;
         void setRHS(Expression *rhs) ;
 

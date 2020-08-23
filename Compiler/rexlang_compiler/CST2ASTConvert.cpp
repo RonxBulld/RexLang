@@ -219,6 +219,19 @@ namespace rexlang {
 
     // --- 加载待解析资源 ---------------------------------------------------------------------------------
 
+    bool CST2ASTConvert::buildTranslateUnitAndFetchSrc(const std::vector<antlr4::tree::ParseTree *> &trees) {
+
+        for (antlr4::tree::ParseTree *tree : trees) {
+            if (rexLangParser::Rexlang_srcContext *rex_lang_src_ctx = dynamic_cast<rexLangParser::Rexlang_srcContext *>(tree)) {
+                TranslateUnit *TU = GetFromCtxIfExist<TranslateUnit *>(rex_lang_src_ctx);
+            } else {
+                assert(false);
+            }
+        }
+
+        return true;
+    }
+
     antlrcpp::Any CST2ASTConvert::visitRexlang_src(rexLangParser::Rexlang_srcContext *context) {
         TranslateUnit * translate_unit = ast_context_->getTranslateUnit();
         if(!translate_unit) {
@@ -240,15 +253,6 @@ namespace rexlang {
 
         ast_context_->popScope(translate_unit);
         return NodeWarp(translate_unit);
-    }
-
-    bool CST2ASTConvert::buildTranslateUnitAndFetchSrc(const std::vector<antlr4::tree::ParseTree *> &trees) {
-
-        for (antlr4::tree::ParseTree *tree : trees) {
-            this->visit(tree);
-        }
-
-        return true;
     }
 
     // --- 外部库引入 ---------------------------------------------------------------------------------
@@ -542,59 +546,7 @@ namespace rexlang {
         }
     }
 
-    /******************************************************************************************************************/
-
-    antlrcpp::Any CST2ASTConvert::visitSrc_content(rexLangParser::Src_contentContext *context) {
-               if (auto *program_set_file_ctx     = context->program_set_file())     { return NodeWarp(GetFromCtxIfExist<ProgramSetFile*,     true>(program_set_file_ctx));
-        } else if (auto *global_variable_file_ctx = context->global_variable_file()) { return NodeWarp(GetFromCtxIfExist<GlobalVariableFile*, true>(global_variable_file_ctx));
-        } else if (auto *dll_define_file_ctx      = context->dll_define_file())      { return NodeWarp(GetFromCtxIfExist<APIDeclareFile*,     true>(dll_define_file_ctx));
-        } else { return NodeWarp(nullptr); }
-    }
-
-    antlrcpp::Any CST2ASTConvert::visitEdition_spec(rexLangParser::Edition_specContext *context) {
-        return (unsigned int) strtoul(context->INTEGER_LITERAL()->getText().c_str(), nullptr, 10);
-    }
-
-    antlrcpp::Any CST2ASTConvert::visitProg_set(rexLangParser::Prog_setContext *context) {
-        ProgSetDecl* prog_set_decl = CreateNode<ProgSetDecl>(context);
-        ast_context_->pushScope(prog_set_decl);
-
-        prog_set_decl->setName(GetTextIfExist(context->name));
-        prog_set_decl->applyAttribute(GetTextIfExist(context->access));
-        prog_set_decl->setComment(getTableComment(context));
-        for (rexLangParser::File_vari_declContext *vari_ctx : context->prog_set_varis) {
-            FileVariableDecl* vari_decl = GetFromCtxIfExist<FileVariableDecl*>(vari_ctx);
-            prog_set_decl->appendFileStaticVari(vari_decl);
-        }
-        for (auto *func_ctx : context->functions) {
-            FunctionDecl* sub_prog_decl = GetFromCtxIfExist<FunctionDecl*>(func_ctx);
-            prog_set_decl->appendFunctionDecl(sub_prog_decl);
-        }
-
-        ast_context_->popScope(prog_set_decl);
-        return NodeWarp(prog_set_decl);
-    }
-
-    antlrcpp::Any CST2ASTConvert::visitSub_program(rexLangParser::Sub_programContext *context) {
-        FunctionDecl* sub_prog_decl = CreateNode<FunctionDecl>(context);
-        ast_context_->pushScope(sub_prog_decl);
-
-        sub_prog_decl->setName(GetTextIfExist(context->name));
-        sub_prog_decl->setReturnTypeName(GetTextIfExist(context->type));
-        sub_prog_decl->applyAttribute(GetTextIfExist(context->access));
-        sub_prog_decl->setComment(getTableComment(context));
-        for (ParameterDecl *parameter_decl : GetFromCtxIfExist<std::vector<ParameterDecl *>>(context->params)) {
-            sub_prog_decl->appendParameter(parameter_decl);
-        }
-        for (auto *local_vari_ctx : context->local_vari) {
-            LocalVariableDecl* local_vari = GetFromCtxIfExist<LocalVariableDecl*>(local_vari_ctx);
-            sub_prog_decl->appendLocalVariable(local_vari);
-        }
-        sub_prog_decl->setStatementBlock(GetFromCtxIfExist<StatementBlock*>(context->statement_list()));
-
-        ast_context_->popScope(sub_prog_decl);
-        return NodeWarp(sub_prog_decl);
-    }
+    // --- 语句块 ---------------------------------------------------------------------------------
 
     antlrcpp::Any CST2ASTConvert::visitStatement_list(rexLangParser::Statement_listContext *context) {
         StatementBlock* statement_list = CreateNode<StatementBlock>(context);
@@ -604,24 +556,39 @@ namespace rexlang {
         return NodeWarp(statement_list);
     }
 
+    // --- 赋值语句 ---------------------------------------------------------------------------------
+
+    antlrcpp::Any CST2ASTConvert::visitAssignStatement(rexLangParser::AssignStatementContext *context) {
+        HierarchyIdentifier *lhs         = GetFromCtxIfExist<HierarchyIdentifier *>(context->hierarchy_identifier());
+        Expression *         rhs         = GetFromCtxIfExist<Expression *>(context->expression());
+        AssignStmt *         assign_stmt = CreateNode<AssignStmt>(context, lhs, rhs);
+        return NodeWarp(assign_stmt);
+    }
+
+    // --- 条件语句 ---------------------------------------------------------------------------------
+
     antlrcpp::Any CST2ASTConvert::visitConditionStatement(rexLangParser::ConditionStatementContext *context) {
         return NodeWarp(GetFromCtxIfExist<Statement*>(context->condition_statement()));
     }
 
-    antlrcpp::Any CST2ASTConvert::visitAssignStatement(rexLangParser::AssignStatementContext *context) {
-        AssignStmt* assign_stmt = CreateNode<AssignStmt>(context);
-        assign_stmt->setLHS(GetFromCtxIfExist<HierarchyIdentifier*>(context->hierarchy_identifier()));
-        assign_stmt->setRHS(GetFromCtxIfExist<Expression*>(context->expression()));
-        return NodeWarp(assign_stmt);
+    antlrcpp::Any CST2ASTConvert::visitIfStmt(rexLangParser::IfStmtContext *context) {
+        IfStmt* if_stmt = CreateNode<IfStmt>(context);
+        Expression* condition = GetFromCtxIfExist<Expression*>(context->condition_expr);
+        Statement* true_statement = GetFromCtxIfExist<Statement*>(context->true_stmt_list);
+        if_stmt->appendBranch(condition, true_statement);
+        if_stmt->setDefault(GetFromCtxIfExist<Statement*>(context->false_stmt_list));
+        return NodeWarp(if_stmt);
     }
 
-    antlrcpp::Any CST2ASTConvert::visitExpressionStatement(rexLangParser::ExpressionStatementContext *context) {
-        return NodeWarp(GetFromCtxIfExist<Statement*>(context->expression()));
+    antlrcpp::Any CST2ASTConvert::visitIfTrueStmt(rexLangParser::IfTrueStmtContext *context) {
+        IfStmt* if_stmt = CreateNode<IfStmt>(context);
+        Expression* condition = GetFromCtxIfExist<Expression*>(context->condition_expr);
+        Statement* true_statement = GetFromCtxIfExist<Statement*>(context->true_stmt_list);
+        if_stmt->appendBranch(condition, true_statement);
+        return NodeWarp(if_stmt);
     }
 
-    antlrcpp::Any CST2ASTConvert::visitLoopStatement(rexLangParser::LoopStatementContext *context) {
-        return NodeWarp(GetFromCtxIfExist<Statement*>(context->loop_statement()));
-    }
+    // --- 多路选择语句 ---------------------------------------------------------------------------------
 
     antlrcpp::Any CST2ASTConvert::visitSwitchStatement(rexLangParser::SwitchStatementContext *context) {
         return NodeWarp(GetFromCtxIfExist<Statement*>(context->switch_statement()));
@@ -642,6 +609,12 @@ namespace rexlang {
         }
         switch_stmt->setDefault(GetFromCtxIfExist<Statement*>(context->default_body));
         return NodeWarp(switch_stmt);
+    }
+
+    // --- 循环语句 ---------------------------------------------------------------------------------
+
+    antlrcpp::Any CST2ASTConvert::visitLoopStatement(rexLangParser::LoopStatementContext *context) {
+        return NodeWarp(GetFromCtxIfExist<Statement*>(context->loop_statement()));
     }
 
     antlrcpp::Any CST2ASTConvert::visitWhile(rexLangParser::WhileContext *context) {
@@ -676,22 +649,7 @@ namespace rexlang {
         return NodeWarp(do_while_stmt);
     }
 
-    antlrcpp::Any CST2ASTConvert::visitIfStmt(rexLangParser::IfStmtContext *context) {
-        IfStmt* if_stmt = CreateNode<IfStmt>(context);
-        Expression* condition = GetFromCtxIfExist<Expression*>(context->condition_expr);
-        Statement* true_statement = GetFromCtxIfExist<Statement*>(context->true_stmt_list);
-        if_stmt->appendBranch(condition, true_statement);
-        if_stmt->setDefault(GetFromCtxIfExist<Statement*>(context->false_stmt_list));
-        return NodeWarp(if_stmt);
-    }
-
-    antlrcpp::Any CST2ASTConvert::visitIfTrueStmt(rexLangParser::IfTrueStmtContext *context) {
-        IfStmt* if_stmt = CreateNode<IfStmt>(context);
-        Expression* condition = GetFromCtxIfExist<Expression*>(context->condition_expr);
-        Statement* true_statement = GetFromCtxIfExist<Statement*>(context->true_stmt_list);
-        if_stmt->appendBranch(condition, true_statement);
-        return NodeWarp(if_stmt);
-    }
+    // --- 循环控制语句 ---------------------------------------------------------------------------------
 
     antlrcpp::Any CST2ASTConvert::visitControlStatement(rexLangParser::ControlStatementContext *context) {
         return NodeWarp(GetFromCtxIfExist<ControlStmt*>(context->control_statement()));
@@ -707,6 +665,8 @@ namespace rexlang {
         return NodeWarp(break_stmt);
     }
 
+    // --- 返回语句 ---------------------------------------------------------------------------------
+
     antlrcpp::Any CST2ASTConvert::visitReturnStmt(rexLangParser::ReturnStmtContext *context) {
         ReturnStmt* return_stmt = CreateNode<ReturnStmt>(context);
         return_stmt->setReturnValue(GetFromCtxIfExist<Expression*>(context->return_expr));
@@ -717,6 +677,14 @@ namespace rexlang {
         ExitStmt* exit_stmt = CreateNode<ExitStmt>(context);
         return NodeWarp(exit_stmt);
     }
+
+    // --- 表达式语句 ---------------------------------------------------------------------------------
+
+    antlrcpp::Any CST2ASTConvert::visitExpressionStatement(rexLangParser::ExpressionStatementContext *context) {
+        return NodeWarp(GetFromCtxIfExist<Statement*>(context->expression()));
+    }
+
+    // --- 表达式 ---------------------------------------------------------------------------------
 
     antlrcpp::Any CST2ASTConvert::visitHierarchy_identifier(rexLangParser::Hierarchy_identifierContext *context) {
         HierarchyIdentifier* hierarchy_identifier = CreateNode<HierarchyIdentifier>(context);
