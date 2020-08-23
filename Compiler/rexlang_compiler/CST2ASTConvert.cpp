@@ -668,8 +668,8 @@ namespace rexlang {
     // --- 返回语句 ---------------------------------------------------------------------------------
 
     antlrcpp::Any CST2ASTConvert::visitReturnStmt(rexLangParser::ReturnStmtContext *context) {
-        ReturnStmt* return_stmt = CreateNode<ReturnStmt>(context);
-        return_stmt->setReturnValue(GetFromCtxIfExist<Expression*>(context->return_expr));
+        Expression *return_value = GetFromCtxIfExist<Expression *>(context->return_expr);
+        ReturnStmt *return_stmt = CreateNode<ReturnStmt>(context, return_value);
         return NodeWarp(return_stmt);
     }
 
@@ -684,7 +684,7 @@ namespace rexlang {
         return NodeWarp(GetFromCtxIfExist<Statement*>(context->expression()));
     }
 
-    // --- 表达式 ---------------------------------------------------------------------------------
+    // --- 名称组件表达式 ---------------------------------------------------------------------------------
 
     antlrcpp::Any CST2ASTConvert::visitHierarchy_identifier(rexLangParser::Hierarchy_identifierContext *context) {
         HierarchyIdentifier* hierarchy_identifier = CreateNode<HierarchyIdentifier>(context);
@@ -696,12 +696,18 @@ namespace rexlang {
     }
 
     antlrcpp::Any CST2ASTConvert::visitFuncCall(rexLangParser::FuncCallContext *context) {
-        FunctionCall* function_call = CreateNode<FunctionCall>(context);
-        function_call->setCallName(GetFromCtxIfExist<NameComponent*, true>(context->name_component()));
+        TranslateUnit *TU = ast_context_->getTranslateUnit();
+        // 调用对象
+        IdentRefer *callee_name = GetFromCtxIfExist<IdentRefer *, true>(context->name_component());
+        FunctorDecl *callee = TU->getFunctor(callee_name->getName());
+        // 实参列表
+        std::vector<Expression *> arguments;
         for (auto *arg_ctx : context->arguments) {
             Expression* arg_expr = GetFromCtxIfExist<Expression*>(arg_ctx);
-            function_call->appendArgument(arg_expr);
+            arguments.push_back(arg_expr);
         }
+        // 创建调用
+        FunctionCall* function_call = CreateNode<FunctionCall>(context, callee, arguments);
         return NodeWarp(function_call);
     }
 
@@ -711,15 +717,19 @@ namespace rexlang {
     }
 
     antlrcpp::Any CST2ASTConvert::visitArrayIndex(rexLangParser::ArrayIndexContext *context) {
-        ArrayIndex* array_index = CreateNode<ArrayIndex>(context);
-        array_index->setBaseComponent(GetFromCtxIfExist<NameComponent*, true>(context->name_component()));
-        array_index->setIndexExpr(GetFromCtxIfExist<Expression*>(context->expression()));
+        NameComponent *base_component   = GetFromCtxIfExist<NameComponent *, true>(context->name_component());
+        Expression *   index_expression = GetFromCtxIfExist<Expression *>(context->expression());
+        ArrayIndex *   array_index      = CreateNode<ArrayIndex>(context, base_component, index_expression);
         return NodeWarp(array_index);
     }
+
+    // --- 括号表达式 ---------------------------------------------------------------------------------
 
     antlrcpp::Any CST2ASTConvert::visitBracket(rexLangParser::BracketContext *context) {
         return NodeWarp(GetFromCtxIfExist<Expression*>(context->expression()));
     }
+
+    // --- 运算表达式 ---------------------------------------------------------------------------------
 
     antlrcpp::Any CST2ASTConvert::visitOptElement(rexLangParser::OptElementContext *context) {
         return NodeWarp(GetFromCtxIfExist<Expression*>(context->getRuleContext<antlr4::ParserRuleContext>(0)));
@@ -763,6 +773,8 @@ namespace rexlang {
         unary_expression->setOperand(GetFromCtxIfExist<Expression*>(context->expression()));
         return NodeWarp(unary_expression);
     }
+
+    // --- 字面量表达式 ---------------------------------------------------------------------------------
 
     antlrcpp::Any CST2ASTConvert::visitData_set_value(rexLangParser::Data_set_valueContext *context) {
         ValueOfDataSet* value_of_data_set = CreateNode<ValueOfDataSet>(context);
@@ -866,19 +878,6 @@ namespace rexlang {
         return NodeWarp(new_time);
     }
 
-    antlrcpp::Any CST2ASTConvert::visitMacro_value(rexLangParser::Macro_valueContext *context) {
-        ResourceRefExpression* resource_ref_expression = CreateNode<ResourceRefExpression>(context);
-        resource_ref_expression->setResourceName(GetTextIfExist(context->IDENTIFIER()->getSymbol()));
-        return NodeWarp(resource_ref_expression);
-    }
-
-    antlrcpp::Any CST2ASTConvert::visitFunc_ptr(rexLangParser::Func_ptrContext *context) {
-        FuncAddrExpression *func_addr_expression = CreateNode<FuncAddrExpression>(context);
-        IdentRefer *reference = CreateNode<IdentRefer>(context, GetTextIfExist(context->IDENTIFIER()->getSymbol()));
-        func_addr_expression->setRefFuncName(reference);
-        return NodeWarp(func_addr_expression);
-    }
-
     antlrcpp::Any CST2ASTConvert::visitBoolValueTrue(rexLangParser::BoolValueTrueContext *context) {
         ValueOfBool* value_of_bool = CreateNode<ValueOfBool>(context);
         value_of_bool->setBool(true);
@@ -908,6 +907,23 @@ namespace rexlang {
         value_of_string->setStringLiteral(RemoveRoundQuotes(GetTextIfExist(context->STRING_LITERAL()->getSymbol())));
         return NodeWarp(value_of_string);
     }
+
+    // --- 常量表达式 ---------------------------------------------------------------------------------
+
+    antlrcpp::Any CST2ASTConvert::visitMacro_value(rexLangParser::Macro_valueContext *context) {
+        ResourceRefExpression* resource_ref_expression = CreateNode<ResourceRefExpression>(context);
+        resource_ref_expression->setResourceName(GetTextIfExist(context->IDENTIFIER()->getSymbol()));
+        return NodeWarp(resource_ref_expression);
+    }
+
+    antlrcpp::Any CST2ASTConvert::visitFunc_ptr(rexLangParser::Func_ptrContext *context) {
+        FuncAddrExpression *func_addr_expression = CreateNode<FuncAddrExpression>(context);
+        IdentRefer *reference = CreateNode<IdentRefer>(context, GetTextIfExist(context->IDENTIFIER()->getSymbol()));
+        func_addr_expression->setRefFuncName(reference);
+        return NodeWarp(func_addr_expression);
+    }
+
+    // ------------------------------------------------------------------------------------------
 
     CST2ASTConvert::CST2ASTConvert(ASTContext *ast_context, Diagnostic *diagnostic, REXCompilerInstance *compiler_instance)
         : ast_context_(ast_context), compiler_instance_(compiler_instance) {

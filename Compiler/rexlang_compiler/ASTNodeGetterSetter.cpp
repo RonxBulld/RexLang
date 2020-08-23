@@ -21,7 +21,6 @@ namespace rexlang {
 
     TranslateUnit * Node::getTranslateUnit() const { return ast_context_->getTranslateUnit(); }
     ASTContext *    Node::getAstContext   () const { return ast_context_;  }
-    Node *          Node::getNearstScope  () const { return parent_scope_; }
     Node *          Node::getParent       () const { assert(parent_node_); return parent_node_;  }
 
     void Node::setLocation(const char *filename, size_t leftLine, size_t leftColumn, size_t rightLine, size_t rightColumn) {

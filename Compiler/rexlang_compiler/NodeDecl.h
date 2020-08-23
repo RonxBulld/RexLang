@@ -215,7 +215,6 @@ namespace rexlang {
     private:
         size_t          node_id_            = 0;        // 节点ID
         ASTContext *    ast_context_        = nullptr;  // 语法树编译上下文
-        Node *          parent_scope_       = nullptr;  // 最近的父域
         Node *          parent_node_        = nullptr;  // 父节点
         NodeType        node_type_          = NodeType::kNTyBadType;    // 节点类型
         size_t          location_start_     = 0;        // 起始位置
@@ -236,7 +235,6 @@ namespace rexlang {
             node->node_id_      = ast_context->GetNodeIndex();
             node->node_type_    = NodeTy::GetClassId();
             node->ast_context_  = ast_context;
-            node->parent_scope_ = ast_context->currentScope();
 
             return node;
         }
@@ -254,7 +252,6 @@ namespace rexlang {
     public:
         TranslateUnit * getTranslateUnit    () const ;
         ASTContext *    getAstContext       () const ;
-        Node *          getNearstScope      () const ;
         Node *          getParent           () const ;
 
     public:
@@ -558,16 +555,12 @@ namespace rexlang {
     public:
         /*===-----------------------------------------------------------===*
          * 使用其他类型来包装原有类型
-         * 其他类型节点必须有两个签名如下的静态成员方法：
+         * 其他类型节点必须有签名如下的静态成员方法：
          * static VariTypeDecl *get(TypeDecl *  elementType, ...);
-         * static VariTypeDecl *get(IdentRefer *elementName, ...);
          *===-----------------------------------------------------------===*/
         template <typename NewTy, typename ... Args>
         void wrapTypeUse(Args && ... args) {
-            if (IdentRefer *__id = id()) {
-                updateType(NewTy::get(__id, args...));
-            }
-            else if (VariTypeDecl *__type = type()) {
+            if (VariTypeDecl *__type = type()) {
                 updateType(NewTy::get(__type, args...));
             }
             else {
@@ -1364,10 +1357,13 @@ namespace rexlang {
      */
     class ReturnStmt : public ControlStmt {
     private:
-        Expression* return_value_ = nullptr;
+        Expression *return_value_ = nullptr;
 
     protected:
         ExprUsage getSubExprAccessType(const Expression *expr) const override ;
+
+    public:
+        explicit ReturnStmt(Expression *returnValue) ;
 
     public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
@@ -1667,18 +1663,22 @@ namespace rexlang {
 
     /**
      * @brief 数组引用组件
+     * 一个组件仅表示一个维度，多维数组由多层ArrayIndex嵌套。
      */
     class ArrayIndex : public NameComponent {
     private:
         // 索引对象
-        NameComponent* base_ = nullptr;
+        NameComponent *base_ = nullptr;
         // 索引表达式
-        Expression* index_ = nullptr;
+        Expression *index_   = nullptr;
 
     protected:
         TypeDecl *CheckExpressionInternal() override;
         ExprUsage getSubExprAccessType      (const Expression *expr) const override ;
         TypeDecl *getExpressionTypeInternal ()                       const override ;
+
+    public:
+        ArrayIndex(NameComponent *baseComponent, Expression *indexExpression) ;
 
     public:
         void setBaseComponent(NameComponent *baseComponent) ;
@@ -1726,13 +1726,15 @@ namespace rexlang {
         TypeDecl *getExpressionTypeInternal ()                       const override ;
 
     public:
+        FunctionCall(FunctorDecl *functorDecl, const std::vector<Expression *> &arguments) ;
+
+    public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
         TagDecl *       EvalBaseNameComponentType   ()       override ;
         IdentRefer *    getBaseId                   () const override ;
 
         bool matchFunctor       (FunctorDecl *  functorDecl) const ;
-        void setCallName        (NameComponent *funcName) ;
         void appendArgument     (Expression *   argument) ;
 
         NameComponent *             getCallee           () const ;
