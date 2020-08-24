@@ -1396,14 +1396,19 @@ namespace rexlang {
      * 如果、如果真、判断
      */
     class IfStmt : public Statement {
+    public:
+        typedef std::pair<Expression *, Statement *> BranchTy ;
     private:
         // 选择分支，每个pair第一个元素为测试表达式，第二个元素为相应的语句块
-        std::vector<std::pair<Expression *, Statement *>> switches_;
+        std::vector<BranchTy> switches_;
         // 默认分支
         Statement* default_statement_ = nullptr;
 
     protected:
         ExprUsage getSubExprAccessType(const Expression *expr) const override ;
+
+    public:
+        IfStmt(const std::vector<BranchTy> &branchs, Statement *defaultBranchBody = nullptr) ;
 
     public:
         void        appendBranch    (Expression *condition, Statement *statement) ;
@@ -1425,7 +1430,10 @@ namespace rexlang {
      */
     class LoopStatement : public Statement {
     private:
-        Statement* loop_body_ = nullptr;
+        Statement *loop_body_ = nullptr;
+
+    public:
+        LoopStatement(Statement *loopBody) ;
 
     public:
         void        setLoopBody(Statement *loopBody) ;
@@ -1439,10 +1447,13 @@ namespace rexlang {
      */
     class WhileStmt : public LoopStatement {
     private:
-        Expression* condition_ = nullptr;
+        Expression *condition_ = nullptr;
 
     protected:
         ExprUsage getSubExprAccessType(const Expression *expr) const override ;
+
+    public:
+        WhileStmt(Expression *condition, Statement *loopBody) ;
 
     public:
         void            setLoopCondition(Expression *condition) ;
@@ -1465,6 +1476,9 @@ namespace rexlang {
 
     protected:
         ExprUsage getSubExprAccessType(const Expression *expr) const override ;
+
+    public:
+        RangeForStmt(Expression *rangeSize, HierarchyIdentifier *loopVari, Statement *loopBody) ;
 
     public:
         void setRangeSize    (Expression *rangeSize) ;
@@ -1493,6 +1507,9 @@ namespace rexlang {
         ExprUsage getSubExprAccessType(const Expression *expr) const override ;
 
     public:
+        ForStmt(Expression *startValue, Expression *stopValue, Expression *stepValue, HierarchyIdentifier *loopVari, Statement *loopBody) ;
+
+    public:
         void setStartValue(Expression *startValue) ;
         void setStopValue (Expression *stopValue)  ;
         void setStepValue (Expression *stepValue)  ;
@@ -1515,10 +1532,13 @@ namespace rexlang {
      */
     class DoWhileStmt : public LoopStatement {
     private:
-        Expression* condition_ = nullptr;
+        Expression *condition_ = nullptr;
 
     protected:
         ExprUsage getSubExprAccessType(const Expression *expr) const override ;
+
+    public:
+        DoWhileStmt(Expression *condition, Statement *loopBody) ;
 
     public:
         void setCondition(Expression *condition) ;
@@ -1540,6 +1560,9 @@ namespace rexlang {
 
     protected:
         ExprUsage getSubExprAccessType(const Expression *expr) const override ;
+
+    public:
+        StatementBlock(const std::vector<Statement *> &statement_list) ;
 
     public:
         void appendStatement(Statement *statement) ;
@@ -1591,12 +1614,15 @@ namespace rexlang {
      */
     class HierarchyIdentifier : public Expression {
     private:
-        std::vector<NameComponent*> name_components_;
+        std::vector<NameComponent *> name_components_;
 
     protected:
         TypeDecl *CheckExpressionInternal   ()                             override ;
         ExprUsage getSubExprAccessType      (const Expression *expr) const override ;
         TypeDecl *getExpressionTypeInternal ()                       const override ;
+
+    public:
+        HierarchyIdentifier(const std::vector<NameComponent *> &nameComponents) ;
 
     public:
         void AppendComponent(NameComponent *component);
@@ -1786,6 +1812,7 @@ namespace rexlang {
      * 有运算符的表达式
      */
     class _OperatorExpression : public Expression {
+    private:
         OperatorType operator_type_ = OperatorType(OperatorType::Opt::kOptNone);
         /*
          * 可选运算符：
@@ -1793,6 +1820,9 @@ namespace rexlang {
          * 二元：* / \ % + - != == < > <= >= ?= && ||
          */
         TString operator_;
+
+    public:
+        _OperatorExpression(const OperatorType &opt) ;
 
     public:
         void setOperatorText            (const TString &            operatorText) ;
@@ -1810,12 +1840,15 @@ namespace rexlang {
 
     class UnaryExpression : public _OperatorExpression {
     private:
-        Expression* operand_value_ = nullptr;
+        Expression *operand_value_ = nullptr;
 
     protected:
         VariTypeDecl *CheckExpressionInternal   () override ;
         ExprUsage getSubExprAccessType          (const Expression *expr) const override ;
         TypeDecl *getExpressionTypeInternal ()  const override ;
+
+    public:
+        UnaryExpression(const OperatorType::Opt &opt, Expression *operand) ;
 
     public:
         void setOperand(Expression *operand) ;
@@ -1827,13 +1860,16 @@ namespace rexlang {
 
     class BinaryExpression : public _OperatorExpression {
     private:
-        Expression* lhs_ = nullptr;
-        Expression* rhs_ = nullptr;
+        Expression *lhs_ = nullptr;
+        Expression *rhs_ = nullptr;
 
     protected:
         VariTypeDecl *  CheckExpressionInternal     () override ;
         ExprUsage       getSubExprAccessType        (const Expression *expr) const override ;
         TypeDecl *      getExpressionTypeInternal   ()  const override ;
+
+    public:
+        BinaryExpression(const OperatorType::Opt &opt, Expression *lhs, Expression *rhs) ;
 
     public:
         void    setLHS(Expression *lhsExpr) ;
@@ -1905,11 +1941,14 @@ namespace rexlang {
 
     class ValueOfDataSet : public Value {
     private:
-        std::vector<Expression*> elements_;
+        std::vector<Expression *> elements_;
 
     protected:
         TypeDecl *  CheckExpressionInternal     () override ;
         TypeDecl *  getExpressionTypeInternal   () const override ;
+
+    public:
+        ValueOfDataSet(const std::vector<Expression *> &dataSet) ;
 
     public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;

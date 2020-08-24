@@ -549,11 +549,12 @@ namespace rexlang {
     // --- 语句块 ---------------------------------------------------------------------------------
 
     antlrcpp::Any CST2ASTConvert::visitStatement_list(rexLangParser::Statement_listContext *context) {
-        StatementBlock* statement_list = CreateNode<StatementBlock>(context);
+        std::vector<Statement *> statement_list;
         for (auto *stmt_ctx : context->stmts) {
-            statement_list->appendStatement(GetFromCtxIfExist<Statement*>(stmt_ctx));
+            statement_list.push_back(GetFromCtxIfExist<Statement*>(stmt_ctx));
         }
-        return NodeWarp(statement_list);
+        StatementBlock* statement_block = CreateNode<StatementBlock>(context, statement_list);
+        return NodeWarp(statement_block);
     }
 
     // --- 赋值语句 ---------------------------------------------------------------------------------
@@ -561,7 +562,8 @@ namespace rexlang {
     antlrcpp::Any CST2ASTConvert::visitAssignStatement(rexLangParser::AssignStatementContext *context) {
         HierarchyIdentifier *lhs         = GetFromCtxIfExist<HierarchyIdentifier *>(context->hierarchy_identifier());
         Expression *         rhs         = GetFromCtxIfExist<Expression *>(context->expression());
-        AssignStmt *         assign_stmt = CreateNode<AssignStmt>(context, lhs, rhs);
+
+        AssignStmt *assign_stmt = CreateNode<AssignStmt>(context, lhs, rhs);
         return NodeWarp(assign_stmt);
     }
 
@@ -572,19 +574,19 @@ namespace rexlang {
     }
 
     antlrcpp::Any CST2ASTConvert::visitIfStmt(rexLangParser::IfStmtContext *context) {
-        IfStmt* if_stmt = CreateNode<IfStmt>(context);
-        Expression* condition = GetFromCtxIfExist<Expression*>(context->condition_expr);
-        Statement* true_statement = GetFromCtxIfExist<Statement*>(context->true_stmt_list);
-        if_stmt->appendBranch(condition, true_statement);
-        if_stmt->setDefault(GetFromCtxIfExist<Statement*>(context->false_stmt_list));
+        Expression *condition       = GetFromCtxIfExist<Expression *>(context->condition_expr);
+        Statement * true_statement  = GetFromCtxIfExist<Statement *>(context->true_stmt_list);
+        Statement * false_statement = GetFromCtxIfExist<Statement *>(context->false_stmt_list);
+
+        IfStmt *if_stmt = CreateNode<IfStmt>(context, IfStmt::BranchTy(condition, true_statement), false_statement);
         return NodeWarp(if_stmt);
     }
 
     antlrcpp::Any CST2ASTConvert::visitIfTrueStmt(rexLangParser::IfTrueStmtContext *context) {
-        IfStmt* if_stmt = CreateNode<IfStmt>(context);
-        Expression* condition = GetFromCtxIfExist<Expression*>(context->condition_expr);
-        Statement* true_statement = GetFromCtxIfExist<Statement*>(context->true_stmt_list);
-        if_stmt->appendBranch(condition, true_statement);
+        Expression *condition       = GetFromCtxIfExist<Expression*>(context->condition_expr);
+        Statement * true_statement  = GetFromCtxIfExist<Statement*>(context->true_stmt_list);
+
+        IfStmt* if_stmt = CreateNode<IfStmt>(context, IfStmt::BranchTy(condition, true_statement), nullptr);
         return NodeWarp(if_stmt);
     }
 
@@ -595,19 +597,21 @@ namespace rexlang {
     }
 
     antlrcpp::Any CST2ASTConvert::visitSwitch_statement(rexLangParser::Switch_statementContext *context) {
-        IfStmt* switch_stmt = CreateNode<IfStmt>(context);
+        std::vector<IfStmt::BranchTy> branchs;
 
-        Expression* major_cond_expr = GetFromCtxIfExist<Expression*>(context->major_condition_expr);
-        Statement*  major_cond_body = GetFromCtxIfExist<Statement*>(context->major_cond_body);
-        switch_stmt->appendBranch(major_cond_expr, major_cond_body);
+        Expression *major_cond_expr = GetFromCtxIfExist<Expression *>(context->major_condition_expr);
+        Statement * major_cond_body = GetFromCtxIfExist<Statement *>(context->major_cond_body);
+        branchs.push_back(IfStmt::BranchTy(major_cond_expr, major_cond_body));
 
         assert(context->minor_condition_expr.size() == context->minor_cond_body.size());
         for (size_t idx = 0; idx < context->minor_condition_expr.size(); idx++) {
             Expression* minor_cond_expr = GetFromCtxIfExist<Expression*>(context->minor_condition_expr[idx]);
             Statement*  minor_cond_body = GetFromCtxIfExist<Statement*>(context->minor_cond_body[idx]);
-            switch_stmt->appendBranch(minor_cond_expr, minor_cond_body);
+            branchs.push_back(IfStmt::BranchTy(minor_cond_expr, minor_cond_body));
         }
-        switch_stmt->setDefault(GetFromCtxIfExist<Statement*>(context->default_body));
+        Statement *default_body = GetFromCtxIfExist<Statement*>(context->default_body);
+
+        IfStmt *switch_stmt = CreateNode<IfStmt>(context, branchs, default_body);
         return NodeWarp(switch_stmt);
     }
 
@@ -618,34 +622,38 @@ namespace rexlang {
     }
 
     antlrcpp::Any CST2ASTConvert::visitWhile(rexLangParser::WhileContext *context) {
-        WhileStmt* while_stmt = CreateNode<WhileStmt>(context);
-        while_stmt->setLoopCondition(GetFromCtxIfExist<Expression*>(context->condition_expr));
-        while_stmt->setLoopBody(GetFromCtxIfExist<Statement*>(context->loop_body));
+        Expression *condition = GetFromCtxIfExist<Expression*>(context->condition_expr);
+        Statement * loop_body = GetFromCtxIfExist<Statement*>(context->loop_body);
+
+        WhileStmt *while_stmt = CreateNode<WhileStmt>(context, condition, loop_body);
         return NodeWarp(while_stmt);
     }
 
     antlrcpp::Any CST2ASTConvert::visitRangeFor(rexLangParser::RangeForContext *context) {
-        RangeForStmt* range_for_stmt = CreateNode<RangeForStmt>(context);
-        range_for_stmt->setRangeSize(GetFromCtxIfExist<Expression*>(context->times_expr));
-        range_for_stmt->setLoopVariable(GetFromCtxIfExist<HierarchyIdentifier*>(context->loop_variable));
-        range_for_stmt->setLoopBody(GetFromCtxIfExist<Statement*>(context->loop_body));
+        Expression *            range_size  = GetFromCtxIfExist<Expression *>         (context->times_expr);
+        HierarchyIdentifier *   loop_vari   = GetFromCtxIfExist<HierarchyIdentifier *>(context->loop_variable);
+        Statement *             loop_body   = GetFromCtxIfExist<Statement *>          (context->loop_body);
+
+        RangeForStmt* range_for_stmt = CreateNode<RangeForStmt>(context, range_size, loop_vari, loop_body);
         return NodeWarp(range_for_stmt);
     }
 
     antlrcpp::Any CST2ASTConvert::visitFor(rexLangParser::ForContext *context) {
-        ForStmt* for_stmt = CreateNode<ForStmt>(context);
-        for_stmt->setStartValue(GetFromCtxIfExist<Expression*>(context->loop_start));
-        for_stmt->setStopValue (GetFromCtxIfExist<Expression*>(context->loop_end));
-        for_stmt->setStepValue (GetFromCtxIfExist<Expression*>(context->loop_step));
-        for_stmt->setLoopVari  (GetFromCtxIfExist<HierarchyIdentifier*>(context->loop_variable));
-        for_stmt->setLoopBody  (GetFromCtxIfExist<Statement*>(context->loop_body));
+        Expression *            start_value = GetFromCtxIfExist<Expression*>(context->loop_start);
+        Expression *            stop_value  = GetFromCtxIfExist<Expression*>(context->loop_end);
+        Expression *            step_value  = GetFromCtxIfExist<Expression*>(context->loop_step);
+        HierarchyIdentifier *   loop_vari   = GetFromCtxIfExist<HierarchyIdentifier*>(context->loop_variable);
+        Statement *             loop_body   = GetFromCtxIfExist<Statement*>(context->loop_body);
+
+        ForStmt* for_stmt = CreateNode<ForStmt>(context, start_value, stop_value, step_value, loop_vari, loop_body);
         return NodeWarp(for_stmt);
     }
 
     antlrcpp::Any CST2ASTConvert::visitDoWhile(rexLangParser::DoWhileContext *context) {
-        DoWhileStmt* do_while_stmt = CreateNode<DoWhileStmt>(context);
-        do_while_stmt->setCondition(GetFromCtxIfExist<Expression*>(context->condition_expr));
-        do_while_stmt->setLoopBody(GetFromCtxIfExist<Statement*>(context->loop_body));
+        Expression *    condition = GetFromCtxIfExist<Expression*>(context->condition_expr);
+        Statement *     loop_body = GetFromCtxIfExist<Statement*>(context->loop_body);
+
+        DoWhileStmt *do_while_stmt = CreateNode<DoWhileStmt>(context, condition, loop_body);
         return NodeWarp(do_while_stmt);
     }
 
@@ -669,6 +677,7 @@ namespace rexlang {
 
     antlrcpp::Any CST2ASTConvert::visitReturnStmt(rexLangParser::ReturnStmtContext *context) {
         Expression *return_value = GetFromCtxIfExist<Expression *>(context->return_expr);
+
         ReturnStmt *return_stmt = CreateNode<ReturnStmt>(context, return_value);
         return NodeWarp(return_stmt);
     }
@@ -687,39 +696,46 @@ namespace rexlang {
     // --- 名称组件表达式 ---------------------------------------------------------------------------------
 
     antlrcpp::Any CST2ASTConvert::visitHierarchy_identifier(rexLangParser::Hierarchy_identifierContext *context) {
-        HierarchyIdentifier* hierarchy_identifier = CreateNode<HierarchyIdentifier>(context);
+        std::vector<NameComponent *> name_components;
         for (auto *name_component_ctx : context->components) {
             NameComponent* name_component = GetFromCtxIfExist<NameComponent*, true>(name_component_ctx);
-            hierarchy_identifier->AppendComponent(name_component);
+            name_components.push_back(name_component);
         }
+
+        HierarchyIdentifier* hierarchy_identifier = CreateNode<HierarchyIdentifier>(context, name_components);
         return NodeWarp(hierarchy_identifier);
     }
 
     antlrcpp::Any CST2ASTConvert::visitFuncCall(rexLangParser::FuncCallContext *context) {
         TranslateUnit *TU = ast_context_->getTranslateUnit();
+
         // 调用对象
         IdentRefer *callee_name = GetFromCtxIfExist<IdentRefer *, true>(context->name_component());
         FunctorDecl *callee = TU->getFunctor(callee_name->getName());
+
         // 实参列表
         std::vector<Expression *> arguments;
         for (auto *arg_ctx : context->arguments) {
             Expression* arg_expr = GetFromCtxIfExist<Expression*>(arg_ctx);
             arguments.push_back(arg_expr);
         }
+
         // 创建调用
         FunctionCall* function_call = CreateNode<FunctionCall>(context, callee, arguments);
         return NodeWarp(function_call);
     }
 
     antlrcpp::Any CST2ASTConvert::visitIdentifier(rexLangParser::IdentifierContext *context) {
-        IdentRefer* identifier = CreateNode<IdentRefer>(context, GetTextIfExist(context->IDENTIFIER()->getSymbol()));
+        TString name = GetTextIfExist(context->IDENTIFIER()->getSymbol());
+        IdentRefer* identifier = CreateNode<IdentRefer>(context, name);
         return NodeWarp(identifier);
     }
 
     antlrcpp::Any CST2ASTConvert::visitArrayIndex(rexLangParser::ArrayIndexContext *context) {
         NameComponent *base_component   = GetFromCtxIfExist<NameComponent *, true>(context->name_component());
         Expression *   index_expression = GetFromCtxIfExist<Expression *>(context->expression());
-        ArrayIndex *   array_index      = CreateNode<ArrayIndex>(context, base_component, index_expression);
+
+        ArrayIndex *array_index = CreateNode<ArrayIndex>(context, base_component, index_expression);
         return NodeWarp(array_index);
     }
 
@@ -736,51 +752,56 @@ namespace rexlang {
     }
 
     antlrcpp::Any CST2ASTConvert::visitBinaryExpr(rexLangParser::BinaryExprContext *context) {
-        BinaryExpression* binary_expression = CreateNode<BinaryExpression>(context);
-        binary_expression->setOperatorText(GetTextIfExist(context->opt));
+        OperatorType::Opt opt;
         switch (context->opt->getType()) {
-            if (0) { case rexLangParser::K_ADD_OPT:        binary_expression->setOperator(OperatorType::Opt::kOptAdd);        break; }
-            if (0) { case rexLangParser::K_SUB_OPT:        binary_expression->setOperator(OperatorType::Opt::kOptSub);        break; }
-            if (0) { case rexLangParser::K_MUL_OPT:        binary_expression->setOperator(OperatorType::Opt::kOptMul);        break; }
-            if (0) { case rexLangParser::K_DIV_OPT:        binary_expression->setOperator(OperatorType::Opt::kOptDiv);        break; }
-            if (0) { case rexLangParser::K_FULL_DIV_OPT:   binary_expression->setOperator(OperatorType::Opt::kOptFullDiv);    break; }
-            if (0) { case rexLangParser::K_MOD_OPT:        binary_expression->setOperator(OperatorType::Opt::kOptMod);        break; }
-            if (0) { case rexLangParser::K_AECOM_OPT:      binary_expression->setOperator(OperatorType::Opt::kOptEqual);      break; }
-            if (0) { case rexLangParser::K_ASSIGN_OPT:     binary_expression->setOperator(OperatorType::Opt::kOptEqual);      break; }
-            if (0) { case rexLangParser::K_EQUAL_OPT:      binary_expression->setOperator(OperatorType::Opt::kOptEqual);      break; }
-            if (0) { case rexLangParser::K_NOT_EQUAL_OPT:  binary_expression->setOperator(OperatorType::Opt::kOptNotEqual);   break; }
-            if (0) { case rexLangParser::K_GREAT_OPT:      binary_expression->setOperator(OperatorType::Opt::kOptGreatThan);  break; }
-            if (0) { case rexLangParser::K_LESS_OPT:       binary_expression->setOperator(OperatorType::Opt::kOptLessThan);   break; }
-            if (0) { case rexLangParser::K_GREAT_EQU_OPT:  binary_expression->setOperator(OperatorType::Opt::kOptGreatEqual); break; }
-            if (0) { case rexLangParser::K_LESS_EQU_OPT:   binary_expression->setOperator(OperatorType::Opt::kOptLessEqual);  break; }
-            if (0) { case rexLangParser::K_LIKE_EQU_OPT:   binary_expression->setOperator(OperatorType::Opt::kOptLikeEqual);  break; }
-            if (0) { case rexLangParser::K_AND_OPT:        binary_expression->setOperator(OperatorType::Opt::kOptAnd);        break; }
-            if (0) { case rexLangParser::K_OR_OPT:         binary_expression->setOperator(OperatorType::Opt::kOptOr);         break; }
-            if (0) { default: assert(false);               binary_expression->setOperator(OperatorType::Opt::kOptNone);       break; }
+            if (0) { case rexLangParser::K_ADD_OPT:        opt = OperatorType::Opt::kOptAdd;        break; }
+            if (0) { case rexLangParser::K_SUB_OPT:        opt = OperatorType::Opt::kOptSub;        break; }
+            if (0) { case rexLangParser::K_MUL_OPT:        opt = OperatorType::Opt::kOptMul;        break; }
+            if (0) { case rexLangParser::K_DIV_OPT:        opt = OperatorType::Opt::kOptDiv;        break; }
+            if (0) { case rexLangParser::K_FULL_DIV_OPT:   opt = OperatorType::Opt::kOptFullDiv;    break; }
+            if (0) { case rexLangParser::K_MOD_OPT:        opt = OperatorType::Opt::kOptMod;        break; }
+            if (0) { case rexLangParser::K_AECOM_OPT:      opt = OperatorType::Opt::kOptEqual;      break; }
+            if (0) { case rexLangParser::K_ASSIGN_OPT:     opt = OperatorType::Opt::kOptEqual;      break; }
+            if (0) { case rexLangParser::K_EQUAL_OPT:      opt = OperatorType::Opt::kOptEqual;      break; }
+            if (0) { case rexLangParser::K_NOT_EQUAL_OPT:  opt = OperatorType::Opt::kOptNotEqual;   break; }
+            if (0) { case rexLangParser::K_GREAT_OPT:      opt = OperatorType::Opt::kOptGreatThan;  break; }
+            if (0) { case rexLangParser::K_LESS_OPT:       opt = OperatorType::Opt::kOptLessThan;   break; }
+            if (0) { case rexLangParser::K_GREAT_EQU_OPT:  opt = OperatorType::Opt::kOptGreatEqual; break; }
+            if (0) { case rexLangParser::K_LESS_EQU_OPT:   opt = OperatorType::Opt::kOptLessEqual;  break; }
+            if (0) { case rexLangParser::K_LIKE_EQU_OPT:   opt = OperatorType::Opt::kOptLikeEqual;  break; }
+            if (0) { case rexLangParser::K_AND_OPT:        opt = OperatorType::Opt::kOptAnd;        break; }
+            if (0) { case rexLangParser::K_OR_OPT:         opt = OperatorType::Opt::kOptOr;         break; }
+            if (0) { default: assert(false);               opt = OperatorType::Opt::kOptNone;       break; }
         }
-        binary_expression->setLHS(GetFromCtxIfExist<Expression*>(context->lval));
-        binary_expression->setRHS(GetFromCtxIfExist<Expression*>(context->rval));
+        Expression *lhs = GetFromCtxIfExist<Expression *>(context->lval);
+        Expression *rhs = GetFromCtxIfExist<Expression *>(context->rval);
+
+        BinaryExpression *binary_expression = CreateNode<BinaryExpression>(context, opt, lhs, rhs);
+        binary_expression->setOperatorText(GetTextIfExist(context->opt));
         return NodeWarp(binary_expression);
     }
 
     antlrcpp::Any CST2ASTConvert::visitUnaryExpr(rexLangParser::UnaryExprContext *context) {
-        UnaryExpression* unary_expression = CreateNode<UnaryExpression>(context);
-        unary_expression->setOperatorText(GetTextIfExist(context->opt));
+        OperatorType::Opt opt;
         switch (context->opt->getType()) {
-            if (0) { case rexLangParser::K_SUB_OPT:    unary_expression->setOperator(OperatorType::Opt::kOptSub);  break; }
-            if (0) { default: assert(false);           unary_expression->setOperator(OperatorType::Opt::kOptNone); break; }
+            if (0) { case rexLangParser::K_SUB_OPT:    opt = OperatorType::Opt::kOptSub;  break; }
+            if (0) { default: assert(false);           opt = OperatorType::Opt::kOptNone; break; }
         }
-        unary_expression->setOperand(GetFromCtxIfExist<Expression*>(context->expression()));
+        Expression *operand = GetFromCtxIfExist<Expression *>(context->expression());
+
+        UnaryExpression* unary_expression = CreateNode<UnaryExpression>(context, opt, operand);
+        unary_expression->setOperatorText(GetTextIfExist(context->opt));
         return NodeWarp(unary_expression);
     }
 
     // --- 字面量表达式 ---------------------------------------------------------------------------------
 
     antlrcpp::Any CST2ASTConvert::visitData_set_value(rexLangParser::Data_set_valueContext *context) {
-        ValueOfDataSet* value_of_data_set = CreateNode<ValueOfDataSet>(context);
+        std::vector<Expression *> data_vector;
         for (auto *elem_ctx : context->elems) {
-            value_of_data_set->appendElement(GetFromCtxIfExist<Expression*>(elem_ctx));
+            data_vector.push_back(GetFromCtxIfExist<Expression*>(elem_ctx));
         }
+        ValueOfDataSet *value_of_data_set = CreateNode<ValueOfDataSet>(context, data_vector);
         return NodeWarp(value_of_data_set);
     }
 
@@ -791,7 +812,7 @@ namespace rexlang {
     ValueOfDatetime* CST2ASTConvert::TimeNodeBuilder(time_t ntm, antlr4::ParserRuleContext *parserRuleContext) {
         auto start_token = parserRuleContext->getStart();
         auto end_token   = parserRuleContext->getStop();
-        ValueOfDatetime* value_of_datetime = CreateNode<ValueOfDatetime>(start_token, end_token);
+        ValueOfDatetime *value_of_datetime = CreateNode<ValueOfDatetime>(start_token, end_token);
         value_of_datetime->setTime(ntm);
         return value_of_datetime;
     }
