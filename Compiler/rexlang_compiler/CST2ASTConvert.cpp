@@ -239,8 +239,8 @@ namespace rexlang {
             ast_context_->setTranslateUnit(translate_unit);
         }
 
-        ast_context_->cleanScopeStack();
-        ast_context_->pushScope(translate_unit);
+//        ast_context_->cleanScopeStack();
+//        ast_context_->pushScope(translate_unit);
 
         // 分析版本号并检查兼容性
         unsigned int edition = GetFromCtxIfExist<unsigned int, true>(context->edition_spec(), 2);
@@ -251,7 +251,7 @@ namespace rexlang {
         rexLangParser::Src_contentContext *src_ctx = context->src_content();
         this->source_cache_.insert(src_ctx);
 
-        ast_context_->popScope(translate_unit);
+//        ast_context_->popScope(translate_unit);
         return NodeWarp(translate_unit);
     }
 
@@ -932,15 +932,17 @@ namespace rexlang {
     // --- 常量表达式 ---------------------------------------------------------------------------------
 
     antlrcpp::Any CST2ASTConvert::visitMacro_value(rexLangParser::Macro_valueContext *context) {
+        // TODO: 目前尚未对常量表有全面支持
         ResourceRefExpression* resource_ref_expression = CreateNode<ResourceRefExpression>(context);
         resource_ref_expression->setResourceName(GetTextIfExist(context->IDENTIFIER()->getSymbol()));
         return NodeWarp(resource_ref_expression);
     }
 
     antlrcpp::Any CST2ASTConvert::visitFunc_ptr(rexLangParser::Func_ptrContext *context) {
-        FuncAddrExpression *func_addr_expression = CreateNode<FuncAddrExpression>(context);
-        IdentRefer *reference = CreateNode<IdentRefer>(context, GetTextIfExist(context->IDENTIFIER()->getSymbol()));
-        func_addr_expression->setRefFuncName(reference);
+        TString func_name = GetTextIfExist(context->IDENTIFIER()->getSymbol());
+        FunctorDecl *callee = ast_context_->getTranslateUnit()->getFunctor(func_name.string_);
+
+        FuncAddrExpression *func_addr_expression = CreateNode<FuncAddrExpression>(context, callee);
         return NodeWarp(func_addr_expression);
     }
 

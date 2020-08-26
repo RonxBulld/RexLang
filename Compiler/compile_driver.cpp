@@ -105,16 +105,16 @@ namespace rexlang {
 
     int REXCompilerInstance::setInstanceName    (const std::string &name)       { this->instance_name_ = name;     return 0; }
 
-    antlr4::tree::ParseTree *REXCompilerInstance::runParser(const std::string &code, const std::string &file) {
+    antlr4::tree::ParseTree *REXCompilerInstance::parseOnFile(const FileEntry &fileEntry) {
+        std::cout << "分析文件：" << fileEntry.GetFilename() << std::endl;
+        return this->buildCstFromCode(fileEntry.GetCode(), fileEntry.GetFilename());
+    }
+
+    antlr4::tree::ParseTree *REXCompilerInstance::buildCstFromCode(const std::string &code, const std::string &file) {
 
         // 分析指定的源代码
 
         return this->ast_generate_.buildCstFromCode(code, file, this->instance_name_);
-    }
-
-    antlr4::tree::ParseTree *REXCompilerInstance::parseOnFile(const FileEntry &fileEntry) {
-        std::cout << "分析文件：" << fileEntry.GetFilename() << std::endl;
-        return this->runParser(fileEntry.GetCode(), fileEntry.GetFilename());
     }
 
     FileEntry REXCompilerInstance::detectLibraryFile(const rexlang::StringRef &filePath) {

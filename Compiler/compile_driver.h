@@ -69,7 +69,7 @@ namespace rexlang {
          * 分析源代码，并生成CST
          * 根据输入的参数执行分析过程
          */
-        antlr4::tree::ParseTree *runParser(const std::string &code, const std::string &file);
+        antlr4::tree::ParseTree *buildCstFromCode(const std::string &code, const std::string &file);
 
         /*===-------------------------------------===*
          * 分析一个指定文件名的文件

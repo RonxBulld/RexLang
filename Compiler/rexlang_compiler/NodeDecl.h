@@ -1905,12 +1905,14 @@ namespace rexlang {
 
     class FuncAddrExpression : public Expression {
     private:
-        IdentRefer *  function_name_;
-        FunctorDecl * functor_declare_ = nullptr;
+        FunctorDecl *functor_declare_ = nullptr;
 
     protected:
         TypeDecl *  CheckExpressionInternal     () override ;
         TypeDecl *  getExpressionTypeInternal   () const override ;
+
+    public:
+        explicit FuncAddrExpression(FunctorDecl *callee) ;
 
     public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
