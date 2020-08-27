@@ -99,21 +99,21 @@ namespace rexlang {
     const APIDeclareFile::DllDefMapTy & APIDeclareFile::getAPIDefMap () const { return api_declares_; }
 
     /***************************************************
-     * ConstDeclareFile
+     * MacroDeclareFile
      ***************************************************/
 
-    void ConstDeclareFile::appendConstDeclare(ConstDecl *constDecl) {
-        consts_declares_[constDecl->getNameRef()] = constDecl;
-        setChild(constDecl);
+    void MacroDeclareFile::appendMacroDeclare(MacroDecl *macroDecl) {
+        macros_declares_[macroDecl->getNameRef()] = macroDecl;
+        setChild(macroDecl);
     }
 
-    const ConstDeclareFile::ConstDeclMapTy & ConstDeclareFile::getConstDeclMap () const { return consts_declares_; }
+    const MacroDeclareFile::MacroDeclMapTy & MacroDeclareFile::getMacroDeclMap () const { return macros_declares_; }
 
     /***************************************************
-     * ConstDecl
+     * MacroDecl
      ***************************************************/
 
-    ConstDecl::ConstDecl(IdentDef *name, Value *value) : TagDecl(name), const_value_(value) {}
+    MacroDecl::MacroDecl(IdentDef *name, Value *value) : TagDecl(name), macro_value_(value) {}
 
     /***************************************************
      * Decl

@@ -180,13 +180,13 @@ namespace rexlang {
     bool SourceFile::isGlobalVariableFile() const { return false; }
     bool SourceFile::isDataStructureFile () const { return false; }
     bool SourceFile::isAPIDeclareFile    () const { return false; }
-    bool SourceFile::isConstDeclareFile  () const { return false; }
+    bool SourceFile::isMacroDeclareFile  () const { return false; }
 
     bool ProgramSetFile    ::isProgramSetFile    () const { return true; }
     bool GlobalVariableFile::isGlobalVariableFile() const { return true; }
     bool DataStructureFile ::isDataStructureFile () const { return true; }
     bool APIDeclareFile    ::isAPIDeclareFile    () const { return true; }
-    bool ConstDeclareFile  ::isConstDeclareFile  () const { return true; }
+    bool MacroDeclareFile  ::isMacroDeclareFile  () const { return true; }
 
     /**********************************************************
      * 符号特性提取

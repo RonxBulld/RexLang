@@ -89,7 +89,7 @@ namespace rexlang {
 
     TypeDecl *ResourceRefExpression::CheckExpressionInternal() {
 
-        // TODO: 需要通过查找常量表来确定类型
+        // TODO: 需要通过查找宏表来确定类型
 
         assert(false);
         return nullptr;

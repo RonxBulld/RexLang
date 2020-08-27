@@ -217,6 +217,29 @@ namespace rexlang {
         return GetTextIfExist(context->comment);
     }
 
+    /*===----------------------------===*
+     *              O
+     *              |
+     *              #
+     *   _------loadHeads<--------_
+     *   |          |             |
+     *   |          |             |
+     *   |          #             |
+     *   |   importLibraries------`
+     *   |
+     *   |
+     *   `--------->O
+     */
+    bool CST2ASTConvert::loadHeads(const std::vector<antlr4::tree::ParseTree *> &trees) {
+
+        // 在编译过程中遇到外部文件引用会重入这个函数
+
+        this->buildTranslateUnitAndFetchSrc(trees);
+        this->importLibraries();
+
+        return true;
+    }
+
     // --- 加载待解析资源 ---------------------------------------------------------------------------------
 
     bool CST2ASTConvert::buildTranslateUnitAndFetchSrc(const std::vector<antlr4::tree::ParseTree *> &trees) {
@@ -262,11 +285,15 @@ namespace rexlang {
         for (rexLangParser::Program_set_fileContext * ctx : ctx_list) {
             for (antlr4::Token *token : ctx->libraries) {
                 TString library_name = GetTextIfExist(token);
+
                 /// 此处调用 CompilerInstance 分析引用的库
+
                 antlr4::tree::ParseTree *parse_tree = compiler_instance_->processExternLibrary(library_name.string_);
                 assert(parse_tree);
+
                 /// 就地对引用库进行进一步分析（一般情况下引用库接口文件是一组定义文件）
-                this->buildTUFromParseTrees({parse_tree});
+
+                this->loadHeads({parse_tree});
             }
         }
         return true;
@@ -280,10 +307,13 @@ namespace rexlang {
         std::vector<rexLangParser::Data_structure_fileContext *> ctx_list = this->filterSources<rexLangParser::Data_structure_fileContext>();
         for (rexLangParser::Data_structure_fileContext *ctx : ctx_list) {
             DataStructureFile *ds_file = CreateNode<DataStructureFile>(ctx);
+
             // 扫描数据结构列表并创建空声明
+
             for (rexLangParser::Struct_declareContext *struct_decl_ctx : ctx->struct_declare()) {
 
                 // 获取名称
+
                 antlr4::Token *name_tk = struct_decl_ctx->name;
                 assert(name_tk);
                 TString name = GetTextIfExist(name_tk, "");
@@ -291,13 +321,16 @@ namespace rexlang {
                 IdentDef *struct_name = CreateNode<IdentDef>(name_tk, name_tk, name.string_);
 
                 // 创建节点
+
                 StructureDecl *structure_decl = CreateNode<StructureDecl>(struct_decl_ctx, struct_name);
 
                 // 设置公有属性
+
                 structure_decl->applyAttribute(GetTextIfExist(struct_decl_ctx->access));
                 structure_decl->setComment(getTableComment(struct_decl_ctx));
 
                 // 注册到类型池中
+
                 ds_file->appendStructureDecl(structure_decl);
                 structures.insert(std::make_pair(structure_decl, struct_decl_ctx));
             }
@@ -305,6 +338,7 @@ namespace rexlang {
         }
 
         // 对每个空声明创建定义实体并检查循环引用问题
+
         for (auto &item : structures) {
             StructureDecl *struct_decl = item.first;
             rexLangParser::Struct_declareContext *struct_decl_ctx = item.second;
@@ -338,6 +372,7 @@ namespace rexlang {
             GlobalVariableFile * gvari_file = this->GetFromCtxIfExist<GlobalVariableFile *>(ctx);
             gvari_file->registResourceTo(TU);
         }
+        return true;
     }
 
     antlrcpp::Any CST2ASTConvert::visitGlobal_variable_file(rexLangParser::Global_variable_fileContext *context) {
@@ -412,13 +447,17 @@ namespace rexlang {
 
     bool CST2ASTConvert::parseGlobalFuntorsDeclare() {
         TranslateUnit *TU = ast_context_->getTranslateUnit();
+
         // 先处理DLL定义文件中DLL与LIB声明
+
         std::vector<rexLangParser::Api_define_fileContext *> dll_ctx_list = this->filterSources<rexLangParser::Api_define_fileContext>();
         for (rexLangParser::Api_define_fileContext *ctx : dll_ctx_list) {
             APIDeclareFile *api_declare_file = GetFromCtxIfExist<APIDeclareFile *>(ctx);
             api_declare_file->registResourceTo(TU);
         }
+
         // 然后处理各个程序集中的函数声明
+
         std::vector<rexLangParser::Program_set_fileContext *> prg_ctx_list = this->filterSources<rexLangParser::Program_set_fileContext>();
         for (rexLangParser::Program_set_fileContext *ctx : prg_ctx_list) {
             if (rexLangParser::Prog_setContext *prog_set_ctx = ctx->prog_set()) {
@@ -490,12 +529,14 @@ namespace rexlang {
         std::vector<ParameterDecl*> params;
 
         // 常规参数表
+
         for (rexLangParser::Parameter_declContext *param_vari_ctx : context->parameter_decl()) {
             ParameterDecl *parameter_decl = GetFromCtxIfExist<ParameterDecl *>(param_vari_ctx);
             params.emplace_back(parameter_decl);
         }
 
         // 可变参数项
+
         if (rexLangParser::Vari_parameter_declContext *vari_param_ctx = context->vari_parameter_decl()) {
             ParameterDecl *vari_parameter_decl = GetFromCtxIfExist<ParameterDecl *>(vari_param_ctx);
             params.emplace_back(vari_parameter_decl);
@@ -951,7 +992,7 @@ namespace rexlang {
     // --- 常量表达式 ---------------------------------------------------------------------------------
 
     antlrcpp::Any CST2ASTConvert::visitMacro_value(rexLangParser::Macro_valueContext *context) {
-        // TODO: 目前尚未对常量表有全面支持
+        // TODO: 目前尚未对宏表有全面支持
         ResourceRefExpression* resource_ref_expression = CreateNode<ResourceRefExpression>(context);
         resource_ref_expression->setResourceName(GetTextIfExist(context->IDENTIFIER()->getSymbol()));
         return NodeWarp(resource_ref_expression);
@@ -973,14 +1014,13 @@ namespace rexlang {
 
     TranslateUnit *CST2ASTConvert::buildTUFromParseTrees(const std::vector<antlr4::tree::ParseTree *> &trees) {
 
-        // 在编译过程中遇到外部文件引用会重入这个函数
         // 分层的遍历CST，而不是一次性遍历整个树
 
-        this->buildTranslateUnitAndFetchSrc(trees);
-        this->importLibraries();
+        this->loadHeads(trees);
 
         // 处理全局声明
 
+        this->parseMacroFiles();
         this->parseDataStructFiles();
         this->parseGlobalVariableFiles();
         this->parseFileLocalVariableDecls();    // 需要在分析可调用对象之前调用，因为需要创造程序集文件对象

@@ -75,6 +75,12 @@ namespace rexlang {
         ProgSetDecl *getProgramSetDecl(const StringRef &programSetName) ;
 
         /*===----------------------------------------------------===*
+         * 从 ParseTree 森林中加载头部信息进行转换前预处理
+         * 依赖 buildTranslateUnitAndFetchSrc 和 importLibraries 实现
+         */
+        bool loadHeads(const std::vector<antlr4::tree::ParseTree *> &trees) ;
+
+        /*===----------------------------------------------------===*
          * 从 ParseTree 森林中构建唯一的翻译单元，并提取资源内容
          */
         bool buildTranslateUnitAndFetchSrc(const std::vector<antlr4::tree::ParseTree *> &trees);
@@ -83,6 +89,11 @@ namespace rexlang {
          * 导入依赖库文件
          */
         bool importLibraries();
+
+        /*===----------------------------------------------------===*
+         * 从资源缓存中分析宏定义
+         */
+        bool parseMacroFiles();
 
         /*===----------------------------------------------------===*
          * 从资源缓存中分析结构体定义

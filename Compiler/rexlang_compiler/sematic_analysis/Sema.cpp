@@ -134,9 +134,9 @@ namespace rexlang {
         SemaNamedMap(api_declares_, semaCtx);
     }
 
-    void ConstDeclareFile::sematicAnalysisInternal(SemaContext &semaCtx) {
+    void MacroDeclareFile::sematicAnalysisInternal(SemaContext &semaCtx) {
         SourceFile::sematicAnalysisInternal(semaCtx);
-        SemaNamedMap(consts_declares_, semaCtx);
+        SemaNamedMap(macros_declares_, semaCtx);
     }
 
     /*===------------------------------------------------===*
@@ -173,7 +173,7 @@ namespace rexlang {
         assert(base_type_);
     }
 
-    void ConstDecl::sematicAnalysisInternal(SemaContext &semaCtx) {
+    void MacroDecl::sematicAnalysisInternal(SemaContext &semaCtx) {
         TagDecl::sematicAnalysisInternal(semaCtx);
 
         assert(getValue());

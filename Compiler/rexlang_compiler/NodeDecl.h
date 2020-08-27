@@ -48,7 +48,7 @@ namespace rexlang {
     // File
 
     class SourceFile;           class ProgramSetFile;           class GlobalVariableFile;
-    class DataStructureFile;    class APIDeclareFile;           class ConstDeclareFile;
+    class DataStructureFile;    class APIDeclareFile;           class MacroDeclareFile;
 
     // Declare
 
@@ -58,7 +58,7 @@ namespace rexlang {
 
     class Decl;                 class TagDecl;                  class TypeDecl;
     class VariTypeDecl;         class StructureDecl;            class BuiltinTypeDecl;
-    class ArrayDecl;            class ReferenceType;            class ConstDecl;
+    class ArrayDecl;            class ReferenceType;            class MacroDecl;
 
     // Entity declare
 
@@ -98,13 +98,13 @@ namespace rexlang {
 
         kNTySourceFile,
         kNTyProgramSetFile, kNTyGlobalVariableFile, kNTyDataStructureFile,
-        kNTyAPIDeclareFile, kNTyConstDeclareFile,
+        kNTyAPIDeclareFile, kNTyMacroDeclareFile,
 
         kNTyDecl,
         kNTyIdentDef, kNTyTagDecl, kNTyVariableDecl, kNTyBaseVariDecl,
         kNTyGlobalVariableDecl, kNTyParameterDecl, kNTyMemberVariableDecl, kNTyFileVariableDecl,
         kNTyLocalVariableDecl, kNTyTypeDecl, kNTyVariTypeDecl, kNTyBuiltinTypeDecl,
-        kNTyArrayDecl, kNTyConstDecl, kNTyStructureDecl, kNTReferenceType,
+        kNTyArrayDecl, kNTyMacroDecl, kNTyStructureDecl, kNTReferenceType,
         kNTyFunctorDecl, kNTyFunctionDecl, kNTyProgSetDecl, kNTyAPICommandDecl,
 
         kNTyStatement,
@@ -286,7 +286,7 @@ namespace rexlang {
         virtual bool isGlobalVariableFile() const ;
         virtual bool isDataStructureFile () const ;
         virtual bool isAPIDeclareFile    () const ;
-        virtual bool isConstDeclareFile  () const ;
+        virtual bool isMacroDeclareFile  () const ;
 
         virtual void registResourceTo   (TranslateUnit *translateUnit) const = 0;   // 将资源注册到翻译单元
 
@@ -401,24 +401,24 @@ namespace rexlang {
     };
 
     /**
-     * 常量资源定义文件
+     * 宏资源定义文件
      */
-    class ConstDeclareFile : public SourceFile {
+    class MacroDeclareFile : public SourceFile {
     public:
-        typedef NamedOrderDict<ConstDecl *> ConstDeclMapTy;
+        typedef NamedOrderDict<MacroDecl *> MacroDeclMapTy;
 
     private:
-        ConstDeclMapTy consts_declares_;
+        MacroDeclMapTy macros_declares_;
 
     public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
-        void                    appendConstDeclare(ConstDecl *constDecl) ;
-        const ConstDeclMapTy &  getConstDeclMap   () const ;
+        void                    appendMacroDeclare(MacroDecl *macroDecl) ;
+        const MacroDeclMapTy &  getMacroDeclMap   () const ;
 
     public:
-        bool isConstDeclareFile() const override ;
+        bool isMacroDeclareFile() const override ;
         void registResourceTo(TranslateUnit *translateUnit) const override ;
 
     public:
@@ -605,14 +605,14 @@ namespace rexlang {
     };
 
     /**
-     * 描述常量值定义
+     * 描述宏值定义
      */
-    class ConstDecl : public TagDecl {
+    class MacroDecl : public TagDecl {
     private:
-        Value * const_value_ = nullptr;
+        Value * macro_value_ = nullptr;
 
     public:
-        ConstDecl(IdentDef *name, Value *value) ;
+        MacroDecl(IdentDef *name, Value *value) ;
 
     public:
         Value *getValue() ;
@@ -2051,7 +2051,7 @@ namespace rexlang {
     class TranslateUnit : public Node {
     private:
         unsigned int                edition_ = 0;   // 语法版本号
-        std::vector<SourceFile *>   source_files_;  // 资源文件列表（包括全局变量定义、数据结构定义、类模块定义、DLL接口定义、子程序集合、常量资源）
+        std::vector<SourceFile *>   source_files_;  // 资源文件列表（包括全局变量定义、数据结构定义、类模块定义、DLL接口定义、子程序集合、宏资源）
 
         /********************** 符号表需要用到的公共信息 **********************/
 
@@ -2059,7 +2059,7 @@ namespace rexlang {
         NamedOrderDict<GlobalVariableDecl *>    global_variables_;  // 全局变量索引表
         std::set<TString>                       libraries_list_;    // 支持库引用列表
         NamedOrderDict<FunctorDecl*>            functor_declares_;  // 函数定义表和DLL声明表的合并
-        NamedOrderDict<ConstDecl *>             consts_declares_;   // 常量定义索引表
+        NamedOrderDict<MacroDecl *>             consts_declares_;   // 宏定义索引表
         NamedOrderDict<ProgSetDecl *>           program_sets_;      // 程序集索引表
         NamedOrderDict<IdentDef *>              placeholders_;      // 占位符索引表
 
@@ -2083,13 +2083,13 @@ namespace rexlang {
         bool    addProgSet      (ProgSetDecl *  progSetDecl) const ;    // 添加程序集和程序集中的公开函数声明
         bool    addType         (TypeDecl *     typeDecl)    const ;    // 添加类型
         bool    addGlobalVari   (BaseVariDecl * variDecl)    const ;    // 添加全局变量
-        bool    addConstVal     (ConstDecl *    constDecl)   const ;    // 添加常量定义
+        bool    addMacroVal     (MacroDecl *    constDecl)   const ;    // 添加宏定义
 
         FunctorDecl *           getFunctor      (const StringRef &name) const ;
         ProgSetDecl *           getProgSet      (const StringRef &name) const ;
         TypeDecl *              getType         (const StringRef &name) const ;
         GlobalVariableDecl *    getGlobalVari   (const StringRef &name) const ;
-        ConstDecl *             getConst        (const StringRef &name) const ;
+        MacroDecl *             getConst        (const StringRef &name) const ;
 
         TypeDecl * getOrCreateType(IdentRefer *idRef) ; // 获取或创建类型预定义
 
