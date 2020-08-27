@@ -379,16 +379,22 @@ namespace rexlang {
         TranslateUnit *TU = ast_context_->getTranslateUnit();
         std::vector<rexLangParser::Program_set_fileContext *> prg_ctx_list = this->filterSources<rexLangParser::Program_set_fileContext>();
         for (rexLangParser::Program_set_fileContext *file_ctx : prg_ctx_list) {
+
             // 创建程序集
+
             rexLangParser::Prog_setContext *prog_set_context = file_ctx->prog_set();
             ProgSetDecl *prog_set_decl = CreateNode<ProgSetDecl>(prog_set_context, GetTextIfExist(prog_set_context->name));
             prog_set_decl->setComment(getTableComment(prog_set_context));
+
             // 创建变量
+
             for (rexLangParser::File_vari_declContext *file_vari_decl_context : prog_set_context->prog_set_varis) {
                 FileVariableDecl *file_variable_decl = GetFromCtxIfExist<FileVariableDecl *>(file_vari_decl_context);
                 prog_set_decl->appendFileStaticVari(file_variable_decl);
             }
+
             // 创建程序文件容器
+
             ProgramSetFile *program_set_file = CreateNode<ProgramSetFile>(file_ctx);
             program_set_file->appendProgramSetDecl(prog_set_decl);
             program_set_file->registResourceTo(TU);
@@ -532,18 +538,31 @@ namespace rexlang {
         for (rexLangParser::Program_set_fileContext *file_ctx : prg_ctx_list) {
             if (rexLangParser::Prog_setContext *prog_set_ctx = file_ctx->prog_set()) {
                 for (rexLangParser::Sub_programContext *prog_ctx : prog_set_ctx->functions) {
+
+                    // 取得声明部分
+
                     StringRef func_name = GetTextIfExist(prog_ctx->name).string_;
                     FunctionDecl *function_decl = rtti::dyn_cast<FunctionDecl>(TU->getFunctor(func_name));
                     assert(function_decl);
-                    // 添加函数定义
+
+                    ast_context_->pushScope(function_decl);
+
+                    // 添加函数局部变量
+
                     for (auto *local_vari_ctx : prog_ctx->local_vari) {
                         LocalVariableDecl* local_vari = GetFromCtxIfExist<LocalVariableDecl*>(local_vari_ctx);
                         function_decl->appendLocalVariable(local_vari);
                     }
+
+                    // 添加函数体
+
                     function_decl->setStatementBlock(GetFromCtxIfExist<StatementBlock*>(prog_ctx->statement_list()));
+                    ast_context_->popScope(function_decl);
+
                 }
             }
         }
+        return true;
     }
 
     // --- 语句块 ---------------------------------------------------------------------------------

@@ -24,19 +24,11 @@ namespace rexlang {
         setChild(type_);
     }
 
-    BaseVariDecl::BaseVariDecl(IdentRefer *type, IdentDef *name)
-        : TagDecl(name), type_name_(type) {
-    }
-
     /******************************************************************
      * ParameterDecl
      ******************************************************************/
 
     ParameterDecl::ParameterDecl(VariTypeDecl *type, IdentDef *name)
-        : BaseVariDecl(type, name) {
-    }
-
-    ParameterDecl::ParameterDecl(IdentRefer *type, IdentDef *name)
         : BaseVariDecl(type, name) {
     }
 
