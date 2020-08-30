@@ -158,10 +158,6 @@ namespace rexlang {
         return R;
     }
 
-    ExprUsage ResourceRefExpression::getSubExprAccessType(const Expression *expr) const {
-        return R;
-    }
-
     /********************************************************
      * 其它类型
      ********************************************************/

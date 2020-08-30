@@ -87,15 +87,6 @@ namespace rexlang {
 
     }
 
-    TypeDecl *ResourceRefExpression::CheckExpressionInternal() {
-
-        // TODO: 需要通过查找宏表来确定类型
-
-        assert(false);
-        return nullptr;
-
-    }
-
     TypeDecl *ValueOfDataSet::CheckExpressionInternal() {
 
         // 当前版本只允许字节集中的元素全为整数常量
@@ -106,10 +97,6 @@ namespace rexlang {
                     assert(false);
                     return nullptr;
                 }
-            } else if (ResourceRefExpression *resource_ref_expr = element->as<ResourceRefExpression>()) {
-
-                // TODO: 检查值
-
             } else {
                 assert(false);
                 return nullptr;

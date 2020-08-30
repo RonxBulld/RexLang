@@ -515,7 +515,6 @@ namespace rexlang {
 
     void Value                ::sematicAnalysisInternal(SemaContext &semaCtx) { Expression::sematicAnalysisInternal(semaCtx); }
     void FuncAddrExpression   ::sematicAnalysisInternal(SemaContext &semaCtx) { Expression::sematicAnalysisInternal(semaCtx); }
-    void ResourceRefExpression::sematicAnalysisInternal(SemaContext &semaCtx) { Expression::sematicAnalysisInternal(semaCtx); }
 
     void ValueOfDataSet ::sematicAnalysisInternal(SemaContext &semaCtx) { Value::sematicAnalysisInternal(semaCtx); }
     void ValueOfDatetime::sematicAnalysisInternal(SemaContext &semaCtx) { Value::sematicAnalysisInternal(semaCtx); }

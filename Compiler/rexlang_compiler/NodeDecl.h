@@ -85,7 +85,7 @@ namespace rexlang {
     // Value
 
     class Value;                class ValueOfDataSet;           class ValueOfDatetime;
-    class FuncAddrExpression;   class ResourceRefExpression;    class ValueOfBool;
+    class FuncAddrExpression;   class ValueOfBool;
     class ValueOfDecimal;       class ValueOfString;
 
     /**
@@ -117,7 +117,7 @@ namespace rexlang {
         kNTyHierarchyIdentifier, kNTyNameComponent, kNTyIdentRefer, kNTyArrayIndex,
         kNTyFunctionCall, kNTyUnaryExpression, kNTyBinaryExpression, kNTy_OperatorExpression,
 
-        kNTyTypeConvert, kNTyFuncAddrExpression, kNTyResourceRefExpression,
+        kNTyTypeConvert, kNTyFuncAddrExpression,
 
         kNTyValue,
         kNTyValueOfDataSet, kNTyValueOfDatetime, kNTyValueOfBool, kNTyValueOfDecimal,
@@ -1883,26 +1883,6 @@ namespace rexlang {
 
     };
 
-    class ResourceRefExpression : public Expression {
-    private:
-        TString resource_name_;
-
-    protected:
-        TypeDecl *  CheckExpressionInternal     () override ;
-        TypeDecl *  getExpressionTypeInternal   () const override ;
-
-    public:
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
-
-    public:
-        void setResourceName(const TString &resourceName) ;
-        ExprUsage getSubExprAccessType(const Expression *expr) const override ;
-
-    public:
-        static const NodeType GetClassId () ;
-
-    };
-
     class FuncAddrExpression : public Expression {
     private:
         FunctorDecl *functor_declare_ = nullptr;
@@ -2059,9 +2039,8 @@ namespace rexlang {
         NamedOrderDict<GlobalVariableDecl *>    global_variables_;  // 全局变量索引表
         std::set<TString>                       libraries_list_;    // 支持库引用列表
         NamedOrderDict<FunctorDecl*>            functor_declares_;  // 函数定义表和DLL声明表的合并
-        NamedOrderDict<MacroDecl *>             consts_declares_;   // 宏定义索引表
+        NamedOrderDict<MacroDecl *>             macros_declares_;   // 宏定义索引表
         NamedOrderDict<ProgSetDecl *>           program_sets_;      // 程序集索引表
-        NamedOrderDict<IdentDef *>              placeholders_;      // 占位符索引表
 
         /****************************************************************/
 
@@ -2069,7 +2048,7 @@ namespace rexlang {
         ordered_map<EnumOfBuiltinType, BuiltinTypeDecl *>   builtin_type_map_;      // 内建类型索引
 
     private:
-        void setMainEnrty(FunctorDecl *functorDecl) ;
+        void setMainEnrty(FunctorDecl *functorDecl) ;   // 设置主入口函数
 
     public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
@@ -2089,7 +2068,7 @@ namespace rexlang {
         ProgSetDecl *           getProgSet      (const StringRef &name) const ;
         TypeDecl *              getType         (const StringRef &name) const ;
         GlobalVariableDecl *    getGlobalVari   (const StringRef &name) const ;
-        MacroDecl *             getConst        (const StringRef &name) const ;
+        MacroDecl *             getMacro        (const StringRef &name) const ;
 
         TypeDecl * getOrCreateType(IdentRefer *idRef) ; // 获取或创建类型预定义
 

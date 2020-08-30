@@ -73,11 +73,6 @@ namespace rexlang {
         }
     }
 
-    TypeDecl *ResourceRefExpression::getExpressionTypeInternal() const {
-        assert(false);
-        return nullptr;
-    }
-
     TypeDecl *FuncAddrExpression::getExpressionTypeInternal() const { return getTranslateUnit()->getFuncPtrTy(); }
     TypeDecl *ValueOfDataSet    ::getExpressionTypeInternal() const { return getTranslateUnit()->getDataSetTy(); }
     TypeDecl *ValueOfDatetime   ::getExpressionTypeInternal() const { return getTranslateUnit()->getDatetimeTy(); }

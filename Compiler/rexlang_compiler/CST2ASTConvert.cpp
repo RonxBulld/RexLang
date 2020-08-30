@@ -992,10 +992,10 @@ namespace rexlang {
     // --- 常量表达式 ---------------------------------------------------------------------------------
 
     antlrcpp::Any CST2ASTConvert::visitMacro_value(rexLangParser::Macro_valueContext *context) {
-        // TODO: 目前尚未对宏表有全面支持
-        ResourceRefExpression* resource_ref_expression = CreateNode<ResourceRefExpression>(context);
-        resource_ref_expression->setResourceName(GetTextIfExist(context->IDENTIFIER()->getSymbol()));
-        return NodeWarp(resource_ref_expression);
+        TString reference_id = GetTextIfExist(context->IDENTIFIER()->getSymbol());
+        MacroDecl *macro_decl = ast_context_->getTranslateUnit()->getMacro(reference_id.string_);
+        assert(macro_decl);
+        return NodeWarp(macro_decl->getValue());
     }
 
     antlrcpp::Any CST2ASTConvert::visitFunc_ptr(rexLangParser::Func_ptrContext *context) {

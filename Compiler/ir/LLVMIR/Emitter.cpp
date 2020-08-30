@@ -1506,9 +1506,6 @@ namespace rexlang {
             return Emit(value_of_datetime);
         } else if (FuncAddrExpression *func_addr_expression = value->as<FuncAddrExpression>()) {
             return Emit(func_addr_expression);
-        } else if (ResourceRefExpression *resource_ref_expr = value->as<ResourceRefExpression>()) {
-            assert(false);
-            return nullptr;
         } else if (ValueOfBool *value_of_bool = value->as<ValueOfBool>()) {
             return Emit(value_of_bool);
         } else if (ValueOfDecimal *value_of_decimal = value->as<ValueOfDecimal>()) {

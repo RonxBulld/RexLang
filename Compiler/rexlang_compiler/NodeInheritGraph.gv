@@ -62,7 +62,6 @@ digraph G {
     "NameComponent" -> "Expression";
     "TypeConvert" -> "Expression";
     "_OperatorExpression" -> "Expression";
-    "ResourceRefExpression" -> "Expression";
     "FuncAddrExpression" -> "Expression";
     "Value" -> "Expression";
     "IdentRefer" -> "NameComponent";
@@ -1089,20 +1088,6 @@ digraph G {
             <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- lhs_ : Expression *</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- rhs_ : Expression *</td></tr>
-        </table>>
-    ];
-    "ResourceRefExpression"
-    [
-        shape=none
-        label=<<table border="0" cellspacing="0">
-            <tr><td port="head" border="1" bgcolor="pink">ResourceRefExpression</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">*^ CheckExpressionInternal(...) -&gt; TypeDecl *</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">*^ getExpressionTypeInternal(...) -&gt; TypeDecl *</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+^ sematicAnalysisInternal(...) -&gt; void</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ setResourceName(...) -&gt; void</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+^ getSubExprAccessType(...) -&gt; ExprUsage</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
-            <tr><td border="1" bgcolor="AntiqueWhite">- resource_name_ : TString</td></tr>
         </table>>
     ];
     "FuncAddrExpression"

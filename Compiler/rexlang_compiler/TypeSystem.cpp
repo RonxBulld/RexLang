@@ -71,7 +71,6 @@ namespace rexlang {
     const NodeType Value                ::GetClassId() { return NodeType::kNTyValue; }
     const NodeType ValueOfDataSet       ::GetClassId() { return NodeType::kNTyValueOfDataSet; }
     const NodeType ValueOfDatetime      ::GetClassId() { return NodeType::kNTyValueOfDatetime; }
-    const NodeType ResourceRefExpression::GetClassId() { return NodeType::kNTyResourceRefExpression; }
     const NodeType FuncAddrExpression   ::GetClassId() { return NodeType::kNTyFuncAddrExpression; }
     const NodeType ValueOfBool          ::GetClassId() { return NodeType::kNTyValueOfBool; }
     const NodeType ValueOfDecimal       ::GetClassId() { return NodeType::kNTyValueOfDecimal; }

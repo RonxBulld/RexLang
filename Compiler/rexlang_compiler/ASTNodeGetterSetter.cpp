@@ -477,12 +477,6 @@ namespace rexlang {
     void ValueOfDatetime::setTime(time_t time) { time_ = time; }
 
     /***************************************************
-     * ResourceRefExpression
-     ***************************************************/
-
-    void ResourceRefExpression::setResourceName(const TString &resourceName) { resource_name_ = resourceName; }
-
-    /***************************************************
      * FuncAddrExpression
      ***************************************************/
 
