@@ -486,14 +486,14 @@ namespace rexlang {
     }
 
     void UnaryExpression::sematicAnalysisInternal(SemaContext &semaCtx) {
-        _OperatorExpression::sematicAnalysisInternal(semaCtx);
+        OperatedExpression::sematicAnalysisInternal(semaCtx);
     }
 
     void BinaryExpression::sematicAnalysisInternal(SemaContext &semaCtx) {
-        _OperatorExpression::sematicAnalysisInternal(semaCtx);
+        OperatedExpression::sematicAnalysisInternal(semaCtx);
     }
 
-    void _OperatorExpression::sematicAnalysisInternal(SemaContext &semaCtx) {
+    void OperatedExpression::sematicAnalysisInternal(SemaContext &semaCtx) {
         Expression::sematicAnalysisInternal(semaCtx);
     }
 

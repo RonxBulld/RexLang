@@ -20,7 +20,6 @@ SET(Sematic-Src
         SematicAnalysisUtils.cpp
         SematicAnalysisTypeAssert.cpp
         Sema.cpp
-        RegistResource.cpp
         SemaContext.cpp
         SemaContext.h
         CompleteArguments.cpp)

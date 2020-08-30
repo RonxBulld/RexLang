@@ -19,20 +19,21 @@
 namespace rexlang {
 
     // 有序字典
-    template <typename _Key, typename _Val>
-    class ordered_map : public tsl::ordered_map<_Key, _Val> {
+    template <typename Key, typename Val>
+    class ordered_map : public tsl::ordered_map<Key, Val> {
     public:
-        ordered_map() {}
-        ordered_map(const ordered_map<_Key, _Val> &other) {
+        ordered_map() = default;
+        ordered_map(const ordered_map<Key, Val> &other) {
             *this = other;
         }
-        ~ordered_map() {}
-        ordered_map<_Key, _Val> &operator=(const ordered_map<_Key, _Val> &other) = default;
+        ~ordered_map() = default;
+
+        ordered_map<Key, Val> &operator=(const ordered_map<Key, Val> &other) = default;
     };
 
     // 命名有序字典
-    template <typename _Val>
-    using NamedOrderDict = ordered_map<StringRef, _Val>;
+    template <typename Val>
+    using NamedOrderDict = ordered_map<StringRef, Val>;
 
     class ASTContext;
     class SemaContext;
@@ -79,7 +80,7 @@ namespace rexlang {
 
     class Expression;           class HierarchyIdentifier;      class NameComponent;
     class IdentRefer;           class ArrayIndex;               class FunctionCall;
-    class UnaryExpression;      class BinaryExpression;         class _OperatorExpression;
+    class UnaryExpression;      class BinaryExpression;         class OperatedExpression;
     class TypeConvert;
 
     // Value
@@ -115,7 +116,7 @@ namespace rexlang {
 
         kNTyExpression,
         kNTyHierarchyIdentifier, kNTyNameComponent, kNTyIdentRefer, kNTyArrayIndex,
-        kNTyFunctionCall, kNTyUnaryExpression, kNTyBinaryExpression, kNTy_OperatorExpression,
+        kNTyFunctionCall, kNTyUnaryExpression, kNTyBinaryExpression, kNTyOperatorExpression,
 
         kNTyTypeConvert, kNTyFuncAddrExpression,
 
@@ -280,6 +281,15 @@ namespace rexlang {
      */
     class SourceFile : public Node {
     public:
+        virtual FunctorDecl *        getFunctor   (const StringRef &name) const ; // 在文件中查找函数原型声明
+        virtual ProgSetDecl *        getProgSet   (const StringRef &name) const ; // 在文件中查找程序集和程序集中的公开函数声明
+        virtual TypeDecl *           getType      (const StringRef &name) const ; // 在文件中查找类型
+        virtual GlobalVariableDecl * getGlobalVari(const StringRef &name) const ; // 在文件中查找全局变量
+        virtual MacroDecl *          getMacro     (const StringRef &name) const ; // 在文件中查找宏定义
+
+        virtual void registResourceTo   (TranslateUnit *translateUnit) ;   // 将资源注册到翻译单元
+
+    public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
         virtual bool isProgramSetFile    () const ;
@@ -287,8 +297,6 @@ namespace rexlang {
         virtual bool isDataStructureFile () const ;
         virtual bool isAPIDeclareFile    () const ;
         virtual bool isMacroDeclareFile  () const ;
-
-        virtual void registResourceTo   (TranslateUnit *translateUnit) const = 0;   // 将资源注册到翻译单元
 
     public:
         static const NodeType GetClassId () ;
@@ -308,7 +316,9 @@ namespace rexlang {
 
     public:
         bool isProgramSetFile() const override ;
-        void registResourceTo(TranslateUnit *translateUnit) const override ;
+
+        FunctorDecl *getFunctor(const StringRef &name) const override ;
+        ProgSetDecl *getProgSet(const StringRef &name) const override ;
 
     public:
         void appendReferenceLibName (const TString &libraryName) ;
@@ -338,10 +348,10 @@ namespace rexlang {
     public:
         void                    appendGlobalVariableDecl(GlobalVariableDecl *globalVariableDecl) ;
         const GlobalVariMapTy & getGlobalVariMap        () const ;
+        GlobalVariableDecl *    getGlobalVari           (const StringRef &name) const override ;
 
     public:
         bool isGlobalVariableFile() const override ;
-        void registResourceTo(TranslateUnit *translateUnit) const override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -358,18 +368,18 @@ namespace rexlang {
         StructDeclMapTy structure_decl_map_;
 
     public:
-        DataStructureFile() ;
+        DataStructureFile() = default ;
 
     public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
-        void                    appendStructureDecl(StructureDecl *structureDecl) ;
-        const StructDeclMapTy & getTypes() const ;
+        void                    appendStructureDecl (StructureDecl *structureDecl) ;
+        const StructDeclMapTy & getTypes            () const ;
+        TypeDecl *              getType             (const StringRef &name) const override ;
 
     public:
         bool isDataStructureFile() const override ;
-        void registResourceTo(TranslateUnit *translateUnit) const override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -390,11 +400,11 @@ namespace rexlang {
 
     public:
         void                appendAPIDeclare(APICommandDecl *apiCommandDecl) ;
-        const DllDefMapTy & getAPIDefMap () const ;
+        const DllDefMapTy & getAPIDefMap    () const ;
+        FunctorDecl *       getFunctor      (const StringRef &name) const override ;
 
     public:
         bool isAPIDeclareFile() const override ;
-        void registResourceTo(TranslateUnit *translateUnit) const override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -416,10 +426,10 @@ namespace rexlang {
     public:
         void                    appendMacroDeclare(MacroDecl *macroDecl) ;
         const MacroDeclMapTy &  getMacroDeclMap   () const ;
+        MacroDecl *             getMacro          (const StringRef &name) const override ;
 
     public:
         bool isMacroDeclareFile() const override ;
-        void registResourceTo(TranslateUnit *translateUnit) const override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -452,6 +462,7 @@ namespace rexlang {
 
     public:
         const char *name() const ;
+        const StringRef &id() const ;
 
         TagDecl *decl() const ;
 
@@ -509,8 +520,9 @@ namespace rexlang {
         explicit TagDecl(IdentDef *name) ;
 
     public:
-        IdentDef *      getName    () const         ;
-        const char *    getNameStr () const         ;
+        IdentDef *          getName    () const ;
+        const StringRef &   getNameRef () const ;
+        const char *        getNameStr () const ;
 
         void            setComment      (const TString &comment) ;
         const TString & getComment      () const                 ;
@@ -1811,7 +1823,7 @@ namespace rexlang {
     /*
      * 有运算符的表达式
      */
-    class _OperatorExpression : public Expression {
+    class OperatedExpression : public Expression {
     private:
         OperatorType operator_type_ = OperatorType(OperatorType::Opt::kOptNone);
         /*
@@ -1822,7 +1834,7 @@ namespace rexlang {
         TString operator_;
 
     public:
-        _OperatorExpression(const OperatorType &opt) ;
+        OperatedExpression(const OperatorType &opt) ;
 
     public:
         void setOperatorText            (const TString &            operatorText) ;
@@ -1838,7 +1850,7 @@ namespace rexlang {
 
     };
 
-    class UnaryExpression : public _OperatorExpression {
+    class UnaryExpression : public OperatedExpression {
     private:
         Expression *operand_value_ = nullptr;
 
@@ -1858,7 +1870,7 @@ namespace rexlang {
 
     };
 
-    class BinaryExpression : public _OperatorExpression {
+    class BinaryExpression : public OperatedExpression {
     private:
         Expression *lhs_ = nullptr;
         Expression *rhs_ = nullptr;
@@ -2032,20 +2044,10 @@ namespace rexlang {
     private:
         unsigned int                edition_ = 0;   // 语法版本号
         std::vector<SourceFile *>   source_files_;  // 资源文件列表（包括全局变量定义、数据结构定义、类模块定义、DLL接口定义、子程序集合、宏资源）
+        FunctorDecl *               main_entry_ = nullptr;  // 程序入口
 
-        /********************** 符号表需要用到的公共信息 **********************/
-
-        NamedOrderDict<TypeDecl *>              global_type_;       // 全局类型索引表
-        NamedOrderDict<GlobalVariableDecl *>    global_variables_;  // 全局变量索引表
-        std::set<TString>                       libraries_list_;    // 支持库引用列表
-        NamedOrderDict<FunctorDecl*>            functor_declares_;  // 函数定义表和DLL声明表的合并
-        NamedOrderDict<MacroDecl *>             macros_declares_;   // 宏定义索引表
-        NamedOrderDict<ProgSetDecl *>           program_sets_;      // 程序集索引表
-
-        /****************************************************************/
-
-        FunctorDecl *                                       main_entry_ = nullptr;  // 程序入口
-        ordered_map<EnumOfBuiltinType, BuiltinTypeDecl *>   builtin_type_map_;      // 内建类型索引
+        NamedOrderDict<BuiltinTypeDecl *>                   named_builtin_type_map_;    // 内建类型命名索引
+        ordered_map<EnumOfBuiltinType, BuiltinTypeDecl *>   builtin_type_map_;          // 内建类型索引
 
     private:
         void setMainEnrty(FunctorDecl *functorDecl) ;   // 设置主入口函数
@@ -2058,25 +2060,16 @@ namespace rexlang {
         bool    merge(TranslateUnit *other) ;   // 兼容性检查、冲突检查，并合并其它翻译单元
 
     public:
-        bool    addFunctor      (FunctorDecl *  functorDecl) const ;    // 添加函数原型声明
-        bool    addProgSet      (ProgSetDecl *  progSetDecl) const ;    // 添加程序集和程序集中的公开函数声明
-        bool    addType         (TypeDecl *     typeDecl)    const ;    // 添加类型
-        bool    addGlobalVari   (BaseVariDecl * variDecl)    const ;    // 添加全局变量
-        bool    addMacroVal     (MacroDecl *    constDecl)   const ;    // 添加宏定义
-
-        FunctorDecl *           getFunctor      (const StringRef &name) const ;
-        ProgSetDecl *           getProgSet      (const StringRef &name) const ;
-        TypeDecl *              getType         (const StringRef &name) const ;
-        GlobalVariableDecl *    getGlobalVari   (const StringRef &name) const ;
-        MacroDecl *             getMacro        (const StringRef &name) const ;
-
-        TypeDecl * getOrCreateType(IdentRefer *idRef) ; // 获取或创建类型预定义
+        FunctorDecl *           getFunctor      (const StringRef &name) const ; // 在文件清单中查找函数原型声明
+        ProgSetDecl *           getProgSet      (const StringRef &name) const ; // 在文件清单中查找程序集和程序集中的公开函数声明
+        TypeDecl *              getType         (const StringRef &name) const ; // 在文件清单中查找类型
+        GlobalVariableDecl *    getGlobalVari   (const StringRef &name) const ; // 在文件清单中查找全局变量
+        MacroDecl *             getMacro        (const StringRef &name) const ; // 在文件清单中查找宏定义
 
     public:
-        void     setSourceEdition(unsigned edition) { edition_ = edition; }
-        unsigned getSourceEdition() const           { return edition_; }
+        void     setSourceEdition(unsigned edition) ;
+        unsigned getSourceEdition() const           ;
 
-        const std::set<TString> &getReferenceLibraries () const ;
         FunctorDecl *getMainEntry() const ;
 
     private:

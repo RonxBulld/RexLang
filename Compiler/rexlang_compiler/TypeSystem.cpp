@@ -65,7 +65,7 @@ namespace rexlang {
     const NodeType ArrayIndex           ::GetClassId() { return NodeType::kNTyArrayIndex; }
     const NodeType FunctionCall         ::GetClassId() { return NodeType::kNTyFunctionCall; }
     const NodeType TypeConvert          ::GetClassId() { return NodeType::kNTyTypeConvert; }
-    const NodeType _OperatorExpression  ::GetClassId() { return NodeType::kNTy_OperatorExpression; }
+    const NodeType OperatedExpression   ::GetClassId() { return NodeType::kNTyOperatorExpression; }
     const NodeType UnaryExpression      ::GetClassId() { return NodeType::kNTyUnaryExpression; }
     const NodeType BinaryExpression     ::GetClassId() { return NodeType::kNTyBinaryExpression; }
     const NodeType Value                ::GetClassId() { return NodeType::kNTyValue; }
@@ -232,8 +232,8 @@ namespace rexlang {
     BuiltinDoubleType *   TranslateUnit::getDoubleTy   () const { BuiltinTypeDecl *BT = builtin_type_map_.at(BuiltinDoubleType  ::BuiltinType()); assert(BT); return (BuiltinDoubleType *  ) BT; }
 
     bool TranslateUnit::RegistBuiltinType(BuiltinTypeDecl *builtinTypeDecl) {
-        global_type_[StringPool::Create(builtinTypeDecl->GetTypeText())] = builtinTypeDecl;
-        builtin_type_map_[builtinTypeDecl->GetBuiltinType()] = builtinTypeDecl;
+        named_builtin_type_map_[StringPool::Create(builtinTypeDecl->GetTypeText())] = builtinTypeDecl;
+        builtin_type_map_      [builtinTypeDecl->GetBuiltinType()]                  = builtinTypeDecl;
         return true;
     }
 

@@ -7,6 +7,7 @@
 // Created by rex on 2020/7/18.
 //
 
+#include <cstring>
 #include "NodeDecl.h"
 #include "utilities/Str2Attr.h"
 
@@ -38,15 +39,67 @@ namespace rexlang {
      * TranslateUnit
      ***************************************************/
 
-    const std::set<TString> &TranslateUnit::getReferenceLibraries() const {
-        return libraries_list_;
-    }
-
     void TranslateUnit::appendSourceFile(rexlang::SourceFile *sourceFile) {
         sourceFile->registResourceTo(this);
         source_files_.emplace_back(sourceFile);
         setChild(sourceFile);
     }
+
+    void     TranslateUnit::setSourceEdition(unsigned edition) { edition_ = edition; }
+    unsigned TranslateUnit::getSourceEdition() const           { return edition_; }
+
+    void         TranslateUnit::setMainEnrty(FunctorDecl *functorDecl) { main_entry_ = functorDecl; }
+    FunctorDecl *TranslateUnit::getMainEntry() const                   { return main_entry_; }
+
+    template <typename Ty>
+    Ty *getAnyInSources(const StringRef &name, const std::vector<SourceFile *> &sourceFiles, Ty *(SourceFile::*fn)(const StringRef &) const) {
+        for (SourceFile *source_file : sourceFiles) {
+            if (source_file) {
+                if (Ty *entity = (source_file->*fn)(name)) {
+                    return entity;
+                }
+            }
+        }
+        return nullptr;
+    }
+
+    FunctorDecl *TranslateUnit::getFunctor(const StringRef &name) const {
+        return getAnyInSources(name, source_files_, &SourceFile::getFunctor);
+    }
+
+    ProgSetDecl *TranslateUnit::getProgSet(const StringRef &name) const {
+        return getAnyInSources(name, source_files_, &SourceFile::getProgSet);
+    }
+
+    TypeDecl *TranslateUnit::getType(const StringRef &name) const {
+        TypeDecl *type_decl = getAnyInSources(name, source_files_, &SourceFile::getType);
+        if (type_decl) { return type_decl; }
+        auto found_builtin = named_builtin_type_map_.find(name);
+        if (found_builtin != named_builtin_type_map_.end()) { return found_builtin->second; }
+        return nullptr;
+    }
+
+    GlobalVariableDecl *TranslateUnit::getGlobalVari(const StringRef &name) const {
+        return getAnyInSources(name, source_files_, &SourceFile::getGlobalVari);
+    }
+
+    MacroDecl *TranslateUnit::getMacro(const StringRef &name) const {
+        return getAnyInSources(name, source_files_, &SourceFile::getMacro);
+    }
+
+    /***************************************************
+     * SourceFile
+     ***************************************************/
+
+    void SourceFile::registResourceTo(TranslateUnit *translateUnit) {
+        translateUnit->appendSourceFile(this);
+    }
+
+    FunctorDecl *        SourceFile::getFunctor   (const StringRef &name) const { return nullptr; }
+    ProgSetDecl *        SourceFile::getProgSet   (const StringRef &name) const { return nullptr; }
+    TypeDecl *           SourceFile::getType      (const StringRef &name) const { return nullptr; }
+    GlobalVariableDecl * SourceFile::getGlobalVari(const StringRef &name) const { return nullptr; }
+    MacroDecl *          SourceFile::getMacro     (const StringRef &name) const { return nullptr; }
 
     /***************************************************
      * ProgramSetFile
@@ -65,6 +118,22 @@ namespace rexlang {
     ProgSetDecl *                ProgramSetFile::getProgramSetDecl() const { return program_set_declares_; }
     const std::vector<TString> & ProgramSetFile::getRefLibs       () const { return libraries_; }
 
+    FunctorDecl *ProgramSetFile::getFunctor(const StringRef &name) const {
+        if (program_set_declares_) {
+            return program_set_declares_->getFunctionDecl(name);
+        } else {
+            return nullptr;
+        }
+    }
+    ProgSetDecl *ProgramSetFile::getProgSet(const StringRef &name) const {
+        if (program_set_declares_) {
+            if (strcmp(program_set_declares_->getNameStr(), name.c_str()) == 0) {
+                return program_set_declares_;
+            }
+        }
+        return nullptr;
+    }
+
     /***************************************************
      * DataStructureFile
      ***************************************************/
@@ -75,6 +144,15 @@ namespace rexlang {
     }
 
     const DataStructureFile::StructDeclMapTy & DataStructureFile::getTypes() const { return structure_decl_map_; }
+
+    TypeDecl *DataStructureFile::getType(const StringRef &name) const {
+        auto found = structure_decl_map_.find(name);
+        if (found != structure_decl_map_.end()) {
+            return found->second;
+        } else {
+            return nullptr;
+        }
+    }
 
     /***************************************************
      * GlobalVariableFile
@@ -87,6 +165,15 @@ namespace rexlang {
 
     const GlobalVariableFile::GlobalVariMapTy &GlobalVariableFile::getGlobalVariMap() const { return global_variable_map_; }
 
+    GlobalVariableDecl *GlobalVariableFile::getGlobalVari(const StringRef &name) const {
+        auto found = global_variable_map_.find(name);
+        if (found != global_variable_map_.end()) {
+            return found->second;
+        } else {
+            return nullptr;
+        }
+    }
+
     /***************************************************
      * APIDeclareFile
      ***************************************************/
@@ -98,6 +185,15 @@ namespace rexlang {
 
     const APIDeclareFile::DllDefMapTy & APIDeclareFile::getAPIDefMap () const { return api_declares_; }
 
+    FunctorDecl *APIDeclareFile::getFunctor(const StringRef &name) const {
+        auto found = api_declares_.find(name);
+        if (found != api_declares_.end()) {
+            return found->second;
+        } else {
+            return nullptr;
+        }
+    }
+
     /***************************************************
      * MacroDeclareFile
      ***************************************************/
@@ -108,6 +204,15 @@ namespace rexlang {
     }
 
     const MacroDeclareFile::MacroDeclMapTy & MacroDeclareFile::getMacroDeclMap () const { return macros_declares_; }
+
+    MacroDecl *MacroDeclareFile::getMacro(const StringRef &name) const {
+        auto found = macros_declares_.find(name);
+        if (found != macros_declares_.end()) {
+            return found->second;
+        } else {
+            return nullptr;
+        }
+    }
 
     /***************************************************
      * MacroDecl
@@ -141,12 +246,13 @@ namespace rexlang {
      * TagDecl
      ***************************************************/
 
-    IdentDef *      TagDecl::getName    () const    { return name_; }
-    const char *    TagDecl::getNameStr () const    { return name_->name(); }
+    IdentDef *          TagDecl::getName    () const    { return name_; }
+    const StringRef &   TagDecl::getNameRef () const    { return name_->id(); }
+    const char *        TagDecl::getNameStr () const    { return name_->name(); }
 
-    void                TagDecl::setComment      (const TString &comment)   { comment_ = comment; }
-    const TString &     TagDecl::getComment      () const                   { return comment_; }
-    const char *        TagDecl::getCommentStr   () const                   { return comment_.string_.c_str(); }
+    void                TagDecl::setComment     (const TString &comment)   { comment_ = comment; }
+    const TString &     TagDecl::getComment     () const                   { return comment_; }
+    const char *        TagDecl::getCommentStr  () const                   { return comment_.string_.c_str(); }
 
     std::set<IdentRefer *> &TagDecl::getReferenceTable()    { return name_->getReferenceTable(); }
 
@@ -446,10 +552,10 @@ namespace rexlang {
      * _OperatorExpression
      ***************************************************/
 
-    void                 _OperatorExpression::setOperatorText(const TString & operatorText) { operator_      = operatorText; }
-    void                 _OperatorExpression::setOperator    (const OperatorType &     opt) { operator_type_ = opt; }
-    void                 _OperatorExpression::setOperator    (const OperatorType::Opt &opt) { operator_type_ = OperatorType(opt); }
-    const OperatorType & _OperatorExpression::getOperator    () const                       { return operator_type_; }
+    void                 OperatedExpression::setOperatorText(const TString & operatorText) { operator_      = operatorText; }
+    void                 OperatedExpression::setOperator    (const OperatorType &     opt) { operator_type_ = opt; }
+    void                 OperatedExpression::setOperator    (const OperatorType::Opt &opt) { operator_type_ = OperatorType(opt); }
+    const OperatorType & OperatedExpression::getOperator    () const                       { return operator_type_; }
 
     /***************************************************
      * BinaryExpression
