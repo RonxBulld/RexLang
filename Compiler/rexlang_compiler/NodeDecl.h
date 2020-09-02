@@ -1107,16 +1107,19 @@ namespace rexlang {
 
     };
 
-    /*
+    /**
      * 数组类型
      * 该节点不会在语法分析阶段产生，在语义分析阶段根据 VariableDecl 生成
      */
     class ArrayDecl : public VariTypeDecl {
     private:
         // 元素类型
-        TypeDecl * base_type_ = nullptr;
+        TypeDecl *base_type_ = nullptr;
         // 数组维度定义
         std::vector<size_t> dimensions_;
+
+    public:
+        ArrayDecl(TypeDecl *baseType, const std::vector<size_t> &dimensions) ;
 
     public:
         bool                isIndexable             () const override ;
@@ -1129,7 +1132,7 @@ namespace rexlang {
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
-        static ArrayDecl *  get (TypeDecl *  elementType, const std::vector<size_t> &dimensions) ;
+        static ArrayDecl *get(TypeDecl *elementType, const std::vector<size_t> &dimensions) ;
 
     public:
         static const NodeType GetClassId () ;

@@ -404,7 +404,7 @@ namespace rexlang {
         setChild(element);
     }
 
-    BaseVariDecl *StructureDecl::getElementWithIndex (size_t idx) {
+    BaseVariDecl *StructureDecl::getElementWithIndex(size_t idx) {
         if (idx < members_.size()) {
             return (members_.begin() + idx)->second;
         } else {
@@ -412,7 +412,7 @@ namespace rexlang {
             return nullptr;
         }
     }
-    BaseVariDecl *StructureDecl::getElementWithName  (const StringRef &variable_name) const {
+    BaseVariDecl *StructureDecl::getElementWithName(const StringRef &variable_name) const {
         auto found = members_.find(variable_name);
         if (found != members_.end()) {
             return found->second;

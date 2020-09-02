@@ -22,4 +22,12 @@ namespace rexlang {
         return ArrayDecl::get(this, dims);
     }
 
+    /*===--------------------------------===*
+     * ArrayDecl
+     */
+
+    ArrayDecl *ArrayDecl::get(TypeDecl *elementType, const std::vector<size_t> &dimensions) {
+        return CreateNode<ArrayDecl>(elementType->getAstContext(), elementType, dimensions);
+    }
+
 }

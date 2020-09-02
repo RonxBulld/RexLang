@@ -78,4 +78,13 @@ namespace rexlang {
 
     StructureDecl::StructureDecl(IdentDef *name) : VariTypeDecl(name) {}
 
+    /******************************************************************
+     * ArrayDecl
+     ******************************************************************/
+
+    ArrayDecl::ArrayDecl(TypeDecl *baseType, const std::vector<size_t> &dimensions)
+            : VariTypeDecl(CreateNode<IdentDef>(baseType->getAstContext(), "")),
+              base_type_(baseType), dimensions_(dimensions) {
+    }
+
 }
