@@ -105,7 +105,7 @@ namespace rexlang {
         kNTyIdentDef, kNTyTagDecl, kNTyVariableDecl, kNTyBaseVariDecl,
         kNTyGlobalVariableDecl, kNTyParameterDecl, kNTyMemberVariableDecl, kNTyFileVariableDecl,
         kNTyLocalVariableDecl, kNTyTypeDecl, kNTyVariTypeDecl, kNTyBuiltinTypeDecl,
-        kNTyArrayDecl, kNTyMacroDecl, kNTyStructureDecl, kNTReferenceType,
+        kNTyArrayDecl, kNTyMacroDecl, kNTyStructureDecl, kNTyReferenceType,
         kNTyFunctorDecl, kNTyFunctionDecl, kNTyProgSetDecl, kNTyAPICommandDecl,
 
         kNTyStatement,
@@ -587,7 +587,8 @@ namespace rexlang {
      */
     class ParameterDecl : public BaseVariDecl {
     private:
-        bool is_nullable_  = false; // 是否可空
+        bool is_variable_param_ = false; // 是否可变
+        bool is_nullable_       = false; // 是否可空
 
     public:
         ParameterDecl(VariTypeDecl *type, IdentDef *name) ;
@@ -597,13 +598,13 @@ namespace rexlang {
 
     public:
         void applyAttribute (const TString &attribute) override ;
-        bool isDynamicParam () const ;
-        void enableReference(bool enable = true) ;
+
+        void markAsVariParam () ;
+        bool isVariParam     () const ;
 
     public:
         int      getParamIndex  () const ;
         bool     isNullable     () const ;
-        bool     isArray        () const ;
 
         // 判断该参数是否应该以引用的方式传递，如果是数组、字符串、字节集、自定义类型或 is_reference 为真时则为真
         bool     shouldBeReference  () const ;
@@ -687,6 +688,9 @@ namespace rexlang {
      */
     class FileVariableDecl : public VariableDecl {
     public:
+        FileVariableDecl(VariTypeDecl *type, IdentDef *name) ;
+
+    public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
@@ -699,6 +703,9 @@ namespace rexlang {
     class LocalVariableDecl : public VariableDecl {
     private:
         bool is_static_ = false;    // 是否为静态
+
+    public:
+        LocalVariableDecl(VariTypeDecl *type, IdentDef *name) ;
 
     public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
@@ -716,10 +723,10 @@ namespace rexlang {
      */
     class TypeDecl : public TagDecl {
     public:
-        TypeDecl(IdentDef *name) ;
+        explicit TypeDecl(IdentDef *name) ;
 
     public:
-        TypeDecl* getType () const override ;
+        TypeDecl *getType () const override ;
 
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
@@ -771,12 +778,15 @@ namespace rexlang {
 
     };
 
+    /**
+     * 变量类型定义
+     */
     class VariTypeDecl : public TypeDecl {
     public:
-        VariTypeDecl(IdentDef *name);
+        explicit VariTypeDecl(IdentDef *name);
 
     public:
-        ArrayDecl *getArrayToWithDimStr(const std::vector<size_t> dims) ;
+        ArrayDecl *getArrayToWithDimStr(const std::vector<size_t> &dims) ;
 
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
@@ -791,15 +801,12 @@ namespace rexlang {
     class ReferenceType final : public VariTypeDecl {
         friend class Node;
     private:
-        IdentRefer * type_name_    = nullptr;
         TypeDecl *   pointee_type_ = nullptr;
 
     private:
-        ReferenceType(IdentRefer * typeName) ;
-        ReferenceType(TypeDecl *   pointeeType) ;
+        explicit ReferenceType(TypeDecl *   pointeeType) ;
 
     public:
-        static ReferenceType *get(IdentRefer * typeName) ;
         static ReferenceType *get(TypeDecl *   pointeeType) ;
 
     public:
@@ -813,7 +820,7 @@ namespace rexlang {
 
     };
 
-    /*
+    /**
      * 内置类型定义
      */
     class BuiltinTypeDecl : public VariTypeDecl {
@@ -837,6 +844,9 @@ namespace rexlang {
         static const NodeType GetClassId () ;
     };
 
+    /**
+     * 内置类型-空类型
+     */
     class BuiltinVoidType : public BuiltinTypeDecl {
     public:
         BuiltinVoidType() ;
@@ -850,6 +860,9 @@ namespace rexlang {
         static const char *         TypeText        () ;
     };
 
+    /**
+     * 内置类型-通用型
+     */
     class BuiltinCommonType : public BuiltinTypeDecl {
     public:
         BuiltinCommonType() ;
@@ -863,6 +876,9 @@ namespace rexlang {
         static const char *         TypeText        () ;
     };
 
+    /**
+     * 内置类型-字符型
+     */
     class BuiltinCharType : public BuiltinTypeDecl {
     public:
         BuiltinCharType() ;
@@ -878,6 +894,9 @@ namespace rexlang {
         static const char *         TypeText        () ;
     };
 
+    /**
+     * 内置类型-整数型
+     */
     class BuiltinIntegerType : public BuiltinTypeDecl {
     public:
         BuiltinIntegerType() ;
@@ -893,6 +912,9 @@ namespace rexlang {
         static const char *         TypeText        () ;
     };
 
+    /**
+     * 内置类型-浮点型
+     */
     class BuiltinFloatType : public BuiltinTypeDecl {
     public:
         BuiltinFloatType() ;
@@ -908,6 +930,9 @@ namespace rexlang {
         static const char *         TypeText        () ;
     };
 
+    /**
+     * 内置类型-逻辑型
+     */
     class BuiltinBoolType : public BuiltinTypeDecl {
     public:
         BuiltinBoolType() ;
@@ -922,6 +947,9 @@ namespace rexlang {
         static const char *         TypeText        () ;
     };
 
+    /**
+     * 内置类型-文本型
+     */
     class BuiltinStringType : public BuiltinTypeDecl {
     public:
         BuiltinStringType() ;
@@ -941,6 +969,9 @@ namespace rexlang {
         static const char *         TypeText        () ;
     };
 
+    /**
+     * 内置类型-字节集型
+     */
     class BuiltinDataSetType : public BuiltinTypeDecl {
     public:
         BuiltinDataSetType() ;
@@ -960,6 +991,9 @@ namespace rexlang {
         static const char *         TypeText        () ;
     };
 
+    /**
+     * 内置类型-短整型
+     */
     class BuiltinShortType : public BuiltinTypeDecl {
     public:
         BuiltinShortType() ;
@@ -975,6 +1009,9 @@ namespace rexlang {
         static const char *         TypeText        () ;
     };
 
+    /**
+     * 内置类型-长整型
+     */
     class BuiltinLongType : public BuiltinTypeDecl {
     public:
         BuiltinLongType() ;
@@ -990,6 +1027,9 @@ namespace rexlang {
         static const char *         TypeText        () ;
     };
 
+    /**
+     * 内置类型-日期时间型
+     */
     class BuiltinDatetimeType : public BuiltinTypeDecl {
     public:
         BuiltinDatetimeType() ;
@@ -1004,6 +1044,9 @@ namespace rexlang {
         static const char *         TypeText        () ;
     };
 
+    /**
+     * 内置类型-函数指针型
+     */
     class BuiltinFuncPtrType : public BuiltinTypeDecl {
     public:
         BuiltinFuncPtrType() ;
@@ -1018,6 +1061,9 @@ namespace rexlang {
         static const char *         TypeText        () ;
     };
 
+    /**
+     * 内置类型-双精度浮点型
+     */
     class BuiltinDoubleType : public BuiltinTypeDecl {
     public:
         BuiltinDoubleType() ;
@@ -1041,7 +1087,7 @@ namespace rexlang {
         NamedOrderDict<MemberVariableDecl *> members_;
 
     public:
-        StructureDecl(IdentDef *name) ;
+        explicit StructureDecl(IdentDef *name) ;
 
     public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
@@ -1083,8 +1129,7 @@ namespace rexlang {
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
-        static ArrayDecl *  get (TypeDecl *  elementType, const std::vector<size_t> dimensions) ;
-        static ArrayDecl *  get (IdentRefer *elementName, const std::vector<size_t> dimensions) ;
+        static ArrayDecl *  get (TypeDecl *  elementType, const std::vector<size_t> &dimensions) ;
 
     public:
         static const NodeType GetClassId () ;

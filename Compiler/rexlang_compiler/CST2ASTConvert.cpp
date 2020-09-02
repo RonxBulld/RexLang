@@ -539,6 +539,7 @@ namespace rexlang {
 
         if (rexLangParser::Vari_parameter_declContext *vari_param_ctx = context->vari_parameter_decl()) {
             ParameterDecl *vari_parameter_decl = GetFromCtxIfExist<ParameterDecl *>(vari_param_ctx);
+            vari_parameter_decl->markAsVariParam();
             params.emplace_back(vari_parameter_decl);
         }
 

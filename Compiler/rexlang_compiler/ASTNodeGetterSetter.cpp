@@ -230,6 +230,8 @@ namespace rexlang {
 
     MacroDecl::MacroDecl(IdentDef *name, Value *value) : TagDecl(name), macro_value_(value) {}
 
+    Value *MacroDecl::getValue() { return macro_value_; }
+
     /***************************************************
      * Decl
      ***************************************************/
@@ -313,6 +315,9 @@ namespace rexlang {
             Decl::applyAttribute(attribute);
         }
     }
+
+    void ParameterDecl::markAsVariParam ()          { is_variable_param_ = true; }
+    bool ParameterDecl::isVariParam     () const    { return is_variable_param_; }
 
     /***************************************************
      * VariableDecl

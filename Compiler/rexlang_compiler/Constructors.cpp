@@ -36,14 +36,7 @@ namespace rexlang {
      * ReferenceType
      ******************************************************************/
 
-    ReferenceType::ReferenceType(IdentRefer * typeName)    : VariTypeDecl(nullptr), type_name_(typeName), pointee_type_(nullptr) {}
     ReferenceType::ReferenceType(TypeDecl *   pointeeType) : VariTypeDecl(nullptr), type_name_(nullptr),  pointee_type_(pointeeType) {}
-
-    /******************************************************************
-     * TypeDecl
-     ******************************************************************/
-
-    TypeDecl::TypeDecl(IdentDef *name) : TagDecl(name) {}
 
     /******************************************************************
      * IdentDef
@@ -55,5 +48,28 @@ namespace rexlang {
     IdentDef::IdentDef(const TString &        id)  : id_(id.string_)  {}
 
     IdentDef::IdentDef(const IdentDef &       other) = default ;
+
+    /******************************************************************
+     * VariableDecl
+     ******************************************************************/
+
+    VariableDecl::VariableDecl(VariTypeDecl *type, IdentDef *name) : BaseVariDecl(type, name) {}
+
+    GlobalVariableDecl::GlobalVariableDecl(VariTypeDecl *type, IdentDef *name) : VariableDecl(type, name) {}
+    MemberVariableDecl::MemberVariableDecl(VariTypeDecl *type, IdentDef *name) : VariableDecl(type, name) {}
+    FileVariableDecl  ::FileVariableDecl  (VariTypeDecl *type, IdentDef *name) : VariableDecl(type, name) {}
+    LocalVariableDecl ::LocalVariableDecl (VariTypeDecl *type, IdentDef *name) : VariableDecl(type, name) {}
+
+    /******************************************************************
+     * TypeDecl
+     ******************************************************************/
+
+    TypeDecl::TypeDecl(IdentDef *name) : TagDecl(name) {}
+
+    /******************************************************************
+     * VariTypeDecl
+     ******************************************************************/
+
+    VariTypeDecl::VariTypeDecl(IdentDef *name) : TypeDecl(name) {}
 
 }
