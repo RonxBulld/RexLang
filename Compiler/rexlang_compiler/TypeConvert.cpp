@@ -8,14 +8,18 @@ namespace rexlang {
 
     /*===--------------------------------===*
      * ReferenceType
-     *===--------------------------------===*/
-
-    ReferenceType *ReferenceType::get(IdentRefer *typeName) {
-        return Node::Create<ReferenceType>(typeName->getAstContext(), typeName);
-    }
+     */
 
     ReferenceType *ReferenceType::get(TypeDecl *pointeeType) {
         return Node::Create<ReferenceType>(pointeeType->getAstContext(), pointeeType);
+    }
+
+    /*===--------------------------------===*
+     * VariTypeDecl
+     */
+
+    ArrayDecl *VariTypeDecl::getArrayToWithDimStr(const std::vector<size_t> &dims) {
+        return ArrayDecl::get(this, dims);
     }
 
 }

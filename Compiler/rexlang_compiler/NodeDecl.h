@@ -1079,7 +1079,7 @@ namespace rexlang {
         static const char *         TypeText        () ;
     };
 
-    /*
+    /**
      * 数据结构定义
      */
     class StructureDecl : public VariTypeDecl {
@@ -1099,7 +1099,7 @@ namespace rexlang {
         bool            isBinOptValid       (OperatorType opt, VariTypeDecl *otherType) const override ;
         bool            isStructType        () const override ;
         void            appendElement       (MemberVariableDecl *element) ;
-        BaseVariDecl *  getElementWithIndex () ;
+        BaseVariDecl *  getElementWithIndex (size_t idx) ;
         BaseVariDecl *  getElementWithName  (const StringRef &variable_name) const ;
 
         bool            isMemberOfThis      (MemberVariableDecl *memberVariDecl) const ;

@@ -38,6 +38,7 @@ namespace rexlang {
     const NodeType LocalVariableDecl    ::GetClassId() { return NodeType::kNTyLocalVariableDecl; }
     const NodeType TypeDecl             ::GetClassId() { return NodeType::kNTyTypeDecl; }
     const NodeType VariTypeDecl         ::GetClassId() { return NodeType::kNTyVariTypeDecl; }
+    const NodeType ReferenceType        ::GetClassId() { return NodeType::kNTyReferenceType; }
     const NodeType BuiltinTypeDecl      ::GetClassId() { return NodeType::kNTyBuiltinTypeDecl; }
     const NodeType StructureDecl        ::GetClassId() { return NodeType::kNTyStructureDecl; }
     const NodeType ArrayDecl            ::GetClassId() { return NodeType::kNTyArrayDecl; }

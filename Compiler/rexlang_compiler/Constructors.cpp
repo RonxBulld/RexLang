@@ -72,4 +72,10 @@ namespace rexlang {
 
     VariTypeDecl::VariTypeDecl(IdentDef *name) : TypeDecl(name) {}
 
+    /******************************************************************
+     * StructureDecl
+     ******************************************************************/
+
+    StructureDecl::StructureDecl(IdentDef *name) : VariTypeDecl(name) {}
+
 }
