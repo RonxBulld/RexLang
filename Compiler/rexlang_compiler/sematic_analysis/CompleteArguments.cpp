@@ -22,7 +22,7 @@ namespace rexlang {
 
         // 1.2. 检查是否有不定参数
 
-        bool dynamic_params = functorDecl->isDynamicArgs();
+        bool dynamic_params = functorDecl->hasVarArgs();
         if (param_count > 0 && parameters.back()->isVariParam()) {
             param_count -= 1;
             dynamic_params = true;

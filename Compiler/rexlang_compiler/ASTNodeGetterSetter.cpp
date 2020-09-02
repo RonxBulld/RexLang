@@ -372,11 +372,48 @@ namespace rexlang {
      * FunctorDecl
      ***************************************************/
 
-    void FunctorDecl::setReturnTypeName(const TString &typeName) { return_type_name_ = typeName; }
-
     void FunctorDecl::appendParameter(ParameterDecl *parameterDecl) {
         parameters_.push_back(parameterDecl);
         setChild(parameterDecl);
+    }
+
+    const std::vector<ParameterDecl *> &FunctorDecl::getParameters() const { return parameters_; }
+          std::vector<ParameterDecl *> &FunctorDecl::getParameters()       { return parameters_; }
+
+    ParameterDecl *FunctorDecl::getParameterAt(unsigned idx) const {
+        if (idx < parameters_.size()) {
+            return parameters_.at(idx);
+        } else {
+            assert(false);
+            return nullptr;
+        }
+    }
+
+    ParameterDecl *FunctorDecl::getParamByName(const StringRef &name) const {
+        for (ParameterDecl *parameter_decl : parameters_) {
+            if (parameter_decl->getNameRef() == name) {
+                return parameter_decl;
+            }
+        }
+        assert(false);
+        return nullptr;
+    }
+
+    int FunctorDecl::getIndexOf(const ParameterDecl *parameterDecl) const {
+        for (int idx = 0, count = parameters_.size(); idx < count; ++idx) {
+            if (parameters_[idx] == parameterDecl) { return idx; }
+        }
+        assert(false);
+        return -1;
+    }
+
+    TypeDecl *FunctorDecl::getReturnType() const { return return_type_; }
+
+    bool FunctorDecl::hasVarArgs() const {
+        for (ParameterDecl *parameter_decl : parameters_) {
+            if (parameter_decl->isVariParam()) { return true; }
+        }
+        return false;
     }
 
     /***************************************************

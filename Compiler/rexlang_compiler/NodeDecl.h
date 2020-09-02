@@ -1139,7 +1139,7 @@ namespace rexlang {
 
     };
 
-    /*
+    /**
      * 具有函数性的定义
      * 包含子函数定义和DLL函数定义
      */
@@ -1154,23 +1154,24 @@ namespace rexlang {
         FunctorDecl(VariTypeDecl *retType, IdentDef *name, const std::vector<ParameterDecl *> &parameters) ;
 
     public:
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        void sematicAnalysisInternal(SemaContext &semaCtx)  override ;
 
-        bool isCallable             () const override ;
-        bool isAssginValidFrom      (TypeDecl *fromType) const override ;
+        bool isCallable             ()                      const override ;
+        bool isAssginValidFrom      (TypeDecl *fromType)    const override ;
 
     public:
         void appendParameter(ParameterDecl *parameterDecl) ;
 
     public:
-        std::vector<ParameterDecl *> &getParameters() const ;
+        const std::vector<ParameterDecl *> &getParameters() const ;
+              std::vector<ParameterDecl *> &getParameters() ;
 
         ParameterDecl * getParameterAt  (unsigned idx)                       const ;
         ParameterDecl * getParamByName  (const StringRef &name)              const ;
-        int             getIndexOf      (const ParameterDecl *parameterDecl) const ;
+        int             getIndexOf      (const ParameterDecl *parameterDecl) const ;    // 不存在返回-1
 
         TypeDecl *getReturnType() const ;
-        bool      isDynamicArgs() const ;
+        bool      hasVarArgs   () const ;
 
         virtual bool    isStaticLibraryAPI  () const = 0;
         virtual bool    isDynamicLibraryAPI () const = 0;

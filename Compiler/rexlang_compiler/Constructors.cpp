@@ -87,4 +87,12 @@ namespace rexlang {
               base_type_(baseType), dimensions_(dimensions) {
     }
 
+    /******************************************************************
+     * FunctorDecl
+     ******************************************************************/
+
+    FunctorDecl::FunctorDecl(VariTypeDecl *retType, IdentDef *name, const std::vector<ParameterDecl *> &parameters)
+            : TypeDecl(name), return_type_(retType), parameters_(parameters) {
+    }
+
 }
