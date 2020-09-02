@@ -447,28 +447,25 @@ namespace rexlang {
     class IdentDef final : public Node {
     private:
         StringRef id_;
-        std::set<IdentRefer *> reference_table_;
+        TagDecl * tag_decl_ = nullptr;
 
     public:
-        IdentDef(const char *id) ;
-        IdentDef(const std::string &id) ;
-        IdentDef(const StringRef &id) ;
-        IdentDef(const TString &id) ;
+        explicit IdentDef(const char *           id) ;
+        explicit IdentDef(const std::string &    id) ;
+        explicit IdentDef(const StringRef &      id) ;
+        explicit IdentDef(const TString &        id) ;
 
-        IdentDef(const IdentDef &other) ;
+        IdentDef(const IdentDef &       other) ;
 
     public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
-        const char *name() const ;
-        const StringRef &id() const ;
+        const char *        name    () const ;
+        const StringRef &   id      () const ;
 
-        TagDecl *decl() const ;
-
-        void addReference(IdentRefer *idRef) ;
-        void removeReference(IdentRefer *idRef) ;
-        std::set<IdentRefer *> &getReferenceTable() const ;
+        void                setDecl (TagDecl *tagDecl) ;
+        TagDecl *           decl    () const ;
 
     public:
         static const NodeType GetClassId () ;

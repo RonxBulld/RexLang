@@ -215,6 +215,16 @@ namespace rexlang {
     }
 
     /***************************************************
+     * IdentDef
+     ***************************************************/
+
+    const char *        IdentDef::name    () const { return id_.c_str(); }
+    const StringRef &   IdentDef::id      () const { return id_; }
+
+    void                IdentDef::setDecl (TagDecl *tagDecl) { tag_decl_ = tagDecl; }
+    TagDecl *           IdentDef::decl    () const           { return tag_decl_; }
+
+    /***************************************************
      * MacroDecl
      ***************************************************/
 

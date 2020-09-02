@@ -25,6 +25,7 @@ namespace rexlang {
     const NodeType DataStructureFile    ::GetClassId() { return NodeType::kNTyDataStructureFile; }
     const NodeType APIDeclareFile       ::GetClassId() { return NodeType::kNTyAPIDeclareFile; }
     const NodeType MacroDeclareFile     ::GetClassId() { return NodeType::kNTyMacroDeclareFile; }
+    const NodeType IdentDef             ::GetClassId() { return NodeType::kNTyIdentDef; }
     const NodeType Decl                 ::GetClassId() { return NodeType::kNTyDecl; }
     const NodeType TagDecl              ::GetClassId() { return NodeType::kNTyTagDecl; }
     const NodeType BaseVariDecl         ::GetClassId() { return NodeType::kNTyBaseVariDecl; }

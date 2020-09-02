@@ -45,4 +45,15 @@ namespace rexlang {
 
     TypeDecl::TypeDecl(IdentDef *name) : TagDecl(name) {}
 
+    /******************************************************************
+     * IdentDef
+     ******************************************************************/
+
+    IdentDef::IdentDef(const char *           id)  : id_(StringPool::Create(id)) {}
+    IdentDef::IdentDef(const std::string &    id)  : id_(StringPool::Create(id))  {}
+    IdentDef::IdentDef(const StringRef &      id)  : id_(id)  {}
+    IdentDef::IdentDef(const TString &        id)  : id_(id.string_)  {}
+
+    IdentDef::IdentDef(const IdentDef &       other) = default ;
+
 }
