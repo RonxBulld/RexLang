@@ -103,4 +103,23 @@ namespace rexlang {
             : FunctorDecl(retType, name, parameters) {
     }
 
+    /******************************************************************
+     * APICommandDecl
+     ******************************************************************/
+
+    APICommandDecl::APICommandDecl(
+            VariTypeDecl *                          retType,
+            IdentDef *                              name,
+            const std::vector<ParameterDecl *> &    parameters,
+            LibraryType                             libraryType,
+            const TString &                         libraryName,
+            IdentDef *                              apiName
+            )
+            : FunctorDecl   (retType, name, parameters)
+            , library_file_ (libraryName)
+            , library_type_ (libraryType)
+            , api_name_     (apiName)
+            {
+    }
+
 }

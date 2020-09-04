@@ -499,6 +499,17 @@ namespace rexlang {
     StatementBlock *FunctionDecl::getFunctionBody() const { return statement_list_; }
 
     /***************************************************
+     * APICommandDecl
+     ***************************************************/
+
+    const TString &     APICommandDecl::getLibraryName   () const { return library_file_; }
+    LibraryType         APICommandDecl::getLibraryType   () const { return library_type_; }
+    IdentDef *          APICommandDecl::getApiName       () const { return api_name_;     }
+
+    ArgumentPassModel   APICommandDecl::getArguPassModel () const { return argument_pass_model_; }
+    void                APICommandDecl::setArguPassModel (ArgumentPassModel model) { argument_pass_model_ = model; }
+
+    /***************************************************
      * StatementBlock
      ***************************************************/
 

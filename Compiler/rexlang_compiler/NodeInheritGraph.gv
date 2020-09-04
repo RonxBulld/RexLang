@@ -682,7 +682,7 @@ digraph G {
             <tr><td border="1" bgcolor="AliceBlue">+ setLibraryType(...) -&gt; void</td></tr>
             <tr><td border="1" bgcolor="AliceBlue">+ getLibraryType(...) -&gt; LibraryType</td></tr>
             <tr><td border="1" bgcolor="AliceBlue">+^ sematicAnalysisInternal(...) -&gt; void</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ getApiNameRef(...) -&gt; IdentDef *</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ getApiName(...) -&gt; IdentDef *</td></tr>
             <tr><td border="1" bgcolor="AliceBlue">+ setApiNameRef(...) -&gt; void</td></tr>
             <tr><td border="1" bgcolor="AliceBlue">+ getArguPassModel(...) -&gt; ArgumentPassModel</td></tr>
             <tr><td border="1" bgcolor="AliceBlue">+ setArguPassModel(...) -&gt; void</td></tr>

@@ -16,7 +16,7 @@ namespace rexlang {
                 assert(apiCommandDecl);
                 return false;
             }
-            const std::string &api_extern_name = apiCommandDecl->getApiNameRef().str();
+            const std::string &api_extern_name = apiCommandDecl->getApiName().str();
             return api_extern_name.back() == '#';
         }
 
@@ -26,7 +26,7 @@ namespace rexlang {
                 return false;
             }
             apiCommandDecl->setArguPassModel(ArgumentPassModel::kSimpleRTTIPack);
-            std::string api_extern_name = apiCommandDecl->getApiNameRef().str();
+            std::string api_extern_name = apiCommandDecl->getApiName().str();
             if (api_extern_name.back() == '#') {
                 api_extern_name.pop_back();
                 apiCommandDecl->setApiNameRef(StringPool::Create(api_extern_name));

@@ -1218,7 +1218,7 @@ namespace rexlang {
     };
 
     /**
-     * @brief DLL函数声明
+     * DLL函数声明
      */
     class APICommandDecl : public FunctorDecl {
     private:
@@ -1231,30 +1231,25 @@ namespace rexlang {
         // 参数传递方式
         ArgumentPassModel argument_pass_model_ = ArgumentPassModel::kDirect;
         // API参数名称
-        std::vector<StringRef> mapping_names_;
+//        std::vector<StringRef> mapping_names_;
 
     public:
-        APICommandDecl(VariTypeDecl *retType,
-                       IdentDef *name,
-                       const std::vector<ParameterDecl *> &parameters,
-                       LibraryType libraryType,
-                       const TString &libraryName,
-                       const TString &apiName
-                       ) ;
-
-    public:
-        void            setLibraryName(const TString &name) ;
-        const TString & getLibraryName() const ;
-
-        void        setLibraryType(LibraryType type) ;
-        LibraryType getLibraryType() const ;
+        APICommandDecl(
+                VariTypeDecl *                          retType,
+                IdentDef *                              name,
+                const std::vector<ParameterDecl *> &    parameters,
+                LibraryType                             libraryType,
+                const TString &                         libraryName,
+                IdentDef *                              apiName
+                ) ;
 
     public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
-        IdentDef *  getApiNameRef() const ;
-        void        setApiNameRef(IdentDef *apiName) ;
+        const TString & getLibraryName  () const ;
+        LibraryType     getLibraryType  () const ;
+        IdentDef *      getApiName      () const ;
 
         ArgumentPassModel   getArguPassModel() const ;
         void                setArguPassModel(ArgumentPassModel model) ;
