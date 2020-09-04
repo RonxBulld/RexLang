@@ -95,4 +95,12 @@ namespace rexlang {
             : TypeDecl(name), return_type_(retType), parameters_(parameters) {
     }
 
+    /******************************************************************
+     * FunctionDecl
+     ******************************************************************/
+
+    FunctionDecl::FunctionDecl(VariTypeDecl *retType, IdentDef *name, const std::vector<ParameterDecl *> &parameters)
+            : FunctorDecl(retType, name, parameters) {
+    }
+
 }

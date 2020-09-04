@@ -1182,7 +1182,7 @@ namespace rexlang {
     };
 
     /**
-     * @brief 子程序/函数定义
+     * 子程序/函数定义
      */
     class FunctionDecl : public FunctorDecl {
     private:
@@ -1190,8 +1190,6 @@ namespace rexlang {
         NamedOrderDict<LocalVariableDecl*> local_vari_;
         // 语句列表
         StatementBlock *statement_list_ = nullptr;
-        // 所属程序集
-        ProgSetDecl *super_set_ = nullptr;
 
     public:
         FunctionDecl(VariTypeDecl *retType, IdentDef *name, const std::vector<ParameterDecl *> &parameters) ;
@@ -1204,7 +1202,6 @@ namespace rexlang {
         void     setStatementBlock  (StatementBlock *    statementBlock) ;
 
         LocalVariableDecl * getLocalVari    (const StringRef &name) const ;
-        ParameterDecl *     getParameter    (const StringRef &name) const ;
         StatementBlock *    getFunctionBody () const ;
 
     public:

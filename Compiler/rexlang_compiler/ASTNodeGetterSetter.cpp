@@ -487,6 +487,17 @@ namespace rexlang {
         setChild(statementBlock);
     }
 
+    LocalVariableDecl *FunctionDecl::getLocalVari(const StringRef &name) const {
+        auto found = local_vari_.find(name);
+        if (found == local_vari_.end()) {
+            return found->second;
+        } else {
+            return nullptr;
+        }
+    }
+
+    StatementBlock *FunctionDecl::getFunctionBody() const { return statement_list_; }
+
     /***************************************************
      * StatementBlock
      ***************************************************/
