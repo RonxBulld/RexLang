@@ -1346,7 +1346,7 @@ namespace rexlang {
     };
 
     /**
-     * @brief 控制语句
+     * 控制语句
      */
     class ControlStmt : public Statement {
     public:
@@ -1357,25 +1357,20 @@ namespace rexlang {
     };
 
     /**
-     * @brief 循环控制语句
+     * 循环控制语句
      */
     class LoopControlStmt : public ControlStmt {
-    private:
-        // 所控制的循环语句
-        LoopStatement *controlled_loop_ = nullptr;
-
     public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
-        void setControlledLoop(LoopStatement *loopStatement) ;
-        LoopStatement *getControlledLoop() const ;
+        LoopStatement *getControlledLoop() ;  // 根据在语法树中的位置计算最近一层的循环结构
 
     public:
         static const NodeType GetClassId () ;
     };
 
     /**
-     * @brief 到循环尾
+     * 到循环尾
      */
     class ContinueStmt : public LoopControlStmt {
     protected:
@@ -1390,7 +1385,7 @@ namespace rexlang {
     };
 
     /**
-     * @brief 跳出循环
+     * 跳出循环
      */
     class BreakStmt : public LoopControlStmt {
     protected:
@@ -1405,7 +1400,7 @@ namespace rexlang {
     };
 
     /**
-     * @brief 返回
+     * 返回
      */
     class ReturnStmt : public ControlStmt {
     private:
@@ -1420,8 +1415,8 @@ namespace rexlang {
     public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
-        void setReturnValue(Expression *returnValue) ;
-        Expression *getReturnValue() const ;
+        void         setReturnValue(Expression *returnValue) ;
+        Expression * getReturnValue() const ;
 
     public:
         static const NodeType GetClassId () ;
@@ -1429,7 +1424,7 @@ namespace rexlang {
     };
 
     /**
-     * @brief 结束
+     * 结束
      */
     class ExitStmt : public ControlStmt {
     protected:

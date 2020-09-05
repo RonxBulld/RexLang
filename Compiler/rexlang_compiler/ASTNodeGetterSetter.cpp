@@ -562,8 +562,15 @@ namespace rexlang {
      * LoopControlStmt
      ***************************************************/
 
-    void           LoopControlStmt::setControlledLoop(LoopStatement *loopStatement) { controlled_loop_ = loopStatement; }
-    LoopStatement *LoopControlStmt::getControlledLoop() const                       { return controlled_loop_; }
+    LoopStatement *LoopControlStmt::getControlledLoop() {
+        for (Node *cur = this; cur; cur = cur->getParent()) {
+            if (LoopStatement *loop_statement = cur->as<LoopStatement>()) {
+                return loop_statement;
+            }
+        }
+        assert(false);
+        return nullptr;
+    }
 
     /***************************************************
      * IfStmt

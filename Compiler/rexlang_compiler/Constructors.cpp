@@ -36,7 +36,7 @@ namespace rexlang {
      * ReferenceType
      ******************************************************************/
 
-    ReferenceType::ReferenceType(TypeDecl *   pointeeType) : VariTypeDecl(nullptr), type_name_(nullptr),  pointee_type_(pointeeType) {}
+    ReferenceType::ReferenceType(TypeDecl *pointeeType) : VariTypeDecl(nullptr), pointee_type_(pointeeType) {}
 
     /******************************************************************
      * IdentDef
@@ -135,6 +135,14 @@ namespace rexlang {
     AssignStmt::AssignStmt(HierarchyIdentifier *lhs, Expression *rhs) {
         setLHS(lhs);
         setRHS(rhs);
+    }
+
+    /******************************************************************
+     * AssignStmt
+     ******************************************************************/
+
+    ReturnStmt::ReturnStmt(Expression *returnValue) {
+        setReturnValue(returnValue);
     }
 
 }
