@@ -1474,7 +1474,7 @@ namespace rexlang {
     };
 
     /**
-     * @brief 循环语句基本结构
+     * 循环语句基本结构
      */
     class LoopStatement : public Statement {
     private:
@@ -1491,7 +1491,7 @@ namespace rexlang {
     };
 
     /**
-     * @brief 描述先判断后执行的While-Loop结构
+     * 描述先判断后执行的While-Loop结构
      */
     class WhileStmt : public LoopStatement {
     private:
@@ -1515,7 +1515,7 @@ namespace rexlang {
     };
 
     /**
-     * @brief 描述计次循环的范围迭代循环结构
+     * 描述计次循环的范围迭代循环结构
      */
     class RangeForStmt : public LoopStatement {
     private:
@@ -1543,7 +1543,7 @@ namespace rexlang {
     };
 
     /**
-     * @brief 描述计步循环的范围迭代循环结构
+     * 描述计步循环的范围迭代循环结构
      */
     class ForStmt : public LoopStatement {
         Expression *          start_value_ = nullptr;
@@ -1576,7 +1576,7 @@ namespace rexlang {
     };
 
     /**
-     * @brief 描述先执行后判断的Do-While循环结构
+     * 描述先执行后判断的Do-While循环结构
      */
     class DoWhileStmt : public LoopStatement {
     private:

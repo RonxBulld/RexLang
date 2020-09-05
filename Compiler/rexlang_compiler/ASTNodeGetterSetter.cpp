@@ -625,6 +625,9 @@ namespace rexlang {
     void RangeForStmt::setRangeSize   (Expression *rangeSize)         { range_size_ = rangeSize; setChild(rangeSize); }
     void RangeForStmt::setLoopVariable(HierarchyIdentifier *loopVari) { loop_vari_ = loopVari; setChild(loopVari); }
 
+    Expression *         RangeForStmt::getRangeSize () const { return range_size_; }
+    HierarchyIdentifier *RangeForStmt::getLoopVari  () const { return loop_vari_;  }
+
     /***************************************************
      * ForStmt
      ***************************************************/
@@ -634,11 +637,18 @@ namespace rexlang {
     void ForStmt::setStepValue (Expression *stepValue)         { step_value_  = stepValue;  setChild(stepValue); }
     void ForStmt::setLoopVari  (HierarchyIdentifier *loopVari) { loop_vari_   = loopVari;   setChild(loopVari); }
 
+    Expression *            ForStmt::getStartValue () const { return start_value_; }
+    Expression *            ForStmt::getStopValue  () const { return stop_value_ ; }
+    Expression *            ForStmt::getStepValue  () const { return step_value_ ; }
+    HierarchyIdentifier *   ForStmt::getLoopVari   () const { return loop_vari_  ; }
+
     /***************************************************
      * DoWhileStmt
      ***************************************************/
 
     void DoWhileStmt::setCondition(Expression *condition) { condition_ = condition; setChild(condition); }
+
+    Expression *DoWhileStmt::getCondition() const { return condition_; }
 
     /***************************************************
      * ReturnStmt

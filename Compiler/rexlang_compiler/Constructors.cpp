@@ -156,4 +156,35 @@ namespace rexlang {
         setDefault(defaultBranchBody);
     }
 
+    /******************************************************************
+     * LoopStatement
+     ******************************************************************/
+
+    LoopStatement::LoopStatement(Statement *loopBody) {
+        setLoopBody(loopBody);
+    }
+
+    WhileStmt::WhileStmt(Expression *condition, Statement *loopBody) : LoopStatement(loopBody) {
+        setLoopCondition(condition);
+    }
+
+    RangeForStmt::RangeForStmt(Expression *rangeSize, HierarchyIdentifier *loopVari, Statement *loopBody)
+        : LoopStatement(loopBody) {
+        setRangeSize(rangeSize);
+        setLoopVariable(loopVari);
+    }
+
+    ForStmt::ForStmt(Expression *startValue, Expression *stopValue, Expression *stepValue, HierarchyIdentifier *loopVari, Statement *loopBody)
+        : LoopStatement(loopBody) {
+        setStartValue(startValue);
+        setStopValue (stopValue) ;
+        setStepValue (stepValue) ;
+        setLoopVari  (loopVari)  ;
+    }
+
+    DoWhileStmt::DoWhileStmt(Expression *condition, Statement *loopBody)
+        : LoopStatement(loopBody) {
+        setCondition(condition);
+    }
+
 }
