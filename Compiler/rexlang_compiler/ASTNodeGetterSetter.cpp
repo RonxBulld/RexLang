@@ -473,6 +473,32 @@ namespace rexlang {
         setChild(functionDecl);
     }
 
+    FileVariableDecl *ProgSetDecl::getFileVariableDecl(const StringRef &name) const {
+        auto found = file_static_variables_.find(name);
+        if (found != file_static_variables_.end()) {
+            return found->second;
+        } else {
+            return nullptr;
+        }
+    }
+
+    FunctionDecl *ProgSetDecl::getFunctionDecl(const StringRef &name) const {
+        auto found = function_decls_.find(name);
+        if (found != function_decls_.end()) {
+            return found->second;
+        } else {
+            return nullptr;
+        }
+    }
+
+    std::vector<FunctorDecl *> ProgSetDecl::getFuncSignatures() {
+        std::vector<FunctorDecl *> signatures;
+        for (auto &item : function_decls_) {
+            signatures.push_back(item.second);
+        }
+        return signatures;
+    }
+
     /***************************************************
      * FunctionDecl
      ***************************************************/
@@ -489,7 +515,7 @@ namespace rexlang {
 
     LocalVariableDecl *FunctionDecl::getLocalVari(const StringRef &name) const {
         auto found = local_vari_.find(name);
-        if (found == local_vari_.end()) {
+        if (found != local_vari_.end()) {
             return found->second;
         } else {
             return nullptr;
@@ -526,15 +552,11 @@ namespace rexlang {
      * AssignStmt
      ***************************************************/
 
-    void AssignStmt::setLHS(HierarchyIdentifier *lhs) {
-        lhs_ = lhs;
-        setChild(lhs);
-    }
+    void AssignStmt::setLHS(HierarchyIdentifier *lhs) { lhs_ = lhs; setChild(lhs); }
+    void AssignStmt::setRHS(Expression *rhs)          { rhs_ = rhs; setChild(rhs); }
 
-    void AssignStmt::setRHS(Expression *rhs) {
-        rhs_ = rhs;
-        setChild(rhs);
-    }
+    HierarchyIdentifier *   AssignStmt::getLHS() const { return lhs_; }
+    Expression *            AssignStmt::getRHS() const { return rhs_; }
 
     /***************************************************
      * LoopControlStmt

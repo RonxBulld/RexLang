@@ -1265,13 +1265,12 @@ namespace rexlang {
     };
 
     /**
-     * @brief 程序集定义
+     * 程序集定义
      */
     class ProgSetDecl : public TagDecl {
     private:
         NamedOrderDict<FileVariableDecl *>  file_static_variables_;
         NamedOrderDict<FunctionDecl *>      function_decls_;
-        NamedOrderDict<FunctorDecl *>       signature_of_functions_;
 
     public:
         explicit ProgSetDecl(IdentDef *name) ;
@@ -1283,7 +1282,7 @@ namespace rexlang {
         FileVariableDecl *  getFileVariableDecl (const StringRef &name) const ;
         FunctionDecl *      getFunctionDecl     (const StringRef &name) const ;
 
-        std::vector<FunctorDecl *>  getFuncSignatures() const ;
+        std::vector<FunctorDecl *> getFuncSignatures() ;
 
     public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
@@ -1295,6 +1294,9 @@ namespace rexlang {
         static const NodeType GetClassId () ;
     };
 
+    /**
+     * 表达式引用类型
+     */
     enum class ExprUsage {
         kUnknown,
         kAsLeftValue,
@@ -1302,7 +1304,7 @@ namespace rexlang {
     };
 
     /**
-     * @brief 语句基类
+     * 语句基类
      */
     class Statement : public Node {
     protected:
@@ -1316,7 +1318,7 @@ namespace rexlang {
     };
 
     /**
-     * @brief 赋值语句
+     * 赋值语句
      */
     class AssignStmt : public Statement {
     private:

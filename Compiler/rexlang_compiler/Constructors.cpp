@@ -122,4 +122,19 @@ namespace rexlang {
             {
     }
 
+    /******************************************************************
+     * ProgSetDecl
+     ******************************************************************/
+
+    ProgSetDecl::ProgSetDecl(IdentDef *name) : TagDecl(name) {}
+
+    /******************************************************************
+     * AssignStmt
+     ******************************************************************/
+
+    AssignStmt::AssignStmt(HierarchyIdentifier *lhs, Expression *rhs) {
+        setLHS(lhs);
+        setRHS(rhs);
+    }
+
 }
