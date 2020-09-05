@@ -1439,7 +1439,7 @@ namespace rexlang {
     };
 
     /**
-     * @brief 包含多种条件分支表达式
+     * 包含多种条件分支表达式
      * 如果、如果真、判断
      */
     class IfStmt : public Statement {
@@ -1455,11 +1455,12 @@ namespace rexlang {
         ExprUsage getSubExprAccessType(const Expression *expr) const override ;
 
     public:
-        IfStmt(const std::vector<BranchTy> &branchs, Statement *defaultBranchBody = nullptr) ;
+        IfStmt(const std::vector<BranchTy> &branches, Statement *defaultBranchBody = nullptr) ;
 
     public:
         void        appendBranch    (Expression *condition, Statement *statement) ;
         void        setDefault      (Statement *statement) ;
+
         size_t      branchesCount   () const ;
         Expression *conditionAt     (size_t idx) const ;
         Statement * branchBodyAt    (size_t idx) const ;

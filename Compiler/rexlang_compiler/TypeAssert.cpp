@@ -151,24 +151,24 @@ namespace rexlang {
     bool    APICommandDecl      :: isAPICommandType     () const { return true; }
 
     bool BuiltinTypeDecl::isExtendBooleanType() const {
-        if (this->isBoolType()) { return true; }
-        if (this->isNumerical()) { return true; }
+        if (this->isBoolType())    { return true; }
+        if (this->isNumerical())   { return true; }
         if (this->isFuncPtrType()) { return true; }
         return false;
     }
 
     bool BuiltinTypeDecl::isNumerical() const {
         if (this->isIntegerClass()) { return true; }
-        if (this->isFloatType()) { return true; }
-        if (this->isDoubleType()) { return true; }
+        if (this->isFloatType())    { return true; }
+        if (this->isDoubleType())   { return true; }
         return false;
     }
 
     bool BuiltinTypeDecl::isIntegerClass() const {
-        if (this->isCharType()) { return true; }
+        if (this->isCharType())    { return true; }
         if (this->isIntegerType()) { return true; }
-        if (this->isShortType()) { return true; }
-        if (this->isLongType()) { return true; }
+        if (this->isShortType())   { return true; }
+        if (this->isLongType())    { return true; }
         return false;
     }
 

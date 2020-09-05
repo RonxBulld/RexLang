@@ -145,4 +145,15 @@ namespace rexlang {
         setReturnValue(returnValue);
     }
 
+    /******************************************************************
+     * IfStmt
+     ******************************************************************/
+
+    IfStmt::IfStmt(const std::vector<BranchTy> &branches, Statement *defaultBranchBody) {
+        for (const BranchTy &branch : branches) {
+            appendBranch(branch.first, branch.second);
+        }
+        setDefault(defaultBranchBody);
+    }
+
 }

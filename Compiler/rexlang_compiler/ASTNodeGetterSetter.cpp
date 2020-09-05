@@ -587,6 +587,11 @@ namespace rexlang {
         setChild(statement);
     }
 
+    size_t          IfStmt::branchesCount() const           { return switches_.size() + (default_statement_ ? 1 : 0); }
+    Expression *    IfStmt::conditionAt (size_t idx) const  { return switches_.at(idx).first;  }
+    Statement *     IfStmt::branchBodyAt(size_t idx) const  { return switches_.at(idx).second; }
+    Statement *     IfStmt::defaultBody () const            { return default_statement_; }
+
     /***************************************************
      * LoopStatement
      ***************************************************/
