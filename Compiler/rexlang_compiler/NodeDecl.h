@@ -1600,7 +1600,7 @@ namespace rexlang {
     };
 
     /**
-     * @brief 语句块
+     * 语句块
      */
     class StatementBlock : public Statement {
     private:
@@ -1623,13 +1623,13 @@ namespace rexlang {
     };
 
     /**
-     * @brief 表达式基类
+     * 表达式基类
      * 在这里，表达式被视作一种特殊的语句。
      */
     class Expression : public Statement {
     private:
         // 该表达式的类型
-        TypeDecl* expression_type_ = nullptr;
+        TypeDecl *expression_type_ = nullptr;
 
     protected:
         virtual TypeDecl *CheckExpressionInternal() = 0 ;
@@ -1843,6 +1843,8 @@ namespace rexlang {
         TypeDecl *getExpressionTypeInternal ()  const override ;
 
     public:
+        TypeConvert(TypeDecl *targetType, Expression *fromExpression) ;
+
         ExprUsage   getSubExprAccessType    (const Expression *expr) const override ;
         void        sematicAnalysisInternal (SemaContext &semaCtx) override ;
 

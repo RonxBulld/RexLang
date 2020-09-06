@@ -187,4 +187,14 @@ namespace rexlang {
         setCondition(condition);
     }
 
+    /******************************************************************
+     * StatementBlock
+     ******************************************************************/
+
+    StatementBlock::StatementBlock(const std::vector<Statement *> &statement_list) {
+        for (Statement *statement : statement_list) {
+            appendStatement(statement);
+        }
+    }
+
 }

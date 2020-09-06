@@ -30,4 +30,26 @@ namespace rexlang {
         return CreateNode<ArrayDecl>(elementType->getAstContext(), elementType, dimensions);
     }
 
+    /*===--------------------------------===*
+     * Expression
+     */
+
+    Expression *Expression::castTo(TypeDecl *targetType) {
+        TypeDecl *this_type = getExpressionType();
+        assert(this_type);
+        assert(targetType);
+        assert(getAstContext() == targetType->getAstContext());
+        if (this_type == targetType) {
+            return this;
+        } else {
+            if (targetType->isAssginValidFrom(this_type)) {
+                TypeConvert *conv_expr = CreateNode<TypeConvert>(getAstContext(), targetType, this);
+                return conv_expr;
+            } else {
+                assert(false);
+                return nullptr;
+            }
+        }
+    }
+
 }
