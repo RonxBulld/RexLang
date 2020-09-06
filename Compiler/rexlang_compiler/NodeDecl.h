@@ -1657,7 +1657,7 @@ namespace rexlang {
     };
 
     /**
-     * @brief 多层名称序列
+     * 多层名称序列
      * 该节点用于表示通过英文句点`.'连接的多层引用结构
      */
     class HierarchyIdentifier : public Expression {

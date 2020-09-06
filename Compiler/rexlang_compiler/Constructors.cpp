@@ -197,4 +197,14 @@ namespace rexlang {
         }
     }
 
+    /******************************************************************
+     * StatementBlock
+     ******************************************************************/
+
+    HierarchyIdentifier::HierarchyIdentifier(const std::vector<NameComponent *> &nameComponents) {
+        for (NameComponent *name_component : nameComponents) {
+            AppendComponent(name_component);
+        }
+    }
+
 }

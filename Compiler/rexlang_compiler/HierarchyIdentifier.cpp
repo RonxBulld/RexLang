@@ -17,6 +17,7 @@ namespace rexlang {
             component->SetForward(forward);
         }
         this->name_components_.push_back(component);
+        setChild(component);
     }
 
     /******************************************************
