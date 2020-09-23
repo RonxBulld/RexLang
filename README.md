@@ -41,6 +41,8 @@ RexLang 即 快速表达扩展语言（Rapid Expression eXtension Language）。
 
 ## 项目现状
 
+- 由于忙于为供职的公司做开发，可能不会在本项目上稳定输出；
+
 - 完成对编译系统框架的搭建；
 
 - 完成了基础语法文件；
