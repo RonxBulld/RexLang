@@ -673,9 +673,7 @@ namespace rexlang {
      * IdentRefer
      ***************************************************/
 
-         IdentRefer::IdentRefer () = default;
-         IdentRefer::IdentRefer (const TString &name)   { setName(name); }
-    void IdentRefer::setName    (const TString &name)   { name_ = name; }
+    IdentDef * IdentRefer::def() const { return reference_; }
 
     /***************************************************
      * ArrayIndex

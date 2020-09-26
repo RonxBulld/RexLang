@@ -279,7 +279,6 @@ namespace rexlang {
     TypeDecl * TypeDecl    ::getType() const { return const_cast<TypeDecl *>(this); }
     TypeDecl * ProgSetDecl ::getType() const { return nullptr; }
 
-    TagDecl * ArrayIndex::EvalBaseNameComponentType() { return getElementTy(); }
     TypeDecl * ArrayIndex::getElementTy() const {
         TypeDecl *type = getBaseId()->getExpressionType();
         if (VariTypeDecl *vari_type_decl = type->as<VariTypeDecl>()) {

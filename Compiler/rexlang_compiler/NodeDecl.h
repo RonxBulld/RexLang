@@ -1682,14 +1682,14 @@ namespace rexlang {
     };
 
     /**
-     * @brief 单个命名组件
+     * 单个命名组件
      */
     class NameComponent : public Expression {
     public:
         static const NodeType GetClassId () ;
 
     private:
-        NameComponent* forward_name_component_ = nullptr;
+        NameComponent* forward_name_component_  = nullptr;
         NameComponent* backward_name_component_ = nullptr;
 
     public:
@@ -1698,16 +1698,13 @@ namespace rexlang {
         NameComponent * Forward     () const ;
         NameComponent * Backward    () const ;
 
-        virtual TagDecl *      EvalBaseNameComponentType   () = 0;
-
     public:
         virtual IdentRefer *getBaseId() const = 0;    // 获取组件的确切名称对象
     };
 
-    /*
+    /**
      * 普通名称组件
      * 组件被创建后会主动寻找名称中指定的定义并且绑定
-     * 如果找不到定义，则会将自身注册到TU中相应的位置，并等待具有该名字的定义出现
      */
     class IdentRefer : public NameComponent {
     private:
@@ -1717,18 +1714,16 @@ namespace rexlang {
     protected:
         TypeDecl *CheckExpressionInternal   () override;
         ExprUsage getSubExprAccessType      (const Expression *expr) const override ;
-        TypeDecl *getExpressionTypeInternal ()                       const override ;
+        TypeDecl *getExpressionTypeInternal ()                       const override ;   // 该物件的数据类型
 
     public:
-        IdentRefer(const StringRef &name) ;     // 创建指向 IdentDef 的对象，不存在则创建占位符
+        IdentRefer(const StringRef &name, NameComponent *prefix) ;
 
     public:
-        IdentDef *          def     () const ;  // 获取指向的定义
-        const StringRef &   getName () const ;  // 获取引用的名称
+        IdentDef *      def         () const ;  // 获取指向的名称定义
 
-        TagDecl *       EvalBaseNameComponentType   ()       override ;
-        IdentRefer *    getBaseId                   () const override ;
-        TagDecl *       getDecl                     () const ;  // 获取被引用的定义
+        IdentRefer *    getBaseId   () const override ;
+        TagDecl *       getDecl     () const ;  // 获取被引用的定义
 
     public:
         static const NodeType GetClassId () ;
@@ -1736,7 +1731,7 @@ namespace rexlang {
     };
 
     /**
-     * @brief 数组引用组件
+     * 数组引用组件
      * 一个组件仅表示一个维度，多维数组由多层ArrayIndex嵌套。
      */
     class ArrayIndex : public NameComponent {
@@ -1749,7 +1744,7 @@ namespace rexlang {
     protected:
         TypeDecl *CheckExpressionInternal() override;
         ExprUsage getSubExprAccessType      (const Expression *expr) const override ;
-        TypeDecl *getExpressionTypeInternal ()                       const override ;
+        TypeDecl *getExpressionTypeInternal ()                       const override ;   // 元素的数据类型
 
     public:
         ArrayIndex(NameComponent *baseComponent, Expression *indexExpression) ;
@@ -1757,8 +1752,6 @@ namespace rexlang {
     public:
         void setBaseComponent(NameComponent *baseComponent) ;
         void setIndexExpr    (Expression *indexExpr) ;
-
-        TagDecl *EvalBaseNameComponentType() override ;
 
         /*
          * 获取数组索引组件的真实基对象
@@ -1797,7 +1790,7 @@ namespace rexlang {
     protected:
         TypeDecl *CheckExpressionInternal   () override ;
         ExprUsage getSubExprAccessType      (const Expression *expr) const override ;
-        TypeDecl *getExpressionTypeInternal ()                       const override ;
+        TypeDecl *getExpressionTypeInternal ()                       const override ;   // 返回值的数据类型
 
     public:
         FunctionCall(FunctorDecl *functorDecl, const std::vector<Expression *> &arguments) ;
@@ -1805,7 +1798,6 @@ namespace rexlang {
     public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
-        TagDecl *       EvalBaseNameComponentType   ()       override ;
         IdentRefer *    getBaseId                   () const override ;
 
         bool matchFunctor       (FunctorDecl *  functorDecl) const ;
