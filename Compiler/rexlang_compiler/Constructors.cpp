@@ -3,6 +3,7 @@
 //
 
 #include "NodeDecl.h"
+#include "rtti.h"
 
 namespace rexlang {
 
@@ -198,13 +199,50 @@ namespace rexlang {
     }
 
     /******************************************************************
-     * StatementBlock
+     * HierarchyIdentifier
      ******************************************************************/
 
     HierarchyIdentifier::HierarchyIdentifier(const std::vector<NameComponent *> &nameComponents) {
         for (NameComponent *name_component : nameComponents) {
             AppendComponent(name_component);
         }
+    }
+
+    /******************************************************************
+     * IdentRefer
+     ******************************************************************/
+
+    IdentRefer::IdentRefer(const StringRef &name, NameComponent *prefix) {
+        // 查找定义
+        if (!prefix) {
+            // 没有前缀则直接在符号域中开始检索
+            if (TagDecl *decl = Node::findDeclWithNameString(name)) {
+                reference_ = decl->getName();
+            } else {
+                assert(false);
+            }
+        } else {
+            TypeDecl *prefix_type = prefix->getExpressionType();
+            // prefix_type 应该是一个结构体
+            if (StructureDecl *structure_decl = rtti::dyn_cast<StructureDecl>(prefix_type)) {
+                if (BaseVariDecl *member = structure_decl->getElementWithName(name)) {
+                    reference_ = member->getName();
+                } else {
+                    assert(false);
+                }
+            } else {
+                assert(false);
+            }
+        }
+    }
+
+    /******************************************************************
+     * ArrayIndex
+     ******************************************************************/
+
+    ArrayIndex::ArrayIndex(NameComponent *baseComponent, Expression *indexExpression) {
+        setBaseComponent(baseComponent);
+        setIndexExpr(indexExpression);
     }
 
 }

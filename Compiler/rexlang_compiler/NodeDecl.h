@@ -1759,7 +1759,8 @@ namespace rexlang {
          * arrayIndex[1][2][3][1]->arrayIndex
          * func()[1][3]->func()
          */
-        NameComponent *getIndexBase() const;
+        NameComponent * getIndexBase() const;
+        IdentRefer *    getBaseId   () const override ;
 
         /*
          * 获取可索引类型的元素类型
@@ -1769,8 +1770,9 @@ namespace rexlang {
          */
         TypeDecl * getElementTy() const ;
 
-        IdentRefer *getBaseId() const override ;
-
+        /*
+         * 获取索引下标列表
+         */
         ErrOr<std::vector<Expression *>> getIndexesList() const ;
 
     public:

@@ -16,7 +16,7 @@ namespace rexlang {
      ***********************************************************/
 
     IdentRefer *IdentRefer  ::getBaseId() const { return const_cast<IdentRefer *>(this); }
-    IdentRefer *ArrayIndex  ::getBaseId() const { return this->base_->getBaseId(); }
+    IdentRefer *ArrayIndex  ::getBaseId() const { return this->getIndexBase()->getBaseId(); }
     IdentRefer *FunctionCall::getBaseId() const { return this->function_name_->getBaseId(); }
 
     NameComponent *ArrayIndex::getIndexBase() const {
