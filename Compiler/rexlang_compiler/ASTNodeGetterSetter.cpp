@@ -669,6 +669,17 @@ namespace rexlang {
         setChild(argument);
     }
 
+    void FunctionCall::setArguments(const std::vector<Expression *> &arguments) {
+        arguments_.clear();
+        for (Expression *argument : arguments) {
+            appendArgument(argument);
+        }
+    }
+
+    void FunctionCall::bindPrototype(FunctorDecl *functorDecl) {
+        functor_declare_ = functorDecl;
+    }
+
     /***************************************************
      * IdentRefer
      ***************************************************/

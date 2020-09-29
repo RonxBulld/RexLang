@@ -1800,11 +1800,13 @@ namespace rexlang {
     public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
-        IdentRefer *    getBaseId                   () const override ;
+        bool matchFunctor       (FunctorDecl *  functorDecl) const ;    // 检查实参列表是否匹配指定可调用对象原型
+        void bindPrototype      (FunctorDecl *  functorDecl) ;          // 将可调用对象绑定到函数调用节点
 
-        bool matchFunctor       (FunctorDecl *  functorDecl) const ;
+        void setArguments       (const std::vector<Expression *> &arguments) ;
         void appendArgument     (Expression *   argument) ;
 
+        IdentRefer *                getBaseId           () const override ;
         NameComponent *             getCallee           () const ;
         FunctorDecl *               getFunctionDeclare  () const ;
         size_t                      getArgumentsCount   () const ;

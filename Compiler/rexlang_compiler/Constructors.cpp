@@ -245,4 +245,17 @@ namespace rexlang {
         setIndexExpr(indexExpression);
     }
 
+    /******************************************************************
+     * FunctionCall
+     ******************************************************************/
+
+    FunctionCall::FunctionCall(FunctorDecl *functorDecl, const std::vector<Expression *> &arguments) {
+        setArguments(arguments);
+        if (matchFunctor(functorDecl)) {
+            bindPrototype(functorDecl);
+        } else {
+            assert(false);
+        }
+    }
+
 }
