@@ -792,4 +792,11 @@ namespace rexlang {
 
     void ValueOfString::setStringLiteral(const TString &literal) { string_literal_ = literal; }
 
+    /******************************************************************
+     * TypeConvert
+     ******************************************************************/
+
+    void TypeConvert::setFromExpression(Expression *expression) { from_expression_ = expression; setChild(expression); }
+    void TypeConvert::setTargetType    (TypeDecl *  targetType) { target_type_ = targetType;     setChild(targetType); }
+
 }

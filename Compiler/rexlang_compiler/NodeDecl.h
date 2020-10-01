@@ -1781,7 +1781,7 @@ namespace rexlang {
     };
 
     /**
-     * @brief 函数调用组件
+     * 函数调用组件
      */
     class FunctionCall : public NameComponent {
     private:
@@ -1825,12 +1825,12 @@ namespace rexlang {
 
     };
 
-    /*
+    /**
      * 类型转换
      */
     class TypeConvert : public Expression {
     private:
-        enum ConvertType { kCTImplicit, kCTExplicit };
+        enum ConvertType { kCTImplicit, kCTExplicit };  // 转换模式
         ConvertType convert_type_ = ConvertType::kCTImplicit;
 
         Expression * from_expression_ = nullptr;     // 被转换表达式
@@ -1840,6 +1840,10 @@ namespace rexlang {
         TypeDecl *CheckExpressionInternal   ()        override ;
         TypeDecl *getExpressionTypeInternal ()  const override ;
 
+    private:
+        void setFromExpression(Expression *expression) ;
+        void setTargetType    (TypeDecl *  targetType) ;
+
     public:
         TypeConvert(TypeDecl *targetType, Expression *fromExpression) ;
 
@@ -1847,7 +1851,6 @@ namespace rexlang {
         void        sematicAnalysisInternal (SemaContext &semaCtx) override ;
 
         Expression *getSourceExpr () const ;
-
         TypeDecl *  getSourceType () const ;
         TypeDecl *  getTargetType () const ;
 

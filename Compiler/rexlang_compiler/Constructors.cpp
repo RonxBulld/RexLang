@@ -259,4 +259,13 @@ namespace rexlang {
         }
     }
 
+    /******************************************************************
+     * TypeConvert
+     ******************************************************************/
+
+    TypeConvert::TypeConvert(TypeDecl *targetType, Expression *fromExpression) {
+        setTargetType(targetType);
+        setFromExpression(fromExpression);
+    }
+
 }
