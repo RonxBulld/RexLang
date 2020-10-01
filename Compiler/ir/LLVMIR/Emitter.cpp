@@ -1167,8 +1167,8 @@ namespace rexlang {
             arguments_ir.push_back(argument_ir);
         }
 
-        assert(functionCall->functor_declare_);
-        FunctorDecl *prototype = functionCall->functor_declare_;
+        assert(functionCall->callee_);
+        FunctorDecl *prototype = functionCall->callee_;
 
         // 处理不同的参数打包方式
 

@@ -662,7 +662,7 @@ namespace rexlang {
      * FunctionCall
      ***************************************************/
 
-    void FunctionCall::setCallName    (NameComponent *funcName) { function_name_ = funcName; setChild(funcName); }
+    void FunctionCall::setName(IdentRefer *funcName) { name_ = funcName; setChild(funcName); }
 
     void FunctionCall::appendArgument (Expression *argument) {
         arguments_.emplace_back(argument);
@@ -677,7 +677,47 @@ namespace rexlang {
     }
 
     void FunctionCall::bindPrototype(FunctorDecl *functorDecl) {
-        functor_declare_ = functorDecl;
+        callee_ = functorDecl;
+    }
+
+    FunctorDecl *FunctionCall::getCallee() const {
+        return callee_;
+    }
+
+    size_t FunctionCall::getArgumentsCount() const {
+        return arguments_.size();
+    }
+
+    Expression * FunctionCall::getArgumentAt(size_t idx) const {
+        return arguments_.at(idx);
+    }
+
+    std::vector<Expression *> &FunctionCall::getArguments() {
+        return arguments_;
+    }
+
+    const std::vector<Expression *> &FunctionCall::getArguments() const {
+        return arguments_;
+    }
+
+    bool FunctionCall::isArgument(Expression *expr) const {
+        return isArgument(const_cast<const Expression *>(expr));
+    }
+    bool FunctionCall::isArgument(const Expression *expr) const {
+        return indexOfArgument(expr) >= 0;
+    }
+
+    int FunctionCall::indexOfArgument(const Expression *expr) const {
+        for (unsigned idx = 0, count = arguments_.size(); idx < count; ++idx) {
+            if (expr == arguments_[idx]) {
+                return idx;
+            }
+        }
+        return -1;
+    }
+
+    int FunctionCall::indexOfArgument(Expression *expr) const {
+        return indexOfArgument(const_cast<const Expression *>(expr));
     }
 
     /***************************************************

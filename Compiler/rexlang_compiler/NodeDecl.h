@@ -1785,9 +1785,9 @@ namespace rexlang {
      */
     class FunctionCall : public NameComponent {
     private:
-        NameComponent *           function_name_ = nullptr;
+        IdentRefer *              name_ = nullptr;
         std::vector<Expression *> arguments_;
-        FunctorDecl *             functor_declare_ = nullptr;
+        FunctorDecl *             callee_ = nullptr;
 
     protected:
         TypeDecl *CheckExpressionInternal   () override ;
@@ -1795,7 +1795,7 @@ namespace rexlang {
         TypeDecl *getExpressionTypeInternal ()                       const override ;   // 返回值的数据类型
 
     public:
-        FunctionCall(FunctorDecl *functorDecl, const std::vector<Expression *> &arguments) ;
+        FunctionCall(IdentRefer *name, FunctorDecl *functorDecl, const std::vector<Expression *> &arguments) ;
 
     public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
@@ -1803,15 +1803,17 @@ namespace rexlang {
         bool matchFunctor       (FunctorDecl *  functorDecl) const ;    // 检查实参列表是否匹配指定可调用对象原型
         void bindPrototype      (FunctorDecl *  functorDecl) ;          // 将可调用对象绑定到函数调用节点
 
+        void setName            (IdentRefer * name) ;
         void setArguments       (const std::vector<Expression *> &arguments) ;
         void appendArgument     (Expression *   argument) ;
 
         IdentRefer *                getBaseId           () const override ;
-        NameComponent *             getCallee           () const ;
-        FunctorDecl *               getFunctionDeclare  () const ;
+        FunctorDecl *               getCallee           () const ;
         size_t                      getArgumentsCount   () const ;
         Expression *                getArgumentAt       (size_t idx) const ;
-        std::vector<Expression *> & getArguments        () const ;
+
+              std::vector<Expression *> & getArguments  () ;
+        const std::vector<Expression *> & getArguments  () const ;
 
         bool    isArgument      (      Expression *expr) const ;    // 判定表达式是否为实参，依赖 IndexOfArgument 实现
         bool    isArgument      (const Expression *expr) const ;    // 判定表达式是否为实参，依赖 IndexOfArgument 实现

@@ -782,7 +782,7 @@ namespace rexlang {
         }
 
         // 创建调用
-        FunctionCall* function_call = CreateNode<FunctionCall>(context, callee, arguments);
+        FunctionCall* function_call = CreateNode<FunctionCall>(context, callee_name, callee, arguments);
         return NodeWarp(function_call);
     }
 

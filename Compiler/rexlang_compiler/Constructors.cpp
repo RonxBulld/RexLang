@@ -249,7 +249,8 @@ namespace rexlang {
      * FunctionCall
      ******************************************************************/
 
-    FunctionCall::FunctionCall(FunctorDecl *functorDecl, const std::vector<Expression *> &arguments) {
+    FunctionCall::FunctionCall(IdentRefer *name, FunctorDecl *functorDecl, const std::vector<Expression *> &arguments) {
+        setName(name);
         setArguments(arguments);
         if (matchFunctor(functorDecl)) {
             bindPrototype(functorDecl);

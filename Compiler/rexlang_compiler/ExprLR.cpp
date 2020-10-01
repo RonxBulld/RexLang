@@ -86,7 +86,7 @@ namespace rexlang {
         // 如果参数是传值则为右值，如果传址则为左值
         else if (this->isArgument(expr)) {
             int idx = this->indexOfArgument(expr);
-            FunctorDecl *functor_decl = this->getFunctionDeclare();
+            FunctorDecl *functor_decl = this->getCallee();
             ParameterDecl *parameter = functor_decl->getParameterAt(idx);
             return parameter->shouldBeReference() ? L : R ;
         }

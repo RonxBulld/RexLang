@@ -7,7 +7,6 @@
 #include "ASTUtility.h"
 #include "ASTContext.h"
 #include "utilities/Str2Attr.h"
-#include "TypeAssert.h"
 
 namespace rexlang {
 
@@ -17,7 +16,7 @@ namespace rexlang {
 
     IdentRefer *IdentRefer  ::getBaseId() const { return const_cast<IdentRefer *>(this); }
     IdentRefer *ArrayIndex  ::getBaseId() const { return this->getIndexBase()->getBaseId(); }
-    IdentRefer *FunctionCall::getBaseId() const { return this->function_name_->getBaseId(); }
+    IdentRefer *FunctionCall::getBaseId() const { return this->name_->getBaseId(); }
 
     NameComponent *ArrayIndex::getIndexBase() const {
         NameComponent *base = nullptr;

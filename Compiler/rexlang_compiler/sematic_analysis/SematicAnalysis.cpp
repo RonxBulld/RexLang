@@ -279,18 +279,4 @@ namespace rexlang {
         return true;
     }
 
-    bool FunctionCall::isArgument(Expression *expr)       const { return isArgument(const_cast<const Expression *>(expr)); }
-    bool FunctionCall::isArgument(const Expression *expr) const { return indexOfArgument(expr) >= 0; }
-
-    int FunctionCall::indexOfArgument(const Expression *expr) const {
-        for (unsigned idx = 0, count = arguments_.size(); idx < count; ++idx) {
-            if (expr == arguments_[idx]) {
-                return idx;
-            }
-        }
-        return -1;
-    }
-
-    int FunctionCall::indexOfArgument(Expression *expr) const { return indexOfArgument(const_cast<const Expression *>(expr)); }
-
 }

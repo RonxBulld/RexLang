@@ -461,8 +461,7 @@ namespace rexlang {
     void FunctionCall::sematicAnalysisInternal(SemaContext &semaCtx) {
         NameComponent::sematicAnalysisInternal(semaCtx);
 
-        getCallee()->sematicAnalysisInternal(semaCtx);
-        FunctorDecl *functor_decl = getFunctionDeclare();
+        FunctorDecl *functor_decl = getCallee();
         if (functor_decl == nullptr) {
             assert(false);
             return;

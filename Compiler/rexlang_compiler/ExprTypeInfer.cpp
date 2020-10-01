@@ -46,7 +46,7 @@ namespace rexlang {
     }
 
     TypeDecl *FunctionCall::getExpressionTypeInternal() const {
-        FunctorDecl *functor_decl = getFunctionDeclare();
+        FunctorDecl *functor_decl = getCallee();
         assert(functor_decl);
         return functor_decl->getReturnType();
     }
