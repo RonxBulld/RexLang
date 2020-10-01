@@ -174,7 +174,7 @@ namespace rexlang {
      ************************************************/
 
     bool TypeDecl   ::isCallable() const { return false; }
-    bool FunctorDecl::isCallable() const { return false; }
+    bool FunctorDecl::isCallable() const { return true; }
 
     /************************************************
      * 类型的可索引性及索引元素类型
