@@ -47,7 +47,7 @@ namespace rexlang {
         if (binary_expression->operator_type_ == UnaryExpression::OperatorType::kOptNone) { return nullptr; }
         TypeDecl *lhs_operand_type = this->CheckExpression(binary_expression->lhs_);
         TypeDecl *rhs_operand_type = this->CheckExpression(binary_expression->rhs_);
-        bool operand_valid = binary_expression->IsBinaryOperateValid();
+        bool operand_valid = binary_expression->isBinaryOperateValid();
         if (operand_valid == false) {
             assert(false);
             return nullptr;

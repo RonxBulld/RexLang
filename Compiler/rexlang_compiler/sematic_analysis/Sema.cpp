@@ -60,7 +60,7 @@ namespace rexlang {
         }
     }
 
-    bool semaExprAndIsInt   (Expression *expr, SemaContext &semaCtx) { return semaExprAndCheckTypeFeature<&TypeDecl::isIntegerClass>(expr, semaCtx); }
+    bool semaExprAndIsInt   (Expression *expr, SemaContext &semaCtx) { return semaExprAndCheckTypeFeature<&TypeDecl::isIntegerCategory>(expr, semaCtx); }
     bool semaExprAndIsBoolEx(Expression *expr, SemaContext &semaCtx) { return semaExprAndCheckTypeFeature<&TypeDecl::isExtendBooleanType>(expr, semaCtx); }
 
     template <typename Ptr>

@@ -358,7 +358,7 @@ digraph G {
             <tr><td border="1" bgcolor="AliceBlue">+ isStructType(...) -&gt; _Bool</td></tr>
             <tr><td border="1" bgcolor="AliceBlue">+ isExtendBooleanType(...) -&gt; _Bool</td></tr>
             <tr><td border="1" bgcolor="AliceBlue">+ isNumerical(...) -&gt; _Bool</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ isIntegerClass(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ isIntegerCategory(...) -&gt; _Bool</td></tr>
             <tr><td border="1" bgcolor="AliceBlue">+ isArrayType(...) -&gt; _Bool</td></tr>
             <tr><td border="1" bgcolor="AliceBlue">+ isFunctionType(...) -&gt; _Bool</td></tr>
             <tr><td border="1" bgcolor="AliceBlue">+ isAPICommandType(...) -&gt; _Bool</td></tr>
@@ -407,7 +407,7 @@ digraph G {
             <tr><td border="1" bgcolor="AliceBlue">+ GetBuiltinType(...) -&gt; EnumOfBuiltinType</td></tr>
             <tr><td border="1" bgcolor="AliceBlue">+^ isExtendBooleanType(...) -&gt; _Bool</td></tr>
             <tr><td border="1" bgcolor="AliceBlue">+^ isNumerical(...) -&gt; _Bool</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+^ isIntegerClass(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+^ isIntegerCategory(...) -&gt; _Bool</td></tr>
             <tr><td border="1" bgcolor="AliceBlue">+ GetTypeText(...) -&gt; const char *</td></tr>
             <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
         </table>>
@@ -1083,7 +1083,7 @@ digraph G {
             <tr><td border="1" bgcolor="AliceBlue">*^ getExpressionTypeInternal(...) -&gt; TypeDecl *</td></tr>
             <tr><td border="1" bgcolor="AliceBlue">+ setLHS(...) -&gt; void</td></tr>
             <tr><td border="1" bgcolor="AliceBlue">+ setRHS(...) -&gt; void</td></tr>
-            <tr><td border="1" bgcolor="AliceBlue">+ IsBinaryOperateValid(...) -&gt; _Bool</td></tr>
+            <tr><td border="1" bgcolor="AliceBlue">+ isBinaryOperateValid(...) -&gt; _Bool</td></tr>
             <tr><td border="1" bgcolor="AliceBlue">+ getBinaryOperateUpgradeType(...) -&gt; VariTypeDecl *</td></tr>
             <tr><td border="1" bgcolor="AliceBlue">+ GetClassId(...) -&gt; const NodeType</td></tr>
             <tr><td border="1" bgcolor="AntiqueWhite">- lhs_ : Expression *</td></tr>
