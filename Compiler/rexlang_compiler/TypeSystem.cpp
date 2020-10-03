@@ -119,19 +119,19 @@ namespace rexlang {
      * 获取内置类型枚举
      **********************************************************/
 
-    EnumOfBuiltinType  BuiltinVoidType     :: GetBuiltinType () const { return EnumOfBuiltinType::kBTypeVoid; }
-    EnumOfBuiltinType  BuiltinCommonType   :: GetBuiltinType () const { return EnumOfBuiltinType::kBTypeCommon; }
-    EnumOfBuiltinType  BuiltinCharType     :: GetBuiltinType () const { return EnumOfBuiltinType::kBTypeChar; }
-    EnumOfBuiltinType  BuiltinIntegerType  :: GetBuiltinType () const { return EnumOfBuiltinType::kBTypeInteger; }
-    EnumOfBuiltinType  BuiltinFloatType    :: GetBuiltinType () const { return EnumOfBuiltinType::kBTypeFloat; }
-    EnumOfBuiltinType  BuiltinBoolType     :: GetBuiltinType () const { return EnumOfBuiltinType::kBTypeBool; }
-    EnumOfBuiltinType  BuiltinStringType   :: GetBuiltinType () const { return EnumOfBuiltinType::kBTypeString; }
-    EnumOfBuiltinType  BuiltinDataSetType  :: GetBuiltinType () const { return EnumOfBuiltinType::kBTypeDataSet; }
-    EnumOfBuiltinType  BuiltinShortType    :: GetBuiltinType () const { return EnumOfBuiltinType::kBTypeShort; }
-    EnumOfBuiltinType  BuiltinLongType     :: GetBuiltinType () const { return EnumOfBuiltinType::kBTypeLong; }
-    EnumOfBuiltinType  BuiltinDatetimeType :: GetBuiltinType () const { return EnumOfBuiltinType::kBTypeDatetime; }
-    EnumOfBuiltinType  BuiltinFuncPtrType  :: GetBuiltinType () const { return EnumOfBuiltinType::kBTypeFuncPtr; }
-    EnumOfBuiltinType  BuiltinDoubleType   :: GetBuiltinType () const { return EnumOfBuiltinType::kBTypeDouble; }
+    EnumOfBuiltinType  BuiltinVoidType    ::GetBuiltinType () const { return BuiltinVoidType    ::BuiltinType(); }
+    EnumOfBuiltinType  BuiltinCommonType  ::GetBuiltinType () const { return BuiltinCommonType  ::BuiltinType(); }
+    EnumOfBuiltinType  BuiltinCharType    ::GetBuiltinType () const { return BuiltinCharType    ::BuiltinType(); }
+    EnumOfBuiltinType  BuiltinIntegerType ::GetBuiltinType () const { return BuiltinIntegerType ::BuiltinType(); }
+    EnumOfBuiltinType  BuiltinFloatType   ::GetBuiltinType () const { return BuiltinFloatType   ::BuiltinType(); }
+    EnumOfBuiltinType  BuiltinBoolType    ::GetBuiltinType () const { return BuiltinBoolType    ::BuiltinType(); }
+    EnumOfBuiltinType  BuiltinStringType  ::GetBuiltinType () const { return BuiltinStringType  ::BuiltinType(); }
+    EnumOfBuiltinType  BuiltinDataSetType ::GetBuiltinType () const { return BuiltinDataSetType ::BuiltinType(); }
+    EnumOfBuiltinType  BuiltinShortType   ::GetBuiltinType () const { return BuiltinShortType   ::BuiltinType(); }
+    EnumOfBuiltinType  BuiltinLongType    ::GetBuiltinType () const { return BuiltinLongType    ::BuiltinType(); }
+    EnumOfBuiltinType  BuiltinDatetimeType::GetBuiltinType () const { return BuiltinDatetimeType::BuiltinType(); }
+    EnumOfBuiltinType  BuiltinFuncPtrType ::GetBuiltinType () const { return BuiltinFuncPtrType ::BuiltinType(); }
+    EnumOfBuiltinType  BuiltinDoubleType  ::GetBuiltinType () const { return BuiltinDoubleType  ::BuiltinType(); }
 
     /************************************************
      * 定义内建类型节点的 TypeText 返回值
