@@ -176,7 +176,7 @@ namespace rexlang {
     };
 
     // 运算符类型
-    class OperatorType {
+    class OperatorType final {
     public:
         enum class Opt {
             kOptNone,
@@ -187,6 +187,8 @@ namespace rexlang {
         };
 
         explicit OperatorType(const Opt &opt) : opt_(opt) { }
+
+        ~OperatorType() = default ;
 
     public:
 
@@ -203,7 +205,7 @@ namespace rexlang {
         [[nodiscard]] bool isBooleanOpt    () const ;   // && ||
 
     public:
-        const Opt &getOperate() const { return opt_; }
+        const Opt &getOperate() const { return opt_; }  // 获取运算符枚举值
 
     private:
         Opt opt_;
@@ -736,42 +738,49 @@ namespace rexlang {
          * 基本类型工具
          ********************************************************/
 
-        [[nodiscard]] virtual bool    isVoidType          () const ;   // 是否为空类型
-        [[nodiscard]] virtual bool    isCommonType        () const ;   // 是否为通用型
-        [[nodiscard]] virtual bool    isCharType          () const ;   // 是否为字节型
-        [[nodiscard]] virtual bool    isIntegerType       () const ;   // 是否为整数型
-        [[nodiscard]] virtual bool    isFloatType         () const ;   // 是否为小数型
-        [[nodiscard]] virtual bool    isBoolType          () const ;   // 是否为逻辑型
-        [[nodiscard]] virtual bool    isStringType        () const ;   // 是否为文本型
-        [[nodiscard]] virtual bool    isDataSetType       () const ;   // 是否为字节集
-        [[nodiscard]] virtual bool    isShortType         () const ;   // 是否为短整型
-        [[nodiscard]] virtual bool    isLongType          () const ;   // 是否为长整型
-        [[nodiscard]] virtual bool    isDatetimeType      () const ;   // 是否为日期时间型
-        [[nodiscard]] virtual bool    isFuncPtrType       () const ;   // 是否为子程序指针
-        [[nodiscard]] virtual bool    isDoubleType        () const ;   // 是否为双精度小数型
-        [[nodiscard]] virtual bool    isStructType        () const ;   // 是否为自定义结构体类型
-        [[nodiscard]] virtual bool    isExtendBooleanType () const ;   // 类型是否具有扩展布尔性
-        [[nodiscard]] virtual bool    isNumerical         () const ;   // 类型是否具有数值性
-        [[nodiscard]] virtual bool    isIntegerClass      () const ;   // 类型是否整数族
-        [[nodiscard]] virtual bool    isArrayType         () const ;   // 是否为数组
-        [[nodiscard]] virtual bool    isFunctionType      () const ;   // 是否为函数
-        [[nodiscard]] virtual bool    isAPICommandType    () const ;   // 是否为外部API
+        virtual bool    isVoidType          () const ;   // 是否为空类型
+        virtual bool    isCommonType        () const ;   // 是否为通用型
+        virtual bool    isCharType          () const ;   // 是否为字节型
+        virtual bool    isIntegerType       () const ;   // 是否为整数型
+        virtual bool    isFloatType         () const ;   // 是否为小数型
+        virtual bool    isBoolType          () const ;   // 是否为逻辑型
+        virtual bool    isStringType        () const ;   // 是否为文本型
+        virtual bool    isDataSetType       () const ;   // 是否为字节集
+        virtual bool    isShortType         () const ;   // 是否为短整型
+        virtual bool    isLongType          () const ;   // 是否为长整型
+        virtual bool    isDatetimeType      () const ;   // 是否为日期时间型
+        virtual bool    isFuncPtrType       () const ;   // 是否为子程序指针
+        virtual bool    isDoubleType        () const ;   // 是否为双精度小数型
+        virtual bool    isStructType        () const ;   // 是否为自定义结构体类型
+        virtual bool    isExtendBooleanType () const ;   // 类型是否具有扩展布尔性
+        virtual bool    isNumerical         () const ;   // 类型是否具有数值性
+        virtual bool    isIntegerCategory   () const ;   // 类型是否整数族
+        virtual bool    isArrayType         () const ;   // 是否为数组
+        virtual bool    isFunctionType      () const ;   // 是否为函数
+        virtual bool    isAPICommandType    () const ;   // 是否为外部API
 
         /********************************************************
          * 高级类型工具
          ********************************************************/
 
-        [[nodiscard]] virtual bool       isCallable           () const ;   // 类型是否可调用对象
-        [[nodiscard]] virtual bool       isIndexable          () const ;   // 类型是否可索引
-        [[nodiscard]] virtual bool       isFixedDimensions    () const ;   // 维度数量是否不可变
-        [[nodiscard]] virtual TypeDecl * evalIndexedElementTy () const ;   // 获取索引的类型
+        virtual bool       isCallable           () const ;   // 类型是否可调用对象
+        virtual bool       isIndexable          () const ;   // 类型是否可索引
+        virtual bool       isFixedDimensions    () const ;   // 维度数量是否不可变
+        virtual TypeDecl * evalIndexedElementTy () const ;   // 获取索引的类型
 
-        [[nodiscard]] virtual std::vector<size_t> getDimensions () const ;  // 获取定义的索引维度
+        virtual std::vector<size_t> getDimensions () const ;  // 获取定义的索引维度
 
-        [[nodiscard]] virtual bool  compareTo        (TypeDecl *otherType) const ;      // 比较类型
-        [[nodiscard]] virtual bool  isUnyOptValid    (OperatorType opt) const ;                      // 判断一元计算有效性
-        [[nodiscard]] virtual bool  isBinOptValid    (OperatorType opt, VariTypeDecl *otherType) const ; // 判断二元计算有效性
-        [[nodiscard]] virtual bool  isAssginValidFrom(TypeDecl *fromType) const ;                    // 判断赋值有效性
+        virtual bool  compareTo        (TypeDecl *otherType) const ;                       // 比较类型
+        virtual bool  isUnyOptValid    (OperatorType opt) const ;                          // 判断一元计算有效性
+        virtual bool  isBinOptValid    (OperatorType opt, VariTypeDecl *otherType) const ; // 判断二元计算有效性
+        virtual bool  isAssginValidFrom(TypeDecl *fromType) const ;                        // 判断赋值有效性
+
+        /********************************************************
+         * 类型转换助手
+         * NOTE: 在构造类型转换系统的时候考虑使用DAG？
+         ********************************************************/
+
+        virtual TypeDecl *promoteType(TypeDecl *otherType) const ;      // 获取当前类型与指定类型的共同兼容类型
 
     public:
         static const NodeType GetClassId () ;
@@ -836,7 +845,7 @@ namespace rexlang {
     public:
         bool    isExtendBooleanType () const override;
         bool    isNumerical         () const override;
-        bool    isIntegerClass      () const override;
+        bool    isIntegerCategory   () const override;
 
         virtual const char *GetTypeText () const = 0;
 
@@ -856,6 +865,8 @@ namespace rexlang {
         bool                isVoidType      () const override ;
         const char *        GetTypeText     () const override ;
 
+        TypeDecl *          promoteType(TypeDecl *otherType) const override ;
+
         static EnumOfBuiltinType    BuiltinType     () ;
         static const char *         TypeText        () ;
     };
@@ -871,6 +882,8 @@ namespace rexlang {
         EnumOfBuiltinType   GetBuiltinType  () const override ;
         bool                isCommonType    () const override ;
         const char *        GetTypeText     () const override ;
+
+        TypeDecl *          promoteType(TypeDecl *otherType) const override ;
 
         static EnumOfBuiltinType    BuiltinType     () ;
         static const char *         TypeText        () ;
@@ -890,6 +903,8 @@ namespace rexlang {
         bool                isBinOptValid   (OperatorType opt, VariTypeDecl *otherType) const override ;
         bool                isUnyOptValid   (OperatorType opt) const override ;
 
+        TypeDecl *          promoteType(TypeDecl *otherType) const override ;
+
         static EnumOfBuiltinType    BuiltinType     () ;
         static const char *         TypeText        () ;
     };
@@ -907,6 +922,8 @@ namespace rexlang {
         const char *        GetTypeText     () const override ;
         bool                isBinOptValid   (OperatorType opt, VariTypeDecl *otherType) const override ;
         bool                isUnyOptValid   (OperatorType opt) const override ;
+
+        TypeDecl *          promoteType(TypeDecl *otherType) const override ;
 
         static EnumOfBuiltinType    BuiltinType     () ;
         static const char *         TypeText        () ;
@@ -926,6 +943,8 @@ namespace rexlang {
         bool                isBinOptValid   (OperatorType opt, VariTypeDecl *otherType) const override ;
         bool                isUnyOptValid   (OperatorType opt) const override ;
 
+        TypeDecl *          promoteType(TypeDecl *otherType) const override ;
+
         static EnumOfBuiltinType    BuiltinType     () ;
         static const char *         TypeText        () ;
     };
@@ -942,6 +961,8 @@ namespace rexlang {
         bool                isBoolType      () const override ;
         const char *        GetTypeText     () const override ;
         bool                isBinOptValid   (OperatorType opt, VariTypeDecl *otherType) const override ;
+
+        TypeDecl *          promoteType(TypeDecl *otherType) const override ;
 
         static EnumOfBuiltinType    BuiltinType     () ;
         static const char *         TypeText        () ;
@@ -962,6 +983,8 @@ namespace rexlang {
         bool                isFixedDimensions       () const override ;
         std::vector<size_t> getDimensions           () const override ;
         bool                isBinOptValid           (OperatorType opt, VariTypeDecl *otherType) const override ;
+
+        TypeDecl *          promoteType(TypeDecl *otherType) const override ;
 
         TypeDecl *          evalIndexedElementTy     () const override ;
 
@@ -985,6 +1008,8 @@ namespace rexlang {
         std::vector<size_t> getDimensions           () const override ;
         bool                isBinOptValid           (OperatorType opt, VariTypeDecl *otherType) const override ;
 
+        TypeDecl *          promoteType(TypeDecl *otherType) const override ;
+
         TypeDecl *          evalIndexedElementTy     () const override ;
 
         static EnumOfBuiltinType    BuiltinType     () ;
@@ -1005,6 +1030,8 @@ namespace rexlang {
         bool                isBinOptValid   (OperatorType opt, VariTypeDecl *otherType) const override ;
         bool                isUnyOptValid   (OperatorType opt) const override ;
 
+        TypeDecl *          promoteType(TypeDecl *otherType) const override ;
+
         static EnumOfBuiltinType    BuiltinType     () ;
         static const char *         TypeText        () ;
     };
@@ -1023,6 +1050,8 @@ namespace rexlang {
         bool                isBinOptValid   (OperatorType opt, VariTypeDecl *otherType) const override ;
         bool                isUnyOptValid   (OperatorType opt) const override ;
 
+        TypeDecl *          promoteType(TypeDecl *otherType) const override ;
+
         static EnumOfBuiltinType    BuiltinType     () ;
         static const char *         TypeText        () ;
     };
@@ -1039,6 +1068,8 @@ namespace rexlang {
         bool                isDatetimeType  () const override ;
         const char *        GetTypeText     () const override ;
         bool                isBinOptValid   (OperatorType opt, VariTypeDecl *otherType) const override ;
+
+        TypeDecl *          promoteType(TypeDecl *otherType) const override ;
 
         static EnumOfBuiltinType    BuiltinType     () ;
         static const char *         TypeText        () ;
@@ -1057,6 +1088,8 @@ namespace rexlang {
         const char *        GetTypeText     () const override ;
         bool                isBinOptValid   (OperatorType opt, VariTypeDecl *otherType) const override ;
 
+        TypeDecl *          promoteType(TypeDecl *otherType) const override ;
+
         static EnumOfBuiltinType    BuiltinType     () ;
         static const char *         TypeText        () ;
     };
@@ -1074,6 +1107,8 @@ namespace rexlang {
         const char *        GetTypeText     () const override ;
         bool                isBinOptValid   (OperatorType opt, VariTypeDecl *otherType) const override ;
         bool                isUnyOptValid   (OperatorType opt) const override ;
+
+        TypeDecl *          promoteType(TypeDecl *otherType) const override ;
 
         static EnumOfBuiltinType    BuiltinType     () ;
         static const char *         TypeText        () ;
@@ -1104,6 +1139,8 @@ namespace rexlang {
 
         bool            isMemberOfThis      (MemberVariableDecl *memberVariDecl) const ;
         int             indexMemberOfThis   (MemberVariableDecl *memberVariDecl) const ;
+
+        TypeDecl *          promoteType(TypeDecl *otherType) const override ;
 
     };
 
@@ -1880,6 +1917,9 @@ namespace rexlang {
         void setOperator                (const OperatorType &       opt) ;
         void setOperator                (const OperatorType::Opt &  opt) ;
         const OperatorType &getOperator () const ;
+
+    public:
+        VariTypeDecl *promoteType(VariTypeDecl *typeA, VariTypeDecl *typeB) const ;
 
     public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;

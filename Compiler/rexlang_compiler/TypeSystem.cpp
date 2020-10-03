@@ -304,4 +304,246 @@ namespace rexlang {
     TypeDecl *   TypeConvert::getSourceType () const { return from_expression_->getExpressionType(); }
     TypeDecl *   TypeConvert::getTargetType () const { assert(target_type_);     return target_type_; }
 
+    /******************************************
+     * 类型提升
+     ******************************************/
+
+    TypeDecl *TypeDecl::promoteType(TypeDecl *otherType) const { return nullptr; }
+
+    /*===-----------------------------------------------------===*
+     * Void 不和任何类型共类型
+     */
+
+    TypeDecl *BuiltinVoidType::promoteType(TypeDecl *otherType) const {
+        assert(false);
+        return nullptr;
+    }
+
+    /*===-----------------------------------------------------===*
+     * 通用型 暂时不和任何类型共类型
+     */
+
+    TypeDecl *BuiltinCommonType::promoteType(TypeDecl *otherType) const {
+        assert(false);
+        return nullptr;
+    }
+
+    /*===-----------------------------------------------------===*
+     * 字符型
+     * Char->Char
+     * Short->Short
+     * Int->Int
+     * Long->Long
+     * Float->Double
+     * Double->Double
+     */
+
+    TypeDecl *BuiltinCharType::promoteType(TypeDecl *otherType) const {
+        TranslateUnit *TU = getTranslateUnit();
+        assert(TU);
+        if (otherType->isCharType())    { return const_cast<TypeDecl *>(static_cast<const TypeDecl *>(this)); }
+        if (otherType->isShortType())   { return otherType; }
+        if (otherType->isIntegerType()) { return otherType; }
+        if (otherType->isLongType())    { return otherType; }
+        if (otherType->isFloatType())   { return TU->getDoubleTy(); }
+        if (otherType->isDoubleType())  { return TU->getDoubleTy(); }
+        assert(false);
+        return nullptr;
+    }
+
+    /*===-----------------------------------------------------===*
+     * 短整型
+     * Char->Short
+     * Short->Short
+     * Int->Int
+     * Long->Long
+     * Float->Double
+     * Double->Double
+     */
+
+    TypeDecl *BuiltinShortType::promoteType(TypeDecl *otherType) const {
+        TranslateUnit *TU = getTranslateUnit();
+        assert(TU);
+        if (otherType->isCharType())    { return const_cast<TypeDecl *>(static_cast<const TypeDecl *>(this)); }
+        if (otherType->isShortType())   { return const_cast<TypeDecl *>(static_cast<const TypeDecl *>(this)); }
+        if (otherType->isIntegerType()) { return otherType; }
+        if (otherType->isLongType())    { return otherType; }
+        if (otherType->isFloatType())   { return TU->getDoubleTy(); }
+        if (otherType->isDoubleType())  { return TU->getDoubleTy(); }
+        assert(false);
+        return nullptr;
+    }
+
+    /*===-----------------------------------------------------===*
+     * 整数型
+     * Char->Int
+     * Short->Int
+     * Int->Int
+     * Long->Long
+     * Float->Double
+     * Double->Double
+     */
+
+    TypeDecl *BuiltinIntegerType::promoteType(TypeDecl *otherType) const {
+        TranslateUnit *TU = getTranslateUnit();
+        assert(TU);
+        if (otherType->isCharType())    { return const_cast<TypeDecl *>(static_cast<const TypeDecl *>(this)); }
+        if (otherType->isShortType())   { return const_cast<TypeDecl *>(static_cast<const TypeDecl *>(this)); }
+        if (otherType->isIntegerType()) { return const_cast<TypeDecl *>(static_cast<const TypeDecl *>(this)); }
+        if (otherType->isLongType())    { return otherType; }
+        if (otherType->isFloatType())   { return TU->getDoubleTy(); }
+        if (otherType->isDoubleType())  { return TU->getDoubleTy(); }
+        assert(false);
+        return nullptr;
+    }
+
+    /*===-----------------------------------------------------===*
+     * 长整数型
+     * Char->Long
+     * Short->Long
+     * Int->Long
+     * Long->Long
+     * Float->Double
+     * Double->Double
+     */
+
+    TypeDecl *BuiltinLongType::promoteType(TypeDecl *otherType) const {
+        TranslateUnit *TU = getTranslateUnit();
+        assert(TU);
+        if (otherType->isCharType())    { return const_cast<TypeDecl *>(static_cast<const TypeDecl *>(this)); }
+        if (otherType->isShortType())   { return const_cast<TypeDecl *>(static_cast<const TypeDecl *>(this)); }
+        if (otherType->isIntegerType()) { return const_cast<TypeDecl *>(static_cast<const TypeDecl *>(this)); }
+        if (otherType->isLongType())    { return const_cast<TypeDecl *>(static_cast<const TypeDecl *>(this)); }
+        if (otherType->isFloatType())   { return TU->getDoubleTy(); }
+        if (otherType->isDoubleType())  { return TU->getDoubleTy(); }
+        assert(false);
+        return nullptr;
+    }
+
+    /*===-----------------------------------------------------===*
+     * 小数型
+     * Char->Double
+     * Short->Double
+     * Int->Double
+     * Long->Double
+     * Float->Float
+     * Double->Double
+     */
+
+    TypeDecl *BuiltinFloatType::promoteType(TypeDecl *otherType) const {
+        TranslateUnit *TU = getTranslateUnit();
+        assert(TU);
+        if (otherType->isCharType())    { return TU->getDoubleTy(); }
+        if (otherType->isShortType())   { return TU->getDoubleTy(); }
+        if (otherType->isIntegerType()) { return TU->getDoubleTy(); }
+        if (otherType->isLongType())    { return TU->getDoubleTy(); }
+        if (otherType->isFloatType())   { return const_cast<TypeDecl *>(static_cast<const TypeDecl *>(this)); }
+        if (otherType->isDoubleType())  { return TU->getDoubleTy(); }
+        assert(false);
+        return nullptr;
+    }
+
+    /*===-----------------------------------------------------===*
+     * 双精度浮点型
+     * Char->Double
+     * Short->Double
+     * Int->Double
+     * Long->Double
+     * Float->Double
+     * Double->Double
+     */
+
+    TypeDecl *BuiltinDoubleType::promoteType(TypeDecl *otherType) const {
+        TranslateUnit *TU = getTranslateUnit();
+        assert(TU);
+        if (otherType->isCharType())    { return const_cast<TypeDecl *>(static_cast<const TypeDecl *>(this)); }
+        if (otherType->isShortType())   { return const_cast<TypeDecl *>(static_cast<const TypeDecl *>(this)); }
+        if (otherType->isIntegerType()) { return const_cast<TypeDecl *>(static_cast<const TypeDecl *>(this)); }
+        if (otherType->isLongType())    { return const_cast<TypeDecl *>(static_cast<const TypeDecl *>(this)); }
+        if (otherType->isFloatType())   { return const_cast<TypeDecl *>(static_cast<const TypeDecl *>(this)); }
+        if (otherType->isDoubleType())  { return const_cast<TypeDecl *>(static_cast<const TypeDecl *>(this)); }
+        assert(false);
+        return nullptr;
+    }
+
+    /*===-----------------------------------------------------===*
+     * 布尔型
+     * Bool->Bool
+     */
+
+    TypeDecl *BuiltinBoolType::promoteType(TypeDecl *otherType) const {
+        if (otherType->isBoolType()) { return const_cast<TypeDecl *>(static_cast<const TypeDecl *>(this)); }
+        assert(false);
+        return nullptr;
+    }
+
+    /*===-----------------------------------------------------===*
+     * 文本型
+     * String->String
+     */
+
+    TypeDecl *BuiltinStringType::promoteType(TypeDecl *otherType) const {
+        if (otherType->isStringType()) { return const_cast<TypeDecl *>(static_cast<const TypeDecl *>(this)); }
+        assert(false);
+        return nullptr;
+    }
+
+    /*===-----------------------------------------------------===*
+     * 字节集型
+     * DataSet->DataSet
+     */
+
+    TypeDecl *BuiltinDataSetType::promoteType(TypeDecl *otherType) const {
+        if (otherType->isDataSetType()) { return const_cast<TypeDecl *>(static_cast<const TypeDecl *>(this)); }
+        assert(false);
+        return nullptr;
+    }
+
+    /*===-----------------------------------------------------===*
+     * 字节集型
+     * Datetime->Datetime
+     */
+
+    TypeDecl *BuiltinDatetimeType::promoteType(TypeDecl *otherType) const {
+        if (otherType->isDatetimeType()) { return const_cast<TypeDecl *>(static_cast<const TypeDecl *>(this)); }
+        assert(false);
+        return nullptr;
+    }
+
+    /*===-----------------------------------------------------===*
+     * 函数指针 暂时不和任何类型共类型
+     */
+
+    TypeDecl *BuiltinFuncPtrType::promoteType(TypeDecl *otherType) const {
+        assert(false);
+        return nullptr;
+    }
+
+    /*===-----------------------------------------------------===*
+     * 结构体 暂时不和任何类型共类型
+     */
+
+    TypeDecl *StructureDecl::promoteType(TypeDecl *otherType) const {
+        assert(false);
+        return nullptr;
+    }
+
+    /******************************************
+     * BinaryExpression
+     ******************************************/
+
+    VariTypeDecl *BinaryExpression::getBinaryOperateUpgradeType() const {
+        if (!isBinaryOperateValid()) {
+            assert(false);
+            return nullptr;
+        }
+
+        VariTypeDecl *lhs_type = rtti::dyn_cast<VariTypeDecl>(lhs_->getExpressionType());
+        assert(lhs_type);
+        VariTypeDecl *rhs_type = rtti::dyn_cast<VariTypeDecl>(rhs_->getExpressionType());
+        assert(rhs_type);
+
+        return promoteType(lhs_type, rhs_type);
+    }
+
 }
