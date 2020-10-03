@@ -737,10 +737,17 @@ namespace rexlang {
      * _OperatorExpression
      ***************************************************/
 
-    void                 OperatedExpression::setOperatorText(const TString & operatorText) { operator_      = operatorText; }
     void                 OperatedExpression::setOperator    (const OperatorType &     opt) { operator_type_ = opt; }
-    void                 OperatedExpression::setOperator    (const OperatorType::Opt &opt) { operator_type_ = OperatorType(opt); }
+    void                 OperatedExpression::setOperator    (const OperatorType::Opt &opt) { setOperator(OperatorType(opt)); }
     const OperatorType & OperatedExpression::getOperator    () const                       { return operator_type_; }
+    void                 OperatedExpression::setOperatorText(const TString & operatorText) { operator_ = operatorText; }
+
+    /***************************************************
+     * UnaryExpression
+     ***************************************************/
+
+    void        UnaryExpression::setOperand(Expression *operand) { operand_value_ = operand; setChild(operand); }
+    Expression *UnaryExpression::getOperand()                    { return operand_value_; }
 
     /***************************************************
      * BinaryExpression
@@ -749,11 +756,8 @@ namespace rexlang {
     void BinaryExpression::setLHS(Expression *lhsExpr) { lhs_ = lhsExpr; setChild(lhsExpr); }
     void BinaryExpression::setRHS(Expression *rhsExpr) { rhs_ = rhsExpr; setChild(rhsExpr); }
 
-    /***************************************************
-     * UnaryExpression
-     ***************************************************/
-
-    void UnaryExpression::setOperand(Expression *operand) { operand_value_ = operand; setChild(operand); }
+    Expression *BinaryExpression::getLHS() { return lhs_; }
+    Expression *BinaryExpression::getRHS() { return rhs_; }
 
     /***************************************************
      * ValueOfDataSet

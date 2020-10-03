@@ -1365,13 +1365,14 @@ namespace rexlang {
     protected:
         ExprUsage getSubExprAccessType(const Expression *expr) const override ;
 
+    private:
+        void setLHS(HierarchyIdentifier *lhs) ;
+        void setRHS(Expression *rhs) ;
+
     public:
         AssignStmt(HierarchyIdentifier *lhs, Expression *rhs) ;
 
     public:
-        void setLHS(HierarchyIdentifier *lhs) ;
-        void setRHS(Expression *rhs) ;
-
         HierarchyIdentifier *   getLHS() const ;
         Expression *            getRHS() const ;
 
@@ -1896,7 +1897,7 @@ namespace rexlang {
 
     };
 
-    /*
+    /**
      * 有运算符的表达式
      */
     class OperatedExpression : public Expression {
@@ -1910,7 +1911,7 @@ namespace rexlang {
         TString operator_;
 
     public:
-        OperatedExpression(const OperatorType &opt) ;
+        explicit OperatedExpression(const OperatorType &opt) ;
 
     public:
         void setOperatorText            (const TString &            operatorText) ;
@@ -1929,26 +1930,35 @@ namespace rexlang {
 
     };
 
+    /**
+     * 一元表达式
+     */
     class UnaryExpression : public OperatedExpression {
     private:
         Expression *operand_value_ = nullptr;
 
     protected:
-        VariTypeDecl *CheckExpressionInternal   () override ;
-        ExprUsage getSubExprAccessType          (const Expression *expr) const override ;
-        TypeDecl *getExpressionTypeInternal ()  const override ;
+        VariTypeDecl *  CheckExpressionInternal   () override ;
+        ExprUsage       getSubExprAccessType      (const Expression *expr) const override ;
+        TypeDecl *      getExpressionTypeInternal ()  const override ;
 
     public:
-        UnaryExpression(const OperatorType::Opt &opt, Expression *operand) ;
+        UnaryExpression(const OperatorType &opt, Expression *operand) ;
 
-    public:
+    private:
         void setOperand(Expression *operand) ;
+
+    public:
+        Expression *getOperand() ;
 
     public:
         static const NodeType GetClassId () ;
 
     };
 
+    /**
+     * 二元表达式
+     */
     class BinaryExpression : public OperatedExpression {
     private:
         Expression *lhs_ = nullptr;
@@ -1960,14 +1970,17 @@ namespace rexlang {
         TypeDecl *      getExpressionTypeInternal   ()  const override ;
 
     public:
-        BinaryExpression(const OperatorType::Opt &opt, Expression *lhs, Expression *rhs) ;
+        BinaryExpression(const OperatorType &opt, Expression *lhs, Expression *rhs) ;
 
-    public:
+    private:
         void    setLHS(Expression *lhsExpr) ;
         void    setRHS(Expression *rhsExpr) ;
 
-        bool            IsBinaryOperateValid         () const;   // 检查二元运算是否合法，该断言主要判断二元表达式中左右子式是否可以通过运算符计算
-        VariTypeDecl *  getBinaryOperateUpgradeType  () const;   // 获取二元表达式提升后的类型
+    public:
+        Expression *    getLHS() ;
+        Expression *    getRHS() ;
+        bool            isBinaryOperateValid         () const;   // 检查二元运算是否合法，该断言主要判断二元表达式中左右子式是否可以通过运算符计算
+        VariTypeDecl *  getBinaryOperateUpgradeType  () const;   // 获取二元表达式提升后的类型，亦是计算结果类型
 
     public:
         static const NodeType GetClassId () ;

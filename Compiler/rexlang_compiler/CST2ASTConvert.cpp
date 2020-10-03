@@ -813,26 +813,26 @@ namespace rexlang {
     }
 
     antlrcpp::Any CST2ASTConvert::visitBinaryExpr(rexLangParser::BinaryExprContext *context) {
-        OperatorType::Opt opt;
+        OperatorType opt(OperatorType::Opt::kOptNone);
         switch (context->opt->getType()) {
-            if (0) { case rexLangParser::K_ADD_OPT:        opt = OperatorType::Opt::kOptAdd;        break; }
-            if (0) { case rexLangParser::K_SUB_OPT:        opt = OperatorType::Opt::kOptSub;        break; }
-            if (0) { case rexLangParser::K_MUL_OPT:        opt = OperatorType::Opt::kOptMul;        break; }
-            if (0) { case rexLangParser::K_DIV_OPT:        opt = OperatorType::Opt::kOptDiv;        break; }
-            if (0) { case rexLangParser::K_FULL_DIV_OPT:   opt = OperatorType::Opt::kOptFullDiv;    break; }
-            if (0) { case rexLangParser::K_MOD_OPT:        opt = OperatorType::Opt::kOptMod;        break; }
-            if (0) { case rexLangParser::K_AECOM_OPT:      opt = OperatorType::Opt::kOptEqual;      break; }
-            if (0) { case rexLangParser::K_ASSIGN_OPT:     opt = OperatorType::Opt::kOptEqual;      break; }
-            if (0) { case rexLangParser::K_EQUAL_OPT:      opt = OperatorType::Opt::kOptEqual;      break; }
-            if (0) { case rexLangParser::K_NOT_EQUAL_OPT:  opt = OperatorType::Opt::kOptNotEqual;   break; }
-            if (0) { case rexLangParser::K_GREAT_OPT:      opt = OperatorType::Opt::kOptGreatThan;  break; }
-            if (0) { case rexLangParser::K_LESS_OPT:       opt = OperatorType::Opt::kOptLessThan;   break; }
-            if (0) { case rexLangParser::K_GREAT_EQU_OPT:  opt = OperatorType::Opt::kOptGreatEqual; break; }
-            if (0) { case rexLangParser::K_LESS_EQU_OPT:   opt = OperatorType::Opt::kOptLessEqual;  break; }
-            if (0) { case rexLangParser::K_LIKE_EQU_OPT:   opt = OperatorType::Opt::kOptLikeEqual;  break; }
-            if (0) { case rexLangParser::K_AND_OPT:        opt = OperatorType::Opt::kOptAnd;        break; }
-            if (0) { case rexLangParser::K_OR_OPT:         opt = OperatorType::Opt::kOptOr;         break; }
-            if (0) { default: assert(false);               opt = OperatorType::Opt::kOptNone;       break; }
+            if (0) { case rexLangParser::K_ADD_OPT:        opt = OperatorType(OperatorType::Opt::kOptAdd);        break; }
+            if (0) { case rexLangParser::K_SUB_OPT:        opt = OperatorType(OperatorType::Opt::kOptSub);        break; }
+            if (0) { case rexLangParser::K_MUL_OPT:        opt = OperatorType(OperatorType::Opt::kOptMul);        break; }
+            if (0) { case rexLangParser::K_DIV_OPT:        opt = OperatorType(OperatorType::Opt::kOptDiv);        break; }
+            if (0) { case rexLangParser::K_FULL_DIV_OPT:   opt = OperatorType(OperatorType::Opt::kOptFullDiv);    break; }
+            if (0) { case rexLangParser::K_MOD_OPT:        opt = OperatorType(OperatorType::Opt::kOptMod);        break; }
+            if (0) { case rexLangParser::K_AECOM_OPT:      opt = OperatorType(OperatorType::Opt::kOptEqual);      break; }
+            if (0) { case rexLangParser::K_ASSIGN_OPT:     opt = OperatorType(OperatorType::Opt::kOptEqual);      break; }
+            if (0) { case rexLangParser::K_EQUAL_OPT:      opt = OperatorType(OperatorType::Opt::kOptEqual);      break; }
+            if (0) { case rexLangParser::K_NOT_EQUAL_OPT:  opt = OperatorType(OperatorType::Opt::kOptNotEqual);   break; }
+            if (0) { case rexLangParser::K_GREAT_OPT:      opt = OperatorType(OperatorType::Opt::kOptGreatThan);  break; }
+            if (0) { case rexLangParser::K_LESS_OPT:       opt = OperatorType(OperatorType::Opt::kOptLessThan);   break; }
+            if (0) { case rexLangParser::K_GREAT_EQU_OPT:  opt = OperatorType(OperatorType::Opt::kOptGreatEqual); break; }
+            if (0) { case rexLangParser::K_LESS_EQU_OPT:   opt = OperatorType(OperatorType::Opt::kOptLessEqual);  break; }
+            if (0) { case rexLangParser::K_LIKE_EQU_OPT:   opt = OperatorType(OperatorType::Opt::kOptLikeEqual);  break; }
+            if (0) { case rexLangParser::K_AND_OPT:        opt = OperatorType(OperatorType::Opt::kOptAnd);        break; }
+            if (0) { case rexLangParser::K_OR_OPT:         opt = OperatorType(OperatorType::Opt::kOptOr);         break; }
+            if (0) { default: assert(false);               opt = OperatorType(OperatorType::Opt::kOptNone);       break; }
         }
         Expression *lhs = GetFromCtxIfExist<Expression *>(context->lval);
         Expression *rhs = GetFromCtxIfExist<Expression *>(context->rval);
@@ -843,10 +843,10 @@ namespace rexlang {
     }
 
     antlrcpp::Any CST2ASTConvert::visitUnaryExpr(rexLangParser::UnaryExprContext *context) {
-        OperatorType::Opt opt;
+        OperatorType opt(OperatorType::Opt::kOptNone);
         switch (context->opt->getType()) {
-            if (0) { case rexLangParser::K_SUB_OPT:    opt = OperatorType::Opt::kOptSub;  break; }
-            if (0) { default: assert(false);           opt = OperatorType::Opt::kOptNone; break; }
+            if (0) { case rexLangParser::K_SUB_OPT:    opt = OperatorType(OperatorType::Opt::kOptSub);  break; }
+            if (0) { default: assert(false);           opt = OperatorType(OperatorType::Opt::kOptNone); break; }
         }
         Expression *operand = GetFromCtxIfExist<Expression *>(context->expression());
 

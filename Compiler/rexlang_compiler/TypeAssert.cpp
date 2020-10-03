@@ -1,6 +1,25 @@
-//
-// Created by rex on 2020/1/25.
-//
+/*
+ * 文件包含各种类型的性质判定，目前已有：
+ * 运算符：
+ *      运算符一元、二元判定；
+ *      运算符性质判定；
+ *      运算有效性判定；
+ * 内置类型：
+ *      内置类型断言判定；
+ *      内置类型转换判定；
+ * 文件类型：
+ *      文件类型断言判定；
+ * 符号特性：
+ *      形式参数特性判定；
+ *      成员变量特性判定；
+ * 可调用对象库：
+ *      可调用对象库类型判定；
+ * 类型通用：
+ *      类型一致性判定；
+ *
+ * Rex
+ * 2020/1/25
+ */
 
 #include <cassert>
 
@@ -108,7 +127,7 @@ namespace rexlang {
     }
 
     /**********************************************************
-     * 内置分类的特定类型断言
+     * 内置类型断言
      **********************************************************/
 
     bool    TypeDecl            :: isVoidType           () const { return false; }
@@ -127,7 +146,7 @@ namespace rexlang {
     bool    TypeDecl            :: isStructType         () const { return false; }
     bool    TypeDecl            :: isExtendBooleanType  () const { return false; }
     bool    TypeDecl            :: isNumerical          () const { return false; }
-    bool    TypeDecl            :: isIntegerClass       () const { return false; }
+    bool    TypeDecl            :: isIntegerCategory    () const { return false; }
     bool    TypeDecl            :: isArrayType          () const { return false; }
     bool    TypeDecl            :: isFunctionType       () const { return false; }
     bool    TypeDecl            :: isAPICommandType     () const { return false; }
@@ -158,13 +177,13 @@ namespace rexlang {
     }
 
     bool BuiltinTypeDecl::isNumerical() const {
-        if (this->isIntegerClass()) { return true; }
-        if (this->isFloatType())    { return true; }
-        if (this->isDoubleType())   { return true; }
+        if (this->isIntegerCategory()) { return true; }
+        if (this->isFloatType())       { return true; }
+        if (this->isDoubleType())      { return true; }
         return false;
     }
 
-    bool BuiltinTypeDecl::isIntegerClass() const {
+    bool BuiltinTypeDecl::isIntegerCategory() const {
         if (this->isCharType())    { return true; }
         if (this->isIntegerType()) { return true; }
         if (this->isShortType())   { return true; }
@@ -220,10 +239,10 @@ namespace rexlang {
     bool TypeDecl::isUnyOptValid(OperatorType opt) const { return false; }
     bool TypeDecl::isBinOptValid(OperatorType opt, VariTypeDecl *otherType) const { return false; }
 
-    bool BinaryExpression::IsBinaryOperateValid() const {
+    bool BinaryExpression::isBinaryOperateValid() const {
         // 只有内置类型才能执行二元运算
-        BuiltinTypeDecl *lhsBuiltinType = this->lhs_->as<BuiltinTypeDecl>();
-        BuiltinTypeDecl *rhsBuiltinType = this->rhs_->as<BuiltinTypeDecl>();
+        BuiltinTypeDecl *lhsBuiltinType = this->lhs_->getExpressionType()->as<BuiltinTypeDecl>();
+        BuiltinTypeDecl *rhsBuiltinType = this->rhs_->getExpressionType()->as<BuiltinTypeDecl>();
         if (lhsBuiltinType == nullptr || rhsBuiltinType == nullptr) {
             assert(false);
             return false;
@@ -337,6 +356,10 @@ namespace rexlang {
         if (evalIndexedElementTy() == otherType->evalIndexedElementTy()) { return false; }
         return false;
     }
+
+    /*===-----------------------------------------------------===*
+     * 类型转换判定
+     *===-----------------------------------------------------===*/
 
     /*===-----------------------------------------------------===*
      * 赋值有效性判定

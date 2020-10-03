@@ -136,6 +136,7 @@ namespace rexlang {
     AssignStmt::AssignStmt(HierarchyIdentifier *lhs, Expression *rhs) {
         setLHS(lhs);
         setRHS(rhs);
+        // TODO: Must add assignable check.
     }
 
     /******************************************************************
@@ -268,4 +269,29 @@ namespace rexlang {
         setFromExpression(fromExpression);
     }
 
+    /******************************************************************
+     * OperatedExpression
+     ******************************************************************/
+
+    OperatedExpression::OperatedExpression(const OperatorType &opt) {
+        setOperator(opt);
+    }
+
+    /******************************************************************
+     * UnaryExpression
+     ******************************************************************/
+
+    UnaryExpression::UnaryExpression(const OperatorType &opt, Expression *operand) : OperatedExpression(opt) {
+        setOperand(operand);
+    }
+
+    /******************************************************************
+     * BinaryExpression
+     ******************************************************************/
+
+    BinaryExpression::BinaryExpression(const OperatorType &opt, Expression *lhs, Expression *rhs)
+        : OperatedExpression(opt) {
+        setLHS(lhs);
+        setRHS(rhs);
+    }
 }

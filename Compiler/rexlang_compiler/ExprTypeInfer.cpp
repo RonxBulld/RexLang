@@ -51,15 +51,15 @@ namespace rexlang {
         return functor_decl->getReturnType();
     }
 
-    TypeDecl *TypeConvert::getExpressionTypeInternal ()  const {
+    TypeDecl *TypeConvert::getExpressionTypeInternal()  const {
         return getTargetType();
     }
 
-    TypeDecl *UnaryExpression::getExpressionTypeInternal ()  const {
+    TypeDecl *UnaryExpression::getExpressionTypeInternal()  const {
         return operand_value_->getExpressionType();
     }
 
-    TypeDecl *BinaryExpression::getExpressionTypeInternal ()  const {
+    TypeDecl *BinaryExpression::getExpressionTypeInternal()  const {
         const OperatorType &opt = getOperator();
         if (opt.isExtraRelOpt() || opt.isBooleanOpt()) {
             return getTranslateUnit()->getBoolTy();

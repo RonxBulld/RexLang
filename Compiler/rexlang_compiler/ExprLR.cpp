@@ -1,11 +1,3 @@
-//
-// Created by rex on 2020/7/12.
-//
-
-#include "NodeDecl.h"
-
-namespace rexlang {
-
 /****************************************************************
  * 对于表达式节点求其左右值特性
  * - 语句参数、函数调用的参数、索引的下标、层次名称的非尾名称是可以自决的
@@ -13,7 +5,14 @@ namespace rexlang {
  * - 资源引用、函数求址恒为右值
  * - 常量值恒为右值
  * - 其它类型需要向上传递
+ *
+ * Rex
+ * 2020/7/12
  ****************************************************************/
+
+#include "NodeDecl.h"
+
+namespace rexlang {
 
 #define L ExprUsage::kAsLeftValue
 #define R ExprUsage::kAsRightValue
