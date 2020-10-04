@@ -1981,7 +1981,7 @@ namespace rexlang {
         Expression *    getLHS() ;
         Expression *    getRHS() ;
         bool            isBinaryOperateValid         () const ;   // 检查二元运算是否合法，该断言主要判断二元表达式中左右子式是否可以通过运算符计算
-        VariTypeDecl *  getBinaryOperateUpgradeType  () const ;   // 获取二元表达式提升后的类型，亦是计算结果类型
+        VariTypeDecl *  getBinaryOperateUpgradeType  () const ;   // 获取二元表达式左右子式提升后的类型，为空则表示无法提升
 
     public:
         static const NodeType GetClassId () ;
