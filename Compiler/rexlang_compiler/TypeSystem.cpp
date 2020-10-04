@@ -310,6 +310,15 @@ namespace rexlang {
 
     TypeDecl *TypeDecl::promoteType(TypeDecl *otherType) const { return nullptr; }
 
+    VariTypeDecl *OperatedExpression::promoteType(VariTypeDecl *typeA, VariTypeDecl *typeB) const {
+        assert(typeA);
+        if (typeB) {
+            return rtti::dyn_cast<VariTypeDecl>(typeA->promoteType(typeB));
+        } else {
+            return typeA;
+        }
+    }
+
     /*===-----------------------------------------------------===*
      * Void 不和任何类型共类型
      */

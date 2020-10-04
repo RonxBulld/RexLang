@@ -1949,7 +1949,8 @@ namespace rexlang {
         void setOperand(Expression *operand) ;
 
     public:
-        Expression *getOperand() ;
+        Expression *    getOperand          () ;
+        bool            isUnaryOperateValid () const ;   // 检查一元运算是否合法，该断言主要判断一元表达式中操作数是否可以通过运算符计算
 
     public:
         static const NodeType GetClassId () ;
@@ -1967,7 +1968,7 @@ namespace rexlang {
     protected:
         VariTypeDecl *  CheckExpressionInternal     () override ;
         ExprUsage       getSubExprAccessType        (const Expression *expr) const override ;
-        TypeDecl *      getExpressionTypeInternal   ()  const override ;
+        TypeDecl *      getExpressionTypeInternal   () const override ;
 
     public:
         BinaryExpression(const OperatorType &opt, Expression *lhs, Expression *rhs) ;
@@ -1979,8 +1980,8 @@ namespace rexlang {
     public:
         Expression *    getLHS() ;
         Expression *    getRHS() ;
-        bool            isBinaryOperateValid         () const;   // 检查二元运算是否合法，该断言主要判断二元表达式中左右子式是否可以通过运算符计算
-        VariTypeDecl *  getBinaryOperateUpgradeType  () const;   // 获取二元表达式提升后的类型，亦是计算结果类型
+        bool            isBinaryOperateValid         () const ;   // 检查二元运算是否合法，该断言主要判断二元表达式中左右子式是否可以通过运算符计算
+        VariTypeDecl *  getBinaryOperateUpgradeType  () const ;   // 获取二元表达式提升后的类型，亦是计算结果类型
 
     public:
         static const NodeType GetClassId () ;

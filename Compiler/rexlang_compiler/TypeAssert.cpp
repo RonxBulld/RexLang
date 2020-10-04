@@ -239,6 +239,15 @@ namespace rexlang {
     bool TypeDecl::isUnyOptValid(OperatorType opt) const { return false; }
     bool TypeDecl::isBinOptValid(OperatorType opt, VariTypeDecl *otherType) const { return false; }
 
+    bool UnaryExpression::isUnaryOperateValid() const {
+        BuiltinTypeDecl *oprBuiltinType = this->operand_value_->getExpressionType()->as<BuiltinTypeDecl>();
+        if (oprBuiltinType == nullptr) {
+            assert(false);
+            return false;
+        }
+        return oprBuiltinType->isUnyOptValid(getOperator());
+    }
+
     bool BinaryExpression::isBinaryOperateValid() const {
         // 只有内置类型才能执行二元运算
         BuiltinTypeDecl *lhsBuiltinType = this->lhs_->getExpressionType()->as<BuiltinTypeDecl>();

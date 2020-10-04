@@ -283,6 +283,7 @@ namespace rexlang {
 
     UnaryExpression::UnaryExpression(const OperatorType &opt, Expression *operand) : OperatedExpression(opt) {
         setOperand(operand);
+        assert(isUnaryOperateValid());
     }
 
     /******************************************************************
@@ -293,5 +294,6 @@ namespace rexlang {
         : OperatedExpression(opt) {
         setLHS(lhs);
         setRHS(rhs);
+        assert(isBinaryOperateValid());
     }
 }
