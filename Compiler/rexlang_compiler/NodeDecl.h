@@ -2006,7 +2006,6 @@ namespace rexlang {
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
-        void setRefFuncName(IdentRefer *functionName) ;
         ExprUsage getSubExprAccessType(const Expression *expr) const override ;
 
     public:
@@ -2015,7 +2014,7 @@ namespace rexlang {
     };
 
     /**
-     * @brief 值基类
+     * 常量值基类
      * 值基类可以表示所有的常量
      */
     class Value : public Expression {
@@ -2023,12 +2022,15 @@ namespace rexlang {
         static const NodeType GetClassId () ;
 
     protected:
-        ExprUsage   getSubExprAccessType    (const Expression *expr) const override ;
+        ExprUsage getSubExprAccessType(const Expression *expr) const override ;
 
     public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
     };
 
+    /**
+     * 字节集字面量
+     */
     class ValueOfDataSet : public Value {
     private:
         std::vector<Expression *> elements_;
@@ -2037,20 +2039,23 @@ namespace rexlang {
         TypeDecl *  CheckExpressionInternal     () override ;
         TypeDecl *  getExpressionTypeInternal   () const override ;
 
+    private:
+        void appendElement(Expression *element) ;
+
     public:
-        ValueOfDataSet(const std::vector<Expression *> &dataSet) ;
+        explicit ValueOfDataSet(const std::vector<Expression *> &dataSet) ;
 
     public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
-
-    public:
-        void appendElement(Expression *element) ;
 
     public:
         static const NodeType GetClassId () ;
 
     };
 
+    /**
+     * 日期时间字面量
+     */
     class ValueOfDatetime : public Value {
     private:
         time_t time_ = 0;
@@ -2059,17 +2064,23 @@ namespace rexlang {
         TypeDecl *  CheckExpressionInternal     () override ;
         TypeDecl *  getExpressionTypeInternal   () const override ;
 
-    public:
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+    private:
+        void setTime(time_t time) ;
 
     public:
-        void setTime(time_t time) ;
+        explicit ValueOfDatetime(time_t time) ;
+
+    public:
+        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
         static const NodeType GetClassId () ;
 
     };
 
+    /**
+     * 布尔字面量
+     */
     class ValueOfBool : public Value {
     private:
         bool value_ = false;
@@ -2078,17 +2089,23 @@ namespace rexlang {
         TypeDecl *  CheckExpressionInternal     () override ;
         TypeDecl *  getExpressionTypeInternal   () const override ;
 
-    public:
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+    private:
+        void setBool(bool boolValue) ;
 
     public:
-        void setBool(bool boolValue) ;
+        ValueOfBool(bool boolValue) ;
+
+    public:
+        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
         static const NodeType GetClassId () ;
 
     };
 
+    /**
+     * 数值字面量
+     */
     class ValueOfDecimal : public Value {
     private:
         union {
@@ -2101,18 +2118,25 @@ namespace rexlang {
         TypeDecl *  CheckExpressionInternal     () override ;
         TypeDecl *  getExpressionTypeInternal   () const override ;
 
-    public:
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
-
-    public:
+    private:
         void setIntValue  (int   value) ;
         void setFloatValue(float value) ;
+
+    public:
+        explicit ValueOfDecimal(int   value) ;
+        explicit ValueOfDecimal(float value) ;
+
+    public:
+        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
         static const NodeType GetClassId () ;
 
     };
 
+    /**
+     * 字符串字面量
+     */
     class ValueOfString : public Value {
     private:
         TString string_literal_;
@@ -2121,11 +2145,14 @@ namespace rexlang {
         TypeDecl *  CheckExpressionInternal     () override ;
         TypeDecl *  getExpressionTypeInternal   () const override ;
 
-    public:
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+    private:
+        void setStringLiteral(const TString &literal) ;
 
     public:
-        void setStringLiteral(const TString &literal) ;
+        explicit ValueOfString(const TString &literal) ;
+
+    public:
+        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
         static const NodeType GetClassId () ;

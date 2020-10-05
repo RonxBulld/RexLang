@@ -772,12 +772,6 @@ namespace rexlang {
     void ValueOfDatetime::setTime(time_t time) { time_ = time; }
 
     /***************************************************
-     * FuncAddrExpression
-     ***************************************************/
-
-    void FuncAddrExpression::setRefFuncName(IdentRefer *functionName) { function_name_ = functionName; }
-
-    /***************************************************
      * ValueOfBool
      ***************************************************/
 

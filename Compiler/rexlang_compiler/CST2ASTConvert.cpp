@@ -772,7 +772,7 @@ namespace rexlang {
 
         // 调用对象
         IdentRefer *callee_name = GetFromCtxIfExist<IdentRefer *, true>(context->name_component());
-        FunctorDecl *callee = TU->getFunctor(callee_name->getName());
+        FunctorDecl *callee = TU->getFunctor(callee_name->def()->id());
 
         // 实参列表
         std::vector<Expression *> arguments;
@@ -873,8 +873,7 @@ namespace rexlang {
     ValueOfDatetime* CST2ASTConvert::TimeNodeBuilder(time_t ntm, antlr4::ParserRuleContext *parserRuleContext) {
         auto start_token = parserRuleContext->getStart();
         auto end_token   = parserRuleContext->getStop();
-        ValueOfDatetime *value_of_datetime = CreateNode<ValueOfDatetime>(start_token, end_token);
-        value_of_datetime->setTime(ntm);
+        ValueOfDatetime *value_of_datetime = CreateNode<ValueOfDatetime>(start_token, end_token, ntm);
         return value_of_datetime;
     }
 
@@ -961,32 +960,27 @@ namespace rexlang {
     }
 
     antlrcpp::Any CST2ASTConvert::visitBoolValueTrue(rexLangParser::BoolValueTrueContext *context) {
-        ValueOfBool* value_of_bool = CreateNode<ValueOfBool>(context);
-        value_of_bool->setBool(true);
+        ValueOfBool* value_of_bool = CreateNode<ValueOfBool>(context, true);
         return NodeWarp(value_of_bool);
     }
 
     antlrcpp::Any CST2ASTConvert::visitBoolValueFalse(rexLangParser::BoolValueFalseContext *context) {
-        ValueOfBool* value_of_bool = CreateNode<ValueOfBool>(context);
-        value_of_bool->setBool(false);
+        ValueOfBool* value_of_bool = CreateNode<ValueOfBool>(context, false);
         return NodeWarp(value_of_bool);
     }
 
     antlrcpp::Any CST2ASTConvert::visitInt(rexLangParser::IntContext *context) {
-        ValueOfDecimal* value_of_decimal = CreateNode<ValueOfDecimal>(context);
-        value_of_decimal->setIntValue(GetLongIfExist(context->INTEGER_LITERAL()->getSymbol()));
+        ValueOfDecimal* value_of_decimal = CreateNode<ValueOfDecimal>(context, GetLongIfExist(context->INTEGER_LITERAL()->getSymbol()));
         return NodeWarp(value_of_decimal);
     }
 
     antlrcpp::Any CST2ASTConvert::visitFloat(rexLangParser::FloatContext *context) {
-        ValueOfDecimal* value_of_decimal = CreateNode<ValueOfDecimal>(context);
-        value_of_decimal->setFloatValue(GetFloatIfExist(context->FLOAT_LITERAL()->getSymbol()));
+        ValueOfDecimal* value_of_decimal = CreateNode<ValueOfDecimal>(context, GetFloatIfExist(context->FLOAT_LITERAL()->getSymbol()));
         return NodeWarp(value_of_decimal);
     }
 
     antlrcpp::Any CST2ASTConvert::visitString_value(rexLangParser::String_valueContext *context) {
-        ValueOfString* value_of_string = CreateNode<ValueOfString>(context);
-        value_of_string->setStringLiteral(RemoveRoundQuotes(GetTextIfExist(context->STRING_LITERAL()->getSymbol())));
+        ValueOfString* value_of_string = CreateNode<ValueOfString>(context, RemoveRoundQuotes(GetTextIfExist(context->STRING_LITERAL()->getSymbol())));
         return NodeWarp(value_of_string);
     }
 

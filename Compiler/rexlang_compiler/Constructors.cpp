@@ -296,4 +296,59 @@ namespace rexlang {
         setRHS(rhs);
         assert(isBinaryOperateValid());
     }
+
+    /******************************************************************
+     * FuncAddrExpression
+     ******************************************************************/
+
+    FuncAddrExpression::FuncAddrExpression(FunctorDecl *callee) {
+        callee_ = callee;
+    }
+
+    /******************************************************************
+     * ValueOfDataSet
+     ******************************************************************/
+
+    ValueOfDataSet::ValueOfDataSet(const std::vector<Expression *> &dataSet) {
+        for (Expression *data : dataSet) {
+            appendElement(data);
+        }
+    }
+
+    /******************************************************************
+     * ValueOfDatetime
+     ******************************************************************/
+
+    ValueOfDatetime::ValueOfDatetime(time_t time) {
+        setTime(time);
+    }
+
+    /******************************************************************
+     * ValueOfBool
+     ******************************************************************/
+
+    ValueOfBool::ValueOfBool(bool boolValue) {
+        setBool(boolValue);
+    }
+
+    /******************************************************************
+     * ValueOfDecimal
+     ******************************************************************/
+
+    ValueOfDecimal::ValueOfDecimal(int   value) {
+        setIntValue(value);
+    }
+
+    ValueOfDecimal::ValueOfDecimal(float value) {
+        setFloatValue(value);
+    }
+
+    /******************************************************************
+     * ValueOfString
+     ******************************************************************/
+
+    ValueOfString::ValueOfString(const TString &literal) {
+        setStringLiteral(literal);
+    }
+
 }
