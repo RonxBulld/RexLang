@@ -1544,7 +1544,7 @@ namespace rexlang {
     }
 
     llvm::Value *IREmit::_EmitImpl_(FuncAddrExpression *funcAddrExpression) {
-        llvm::Function *func = function_object_pool_[funcAddrExpression->functor_declare_];
+        llvm::Function *func = function_object_pool_[funcAddrExpression->callee_];
         assert(func);
         return llvm::ConstantExpr::getPtrToInt(func, Builder.getInt32Ty());
     }

@@ -1988,9 +1988,12 @@ namespace rexlang {
 
     };
 
+    /**
+     * 函数求地址
+     */
     class FuncAddrExpression : public Expression {
     private:
-        FunctorDecl *functor_declare_ = nullptr;
+        FunctorDecl *callee_ = nullptr;
 
     protected:
         TypeDecl *  CheckExpressionInternal     () override ;
