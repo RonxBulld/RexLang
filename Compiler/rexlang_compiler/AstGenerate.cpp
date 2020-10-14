@@ -57,7 +57,7 @@ namespace rexlang {
 
         // 遍历树以生成抽象语法树
 
-        CST2ASTConvert ast_builder(ast_context_, diagnostic_);
+        CST2ASTConvert ast_builder(ast_context_, diagnostic_, compiler_instance_);
         return ast_builder.buildTUFromParseTrees(this->parse_trees_);
     }
 
