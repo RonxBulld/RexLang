@@ -150,6 +150,7 @@ namespace rexlang {
     bool    TypeDecl            :: isArrayType          () const { return false; }
     bool    TypeDecl            :: isFunctionType       () const { return false; }
     bool    TypeDecl            :: isAPICommandType     () const { return false; }
+    bool    TypeDecl            :: isReferenceType      () const { return false; }
 
     bool    BuiltinVoidType     :: isVoidType           () const { return true; }
     bool    BuiltinCommonType   :: isCommonType         () const { return true; }
@@ -168,6 +169,7 @@ namespace rexlang {
     bool    ArrayDecl           :: isArrayType          () const { return true; }
     bool    FunctionDecl        :: isFunctionType       () const { return true; }
     bool    APICommandDecl      :: isAPICommandType     () const { return true; }
+    bool    ReferenceType       :: isReferenceType      () const { return true; }
 
     bool BuiltinTypeDecl::isExtendBooleanType() const {
         if (this->isBoolType())    { return true; }
@@ -212,24 +214,25 @@ namespace rexlang {
      **********************************************************/
 
     bool     ParameterDecl::isNullable         () const { return is_nullable_; }
-    bool     ParameterDecl::isArrayType        () const { return is_array_; }
 
     bool ParameterDecl::shouldBeReference() const {
-             if (this->is_reference_)                   { return true; }
-        else if (this->isArrayType())                   { return true; }
-        else if (this->evalValType()->isStringType())   { return true; }
-        else if (this->evalValType()->isDataSetType())  { return true; }
-        else if (this->evalValType()->isStructType())   { return true; }
-        else                                            { return false; }
+        TypeDecl *param_type = getType();
+             if (param_type->isReferenceType ()) { return true; }
+        else if (param_type->isArrayType     ()) { return true; }
+        else if (param_type->isStringType    ()) { return true; }
+        else if (param_type->isDataSetType   ()) { return true; }
+        else if (param_type->isStructType    ()) { return true; }
+        else                                     { return false; }
     }
 
     bool MemberVariableDecl::shouldBeReference() const {
-             if (this->is_reference_)                   { return true; }
-        else if (this->evalValType()->isArrayType())    { return true; }
-        else if (this->evalValType()->isStringType())   { return true; }
-        else if (this->evalValType()->isDataSetType())  { return true; }
-        else if (this->evalValType()->isStructType())   { return true; }
-        else                                            { return false; }
+        TypeDecl *param_type = getType();
+             if (param_type->isReferenceType ()) { return true; }
+        else if (param_type->isArrayType     ()) { return true; }
+        else if (param_type->isStringType    ()) { return true; }
+        else if (param_type->isDataSetType   ()) { return true; }
+        else if (param_type->isStructType    ()) { return true; }
+        else                                     { return false; }
     }
 
     /*===-----------------------------------------------------===*

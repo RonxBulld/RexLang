@@ -608,7 +608,8 @@ namespace rexlang {
         int      getParamIndex  () const ;
         bool     isNullable     () const ;
 
-        // 判断该参数是否应该以引用的方式传递，如果是数组、字符串、字节集、自定义类型或 is_reference 为真时则为真
+        // 判断该参数是否应该以引用的方式传递
+        // 如果是数组、字符串、字节集、自定义类型或引用类型时则为真
         bool     shouldBeReference  () const ;
 
     public:
@@ -675,7 +676,8 @@ namespace rexlang {
     public:
         void applyAttribute (const TString &attribute) override ;
 
-        // 判断该参数是否应该以引用的方式传递，如果是数组、字符串、字节集、自定义类型或 is_reference 为真时则为真
+        // 判断该参数是否应该以引用的方式传递
+        // 如果是数组、字符串、字节集、自定义类型或引用类型时则为真
         bool    shouldBeReference   () const ;
         int     indexOfStruct       () ;
 
@@ -758,6 +760,7 @@ namespace rexlang {
         virtual bool    isArrayType         () const ;   // 是否为数组
         virtual bool    isFunctionType      () const ;   // 是否为函数
         virtual bool    isAPICommandType    () const ;   // 是否为外部API
+        virtual bool    isReferenceType     () const ;   // 是否为应用类型
 
         /********************************************************
          * 高级类型工具
@@ -820,6 +823,7 @@ namespace rexlang {
 
     public:
         TypeDecl *getPointee() const ;
+        bool isReferenceType() const override ;
 
     public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
