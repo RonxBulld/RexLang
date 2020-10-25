@@ -256,7 +256,7 @@ namespace rexlang {
         setName(name);
         setArguments(arguments);
         if (matchFunctor(functorDecl)) {
-            bindPrototype(functorDecl);
+            bindCallee(functorDecl);
         } else {
             assert(false);
         }

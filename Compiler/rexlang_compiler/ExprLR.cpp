@@ -83,7 +83,7 @@ namespace rexlang {
         // 函数名本身是右值的
         if (expr == function_name_) { return R; }
         // 如果参数是传值则为右值，如果传址则为左值
-        else if (this->isArgument(expr)) {
+        else if (this->isPartOfArgument(expr)) {
             int idx = this->indexOfArgument(expr);
             FunctorDecl *functor_decl = this->getCallee();
             ParameterDecl *parameter = functor_decl->getParameterAt(idx);

@@ -326,23 +326,6 @@ namespace rexlang {
      * VariableDecl
      ***************************************************/
 
-    void VariableDecl::setDimensionsText(const TString &dimStr) {
-        dimensions_decl_ = dimStr;
-        if (!dimensions_decl_.string_.empty()) {
-            auto err_or_dims = Str2Attr::str2Dimension(dimensions_decl_.string_);
-            if (err_or_dims.HadError()) {
-                assert(false);
-                return;
-            }
-            is_array_ = true;
-            dimensions_ = err_or_dims.Value();
-        }
-        else {
-            is_array_ = false;
-            dimensions_ = {};
-        }
-    }
-
     /***************************************************
      * GlobalVariableDecl
      ***************************************************/
@@ -423,18 +406,6 @@ namespace rexlang {
      * APICommandDecl
      ***************************************************/
 
-    APICommandDecl::APICommandDecl(const TString &library, LibraryType libraryType, const TString &name, const TString &apiName) {
-        library_file_ = library;
-        library_type_ = libraryType;
-        setName(name);
-    }
-
-    void APICommandDecl::appendParameter(ParameterDecl *parameterDecl) {
-        FunctorDecl::appendParameter(parameterDecl);
-        mapping_names_.emplace_back(parameterDecl->getNameRef());
-        setChild(parameterDecl);
-    }
-
     /***************************************************
      * StructureDecl
      ***************************************************/
@@ -471,7 +442,7 @@ namespace rexlang {
         setChild(variable);
     }
 
-    void ProgSetDecl::appendFunctionDecl  (FunctionDecl *functionDecl) {
+    void ProgSetDecl::appendFunctionDecl(FunctionDecl *functionDecl) {
         function_decls_[functionDecl->getNameRef()] = functionDecl;
         setChild(functionDecl);
     }
@@ -601,7 +572,7 @@ namespace rexlang {
 
     void LoopStatement::setLoopBody(Statement *loopBody) {
         loop_body_ = loopBody;
-        setChild(loop_body_);
+        setChild(loopBody);
     }
 
     Statement * LoopStatement::getLoopBody() const {
@@ -625,8 +596,8 @@ namespace rexlang {
      * RangeForStmt
      ***************************************************/
 
-    void RangeForStmt::setRangeSize   (Expression *rangeSize)         { range_size_ = rangeSize; setChild(rangeSize); }
-    void RangeForStmt::setLoopVariable(HierarchyIdentifier *loopVari) { loop_vari_ = loopVari; setChild(loopVari); }
+    void RangeForStmt::setRangeSize   (Expression *         rangeSize) { range_size_ = rangeSize; setChild(rangeSize); }
+    void RangeForStmt::setLoopVariable(HierarchyIdentifier *loopVari)  { loop_vari_  = loopVari;  setChild(loopVari); }
 
     Expression *         RangeForStmt::getRangeSize () const { return range_size_; }
     HierarchyIdentifier *RangeForStmt::getLoopVari  () const { return loop_vari_;  }
@@ -667,7 +638,8 @@ namespace rexlang {
 
     void FunctionCall::setName(IdentRefer *funcName) { name_ = funcName; setChild(funcName); }
 
-    void FunctionCall::appendArgument (Expression *argument) {
+    void FunctionCall::appendArgument(Expression *argument) {
+        assert(arguments_.size() < 255);
         arguments_.emplace_back(argument);
         setChild(argument);
     }
@@ -679,7 +651,7 @@ namespace rexlang {
         }
     }
 
-    void FunctionCall::bindPrototype(FunctorDecl *functorDecl) {
+    void FunctionCall::bindCallee(FunctorDecl *functorDecl) {
         callee_ = functorDecl;
     }
 
@@ -703,17 +675,17 @@ namespace rexlang {
         return arguments_;
     }
 
-    bool FunctionCall::isArgument(Expression *expr) const {
-        return isArgument(const_cast<const Expression *>(expr));
+    bool FunctionCall::isPartOfArgument(Expression *expr) const {
+        return isPartOfArgument(const_cast<const Expression *>(expr));
     }
-    bool FunctionCall::isArgument(const Expression *expr) const {
+    bool FunctionCall::isPartOfArgument(const Expression *expr) const {
         return indexOfArgument(expr) >= 0;
     }
 
     int FunctionCall::indexOfArgument(const Expression *expr) const {
         for (unsigned idx = 0, count = arguments_.size(); idx < count; ++idx) {
             if (expr == arguments_[idx]) {
-                return idx;
+                return (int) idx;
             }
         }
         return -1;
@@ -734,7 +706,7 @@ namespace rexlang {
      ***************************************************/
 
     void ArrayIndex::setBaseComponent(NameComponent *baseComponent) { base_  = baseComponent; setChild(baseComponent); }
-    void ArrayIndex::setIndexExpr    (Expression *indexExpr)        { index_ = indexExpr;     setChild(indexExpr); }
+    void ArrayIndex::setIndexExpr    (Expression *   indexExpr)     { index_ = indexExpr;     setChild(indexExpr); }
 
     /***************************************************
      * _OperatorExpression

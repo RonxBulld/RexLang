@@ -1826,6 +1826,10 @@ namespace rexlang {
         std::vector<Expression *> arguments_;
         FunctorDecl *             callee_ = nullptr;
 
+    private:
+        bool matchFunctor   (FunctorDecl *  functorDecl) const ;    // 检查实参列表是否匹配指定可调用对象原型
+        void bindCallee     (FunctorDecl *  functorDecl) ;          // 将可调用对象绑定到函数调用节点
+
     protected:
         TypeDecl *CheckExpressionInternal   () override ;
         ExprUsage getSubExprAccessType      (const Expression *expr) const override ;
@@ -1836,9 +1840,6 @@ namespace rexlang {
 
     public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
-
-        bool matchFunctor       (FunctorDecl *  functorDecl) const ;    // 检查实参列表是否匹配指定可调用对象原型
-        void bindPrototype      (FunctorDecl *  functorDecl) ;          // 将可调用对象绑定到函数调用节点
 
         void setName            (IdentRefer * name) ;
         void setArguments       (const std::vector<Expression *> &arguments) ;
@@ -1852,10 +1853,10 @@ namespace rexlang {
               std::vector<Expression *> & getArguments  () ;
         const std::vector<Expression *> & getArguments  () const ;
 
-        bool    isArgument      (      Expression *expr) const ;    // 判定表达式是否为实参，依赖 IndexOfArgument 实现
-        bool    isArgument      (const Expression *expr) const ;    // 判定表达式是否为实参，依赖 IndexOfArgument 实现
-        int     indexOfArgument (      Expression *expr) const ;    // 若表达式是实参则返回是第几个参数，否则返回-1
-        int     indexOfArgument (const Expression *expr) const ;    // 若表达式是实参则返回是第几个参数，否则返回-1
+        bool    isPartOfArgument (      Expression *expr) const ;    // 判定表达式是否为实参，依赖 IndexOfArgument 实现
+        bool    isPartOfArgument (const Expression *expr) const ;    // 判定表达式是否为实参，依赖 IndexOfArgument 实现
+        int     indexOfArgument  (      Expression *expr) const ;    // 若表达式是实参则返回是第几个参数，否则返回-1
+        int     indexOfArgument  (const Expression *expr) const ;    // 若表达式是实参则返回是第几个参数，否则返回-1
 
     public:
         static const NodeType GetClassId () ;
