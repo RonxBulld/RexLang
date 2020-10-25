@@ -531,11 +531,6 @@ namespace rexlang {
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
-        std::set<IdentRefer *> &        getReferenceTable   () ;
-        int                             addReference        (IdentRefer *reference) ;
-        int                             removeReference     (IdentRefer *reference) ;
-
-    public:
         static const NodeType GetClassId () ;
     };
 

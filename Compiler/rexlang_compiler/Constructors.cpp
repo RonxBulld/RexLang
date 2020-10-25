@@ -14,6 +14,7 @@ namespace rexlang {
     TagDecl::TagDecl(IdentDef *name)
         : name_(name) {
         setChild(name_);
+        name->setDecl(this);
     }
 
     /******************************************************************
@@ -121,6 +122,7 @@ namespace rexlang {
             , library_type_ (libraryType)
             , api_name_     (apiName)
             {
+        apiName->setDecl(this);
     }
 
     /******************************************************************

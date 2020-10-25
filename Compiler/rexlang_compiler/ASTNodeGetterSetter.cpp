@@ -52,39 +52,44 @@ namespace rexlang {
     FunctorDecl *TranslateUnit::getMainEntry() const                   { return main_entry_; }
 
     template <typename Ty>
-    Ty *getAnyInSources(const StringRef &name, const std::vector<SourceFile *> &sourceFiles, Ty *(SourceFile::*fn)(const StringRef &) const) {
+    Ty *getWithName(const StringRef &name, const std::vector<SourceFile *> &sourceFiles, Ty *(SourceFile::*getFn)(const StringRef &) const) {
         for (SourceFile *source_file : sourceFiles) {
-            if (source_file) {
-                if (Ty *entity = (source_file->*fn)(name)) {
-                    return entity;
-                }
+            if (!source_file) { continue; }
+            if (Ty *entity = (source_file->*getFn)(name)) {
+                return entity;
             }
         }
         return nullptr;
     }
 
     FunctorDecl *TranslateUnit::getFunctor(const StringRef &name) const {
-        return getAnyInSources(name, source_files_, &SourceFile::getFunctor);
+        return getWithName(name, source_files_, &SourceFile::getFunctor);
     }
 
     ProgSetDecl *TranslateUnit::getProgSet(const StringRef &name) const {
-        return getAnyInSources(name, source_files_, &SourceFile::getProgSet);
+        return getWithName(name, source_files_, &SourceFile::getProgSet);
     }
 
     TypeDecl *TranslateUnit::getType(const StringRef &name) const {
-        TypeDecl *type_decl = getAnyInSources(name, source_files_, &SourceFile::getType);
+
+        // 从类型表中找
+
+        TypeDecl *type_decl = getWithName(name, source_files_, &SourceFile::getType);
         if (type_decl) { return type_decl; }
+
+        // 从内建类型中查找
+
         auto found_builtin = named_builtin_type_map_.find(name);
         if (found_builtin != named_builtin_type_map_.end()) { return found_builtin->second; }
         return nullptr;
     }
 
     GlobalVariableDecl *TranslateUnit::getGlobalVari(const StringRef &name) const {
-        return getAnyInSources(name, source_files_, &SourceFile::getGlobalVari);
+        return getWithName(name, source_files_, &SourceFile::getGlobalVari);
     }
 
     MacroDecl *TranslateUnit::getMacro(const StringRef &name) const {
-        return getAnyInSources(name, source_files_, &SourceFile::getMacro);
+        return getWithName(name, source_files_, &SourceFile::getMacro);
     }
 
     /***************************************************
@@ -143,7 +148,9 @@ namespace rexlang {
         setChild(structureDecl);
     }
 
-    const DataStructureFile::StructDeclMapTy & DataStructureFile::getTypes() const { return structure_decl_map_; }
+    const DataStructureFile::StructDeclMapTy & DataStructureFile::getTypes() const {
+        return structure_decl_map_;
+    }
 
     TypeDecl *DataStructureFile::getType(const StringRef &name) const {
         auto found = structure_decl_map_.find(name);
@@ -163,7 +170,9 @@ namespace rexlang {
         setChild(globalVariableDecl);
     }
 
-    const GlobalVariableFile::GlobalVariMapTy &GlobalVariableFile::getGlobalVariMap() const { return global_variable_map_; }
+    const GlobalVariableFile::GlobalVariMapTy &GlobalVariableFile::getGlobalVariMap() const {
+        return global_variable_map_;
+    }
 
     GlobalVariableDecl *GlobalVariableFile::getGlobalVari(const StringRef &name) const {
         auto found = global_variable_map_.find(name);
@@ -183,7 +192,9 @@ namespace rexlang {
         setChild(apiCommandDecl);
     }
 
-    const APIDeclareFile::DllDefMapTy & APIDeclareFile::getAPIDefMap () const { return api_declares_; }
+    const APIDeclareFile::DllDefMapTy &APIDeclareFile::getAPIDefMap () const {
+        return api_declares_;
+    }
 
     FunctorDecl *APIDeclareFile::getFunctor(const StringRef &name) const {
         auto found = api_declares_.find(name);
@@ -221,7 +232,7 @@ namespace rexlang {
     const char *        IdentDef::name    () const { return id_.c_str(); }
     const StringRef &   IdentDef::id      () const { return id_; }
 
-    void                IdentDef::setDecl (TagDecl *tagDecl) { tag_decl_ = tagDecl; }
+    void                IdentDef::setDecl (TagDecl *tagDecl) { assert(tag_decl_ == nullptr); tag_decl_ = tagDecl; }
     TagDecl *           IdentDef::decl    () const           { return tag_decl_; }
 
     /***************************************************
@@ -266,23 +277,15 @@ namespace rexlang {
     const TString &     TagDecl::getComment     () const                   { return comment_; }
     const char *        TagDecl::getCommentStr  () const                   { return comment_.string_.c_str(); }
 
-    std::set<IdentRefer *> &TagDecl::getReferenceTable()    { return name_->getReferenceTable(); }
-
-    int TagDecl::addReference     (IdentRefer *reference) { name_->addReference(reference);    return 0; }
-    int TagDecl::removeReference  (IdentRefer *reference) { name_->removeReference(reference); return 0; }
-
     /***************************************************
      * BaseVariDecl
      ***************************************************/
 
     void BaseVariDecl::updateType(VariTypeDecl *type) {
-        type_      = type;
-
-        delete type_name_;
-        type_name_ = nullptr;
+        type_ = type;
+        setChild(type);
     }
 
-    IdentRefer *   BaseVariDecl::id  () const { return type_name_; }
     VariTypeDecl * BaseVariDecl::type() const { return type_; }
 
     /***************************************************
