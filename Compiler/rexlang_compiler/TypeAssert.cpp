@@ -365,7 +365,9 @@ namespace rexlang {
     bool  TypeDecl ::compareTo(TypeDecl *otherType) const { return otherType == this; }
     bool  ArrayDecl::compareTo(TypeDecl *otherType) const {
         if (!otherType->isArrayType()) { return false; }
-        if (evalIndexedElementTy() == otherType->evalIndexedElementTy()) { return false; }
+        TypeDecl *this_elem_ty = evalIndexedElementTy();
+        TypeDecl *other_elem_ty = otherType->evalIndexedElementTy();
+        if (this_elem_ty && other_elem_ty && this_elem_ty->compareTo(other_elem_ty)) { return true; }
         return false;
     }
 
@@ -379,7 +381,7 @@ namespace rexlang {
 
     bool TypeDecl   ::isAssginValidFrom(TypeDecl *fromType) const { return false; }
     bool FunctorDecl::isAssginValidFrom(TypeDecl *fromType) const { return false; }
-    bool ArrayDecl  ::isAssginValidFrom(TypeDecl *fromType) const ;
+    bool ArrayDecl  ::isAssginValidFrom(TypeDecl *fromType) const { return compareTo(fromType); }
 
     /*===-----------------------------------------------------===*
      * 可调用对象库类型断言

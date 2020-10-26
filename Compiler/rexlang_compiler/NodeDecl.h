@@ -1164,6 +1164,8 @@ namespace rexlang {
         TypeDecl *          evalIndexedElementTy    () const override ;
         std::vector<size_t> getDimensions           () const override ;
         bool                isBinOptValid           (OperatorType opt, VariTypeDecl *otherType) const override ;
+        bool                compareTo               (TypeDecl *otherType) const override ;
+        bool                isAssginValidFrom       (TypeDecl *fromType) const override ;
 
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
