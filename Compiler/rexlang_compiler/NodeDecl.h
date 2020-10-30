@@ -233,7 +233,7 @@ namespace rexlang {
     public:
         template<typename NodeTy, typename ... Args, typename = typename std::enable_if<std::is_base_of<Node, NodeTy>::value>::type>
         static NodeTy *Create(ASTContext *ast_context, Args && ... args) {
-            NodeTy *node = new NodeTy(args...);
+            NodeTy *node = new NodeTy(std::forward<Args>(args)...);
 
             node->node_id_      = ast_context->GetNodeIndex();
             node->node_type_    = NodeTy::GetClassId();
@@ -674,7 +674,10 @@ namespace rexlang {
         // 判断该参数是否应该以引用的方式传递
         // 如果是数组、字符串、字节集、自定义类型或引用类型时则为真
         bool    shouldBeReference   () const ;
-        int     indexOfStruct       () ;
+
+        // 获取成员变量在结构体中的索引顺序
+        // 返回值应当为非负数，如果返回负数则表示发生错误
+        int     indexOfStruct       () const ;
 
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
@@ -1135,6 +1138,8 @@ namespace rexlang {
         void            appendElement       (MemberVariableDecl *element) ;
         BaseVariDecl *  getElementWithIndex (size_t idx) ;
         BaseVariDecl *  getElementWithName  (const StringRef &variable_name) const ;
+
+        const NamedOrderDict<MemberVariableDecl *> &elements() const ;
 
         bool            isMemberOfThis      (MemberVariableDecl *memberVariDecl) const ;
         int             indexMemberOfThis   (MemberVariableDecl *memberVariDecl) const ;
@@ -2245,7 +2250,7 @@ namespace rexlang {
 
     template<typename NodeTy, typename ... Args, typename = typename std::enable_if<std::is_base_of<Node, NodeTy>::value>::type>
     NodeTy *CreateNode(ASTContext *ast_context, Args && ... args) {
-        return Node::Create<NodeTy, Args...>(ast_context, args...);
+        return Node::Create<NodeTy, Args...>(ast_context, std::forward<Args>(args)...);
     }
 }
 

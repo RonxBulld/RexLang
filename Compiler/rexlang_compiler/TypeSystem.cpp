@@ -6,12 +6,8 @@
 
 namespace rexlang {
 
-    BuiltinTypeDecl::BuiltinTypeDecl(const char *typeName, EnumOfBuiltinType typeEnum) {
-        TString ts_name;
-        ts_name.string_ = StringPool::Create(typeName);
-        ts_name.location_ = 0;
-        this->setName(ts_name);
-
+    BuiltinTypeDecl::BuiltinTypeDecl(const char *typeName, EnumOfBuiltinType typeEnum)
+        : VariTypeDecl(CreateNode<IdentDef>(getAstContext(), typeName)){
         (void) typeEnum;
     }
 
@@ -263,12 +259,8 @@ namespace rexlang {
      ************************************************/
 
     TypeDecl * ReferenceType::getPointee() const {
-        if (pointee_type_) {
-            return pointee_type_;
-        }
-        else {
-            return rtti::dyn_cast<TypeDecl>(type_name_->getDecl());
-        }
+        assert(pointee_type_);
+        return pointee_type_;
     }
 
     /******************************************

@@ -27,9 +27,8 @@ namespace rexlang {
      ********************************************/
 
     TagDecl * Node::findDeclWithNameString(const StringRef &name) const {
-        Node *scope = getNearstScope();
-        if (scope) {
-            return scope->findDeclWithNameString(name);
+        if (Node *parent = getParent()) {
+            return parent->findDeclWithNameString(name);
         } else {
             assert(false);
             return nullptr;
@@ -37,8 +36,8 @@ namespace rexlang {
     }
     TagDecl * FunctionDecl::findDeclWithNameString(const StringRef &name) const {
         // 查找局部变量、参数
-             if (LocalVariableDecl *lvari = getLocalVari(name)) { return lvari; }
-        else if (ParameterDecl *    param = getParameter(name)) { return param; }
+             if (LocalVariableDecl *lvari = getLocalVari(name))   { return lvari; }
+        else if (ParameterDecl *    param = getParamByName(name)) { return param; }
         else { return Node::findDeclWithNameString(name); }
     }
     TagDecl * ProgSetDecl::findDeclWithNameString(const StringRef &name) const {

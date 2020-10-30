@@ -37,18 +37,19 @@ namespace rexlang {
         return MakeNoErrVal(indexes);
     }
 
-    int MemberVariableDecl::indexOfStruct() {
-        if (index_of_struct_ >= 0) {
-            int tmp = index_of_struct_;
-            assert((index_of_struct_ = -1, tmp == indexOfStruct()));
-            return index_of_struct_;
-        }
-        else {
-            StructureDecl *structure_decl = getParent()->as<StructureDecl>();
-            int index = structure_decl->indexMemberOfThis(this);
-            assert(index >= 0);
-            index_of_struct_ = index;
-            return index;
+    int MemberVariableDecl::indexOfStruct() const {
+        if (StructureDecl *structure_decl = rtti::dyn_cast<StructureDecl>(getParent())) {
+            const NamedOrderDict<MemberVariableDecl *> &elements = structure_decl->elements();
+            int index = 0;
+            for (auto &item : elements) {
+                if (item.second == this) { return index; }
+                index++;
+            }
+            assert(false);
+            return -1;
+        } else {
+            assert(false);
+            return -1;
         }
     }
 

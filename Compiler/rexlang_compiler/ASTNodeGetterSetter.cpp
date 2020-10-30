@@ -433,6 +433,10 @@ namespace rexlang {
         }
     }
 
+    const NamedOrderDict<MemberVariableDecl *> &StructureDecl::elements() const {
+        return members_;
+    }
+
     /***************************************************
      * ProgSetDecl
      ***************************************************/
