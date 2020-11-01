@@ -45,6 +45,8 @@ SET(Utilities-Src
         utilities/Location.h
         utilities/Str2Attr.cpp
         utilities/Str2Attr.h
+        utilities/Visitor.cpp
+        utilities/Visitor.h
         )
 
 SET(REXCompilerParse-Source

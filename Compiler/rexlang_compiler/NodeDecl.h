@@ -267,6 +267,9 @@ namespace rexlang {
         size_t          getRightColumn() const ;
 
     public:
+        int Accept(class Visitor &visitor) ;
+
+    public:
         virtual TagDecl * findDeclWithNameString(const StringRef &name) const ; // 沿着语法树搜索指定名称的定义
 
     public:
@@ -321,6 +324,7 @@ namespace rexlang {
 
         FunctorDecl *getFunctor(const StringRef &name) const override ;
         ProgSetDecl *getProgSet(const StringRef &name) const override ;
+        ProgSetDecl *getProgSet()                      const ;
 
     public:
         void appendReferenceLibName (const TString &libraryName) ;
@@ -448,8 +452,8 @@ namespace rexlang {
      */
     class IdentDef final : public Node {
     private:
-        StringRef id_;
-        TagDecl * tag_decl_ = nullptr;
+        StringRef id_;                  // 名称
+        TagDecl * tag_decl_ = nullptr;  // 反指定义指针
 
     public:
         explicit IdentDef(const char *           id) ;
@@ -1172,6 +1176,8 @@ namespace rexlang {
         bool                compareTo               (TypeDecl *otherType) const override ;
         bool                isAssginValidFrom       (TypeDecl *fromType) const override ;
 
+        TypeDecl *          getArrayBase            () const ;
+
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
@@ -1230,7 +1236,7 @@ namespace rexlang {
     class FunctionDecl : public FunctorDecl {
     private:
         // 局部变量列表
-        NamedOrderDict<LocalVariableDecl*> local_vari_;
+        NamedOrderDict<LocalVariableDecl *> local_vari_;
         // 语句列表
         StatementBlock *statement_list_ = nullptr;
 
@@ -1244,8 +1250,9 @@ namespace rexlang {
         void     appendLocalVariable(LocalVariableDecl * variableDecl) ;
         void     setStatementBlock  (StatementBlock *    statementBlock) ;
 
-        LocalVariableDecl * getLocalVari    (const StringRef &name) const ;
-        StatementBlock *    getFunctionBody () const ;
+        LocalVariableDecl *                         getLocalVari     (const StringRef &name) const ;
+        const NamedOrderDict<LocalVariableDecl *> & getLocalVariables() const ;
+        StatementBlock *                            getFunctionBody  () const ;
 
     public:
         bool    isStaticLibraryAPI  () const override ;
@@ -1324,6 +1331,9 @@ namespace rexlang {
 
         FileVariableDecl *  getFileVariableDecl (const StringRef &name) const ;
         FunctionDecl *      getFunctionDecl     (const StringRef &name) const ;
+
+        const NamedOrderDict<FileVariableDecl *> &  fileVariables   () ;
+        const NamedOrderDict<FunctionDecl *> &      functions       () ;
 
         std::vector<FunctorDecl *> getFuncSignatures() ;
 
@@ -1450,6 +1460,9 @@ namespace rexlang {
     private:
         Expression *return_value_ = nullptr;
 
+    private:
+        void setReturnValue(Expression *returnValue) ;
+
     protected:
         ExprUsage getSubExprAccessType(const Expression *expr) const override ;
 
@@ -1459,7 +1472,6 @@ namespace rexlang {
     public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
-        void         setReturnValue(Expression *returnValue) ;
         Expression * getReturnValue() const ;
 
     public:
@@ -1510,6 +1522,8 @@ namespace rexlang {
         Statement * branchBodyAt    (size_t idx) const ;
         Statement * defaultBody     () const ;
 
+        const std::vector<BranchTy> &expressionSwitches() ;
+
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
@@ -1524,11 +1538,13 @@ namespace rexlang {
     private:
         Statement *loop_body_ = nullptr;
 
+    private:
+        void setLoopBody(Statement *loopBody) ;
+
     public:
         LoopStatement(Statement *loopBody) ;
 
     public:
-        void        setLoopBody(Statement *loopBody) ;
         Statement * getLoopBody() const ;
 
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
@@ -1541,6 +1557,9 @@ namespace rexlang {
     private:
         Expression *condition_ = nullptr;
 
+    private:
+        void setLoopCondition(Expression *condition) ;
+
     protected:
         ExprUsage getSubExprAccessType(const Expression *expr) const override ;
 
@@ -1548,8 +1567,7 @@ namespace rexlang {
         WhileStmt(Expression *condition, Statement *loopBody) ;
 
     public:
-        void            setLoopCondition(Expression *condition) ;
-        Expression *    getLoopCondition() const ;
+        Expression *getLoopCondition() const ;
 
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
@@ -1590,10 +1608,17 @@ namespace rexlang {
      * 描述计步循环的范围迭代循环结构
      */
     class ForStmt : public LoopStatement {
+    private:
         Expression *          start_value_ = nullptr;
         Expression *          stop_value_  = nullptr;
         Expression *          step_value_  = nullptr;
         HierarchyIdentifier * loop_vari_   = nullptr;
+
+    private:
+        void setStartValue(Expression *startValue) ;
+        void setStopValue (Expression *stopValue)  ;
+        void setStepValue (Expression *stepValue)  ;
+        void setLoopVari  (HierarchyIdentifier *loopVari) ;
 
     protected:
         ExprUsage getSubExprAccessType(const Expression *expr) const override ;
@@ -1602,11 +1627,6 @@ namespace rexlang {
         ForStmt(Expression *startValue, Expression *stopValue, Expression *stepValue, HierarchyIdentifier *loopVari, Statement *loopBody) ;
 
     public:
-        void setStartValue(Expression *startValue) ;
-        void setStopValue (Expression *stopValue)  ;
-        void setStepValue (Expression *stepValue)  ;
-        void setLoopVari  (HierarchyIdentifier *loopVari) ;
-
         Expression *            getStartValue () const ;
         Expression *            getStopValue  () const ;
         Expression *            getStepValue  () const ;
@@ -1671,19 +1691,14 @@ namespace rexlang {
      * 在这里，表达式被视作一种特殊的语句。
      */
     class Expression : public Statement {
-    private:
-        // 该表达式的类型
-        TypeDecl *expression_type_ = nullptr;
-
     protected:
         virtual TypeDecl *CheckExpressionInternal() = 0 ;
         virtual TypeDecl *getExpressionTypeInternal() const = 0 ;
 
     public:
-        virtual TypeDecl *CheckExpression() { return expression_type_ = CheckExpressionInternal(); }
+        virtual TypeDecl *CheckExpression  () { return CheckExpressionInternal(); }
+                TypeDecl *getExpressionType() const ;
 
-        TypeDecl *getExpressionType() const ;
-        TypeDecl *getExpressionType() ;
         ExprUsage getLRType     () const ;    // 获取表达式自身的引用类型，依赖父节点的 getSubExprAccessType 实现
         bool      isLeftUsage   () const ;    // 本表达式具有左值属性
         bool      isRightUsage  () const ;    // 本表达式具有右值属性
@@ -1717,8 +1732,17 @@ namespace rexlang {
         HierarchyIdentifier(const std::vector<NameComponent *> &nameComponents) ;
 
     public:
-        void AppendComponent(NameComponent *component);
+        void                                AppendComponent     (NameComponent *component) ;
+        const std::vector<NameComponent *> &getNameComponents   () ;
+
+        /*
+         * 查找指定组件在层次名称中的位置，返回一个非负整数
+         * 若指定组件不在层次名称中，则返回-1
+         */
+        int indexOf(const NameComponent *component) const ;
+
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+
 
     public:
         static const NodeType GetClassId () ;
@@ -1732,13 +1756,7 @@ namespace rexlang {
     public:
         static const NodeType GetClassId () ;
 
-    private:
-        NameComponent* forward_name_component_  = nullptr;
-        NameComponent* backward_name_component_ = nullptr;
-
     public:
-        void            SetForward  (NameComponent *component) ;
-        void            SetBackward (NameComponent *component) ;
         NameComponent * Forward     () const ;
         NameComponent * Backward    () const ;
 
@@ -1803,8 +1821,9 @@ namespace rexlang {
          * arrayIndex[1][2][3][1]->arrayIndex
          * func()[1][3]->func()
          */
-        NameComponent * getIndexBase() const;
+        NameComponent * getIndexBase() const ;
         IdentRefer *    getBaseId   () const override ;
+        Expression *    getIndex    () const ;
 
         /*
          * 获取可索引类型的元素类型
@@ -1837,6 +1856,10 @@ namespace rexlang {
         bool matchFunctor   (FunctorDecl *  functorDecl) const ;    // 检查实参列表是否匹配指定可调用对象原型
         void bindCallee     (FunctorDecl *  functorDecl) ;          // 将可调用对象绑定到函数调用节点
 
+        void setName            (IdentRefer * name) ;
+        void setArguments       (const std::vector<Expression *> &arguments) ;
+        void appendArgument     (Expression *   argument) ;
+
     protected:
         TypeDecl *CheckExpressionInternal   () override ;
         ExprUsage getSubExprAccessType      (const Expression *expr) const override ;
@@ -1847,10 +1870,6 @@ namespace rexlang {
 
     public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
-
-        void setName            (IdentRefer * name) ;
-        void setArguments       (const std::vector<Expression *> &arguments) ;
-        void appendArgument     (Expression *   argument) ;
 
         IdentRefer *                getBaseId           () const override ;
         FunctorDecl *               getCallee           () const ;
@@ -2052,6 +2071,8 @@ namespace rexlang {
     public:
         explicit ValueOfDataSet(const std::vector<Expression *> &dataSet) ;
 
+        const std::vector<Expression *> &elements() const ;
+
     public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
@@ -2199,6 +2220,8 @@ namespace rexlang {
     public:
         void     setSourceEdition(unsigned edition) ;
         unsigned getSourceEdition() const           ;
+
+        const std::vector<SourceFile *> &getSourceFiles() const ;
 
         FunctorDecl *getMainEntry() const ;
 
