@@ -3,6 +3,7 @@
 //
 
 #include "NodeDecl.h"
+#include "rtti.h"
 
 namespace rexlang {
 
@@ -11,11 +12,6 @@ namespace rexlang {
      ******************************************************/
 
     void HierarchyIdentifier::AppendComponent(NameComponent *component) {
-        if (!this->name_components_.empty()) {
-            NameComponent *forward = this->name_components_.back();
-            forward->SetBackward(component);
-            component->SetForward(forward);
-        }
         this->name_components_.push_back(component);
         setChild(component);
     }
@@ -24,9 +20,35 @@ namespace rexlang {
      * NameComponent
      ******************************************************/
 
-    void            NameComponent::SetForward   (NameComponent *component)  { forward_name_component_  = component; }
-    void            NameComponent::SetBackward  (NameComponent *component)  { backward_name_component_ = component; }
-    NameComponent * NameComponent::Forward      () const                    { return forward_name_component_;  }
-    NameComponent * NameComponent::Backward     () const                    { return backward_name_component_; }
+    NameComponent * NameComponent::Forward() const {
+        if (HierarchyIdentifier *hierarchy_identifier = rtti::dyn_cast<HierarchyIdentifier>(getParent())) {
+            int index = hierarchy_identifier->indexOf(this);
+            if (index >= 0) {
+                index--;
+                return index >= 0 ? hierarchy_identifier->getNameComponents()[index] : nullptr;
+            } else {
+                assert(false);
+                return nullptr;
+            }
+        } else {
+            assert(false);
+            return nullptr;
+        }
+    }
+    NameComponent * NameComponent::Backward() const {
+        if (HierarchyIdentifier *hierarchy_identifier = rtti::dyn_cast<HierarchyIdentifier>(getParent())) {
+            int index = hierarchy_identifier->indexOf(this);
+            if (index >= 0) {
+                index++;
+                return index < hierarchy_identifier->getNameComponents().size() ? hierarchy_identifier->getNameComponents()[index] : nullptr;
+            } else {
+                assert(false);
+                return nullptr;
+            }
+        } else {
+            assert(false);
+            return nullptr;
+        }
+    }
 
 }
