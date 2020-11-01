@@ -267,7 +267,7 @@ namespace rexlang {
         size_t          getRightColumn() const ;
 
     public:
-        int Accept(class Visitor &visitor) ;
+        virtual int Visit(class Visitor &visitor) ;
 
     public:
         virtual TagDecl * findDeclWithNameString(const StringRef &name) const ; // 沿着语法树搜索指定名称的定义
@@ -304,6 +304,9 @@ namespace rexlang {
         virtual bool isMacroDeclareFile  () const ;
 
     public:
+        int Visit(class Visitor &visitor) override ;
+
+    public:
         static const NodeType GetClassId () ;
 
     };
@@ -334,6 +337,9 @@ namespace rexlang {
         const std::vector<TString> & getRefLibs       () const ;
 
     public:
+        int Visit(class Visitor &visitor) override ;
+
+    public:
         static const NodeType GetClassId () ;
 
     };
@@ -358,6 +364,9 @@ namespace rexlang {
 
     public:
         bool isGlobalVariableFile() const override ;
+
+    public:
+        int Visit(class Visitor &visitor) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -388,6 +397,9 @@ namespace rexlang {
         bool isDataStructureFile() const override ;
 
     public:
+        int Visit(class Visitor &visitor) override ;
+
+    public:
         static const NodeType GetClassId () ;
     };
 
@@ -413,6 +425,9 @@ namespace rexlang {
         bool isAPIDeclareFile() const override ;
 
     public:
+        int Visit(class Visitor &visitor) override ;
+
+    public:
         static const NodeType GetClassId () ;
     };
 
@@ -436,6 +451,9 @@ namespace rexlang {
 
     public:
         bool isMacroDeclareFile() const override ;
+
+    public:
+        int Visit(class Visitor &visitor) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -474,6 +492,9 @@ namespace rexlang {
         TagDecl *           decl    () const ;
 
     public:
+        int Visit(class Visitor &visitor) override ;
+
+    public:
         static const NodeType GetClassId () ;
 
     };
@@ -506,6 +527,9 @@ namespace rexlang {
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
+        int Visit(class Visitor &visitor) override ;
+
+    public:
         static const NodeType GetClassId () ;
     };
 
@@ -533,6 +557,9 @@ namespace rexlang {
 
     public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+
+    public:
+        int Visit(class Visitor &visitor) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -579,6 +606,9 @@ namespace rexlang {
         }
 
     public:
+        int Visit(class Visitor &visitor) override ;
+
+    public:
         static const NodeType GetClassId () ;
 
     };
@@ -612,6 +642,9 @@ namespace rexlang {
         bool     shouldBeReference  () const ;
 
     public:
+        int Visit(class Visitor &visitor) override ;
+
+    public:
         static const NodeType GetClassId () ;
 
     };
@@ -633,6 +666,9 @@ namespace rexlang {
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
+        int Visit(class Visitor &visitor) override ;
+
+    public:
         static const NodeType GetClassId () ;
 
     };
@@ -648,6 +684,9 @@ namespace rexlang {
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
+        int Visit(class Visitor &visitor) override ;
+
+    public:
         static const NodeType GetClassId () ;
     };
 
@@ -660,6 +699,9 @@ namespace rexlang {
 
     public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+
+    public:
+        int Visit(class Visitor &visitor) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -686,6 +728,9 @@ namespace rexlang {
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
+        int Visit(class Visitor &visitor) override ;
+
+    public:
         static const NodeType GetClassId () ;
     };
 
@@ -698,6 +743,9 @@ namespace rexlang {
 
     public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+
+    public:
+        int Visit(class Visitor &visitor) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -719,6 +767,9 @@ namespace rexlang {
     public:
         void applyAttribute (const TString &attribute) override ;
         bool isStatic() const ;
+
+    public:
+        int Visit(class Visitor &visitor) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -788,6 +839,9 @@ namespace rexlang {
         virtual TypeDecl *promoteType(TypeDecl *otherType) const ;      // 获取当前类型与指定类型的共同兼容类型
 
     public:
+        int Visit(class Visitor &visitor) override ;
+
+    public:
         static const NodeType GetClassId () ;
 
     };
@@ -803,6 +857,9 @@ namespace rexlang {
         ArrayDecl *getArrayToWithDimStr(const std::vector<size_t> &dims) ;
 
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+
+    public:
+        int Visit(rexlang::Visitor &visitor) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -831,6 +888,9 @@ namespace rexlang {
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
+        int Visit(class Visitor &visitor) override ;
+
+    public:
         static const NodeType GetClassId () ;
 
     };
@@ -854,6 +914,9 @@ namespace rexlang {
         bool    isIntegerCategory   () const override;
 
         virtual const char *GetTypeText () const = 0;
+
+    public:
+        int Visit(class Visitor &visitor) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -1134,9 +1197,6 @@ namespace rexlang {
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
-        static const NodeType GetClassId () ;
-
-    public:
         bool            isBinOptValid       (OperatorType opt, VariTypeDecl *otherType) const override ;
         bool            isStructType        () const override ;
         void            appendElement       (MemberVariableDecl *element) ;
@@ -1149,6 +1209,12 @@ namespace rexlang {
         int             indexMemberOfThis   (MemberVariableDecl *memberVariDecl) const ;
 
         TypeDecl *          promoteType(TypeDecl *otherType) const override ;
+
+    public:
+        int Visit(class Visitor &visitor) override ;
+
+    public:
+        static const NodeType GetClassId () ;
 
     };
 
@@ -1182,6 +1248,9 @@ namespace rexlang {
 
     public:
         static ArrayDecl *get(TypeDecl *elementType, const std::vector<size_t> &dimensions) ;
+
+    public:
+        int Visit(class Visitor &visitor) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -1226,6 +1295,9 @@ namespace rexlang {
         virtual bool    isDynamicLibraryAPI () const = 0;
 
     public:
+        int Visit(class Visitor &visitor) override ;
+
+    public:
         static const NodeType GetClassId () ;
 
     };
@@ -1261,6 +1333,9 @@ namespace rexlang {
 
     public:
         TagDecl *findDeclWithNameString(const StringRef &name) const override ;
+
+    public:
+        int Visit(class Visitor &visitor) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -1310,6 +1385,9 @@ namespace rexlang {
         bool    isAPICommandType    () const override ;
 
     public:
+        int Visit(class Visitor &visitor) override ;
+
+    public:
         static const NodeType GetClassId () ;
 
     };
@@ -1344,6 +1422,9 @@ namespace rexlang {
         TypeDecl* getType () const override ;
 
     public:
+        int Visit(class Visitor &visitor) override ;
+
+    public:
         static const NodeType GetClassId () ;
     };
 
@@ -1365,6 +1446,9 @@ namespace rexlang {
 
     public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+
+    public:
+        int Visit(class Visitor &visitor) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -1395,6 +1479,9 @@ namespace rexlang {
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
+        int Visit(class Visitor &visitor) override ;
+
+    public:
         static const NodeType GetClassId () ;
 
     };
@@ -1405,6 +1492,9 @@ namespace rexlang {
     class ControlStmt : public Statement {
     public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+
+    public:
+        int Visit(class Visitor &visitor) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -1418,6 +1508,9 @@ namespace rexlang {
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
         LoopStatement *getControlledLoop() ;  // 根据在语法树中的位置计算最近一层的循环结构
+
+    public:
+        int Visit(class Visitor &visitor) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -1434,6 +1527,9 @@ namespace rexlang {
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
+        int Visit(class Visitor &visitor) override ;
+
+    public:
         static const NodeType GetClassId () ;
 
     };
@@ -1447,6 +1543,9 @@ namespace rexlang {
 
     public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+
+    public:
+        int Visit(class Visitor &visitor) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -1475,6 +1574,9 @@ namespace rexlang {
         Expression * getReturnValue() const ;
 
     public:
+        int Visit(class Visitor &visitor) override ;
+
+    public:
         static const NodeType GetClassId () ;
 
     };
@@ -1488,6 +1590,9 @@ namespace rexlang {
 
     public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+
+    public:
+        int Visit(class Visitor &visitor) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -1527,6 +1632,9 @@ namespace rexlang {
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
+        int Visit(class Visitor &visitor) override ;
+
+    public:
         static const NodeType GetClassId () ;
 
     };
@@ -1547,6 +1655,10 @@ namespace rexlang {
     public:
         Statement * getLoopBody() const ;
 
+    public:
+        int Visit(class Visitor &visitor) override ;
+
+    public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
     };
 
@@ -1570,6 +1682,9 @@ namespace rexlang {
         Expression *getLoopCondition() const ;
 
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+
+    public:
+        int Visit(class Visitor &visitor) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -1598,6 +1713,9 @@ namespace rexlang {
         HierarchyIdentifier *   getLoopVari  () const ;
 
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+
+    public:
+        int Visit(class Visitor &visitor) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -1635,6 +1753,9 @@ namespace rexlang {
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
+        int Visit(class Visitor &visitor) override ;
+
+    public:
         static const NodeType GetClassId () ;
 
     };
@@ -1659,6 +1780,9 @@ namespace rexlang {
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
+        int Visit(class Visitor &visitor) override ;
+
+    public:
         static const NodeType GetClassId () ;
 
     };
@@ -1680,6 +1804,9 @@ namespace rexlang {
         void appendStatement(Statement *statement) ;
         const std::vector<Statement *> &getStatements() const ;
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+
+    public:
+        int Visit(class Visitor &visitor) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -1709,6 +1836,9 @@ namespace rexlang {
         virtual Expression *castTo(TypeDecl *targetType) ;
 
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+
+    public:
+        int Visit(class Visitor &visitor) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -1743,6 +1873,8 @@ namespace rexlang {
 
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
+    public:
+        int Visit(class Visitor &visitor) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -1754,14 +1886,18 @@ namespace rexlang {
      */
     class NameComponent : public Expression {
     public:
-        static const NodeType GetClassId () ;
-
-    public:
         NameComponent * Forward     () const ;
         NameComponent * Backward    () const ;
 
     public:
         virtual IdentRefer *getBaseId() const = 0;    // 获取组件的确切名称对象
+
+    public:
+        int Visit(class Visitor &visitor) override ;
+
+    public:
+        static const NodeType GetClassId () ;
+
     };
 
     /**
@@ -1786,6 +1922,9 @@ namespace rexlang {
 
         IdentRefer *    getBaseId   () const override ;
         TagDecl *       getDecl     () const ;  // 获取被引用的定义
+
+    public:
+        int Visit(class Visitor &visitor) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -1839,6 +1978,9 @@ namespace rexlang {
         ErrOr<std::vector<Expression *>> getIndexesList() const ;
 
     public:
+        int Visit(class Visitor &visitor) override ;
+
+    public:
         static const NodeType GetClassId () ;
 
     };
@@ -1885,6 +2027,9 @@ namespace rexlang {
         int     indexOfArgument  (const Expression *expr) const ;    // 若表达式是实参则返回是第几个参数，否则返回-1
 
     public:
+        int Visit(class Visitor &visitor) override ;
+
+    public:
         static const NodeType GetClassId () ;
 
     };
@@ -1917,6 +2062,9 @@ namespace rexlang {
         Expression *getSourceExpr () const ;
         TypeDecl *  getSourceType () const ;
         TypeDecl *  getTargetType () const ;
+
+    public:
+        int Visit(class Visitor &visitor) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -1952,6 +2100,9 @@ namespace rexlang {
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
+        int Visit(class Visitor &visitor) override ;
+
+    public:
         static const NodeType GetClassId () ;
 
     };
@@ -1977,6 +2128,9 @@ namespace rexlang {
     public:
         Expression *    getOperand          () ;
         bool            isUnaryOperateValid () const ;   // 检查一元运算是否合法，该断言主要判断一元表达式中操作数是否可以通过运算符计算
+
+    public:
+        int Visit(class Visitor &visitor) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -2010,6 +2164,9 @@ namespace rexlang {
         VariTypeDecl *  getBinaryOperateUpgradeType  () const ;   // 获取二元表达式左右子式提升后的类型，为空则表示无法提升
 
     public:
+        int Visit(class Visitor &visitor) override ;
+
+    public:
         static const NodeType GetClassId () ;
 
     };
@@ -2035,6 +2192,9 @@ namespace rexlang {
         ExprUsage getSubExprAccessType(const Expression *expr) const override ;
 
     public:
+        int Visit(class Visitor &visitor) override ;
+
+    public:
         static const NodeType GetClassId () ;
 
     };
@@ -2044,14 +2204,18 @@ namespace rexlang {
      * 值基类可以表示所有的常量
      */
     class Value : public Expression {
-    public:
-        static const NodeType GetClassId () ;
-
     protected:
         ExprUsage getSubExprAccessType(const Expression *expr) const override ;
 
     public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+
+    public:
+        int Visit(class Visitor &visitor) override ;
+
+    public:
+        static const NodeType GetClassId () ;
+
     };
 
     /**
@@ -2075,6 +2239,9 @@ namespace rexlang {
 
     public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+
+    public:
+        int Visit(class Visitor &visitor) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -2102,6 +2269,9 @@ namespace rexlang {
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
+        int Visit(class Visitor &visitor) override ;
+
+    public:
         static const NodeType GetClassId () ;
 
     };
@@ -2125,6 +2295,9 @@ namespace rexlang {
 
     public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+
+    public:
+        int Visit(class Visitor &visitor) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -2158,6 +2331,9 @@ namespace rexlang {
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
 
     public:
+        int Visit(class Visitor &visitor) override ;
+
+    public:
         static const NodeType GetClassId () ;
 
     };
@@ -2181,6 +2357,9 @@ namespace rexlang {
 
     public:
         void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+
+    public:
+        int Visit(class Visitor &visitor) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -2248,6 +2427,9 @@ namespace rexlang {
         BuiltinDoubleType *     getDoubleTy     () const ;
 
         TagDecl *findDeclWithNameString(const StringRef &name) const override ;
+
+    public:
+        int Visit(class Visitor &visitor) override ;
 
     public:
         static const NodeType GetClassId () ;

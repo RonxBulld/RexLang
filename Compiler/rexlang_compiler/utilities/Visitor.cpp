@@ -17,7 +17,7 @@ namespace rexlang {
     void Visitor::PostAction(Node &node) {}
 
     void Visitor::TraverseNode(Node *node) {
-        if (node) node->Accept(*this);
+        if (node) node->Visit(*this);       // 调用节点重写的特定Visit函数实现从叶子类到根基类的访问
     }
 
     template <typename ArrayLikeTy>
@@ -603,5 +603,71 @@ namespace rexlang {
 
         PostAction(node);
     }
+
+    /*===---------------------------------------===*
+     * 利用节点上的Visit多态性进行转发
+     */
+
+    int Node               ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int TranslateUnit      ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int SourceFile         ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int ProgramSetFile     ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int GlobalVariableFile ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int DataStructureFile  ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int APIDeclareFile     ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int MacroDeclareFile   ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int IdentDef           ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int Decl               ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int TagDecl            ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int TypeDecl           ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int VariTypeDecl       ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int StructureDecl      ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int BuiltinTypeDecl    ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int ArrayDecl          ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int ReferenceType      ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int MacroDecl          ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int BaseVariDecl       ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int VariableDecl       ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int GlobalVariableDecl ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int LocalVariableDecl  ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int ParameterDecl      ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int MemberVariableDecl ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int FileVariableDecl   ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int FunctorDecl        ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int FunctionDecl       ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int ProgSetDecl        ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int APICommandDecl     ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int Statement          ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int IfStmt             ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int StatementBlock     ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int LoopStatement      ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int WhileStmt          ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int RangeForStmt       ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int ForStmt            ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int DoWhileStmt        ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int AssignStmt         ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int ControlStmt        ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int LoopControlStmt    ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int ContinueStmt       ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int BreakStmt          ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int ReturnStmt         ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int ExitStmt           ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int Expression         ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int HierarchyIdentifier::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int NameComponent      ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int IdentRefer         ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int ArrayIndex         ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int FunctionCall       ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int UnaryExpression    ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int BinaryExpression   ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int OperatedExpression ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int TypeConvert        ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int Value              ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int ValueOfDataSet     ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int ValueOfDatetime    ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int FuncAddrExpression ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int ValueOfBool        ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int ValueOfDecimal     ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int ValueOfString      ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
 
 }
