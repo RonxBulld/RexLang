@@ -7,17 +7,7 @@
 namespace rexlang {
 
     TypeDecl *Expression::getExpressionType() const {
-        if (expression_type_) {
-            assert(expression_type_ == getExpressionTypeInternal());
-            return expression_type_;
-        } else {
-            return getExpressionTypeInternal();
-        }
-    }
-
-    TypeDecl *Expression::getExpressionType() {
-        expression_type_ = const_cast<const Expression *>(this)->getExpressionType();
-        return expression_type_;
+        return getExpressionTypeInternal();
     }
 
     /**************************************************************
