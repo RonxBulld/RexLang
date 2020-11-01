@@ -18,6 +18,8 @@ namespace rexlang {
     IdentRefer *ArrayIndex  ::getBaseId() const { return this->getIndexBase()->getBaseId(); }
     IdentRefer *FunctionCall::getBaseId() const { return this->name_->getBaseId(); }
 
+    Expression * ArrayIndex::getIndex() const { return index_; }
+
     NameComponent *ArrayIndex::getIndexBase() const {
         NameComponent *base = nullptr;
         const ArrayIndex *arrayIndex = this;

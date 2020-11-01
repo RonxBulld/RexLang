@@ -45,8 +45,9 @@ namespace rexlang {
         setChild(sourceFile);
     }
 
-    void     TranslateUnit::setSourceEdition(unsigned edition) { edition_ = edition; }
-    unsigned TranslateUnit::getSourceEdition() const           { return edition_; }
+    void                                TranslateUnit::setSourceEdition(unsigned edition)   { edition_ = edition; }
+    unsigned                            TranslateUnit::getSourceEdition() const             { return edition_; }
+    const std::vector<SourceFile *> &   TranslateUnit::getSourceFiles  () const             { return source_files_; }
 
     void         TranslateUnit::setMainEnrty(FunctorDecl *functorDecl) { main_entry_ = functorDecl; }
     FunctorDecl *TranslateUnit::getMainEntry() const                   { return main_entry_; }
@@ -137,6 +138,10 @@ namespace rexlang {
             }
         }
         return nullptr;
+    }
+
+    ProgSetDecl * ProgramSetFile::getProgSet() const {
+        return program_set_declares_;
     }
 
     /***************************************************
@@ -438,6 +443,12 @@ namespace rexlang {
     }
 
     /***************************************************
+     * ArrayDecl
+     ***************************************************/
+
+    TypeDecl *ArrayDecl::getArrayBase() const { return base_type_; }
+
+    /***************************************************
      * ProgSetDecl
      ***************************************************/
 
@@ -468,6 +479,9 @@ namespace rexlang {
             return nullptr;
         }
     }
+
+    const NamedOrderDict<FileVariableDecl *> &  ProgSetDecl::fileVariables()    { return file_static_variables_; }
+    const NamedOrderDict<FunctionDecl *> &      ProgSetDecl::functions    ()    { return function_decls_; }
 
     std::vector<FunctorDecl *> ProgSetDecl::getFuncSignatures() {
         std::vector<FunctorDecl *> signatures;
@@ -500,7 +514,8 @@ namespace rexlang {
         }
     }
 
-    StatementBlock *FunctionDecl::getFunctionBody() const { return statement_list_; }
+    const NamedOrderDict<LocalVariableDecl *> & FunctionDecl::getLocalVariables() const { return local_vari_; }
+    StatementBlock *                            FunctionDecl::getFunctionBody  () const { return statement_list_; }
 
     /***************************************************
      * APICommandDecl
@@ -524,6 +539,19 @@ namespace rexlang {
 
     const std::vector<Statement *> &StatementBlock::getStatements() const {
         return statements_;
+    }
+
+    /******************************************************
+     * HierarchyIdentifier
+     ******************************************************/
+
+    const std::vector<NameComponent *> &HierarchyIdentifier::getNameComponents() { return name_components_; }
+
+    int HierarchyIdentifier::indexOf(const NameComponent *component) const {
+        if (!component) { return -1; }
+        auto found = std::find(name_components_.begin(), name_components_.end(), component);
+        if (found == name_components_.end()) { return -1; }
+        return std::distance(name_components_.begin(), found);
     }
 
     /***************************************************
@@ -569,6 +597,8 @@ namespace rexlang {
     Expression *    IfStmt::conditionAt (size_t idx) const  { return switches_.at(idx).first;  }
     Statement *     IfStmt::branchBodyAt(size_t idx) const  { return switches_.at(idx).second; }
     Statement *     IfStmt::defaultBody () const            { return default_statement_; }
+
+    const std::vector<IfStmt::BranchTy> &IfStmt::expressionSwitches() { return switches_; }
 
     /***************************************************
      * LoopStatement
@@ -743,6 +773,8 @@ namespace rexlang {
      ***************************************************/
 
     void ValueOfDataSet::appendElement(Expression *element) { elements_.push_back(element); setChild(element); }
+
+    const std::vector<Expression *> & ValueOfDataSet::elements() const { return elements_; }
 
     /***************************************************
      * ValueOfDatetime
