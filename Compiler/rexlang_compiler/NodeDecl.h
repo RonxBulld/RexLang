@@ -1,6 +1,14 @@
-//
-// Created by rex on 2020/1/3.
-//
+/***********************************************************************
+ * 节点类型定义文件
+ * 当新增或删除节点类型时，需要注意同步处理以下部分：
+ * 1、类型的前置声明；
+ * 2、节点类型枚举；
+ * 3、节点中的GetClassId静态方法；
+ * 4、节点中的sematicAnalysisInternal静态方法；
+ * 5、Visit类中的接口；
+ * 6、DumpAST类中的接口。
+ * Created by rex on 2020/1/3.
+ ***********************************************************************/
 
 #ifndef REXLANG_NODEDECL_H
 #define REXLANG_NODEDECL_H
@@ -268,6 +276,7 @@ namespace rexlang {
 
     public:
         virtual int Visit(class Visitor &visitor) ;
+        void Dump(std::ostream &OS) ;
 
     public:
         virtual TagDecl * findDeclWithNameString(const StringRef &name) const ; // 沿着语法树搜索指定名称的定义

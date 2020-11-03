@@ -47,6 +47,8 @@ SET(Utilities-Src
         utilities/Str2Attr.h
         utilities/Visitor.cpp
         utilities/Visitor.h
+        utilities/DumpAST.cpp
+        utilities/DumpAST.h
         )
 
 SET(REXCompilerParse-Source
