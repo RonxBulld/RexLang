@@ -8,9 +8,6 @@
 #include <string>
 #include <vector>
 #include "rexlang_compiler/AstGenerate.h"
-#include "ir/LLVMIR/EmitLLVMIR.h"
-#include "codegen/LLCodeGen.h"
-#include "link/Linker.h"
 #include "support/ProjectDB.h"
 
 namespace rexlang {

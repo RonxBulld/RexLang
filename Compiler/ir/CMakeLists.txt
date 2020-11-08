@@ -15,6 +15,7 @@ ADD_LIBRARY(IR
         LLVMIR/Emitter.h
         LLVMIR/DebugInfoMgr.cpp
         LLVMIR/DebugInfoMgr.h
+        GenIRPass.cpp
         )
 
 target_link_libraries(IR LLVM)

@@ -6,10 +6,21 @@ PROJECT(${COMPILER_EXECUTE_NAME} CXX)
 INCLUDE_DIRECTORIES(/usr/local/include/antlr4-runtime)
 LINK_DIRECTORIES(/usr/local/lib)
 
+OPTION(ENABLE_GENIR "Enable generate IR." OFF)
+OPTION(ENABLE_LINK  "Enable link module files to executable file." OFF)
+
+SET(ADDITION_LIBRARIES )
+
 ADD_SUBDIRECTORY(rexlang_compiler)
-ADD_SUBDIRECTORY(ir)
-ADD_SUBDIRECTORY(codegen)
-ADD_SUBDIRECTORY(link)
+IF (${ENABLE_GENIR})
+    ADD_SUBDIRECTORY(ir)
+    ADD_SUBDIRECTORY(codegen)
+    LIST(APPEND ADDITION_LIBRARIES IR;CodeGen)
+    IF (${ENABLE_LINK})
+        ADD_SUBDIRECTORY(link)
+        LIST(APPEND ADDITION_LIBRARIES LinkerAPI)
+    ENDIF()
+ENDIF()
 ADD_SUBDIRECTORY(support)
 
 IF("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
@@ -26,9 +37,7 @@ ADD_EXECUTABLE(${COMPILER_EXECUTE_NAME}
 TARGET_LINK_LIBRARIES(${COMPILER_EXECUTE_NAME}
         REXCompilerParse
         antlr4-runtime
-        IR
-        LinkerAPI
-        CodeGen
+        ${ADDITION_LIBRARIES}
         lite_util
         Support
         )

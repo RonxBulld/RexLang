@@ -51,6 +51,7 @@ ADD_DEFINITIONS(-DLINKER="Linker")
 ADD_LIBRARY(LinkerAPI
         Linker.h
         Linker.cpp
+        LinkPass.cpp
         )
 TARGET_LINK_LIBRARIES(LinkerAPI lite_util Support)
 TARGET_LINK_LIBRARIES(LinkerAPI clang clang-cpp LLVM)

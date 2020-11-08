@@ -9,6 +9,7 @@
 #include "../lite_util/StringUtil.h"
 #include "../lite_util/ContainerUtil.h"
 #include "support/ProgramDB.h"
+#include "support/Pass.h"
 
 namespace rexlang {
     FileEntry FileEntry::MakeFromFile(const std::string &filename) {
@@ -68,7 +69,7 @@ namespace rexlang {
         bool all_parse_success = true;
         for (const FileEntry &entry : entries) {
             assert(entry.Valid());
-            all_parse_success &= compilerInstance.parseOnFile(entry);
+            all_parse_success &= (bool) compilerInstance.parseOnFile(entry);
         }
         if (all_parse_success) {
             if (!compilerInstance.runSematicAnalysis()) {
@@ -79,17 +80,13 @@ namespace rexlang {
     }
 
     int tooling::GenerateCodeFromTranslateUnit(ProjectDB &projectDB) {
-        rexlang::EmitLLVMIR emitter(projectDB.getTranslateUnit(), projectDB);
-//        emitter.WriteOutIR();
-        rexlang::LLCodeGen ll_code_gen(emitter);
-//        if (int EC = ll_code_gen.WriteOutBitCode(projectDB.GetBitCodeFilename())) { return EC; }
-        if (int EC = ll_code_gen.WriteOutObject (projectDB.GetObjectFilename()))  { return EC; }
-        return 0;
+        int EC = 0;
+        if ((EC = Pass::Call("GenIR", projectDB))) { return EC; }
+        return EC;
     }
 
     int tooling::LinkExecuteFromObjects(ProjectDB &projectDB) {
-        Linker linker;
-        return linker.LinkProject(projectDB);
+        return Pass::Call("Link", projectDB);
     }
 }
 
