@@ -5,6 +5,7 @@
 #ifndef REXLANG_DUMPAST_H
 #define REXLANG_DUMPAST_H
 
+#include <sstream>
 #include "Visitor.h"
 
 namespace rexlang {
@@ -12,11 +13,19 @@ namespace rexlang {
     class DumpASTWritter {
     private:
         std::ostream &OS_;
+        Node *latest_node_ = nullptr;
+        std::string latest_filename_;
 
     public:
         explicit DumpASTWritter(std::ostream &OS) ;
 
     public:
+        void NodeEnter(Node &node) ;
+        void NodeExit(Node &node) ;
+
+        void PrevAttribute(Node &node) ;
+        void PostAttribute(Node &node) ;
+
         void WriteNodeType(NodeType nodeType) ;
         void WriteNodeAddr(Node *nodePoint) ;
         void WriteLocation(const char *filename, size_t leftLine, size_t leftCol, size_t rightLine, size_t rightCol) ;
@@ -25,11 +34,9 @@ namespace rexlang {
         void WriteString(const char *str) ;
     };
 
-    class DumpAST : public Visitor {
-    private:
-        DumpASTWritter &writter_;
+    class DumpAST : public Visitor, private DumpASTWritter {
     public:
-        explicit DumpAST(DumpASTWritter &writter) ;
+        explicit DumpAST(std::ostream &OS) ;
 
     public:
         void Visit(Node &                node) override;
