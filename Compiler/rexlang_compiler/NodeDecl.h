@@ -264,6 +264,7 @@ namespace rexlang {
         TranslateUnit * getTranslateUnit    () const ;
         ASTContext *    getAstContext       () const ;
         Node *          getParent           () const ;
+        NodeType        getNodeType         () const ;
 
     public:
         void setLocation(const char *filename, size_t leftLine, size_t leftColumn, size_t rightLine, size_t rightColumn) ;

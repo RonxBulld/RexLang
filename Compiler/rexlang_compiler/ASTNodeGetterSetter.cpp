@@ -21,8 +21,9 @@ namespace rexlang {
     void Node::setChild (Node *child)  { child->parent_node_ = this; }
 
     TranslateUnit * Node::getTranslateUnit() const { return ast_context_->getTranslateUnit(); }
-    ASTContext *    Node::getAstContext   () const { return ast_context_;  }
-    Node *          Node::getParent       () const { assert(parent_node_); return parent_node_;  }
+    ASTContext *    Node::getAstContext   () const { return ast_context_; }
+    Node *          Node::getParent       () const { assert(parent_node_); return parent_node_; }
+    NodeType        Node::getNodeType     () const { return node_type_; }
 
     void Node::setLocation(const char *filename, size_t leftLine, size_t leftColumn, size_t rightLine, size_t rightColumn) {
         location_start_ = this->ast_context_->createLocation(filename, leftLine,  leftColumn );
