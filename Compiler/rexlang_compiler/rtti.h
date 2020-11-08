@@ -15,6 +15,8 @@ namespace rexlang {
             return dynamic_cast<T *>(n);
         }
 
+        const char *name(NodeType nodeType) ;
+
     }
 }
 
