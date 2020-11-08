@@ -6,6 +6,7 @@
 #define __REXLANG_DIAGNOSTICBASE_H__
 
 #include <map>
+#include <string>
 
 namespace rexlang {
 
