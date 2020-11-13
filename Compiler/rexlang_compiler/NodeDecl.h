@@ -212,6 +212,7 @@ namespace rexlang {
         [[nodiscard]] bool isRelationalOpt () const ;   // == != > < >= <=
         [[nodiscard]] bool isExtraRelOpt   () const ;   // == != > < >= <= ?=
         [[nodiscard]] bool isBooleanOpt    () const ;   // && ||
+        [[nodiscard]] bool isIllegal       () const ;
 
     public:
         const Opt &getOperate() const { return opt_; }  // 获取运算符枚举值
