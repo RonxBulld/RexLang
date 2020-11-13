@@ -1,6 +1,8 @@
-//
-// Created by Administrator on 2020/7/23.
-//
+/************************************************************
+ * getExpressionTypeInternal会假定表达式经过了验证，
+ * 即VerifyExpression返回值为true。
+ * RonxBulld 2020/7/23.
+ ************************************************************/
 
 #include "NodeDecl.h"
 

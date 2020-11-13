@@ -5,6 +5,8 @@
 #ifndef REXLANG_CST2ASTCONVERT_H
 #define REXLANG_CST2ASTCONVERT_H
 
+#include <stack>
+
 #include "gen/rexLangLexer.h"
 #include "gen/rexLangParser.h"
 #include "gen/rexLangVisitor.h"
@@ -25,6 +27,10 @@ namespace rexlang {
          * 待处理文件缓存
          */
         std::set<rexLangParser::Src_contentContext *> source_cache_;
+        /*
+         * 名称前缀栈
+         */
+        std::stack<NameComponent *> prefix_component_stack_;
 
     private:
         TString              GetTextIfExist   (const antlr4::Token *token, const std::string &hint = "") const;
@@ -48,10 +54,13 @@ namespace rexlang {
         NodeTy *CreateNode(antlr4::Token *start_token, antlr4::Token *end_token, Args && ... args);
 
         template<typename NodeTy, typename ... Args, typename = typename std::enable_if_t<std::is_base_of_v<Node, NodeTy>>>
+        NodeTy *CreateNode(antlr4::Token *token, Args && ... args);
+
+        template<typename NodeTy, typename ... Args, typename = typename std::enable_if_t<std::is_base_of_v<Node, NodeTy>>>
         NodeTy *CreateNode(antlr4::ParserRuleContext *parserRuleContext, Args && ... args);
 
     private:
-        ValueOfDatetime* TimeNodeBuilder(time_t ntm, antlr4::ParserRuleContext *parserRuleContext);
+        ValueOfDatetime* TimeNodeBuilder(time_t ntm, antlr4::ParserRuleContext *context);
         tm TimeBuilder(unsigned year, unsigned month, unsigned day, unsigned hour, unsigned minute, unsigned second);
 
     private:

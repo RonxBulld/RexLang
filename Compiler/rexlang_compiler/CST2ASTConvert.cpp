@@ -104,7 +104,7 @@ namespace rexlang {
 
     template<typename NodeTy, typename ... Args, typename>
     NodeTy *CST2ASTConvert::CreateNode(antlr4::Token *start_token, antlr4::Token *end_token, Args &&... args) {
-        NodeTy *node = rexlang::CreateNode<NodeTy, Args...>(this->ast_context_, args...);
+        NodeTy *node = rexlang::CreateNode<NodeTy, Args...>(this->ast_context_, std::forward<Args>(args)...);
         Node *base_node = node;
         base_node->setLocation(
                 start_token->getTokenSource()->getSourceName().c_str(),
@@ -116,9 +116,22 @@ namespace rexlang {
         return node;
     }
 
-    template<typename NodeTy, typename ... Args, typename = typename std::enable_if_t<std::is_base_of_v<Node, NodeTy>>>
-    NodeTy *CreateNode(antlr4::ParserRuleContext *parserRuleContext, Args &&... args) {
-        return CreateNode<NodeTy, Args...>(parserRuleContext->getStart(), parserRuleContext->getStop(), args...);
+    template<typename NodeTy, typename ... Args, typename>
+    NodeTy *CST2ASTConvert::CreateNode(antlr4::Token *token, Args && ... args) {
+        return CreateNode<NodeTy, Args...>(
+                token,
+                token,
+                std::forward<Args>(args)...
+                );
+    }
+
+    template<typename NodeTy, typename ... Args, typename>
+    NodeTy *CST2ASTConvert::CreateNode(antlr4::ParserRuleContext *parserRuleContext, Args &&... args) {
+        return CreateNode<NodeTy, Args...>(
+                parserRuleContext->getStart(),
+                parserRuleContext->getStop(),
+                std::forward<Args>(args)...
+                );
     }
 
     template <typename T, typename>
@@ -217,6 +230,10 @@ namespace rexlang {
         return GetTextIfExist(context->comment);
     }
 
+    antlrcpp::Any CST2ASTConvert::visitProg_set     (rexLangParser::Prog_setContext *     context) { assert(false); return nullptr; }
+    antlrcpp::Any CST2ASTConvert::visitVariable_decl(rexLangParser::Variable_declContext *context) { assert(false); return nullptr; }
+    antlrcpp::Any CST2ASTConvert::visitSub_program  (rexLangParser::Sub_programContext *  context) { assert(false); return nullptr; }
+
     /*===----------------------------===*
      *              O
      *              |
@@ -278,6 +295,10 @@ namespace rexlang {
         return NodeWarp(translate_unit);
     }
 
+    antlrcpp::Any CST2ASTConvert::visitSrc_content        (rexLangParser::Src_contentContext *        context) { assert(false); return nullptr; }
+    antlrcpp::Any CST2ASTConvert::visitProgram_set_file   (rexLangParser::Program_set_fileContext *   context) { assert(false); return nullptr; }
+    antlrcpp::Any CST2ASTConvert::visitData_structure_file(rexLangParser::Data_structure_fileContext *context) { assert(false); return nullptr; }
+
     // --- 外部库引入 ---------------------------------------------------------------------------------
 
     bool CST2ASTConvert::importLibraries() {
@@ -296,6 +317,13 @@ namespace rexlang {
                 this->loadHeads({parse_tree});
             }
         }
+        return true;
+    }
+
+    // --- 宏定义 ---------------------------------------------------------------------------------
+
+    bool CST2ASTConvert::parseMacroFiles() {
+        // TODO:
         return true;
     }
 
@@ -318,7 +346,7 @@ namespace rexlang {
                 assert(name_tk);
                 TString name = GetTextIfExist(name_tk, "");
                 assert(name.string_ != "");
-                IdentDef *struct_name = CreateNode<IdentDef>(name_tk, name_tk, name.string_);
+                IdentDef *struct_name = CreateNode<IdentDef>(name_tk, name.string_);
 
                 // 创建节点
 
@@ -400,6 +428,9 @@ namespace rexlang {
         return NodeWarp(global_variable_decl);
     }
 
+    antlrcpp::Any CST2ASTConvert::visitEdition_spec  (rexLangParser::Edition_specContext *  context) { assert(false); return nullptr; }
+    antlrcpp::Any CST2ASTConvert::visitStruct_declare(rexLangParser::Struct_declareContext *context) { assert(false); return nullptr; }
+
     // --- 局部变量 ---------------------------------------------------------------------------------
 
     antlrcpp::Any CST2ASTConvert::visitLocal_variable_decl(rexLangParser::Local_variable_declContext *context) {
@@ -418,7 +449,8 @@ namespace rexlang {
             // 创建程序集
 
             rexLangParser::Prog_setContext *prog_set_context = file_ctx->prog_set();
-            ProgSetDecl *prog_set_decl = CreateNode<ProgSetDecl>(prog_set_context, GetTextIfExist(prog_set_context->name));
+            IdentDef *prog_set_id = CreateNode<IdentDef>(prog_set_context->name, GetTextIfExist(prog_set_context->name));
+            ProgSetDecl *prog_set_decl = CreateNode<ProgSetDecl>(prog_set_context, prog_set_id);
             prog_set_decl->setComment(getTableComment(prog_set_context));
 
             // 创建变量
@@ -495,11 +527,11 @@ namespace rexlang {
 
         APICommandDecl *dll_api_decl = CreateNode<APICommandDecl>(context,
                 /*retType*/     ret_type,
-                /*name*/        CreateNode<IdentDef>(context, name),
+                /*name*/        CreateNode<IdentDef>(context->name, name),
                 /*parameters*/  getParameterDecl(context->params),
                 /*libraryType*/ LibraryType::kLTDynamic,
                 /*libraryName*/ library_file,
-                /*apiName*/     api_name
+                /*apiName*/     CreateNode<IdentDef>(context->cmd, api_name)
         );
         dll_api_decl->setComment(getTableComment(context));
         return NodeWarp(dll_api_decl);
@@ -515,11 +547,11 @@ namespace rexlang {
 
         APICommandDecl *lib_api_decl = CreateNode<APICommandDecl>(context,
                 /*retType*/     ret_type,
-                /*name*/        CreateNode<IdentDef>(context, name),
+                /*name*/        CreateNode<IdentDef>(context->name, name),
                 /*parameters*/  getParameterDecl(context->params),
                 /*libraryType*/ LibraryType::kLTStatic,
                 /*libraryName*/ library_file,
-                /*apiName*/     api_name
+                /*apiName*/     CreateNode<IdentDef>(context->cmd, api_name)
         );
         lib_api_decl->setComment(getTableComment(context));
         return NodeWarp(lib_api_decl);
@@ -564,7 +596,7 @@ namespace rexlang {
 
         FunctionDecl *function_decl = CreateNode<FunctionDecl>(context,
                 /*retType*/    ret_type,
-                /*name*/       CreateNode<IdentDef>(context, name),
+                /*name*/       CreateNode<IdentDef>(context->name, name),
                 /*parameters*/ getParameterDecl(context->params)
         );
         function_decl->applyAttribute(GetTextIfExist(context->access));
@@ -639,7 +671,10 @@ namespace rexlang {
         Statement * true_statement  = GetFromCtxIfExist<Statement *>(context->true_stmt_list);
         Statement * false_statement = GetFromCtxIfExist<Statement *>(context->false_stmt_list);
 
-        IfStmt *if_stmt = CreateNode<IfStmt>(context, IfStmt::BranchTy(condition, true_statement), false_statement);
+        IfStmt *if_stmt = CreateNode<IfStmt>(context,
+                                             std::vector<IfStmt::BranchTy>{IfStmt::BranchTy(condition, true_statement)},
+                                             false_statement
+                                             );
         return NodeWarp(if_stmt);
     }
 
@@ -647,7 +682,10 @@ namespace rexlang {
         Expression *condition       = GetFromCtxIfExist<Expression*>(context->condition_expr);
         Statement * true_statement  = GetFromCtxIfExist<Statement*>(context->true_stmt_list);
 
-        IfStmt* if_stmt = CreateNode<IfStmt>(context, IfStmt::BranchTy(condition, true_statement), nullptr);
+        IfStmt* if_stmt = CreateNode<IfStmt>(context,
+                                             std::vector<IfStmt::BranchTy>{IfStmt::BranchTy(condition, true_statement)},
+                                             nullptr
+                                             );
         return NodeWarp(if_stmt);
     }
 
@@ -758,10 +796,14 @@ namespace rexlang {
 
     antlrcpp::Any CST2ASTConvert::visitHierarchy_identifier(rexLangParser::Hierarchy_identifierContext *context) {
         std::vector<NameComponent *> name_components;
+
+        prefix_component_stack_.push(nullptr);  // 维护前缀栈上下文
         for (auto *name_component_ctx : context->components) {
             NameComponent* name_component = GetFromCtxIfExist<NameComponent*, true>(name_component_ctx);
             name_components.push_back(name_component);
+            prefix_component_stack_.top() = name_component;
         }
+        prefix_component_stack_.pop();  // 维护前缀栈上下文
 
         HierarchyIdentifier* hierarchy_identifier = CreateNode<HierarchyIdentifier>(context, name_components);
         return NodeWarp(hierarchy_identifier);
@@ -772,7 +814,8 @@ namespace rexlang {
 
         // 调用对象
         IdentRefer *callee_name = GetFromCtxIfExist<IdentRefer *, true>(context->name_component());
-        FunctorDecl *callee = TU->getFunctor(callee_name->def()->id());
+        FunctorDecl *callee = rtti::dyn_cast<FunctorDecl>(callee_name->def()->getParent());
+        assert(callee);
 
         // 实参列表
         std::vector<Expression *> arguments;
@@ -788,7 +831,8 @@ namespace rexlang {
 
     antlrcpp::Any CST2ASTConvert::visitIdentifier(rexLangParser::IdentifierContext *context) {
         TString name = GetTextIfExist(context->IDENTIFIER()->getSymbol());
-        IdentRefer* identifier = CreateNode<IdentRefer>(context, name);
+        assert(!prefix_component_stack_.empty());
+        IdentRefer* identifier = CreateNode<IdentRefer>(context, name.string_, prefix_component_stack_.top());
         return NodeWarp(identifier);
     }
 
@@ -870,10 +914,8 @@ namespace rexlang {
         return NodeWarp(GetFromCtxIfExist<ValueOfDatetime*>(context->datetime_value_core()));
     }
 
-    ValueOfDatetime* CST2ASTConvert::TimeNodeBuilder(time_t ntm, antlr4::ParserRuleContext *parserRuleContext) {
-        auto start_token = parserRuleContext->getStart();
-        auto end_token   = parserRuleContext->getStop();
-        ValueOfDatetime *value_of_datetime = CreateNode<ValueOfDatetime>(start_token, end_token, ntm);
+    ValueOfDatetime* CST2ASTConvert::TimeNodeBuilder(time_t ntm, antlr4::ParserRuleContext *context) {
+        ValueOfDatetime *value_of_datetime = CreateNode<ValueOfDatetime>(context, ntm);
         return value_of_datetime;
     }
 
@@ -970,12 +1012,12 @@ namespace rexlang {
     }
 
     antlrcpp::Any CST2ASTConvert::visitInt(rexLangParser::IntContext *context) {
-        ValueOfDecimal* value_of_decimal = CreateNode<ValueOfDecimal>(context, GetLongIfExist(context->INTEGER_LITERAL()->getSymbol()));
+        ValueOfDecimal* value_of_decimal = CreateNode<ValueOfDecimal>(context, (int) GetLongIfExist(context->INTEGER_LITERAL()->getSymbol()));
         return NodeWarp(value_of_decimal);
     }
 
     antlrcpp::Any CST2ASTConvert::visitFloat(rexLangParser::FloatContext *context) {
-        ValueOfDecimal* value_of_decimal = CreateNode<ValueOfDecimal>(context, GetFloatIfExist(context->FLOAT_LITERAL()->getSymbol()));
+        ValueOfDecimal* value_of_decimal = CreateNode<ValueOfDecimal>(context, (float) GetFloatIfExist(context->FLOAT_LITERAL()->getSymbol()));
         return NodeWarp(value_of_decimal);
     }
 
