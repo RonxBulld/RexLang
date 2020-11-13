@@ -147,8 +147,9 @@ namespace rexlang {
             return false;
         }
 
-        SematicAnalysis sematic_analysis;
-        bool sematic_success = sematic_analysis.Run(this->major_translate_unit_);
+//        SematicAnalysis sematic_analysis;
+        bool sematic_success = false;
+//        sematic_success = sematic_analysis.Run(this->major_translate_unit_);
 
         return sematic_success;
     }

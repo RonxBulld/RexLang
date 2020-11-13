@@ -24,7 +24,7 @@ SET(Sematic-Src
         SemaContext.h
         CompleteArguments.cpp)
 
-ADD_LIBRARY(Sema
+ADD_LIBRARY(${PROJECT_NAME}
         ${APISemaActions-Src}
         ${Sematic-Src}
         )

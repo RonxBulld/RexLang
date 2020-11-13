@@ -238,7 +238,8 @@ namespace rexlang {
         void setChild (Node *child)  ;
 
     public:
-        virtual ~Node() = default;
+        Node() ;
+        virtual ~Node() { }
 
     public:
         template<typename NodeTy, typename ... Args, typename = typename std::enable_if<std::is_base_of<Node, NodeTy>::value>::type>
@@ -285,7 +286,12 @@ namespace rexlang {
         virtual TagDecl * findDeclWithNameString(const StringRef &name) const ; // 沿着语法树搜索指定名称的定义
 
     public:
+#ifndef REX_NO_SEMA_ANALY
         virtual void sematicAnalysisInternal(SemaContext &semaCtx) = 0;     // 在节点上执行语义分析
+#   define SEMATIC_ANALYSIS_INTERNAL void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+#else
+#   define SEMATIC_ANALYSIS_INTERNAL
+#endif
 
     };
 
@@ -307,7 +313,7 @@ namespace rexlang {
         virtual void registResourceTo   (TranslateUnit *translateUnit) ;   // 将资源注册到翻译单元
 
     public:
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
         virtual bool isProgramSetFile    () const ;
         virtual bool isGlobalVariableFile() const ;
@@ -332,7 +338,7 @@ namespace rexlang {
         ProgSetDecl *        program_set_declares_ = nullptr;
 
     public:
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
     public:
         bool isProgramSetFile() const override ;
@@ -367,7 +373,7 @@ namespace rexlang {
         GlobalVariMapTy global_variable_map_;
 
     public:
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
     public:
         void                    appendGlobalVariableDecl(GlobalVariableDecl *globalVariableDecl) ;
@@ -398,7 +404,7 @@ namespace rexlang {
         DataStructureFile() = default ;
 
     public:
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
     public:
         void                    appendStructureDecl (StructureDecl *structureDecl) ;
@@ -426,7 +432,7 @@ namespace rexlang {
         DllDefMapTy api_declares_;
 
     public:
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
     public:
         void                appendAPIDeclare(APICommandDecl *apiCommandDecl) ;
@@ -454,7 +460,7 @@ namespace rexlang {
         MacroDeclMapTy macros_declares_;
 
     public:
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
     public:
         void                    appendMacroDeclare(MacroDecl *macroDecl) ;
@@ -494,7 +500,7 @@ namespace rexlang {
         IdentDef(const IdentDef &       other) ;
 
     public:
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
     public:
         const char *        name    () const ;
@@ -536,7 +542,7 @@ namespace rexlang {
         virtual TypeDecl* getType () const = 0;
 
     public:
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
     public:
         int Visit(class Visitor &visitor) override ;
@@ -568,7 +574,7 @@ namespace rexlang {
         const char *    getCommentStr   () const                 ;
 
     public:
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
     public:
         int Visit(class Visitor &visitor) override ;
@@ -593,7 +599,7 @@ namespace rexlang {
         BaseVariDecl(VariTypeDecl *type, IdentDef *name) ;
 
     public:
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
     public:
         void        updateType (VariTypeDecl *type) ;
@@ -637,7 +643,7 @@ namespace rexlang {
         ParameterDecl(VariTypeDecl *type, IdentDef *name) ;
 
     public:
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
     public:
         void applyAttribute (const TString &attribute) override ;
@@ -675,7 +681,7 @@ namespace rexlang {
         Value *getValue() ;
 
     public:
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
     public:
         int Visit(class Visitor &visitor) override ;
@@ -693,7 +699,7 @@ namespace rexlang {
         VariableDecl(VariTypeDecl *type, IdentDef *name) ;
 
     public:
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
     public:
         int Visit(class Visitor &visitor) override ;
@@ -710,7 +716,7 @@ namespace rexlang {
         GlobalVariableDecl(VariTypeDecl *type, IdentDef *name) ;
 
     public:
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
     public:
         int Visit(class Visitor &visitor) override ;
@@ -737,7 +743,7 @@ namespace rexlang {
         // 返回值应当为非负数，如果返回负数则表示发生错误
         int     indexOfStruct       () const ;
 
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
     public:
         int Visit(class Visitor &visitor) override ;
@@ -754,7 +760,7 @@ namespace rexlang {
         FileVariableDecl(VariTypeDecl *type, IdentDef *name) ;
 
     public:
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
     public:
         int Visit(class Visitor &visitor) override ;
@@ -774,7 +780,7 @@ namespace rexlang {
         LocalVariableDecl(VariTypeDecl *type, IdentDef *name) ;
 
     public:
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
     public:
         void applyAttribute (const TString &attribute) override ;
@@ -797,7 +803,7 @@ namespace rexlang {
     public:
         TypeDecl *getType () const override ;
 
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
     public:
 
@@ -868,7 +874,7 @@ namespace rexlang {
     public:
         ArrayDecl *getArrayToWithDimStr(const std::vector<size_t> &dims) ;
 
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
     public:
         int Visit(rexlang::Visitor &visitor) override ;
@@ -897,7 +903,7 @@ namespace rexlang {
         bool isReferenceType() const override ;
 
     public:
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
     public:
         int Visit(class Visitor &visitor) override ;
@@ -915,7 +921,7 @@ namespace rexlang {
         BuiltinTypeDecl(const char *typeName, EnumOfBuiltinType typeEnum) ;
 
     public:
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
     public:
         virtual EnumOfBuiltinType GetBuiltinType() const = 0;
@@ -1206,7 +1212,7 @@ namespace rexlang {
         explicit StructureDecl(IdentDef *name) ;
 
     public:
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
     public:
         bool            isBinOptValid       (OperatorType opt, VariTypeDecl *otherType) const override ;
@@ -1256,7 +1262,7 @@ namespace rexlang {
 
         TypeDecl *          getArrayBase            () const ;
 
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
     public:
         static ArrayDecl *get(TypeDecl *elementType, const std::vector<size_t> &dimensions) ;
@@ -1284,7 +1290,7 @@ namespace rexlang {
         FunctorDecl(VariTypeDecl *retType, IdentDef *name, const std::vector<ParameterDecl *> &parameters) ;
 
     public:
-        void sematicAnalysisInternal(SemaContext &semaCtx)  override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
         bool isCallable             ()                      const override ;
         bool isAssginValidFrom      (TypeDecl *fromType)    const override ;
@@ -1328,7 +1334,7 @@ namespace rexlang {
         FunctionDecl(VariTypeDecl *retType, IdentDef *name, const std::vector<ParameterDecl *> &parameters) ;
 
     public:
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
     public:
         void     appendLocalVariable(LocalVariableDecl * variableDecl) ;
@@ -1381,7 +1387,7 @@ namespace rexlang {
                 ) ;
 
     public:
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
     public:
         const TString & getLibraryName  () const ;
@@ -1428,7 +1434,7 @@ namespace rexlang {
         std::vector<FunctorDecl *> getFuncSignatures() ;
 
     public:
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
         TagDecl * findDeclWithNameString(const StringRef &name) const override ;
         TypeDecl* getType () const override ;
@@ -1457,7 +1463,7 @@ namespace rexlang {
         virtual ExprUsage getSubExprAccessType(const Expression *expr) const = 0;
 
     public:
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
     public:
         int Visit(class Visitor &visitor) override ;
@@ -1488,7 +1494,7 @@ namespace rexlang {
         HierarchyIdentifier *   getLHS() const ;
         Expression *            getRHS() const ;
 
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
     public:
         int Visit(class Visitor &visitor) override ;
@@ -1503,7 +1509,7 @@ namespace rexlang {
      */
     class ControlStmt : public Statement {
     public:
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
     public:
         int Visit(class Visitor &visitor) override ;
@@ -1517,7 +1523,7 @@ namespace rexlang {
      */
     class LoopControlStmt : public ControlStmt {
     public:
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
         LoopStatement *getControlledLoop() ;  // 根据在语法树中的位置计算最近一层的循环结构
 
@@ -1536,7 +1542,7 @@ namespace rexlang {
         ExprUsage getSubExprAccessType(const Expression *expr) const override ;
 
     public:
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
     public:
         int Visit(class Visitor &visitor) override ;
@@ -1554,7 +1560,7 @@ namespace rexlang {
         ExprUsage getSubExprAccessType(const Expression *expr) const override ;
 
     public:
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
     public:
         int Visit(class Visitor &visitor) override ;
@@ -1581,7 +1587,7 @@ namespace rexlang {
         explicit ReturnStmt(Expression *returnValue) ;
 
     public:
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
         Expression * getReturnValue() const ;
 
@@ -1601,7 +1607,7 @@ namespace rexlang {
         ExprUsage getSubExprAccessType(const Expression *expr) const override ;
 
     public:
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
     public:
         int Visit(class Visitor &visitor) override ;
@@ -1641,7 +1647,7 @@ namespace rexlang {
 
         const std::vector<BranchTy> &expressionSwitches() ;
 
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
     public:
         int Visit(class Visitor &visitor) override ;
@@ -1671,7 +1677,7 @@ namespace rexlang {
         int Visit(class Visitor &visitor) override ;
 
     public:
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
     };
 
     /**
@@ -1693,7 +1699,7 @@ namespace rexlang {
     public:
         Expression *getLoopCondition() const ;
 
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
     public:
         int Visit(class Visitor &visitor) override ;
@@ -1724,7 +1730,7 @@ namespace rexlang {
         Expression *            getRangeSize () const ;
         HierarchyIdentifier *   getLoopVari  () const ;
 
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
     public:
         int Visit(class Visitor &visitor) override ;
@@ -1762,7 +1768,7 @@ namespace rexlang {
         Expression *            getStepValue  () const ;
         HierarchyIdentifier *   getLoopVari   () const ;
 
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
     public:
         int Visit(class Visitor &visitor) override ;
@@ -1789,7 +1795,7 @@ namespace rexlang {
         void setCondition(Expression *condition) ;
         Expression *getCondition() const ;
 
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
     public:
         int Visit(class Visitor &visitor) override ;
@@ -1815,7 +1821,7 @@ namespace rexlang {
     public:
         void appendStatement(Statement *statement) ;
         const std::vector<Statement *> &getStatements() const ;
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
     public:
         int Visit(class Visitor &visitor) override ;
@@ -1831,12 +1837,11 @@ namespace rexlang {
      */
     class Expression : public Statement {
     protected:
-        virtual TypeDecl *CheckExpressionInternal() = 0 ;
+        virtual bool VerifyExpression() = 0 ;
         virtual TypeDecl *getExpressionTypeInternal() const = 0 ;
 
     public:
-        virtual TypeDecl *CheckExpression  () { return CheckExpressionInternal(); }
-                TypeDecl *getExpressionType() const ;
+        TypeDecl *getExpressionType() const ;
 
         ExprUsage getLRType     () const ;    // 获取表达式自身的引用类型，依赖父节点的 getSubExprAccessType 实现
         bool      isLeftUsage   () const ;    // 本表达式具有左值属性
@@ -1847,7 +1852,7 @@ namespace rexlang {
         // 如果无法转换则返回空指针
         virtual Expression *castTo(TypeDecl *targetType) ;
 
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
     public:
         int Visit(class Visitor &visitor) override ;
@@ -1866,9 +1871,9 @@ namespace rexlang {
         std::vector<NameComponent *> name_components_;
 
     protected:
-        TypeDecl *CheckExpressionInternal   ()                             override ;
-        ExprUsage getSubExprAccessType      (const Expression *expr) const override ;
-        TypeDecl *getExpressionTypeInternal ()                       const override ;
+        bool        VerifyExpression            ()                             override ;
+        ExprUsage   getSubExprAccessType        (const Expression *expr) const override ;
+        TypeDecl *  getExpressionTypeInternal   ()                       const override ;
 
     public:
         HierarchyIdentifier(const std::vector<NameComponent *> &nameComponents) ;
@@ -1883,7 +1888,8 @@ namespace rexlang {
          */
         int indexOf(const NameComponent *component) const ;
 
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+    public:
+        SEMATIC_ANALYSIS_INTERNAL
 
     public:
         int Visit(class Visitor &visitor) override ;
@@ -1922,9 +1928,9 @@ namespace rexlang {
         IdentDef *reference_ = nullptr;
 
     protected:
-        TypeDecl *CheckExpressionInternal   () override;
-        ExprUsage getSubExprAccessType      (const Expression *expr) const override ;
-        TypeDecl *getExpressionTypeInternal ()                       const override ;   // 该物件的数据类型
+        bool        VerifyExpression            () override;
+        ExprUsage   getSubExprAccessType        (const Expression *expr) const override ;
+        TypeDecl *  getExpressionTypeInternal   ()                       const override ;   // 该物件的数据类型
 
     public:
         IdentRefer(const StringRef &name, NameComponent *prefix) ;
@@ -1955,9 +1961,9 @@ namespace rexlang {
         Expression *index_   = nullptr;
 
     protected:
-        TypeDecl *CheckExpressionInternal() override;
-        ExprUsage getSubExprAccessType      (const Expression *expr) const override ;
-        TypeDecl *getExpressionTypeInternal ()                       const override ;   // 元素的数据类型
+        bool        VerifyExpression            () override;
+        ExprUsage   getSubExprAccessType        (const Expression *expr) const override ;
+        TypeDecl *  getExpressionTypeInternal   ()                       const override ;   // 元素的数据类型
 
     public:
         ArrayIndex(NameComponent *baseComponent, Expression *indexExpression) ;
@@ -2015,15 +2021,15 @@ namespace rexlang {
         void appendArgument     (Expression *   argument) ;
 
     protected:
-        TypeDecl *CheckExpressionInternal   () override ;
-        ExprUsage getSubExprAccessType      (const Expression *expr) const override ;
-        TypeDecl *getExpressionTypeInternal ()                       const override ;   // 返回值的数据类型
+        bool        VerifyExpression            () override ;
+        ExprUsage   getSubExprAccessType        (const Expression *expr) const override ;
+        TypeDecl *  getExpressionTypeInternal   ()                       const override ;   // 返回值的数据类型
 
     public:
-        FunctionCall(IdentRefer *name, FunctorDecl *functorDecl, const std::vector<Expression *> &arguments) ;
+        FunctionCall(IdentRefer *name, FunctorDecl *callee, const std::vector<Expression *> &arguments) ;
 
     public:
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
         IdentRefer *                getBaseId           () const override ;
         FunctorDecl *               getCallee           () const ;
@@ -2058,8 +2064,8 @@ namespace rexlang {
         TypeDecl *   target_type_     = nullptr;     // 目标类型
 
     protected:
-        TypeDecl *CheckExpressionInternal   ()        override ;
-        TypeDecl *getExpressionTypeInternal ()  const override ;
+        bool        VerifyExpression            ()        override ;
+        TypeDecl *  getExpressionTypeInternal   ()  const override ;
 
     private:
         void setFromExpression(Expression *expression) ;
@@ -2069,7 +2075,7 @@ namespace rexlang {
         TypeConvert(TypeDecl *targetType, Expression *fromExpression) ;
 
         ExprUsage   getSubExprAccessType    (const Expression *expr) const override ;
-        void        sematicAnalysisInternal (SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
         Expression *getSourceExpr () const ;
         TypeDecl *  getSourceType () const ;
@@ -2109,7 +2115,7 @@ namespace rexlang {
         VariTypeDecl *promoteType(VariTypeDecl *typeA, VariTypeDecl *typeB) const ;
 
     public:
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
     public:
         int Visit(class Visitor &visitor) override ;
@@ -2127,9 +2133,9 @@ namespace rexlang {
         Expression *operand_value_ = nullptr;
 
     protected:
-        VariTypeDecl *  CheckExpressionInternal   () override ;
-        ExprUsage       getSubExprAccessType      (const Expression *expr) const override ;
-        TypeDecl *      getExpressionTypeInternal ()  const override ;
+        bool            VerifyExpression            () override ;
+        ExprUsage       getSubExprAccessType        (const Expression *expr) const override ;
+        TypeDecl *      getExpressionTypeInternal   ()  const override ;
 
     public:
         UnaryExpression(const OperatorType &opt, Expression *operand) ;
@@ -2158,7 +2164,7 @@ namespace rexlang {
         Expression *rhs_ = nullptr;
 
     protected:
-        VariTypeDecl *  CheckExpressionInternal     () override ;
+        bool            VerifyExpression            () override ;
         ExprUsage       getSubExprAccessType        (const Expression *expr) const override ;
         TypeDecl *      getExpressionTypeInternal   () const override ;
 
@@ -2191,14 +2197,14 @@ namespace rexlang {
         FunctorDecl *callee_ = nullptr;
 
     protected:
-        TypeDecl *  CheckExpressionInternal     () override ;
+        bool        VerifyExpression            () override ;
         TypeDecl *  getExpressionTypeInternal   () const override ;
 
     public:
         explicit FuncAddrExpression(FunctorDecl *callee) ;
 
     public:
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
     public:
         ExprUsage getSubExprAccessType(const Expression *expr) const override ;
@@ -2220,7 +2226,7 @@ namespace rexlang {
         ExprUsage getSubExprAccessType(const Expression *expr) const override ;
 
     public:
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
     public:
         int Visit(class Visitor &visitor) override ;
@@ -2238,7 +2244,7 @@ namespace rexlang {
         std::vector<Expression *> elements_;
 
     protected:
-        TypeDecl *  CheckExpressionInternal     () override ;
+        bool        VerifyExpression            () override ;
         TypeDecl *  getExpressionTypeInternal   () const override ;
 
     private:
@@ -2250,7 +2256,7 @@ namespace rexlang {
         const std::vector<Expression *> &elements() const ;
 
     public:
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
     public:
         int Visit(class Visitor &visitor) override ;
@@ -2268,7 +2274,7 @@ namespace rexlang {
         time_t time_ = 0;
 
     protected:
-        TypeDecl *  CheckExpressionInternal     () override ;
+        bool        VerifyExpression            () override ;
         TypeDecl *  getExpressionTypeInternal   () const override ;
 
     private:
@@ -2278,7 +2284,7 @@ namespace rexlang {
         explicit ValueOfDatetime(time_t time) ;
 
     public:
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
     public:
         int Visit(class Visitor &visitor) override ;
@@ -2296,7 +2302,7 @@ namespace rexlang {
         bool value_ = false;
 
     protected:
-        TypeDecl *  CheckExpressionInternal     () override ;
+        bool        VerifyExpression            () override ;
         TypeDecl *  getExpressionTypeInternal   () const override ;
 
     private:
@@ -2306,7 +2312,7 @@ namespace rexlang {
         ValueOfBool(bool boolValue) ;
 
     public:
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
     public:
         int Visit(class Visitor &visitor) override ;
@@ -2328,7 +2334,7 @@ namespace rexlang {
         enum type { kInt, kFloat } type_ = type::kInt;
 
     protected:
-        TypeDecl *  CheckExpressionInternal     () override ;
+        bool        VerifyExpression            () override ;
         TypeDecl *  getExpressionTypeInternal   () const override ;
 
     private:
@@ -2340,7 +2346,7 @@ namespace rexlang {
         explicit ValueOfDecimal(float value) ;
 
     public:
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
     public:
         int Visit(class Visitor &visitor) override ;
@@ -2358,7 +2364,7 @@ namespace rexlang {
         TString string_literal_;
 
     protected:
-        TypeDecl *  CheckExpressionInternal     () override ;
+        bool        VerifyExpression            () override ;
         TypeDecl *  getExpressionTypeInternal   () const override ;
 
     private:
@@ -2368,7 +2374,7 @@ namespace rexlang {
         explicit ValueOfString(const TString &literal) ;
 
     public:
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
     public:
         int Visit(class Visitor &visitor) override ;
@@ -2395,7 +2401,7 @@ namespace rexlang {
         void setMainEnrty(FunctorDecl *functorDecl) ;   // 设置主入口函数
 
     public:
-        void sematicAnalysisInternal(SemaContext &semaCtx) override ;
+        SEMATIC_ANALYSIS_INTERNAL
 
     public:
         void    appendSourceFile(SourceFile* sourceFile) ;

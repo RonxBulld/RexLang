@@ -747,7 +747,7 @@ namespace rexlang {
      * _OperatorExpression
      ***************************************************/
 
-    void                 OperatedExpression::setOperator    (const OperatorType &     opt) { operator_type_ = opt; }
+    void                 OperatedExpression::setOperator    (const OperatorType &     opt) { assert(!opt.isIllegal()); operator_type_ = opt; }
     void                 OperatedExpression::setOperator    (const OperatorType::Opt &opt) { setOperator(OperatorType(opt)); }
     const OperatorType & OperatedExpression::getOperator    () const                       { return operator_type_; }
     void                 OperatedExpression::setOperatorText(const TString & operatorText) { operator_ = operatorText; }

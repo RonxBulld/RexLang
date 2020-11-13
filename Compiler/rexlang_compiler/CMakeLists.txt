@@ -69,22 +69,18 @@ SET(REXCompilerParse-Source
         ExprLR.cpp
         ASTNodeGetterSetter.cpp
         Symbols.cpp
-        ${SematicAnalysis-Src}
-        ExprTypeInfer.cpp rtti.cpp rtti.h Constructors.cpp TypeConvert.cpp)
+        ExprTypeInfer.cpp
+        rtti.cpp
+        rtti.h
+        Constructors.cpp
+        TypeConvert.cpp
+        )
 
 if(NOT CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-    set (flags_1 "-Wno-overloaded-virtual")
+    ADD_COMPILE_OPTIONS("-Wno-overloaded-virtual")
 else()
-    set (flags_1 "-MP /wd4251")
+    ADD_COMPILE_OPTIONS("-MP /wd4251")
 endif()
-
-foreach(src_file ${REXCompilerParse-Source})
-    SET_SOURCE_FILES_PROPERTIES(
-            ${src_file}
-            PROPERTIES
-            COMPILE_FLAGS "${COMPILE_FLAGS} ${flags_1}"
-    )
-endforeach(src_file ${REXCompilerParse-Source})
 
 ADD_LIBRARY(REXCompilerParse
         ${REXCompilerParse-Source}
@@ -93,5 +89,6 @@ ADD_LIBRARY(REXCompilerParse
 ADD_DEPENDENCIES(REXCompilerParse GenerateParser)
 
 TARGET_LINK_LIBRARIES(REXCompilerParse
+        Sema
         antlr4-runtime
         )

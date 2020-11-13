@@ -8,6 +8,12 @@
 namespace rexlang {
 
     /******************************************************************
+     * Node
+     ******************************************************************/
+
+    Node::Node() {}
+
+    /******************************************************************
      * TagDecl
      ******************************************************************/
 
@@ -252,11 +258,11 @@ namespace rexlang {
      * FunctionCall
      ******************************************************************/
 
-    FunctionCall::FunctionCall(IdentRefer *name, FunctorDecl *functorDecl, const std::vector<Expression *> &arguments) {
+    FunctionCall::FunctionCall(IdentRefer *name, FunctorDecl *callee, const std::vector<Expression *> &arguments) {
         setName(name);
         setArguments(arguments);
-        if (matchFunctor(functorDecl)) {
-            bindCallee(functorDecl);
+        if (matchFunctor(callee)) {
+            bindCallee(callee);
         } else {
             assert(false);
         }

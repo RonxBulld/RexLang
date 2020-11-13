@@ -6,7 +6,6 @@
 
 #include "../NodeDecl.h"
 #include "../utilities/Str2Attr.h"
-#include "../TypeAssert.h"
 #include "../ASTUtility.h"
 #include "../ASTContext.h"
 #include "../utilities/Diagnostic.h"
@@ -14,68 +13,42 @@
 #include "APISemaActions/APIArguPackAction.h"
 
 namespace rexlang {
-    TypeDecl *FunctionCall::CheckExpressionInternal() {
 
-    }
-
-    VariTypeDecl *UnaryExpression::CheckExpressionInternal() {
+    bool UnaryExpression::VerifyExpression() {
 
         // 检查一元表达式是否合法
 
-        if (unary_expression->operator_type_ == UnaryExpression::OperatorType::kOptNone) { return nullptr; }
-        TypeDecl *operand_type = this->CheckExpression(unary_expression->operand_value_);
-        if (operand_type == nullptr) { return nullptr; }
+        TypeDecl *operand_type = operand_value_->getExpressionType();
+        if (operand_type == nullptr) { return false; }
 
         // 由于一元运算只支持符号求反，故只检查其数值性
 
-        bool is_numerical = operand_type->IsNumerical();
+        bool is_numerical = operand_type->isNumerical();
         if (is_numerical == false) {
             assert(false);
-            return nullptr;
+            return false;
         }
 
-        // 根据运算类型返回类型
-
-        return operand_type;
+        return true;
 
     }
 
-    VariTypeDecl *BinaryExpression::CheckExpressionInternal() {
+    bool BinaryExpression::VerifyExpression() {
 
         // 检查二元表达式是否可结合
 
-        if (binary_expression->operator_type_ == UnaryExpression::OperatorType::kOptNone) { return nullptr; }
-        TypeDecl *lhs_operand_type = this->CheckExpression(binary_expression->lhs_);
-        TypeDecl *rhs_operand_type = this->CheckExpression(binary_expression->rhs_);
-        bool operand_valid = binary_expression->isBinaryOperateValid();
+        TypeDecl *lhs_operand_type = lhs_->getExpressionType();
+        TypeDecl *rhs_operand_type = rhs_->getExpressionType();
+        bool operand_valid = isBinaryOperateValid();
         if (operand_valid == false) {
             assert(false);
-            return nullptr;
+            return false;
         }
 
-        // 根据运算类型返回类型
-
-        TypeDecl *upgraded_type = binary_expression->getBinaryOperateUpgradeType();
-        assert(upgraded_type);
-
-        ErrOr<Expression*> implicit_conv_lhs = this->MakeImplicitConvertIfNeccessary(upgraded_type, binary_expression->lhs_);
-        ErrOr<Expression*> implicit_conv_rhs = this->MakeImplicitConvertIfNeccessary(upgraded_type, binary_expression->rhs_);
-        if (implicit_conv_lhs.NoError()) { binary_expression->lhs_ = implicit_conv_lhs.Value(); }
-        if (implicit_conv_rhs.NoError()) { binary_expression->rhs_ = implicit_conv_rhs.Value(); }
-
-        if (binary_expression->operator_type_ == OperatorType::kOptDiv) {
-            return TU->getFloatTy();
-        } else if (binary_expression->operator_type_ == OperatorType::kOptFullDiv) {
-            return TU->getIntegerTy();
-        } else if (TypeAssert::IsCompareOperator(binary_expression->operator_type_)) {
-            return TU->getBoolTy();
-        } else {
-            return upgraded_type;
-        }
-
+        return true;
     }
 
-    TypeDecl *FuncAddrExpression::CheckExpressionInternal() {
+    bool FuncAddrExpression::VerifyExpression() {
         TypeDecl *type_decl = TU->getFuncPtrTy();
         assert(type_decl);
         FunctorDecl * functor_decl = ASTUtility::GetFunctionDeclare(func_addr_expression);
@@ -87,7 +60,7 @@ namespace rexlang {
 
     }
 
-    TypeDecl *ValueOfDataSet::CheckExpressionInternal() {
+    bool ValueOfDataSet::VerifyExpression() {
 
         // 当前版本只允许字节集中的元素全为整数常量
 
@@ -105,19 +78,19 @@ namespace rexlang {
         return this->getTranslateUnit()->getDataSetTy();
     }
 
-    TypeDecl *ValueOfDatetime::CheckExpressionInternal() {
+    bool ValueOfDatetime::VerifyExpression() {
         return this->getTranslateUnit()->getDatetimeTy();
     }
 
-    TypeDecl *ValueOfBool::CheckExpressionInternal() {
+    bool ValueOfBool::VerifyExpression() {
         return this->getTranslateUnit()->getBoolTy();
     }
 
-    TypeDecl *ValueOfDecimal::CheckExpressionInternal() {
+    bool ValueOfDecimal::VerifyExpression() {
         return this->getTranslateUnit()->getIntegerTy();
     }
 
-    TypeDecl *ValueOfString::CheckExpressionInternal() {
+    bool ValueOfString::VerifyExpression() {
         return this->getTranslateUnit()->getStringTy();
     }
 
