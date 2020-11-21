@@ -74,7 +74,7 @@ SET(REXCompilerParse-Source
         rtti.h
         Constructors.cpp
         TypeConvert.cpp
-        )
+        VerifyExpression.cpp)
 
 if(NOT CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
     ADD_COMPILE_OPTIONS("-Wno-overloaded-virtual")

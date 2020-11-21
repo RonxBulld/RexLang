@@ -1837,15 +1837,17 @@ namespace rexlang {
      */
     class Expression : public Statement {
     protected:
-        virtual bool VerifyExpression() = 0 ;
         virtual TypeDecl *getExpressionTypeInternal() const = 0 ;
 
-    public:
-        TypeDecl *getExpressionType() const ;
+        virtual bool VerifyExpressionInternal() = 0 ;
 
-        ExprUsage getLRType     () const ;    // 获取表达式自身的引用类型，依赖父节点的 getSubExprAccessType 实现
-        bool      isLeftUsage   () const ;    // 本表达式具有左值属性
-        bool      isRightUsage  () const ;    // 本表达式具有右值属性
+    public:
+        bool        VerifyExpression () ;
+        TypeDecl *  getExpressionType() const ;
+
+        ExprUsage   getLRType     () const ;    // 获取表达式自身的引用类型，依赖父节点的 getSubExprAccessType 实现
+        bool        isLeftUsage   () const ;    // 本表达式具有左值属性
+        bool        isRightUsage  () const ;    // 本表达式具有右值属性
 
         // 创建类型转换将表达式转换为目标类型
         // 如果无需转换则返回原表达式
@@ -1871,12 +1873,12 @@ namespace rexlang {
         std::vector<NameComponent *> name_components_;
 
     protected:
-        bool        VerifyExpression            ()                             override ;
+        bool        VerifyExpressionInternal    ()                             override ;
         ExprUsage   getSubExprAccessType        (const Expression *expr) const override ;
         TypeDecl *  getExpressionTypeInternal   ()                       const override ;
 
     public:
-        HierarchyIdentifier(const std::vector<NameComponent *> &nameComponents) ;
+        explicit HierarchyIdentifier(const std::vector<NameComponent *> &nameComponents) ;
 
     public:
         void                                AppendComponent     (NameComponent *component) ;
@@ -1908,6 +1910,7 @@ namespace rexlang {
         NameComponent * Backward    () const ;
 
     public:
+        bool                VerifyExpressionInternal() override;
         virtual IdentRefer *getBaseId() const = 0;    // 获取组件的确切名称对象
 
     public:
@@ -1928,7 +1931,7 @@ namespace rexlang {
         IdentDef *reference_ = nullptr;
 
     protected:
-        bool        VerifyExpression            () override;
+        bool        VerifyExpressionInternal    () override;
         ExprUsage   getSubExprAccessType        (const Expression *expr) const override ;
         TypeDecl *  getExpressionTypeInternal   ()                       const override ;   // 该物件的数据类型
 
@@ -1961,7 +1964,7 @@ namespace rexlang {
         Expression *index_   = nullptr;
 
     protected:
-        bool        VerifyExpression            () override;
+        bool        VerifyExpressionInternal    () override;
         ExprUsage   getSubExprAccessType        (const Expression *expr) const override ;
         TypeDecl *  getExpressionTypeInternal   ()                       const override ;   // 元素的数据类型
 
@@ -2021,7 +2024,7 @@ namespace rexlang {
         void appendArgument     (Expression *   argument) ;
 
     protected:
-        bool        VerifyExpression            () override ;
+        bool        VerifyExpressionInternal    () override ;
         ExprUsage   getSubExprAccessType        (const Expression *expr) const override ;
         TypeDecl *  getExpressionTypeInternal   ()                       const override ;   // 返回值的数据类型
 
@@ -2064,7 +2067,7 @@ namespace rexlang {
         TypeDecl *   target_type_     = nullptr;     // 目标类型
 
     protected:
-        bool        VerifyExpression            ()        override ;
+        bool        VerifyExpressionInternal    ()        override ;
         TypeDecl *  getExpressionTypeInternal   ()  const override ;
 
     private:
@@ -2133,7 +2136,7 @@ namespace rexlang {
         Expression *operand_value_ = nullptr;
 
     protected:
-        bool            VerifyExpression            () override ;
+        bool            VerifyExpressionInternal    () override ;
         ExprUsage       getSubExprAccessType        (const Expression *expr) const override ;
         TypeDecl *      getExpressionTypeInternal   ()  const override ;
 
@@ -2164,7 +2167,7 @@ namespace rexlang {
         Expression *rhs_ = nullptr;
 
     protected:
-        bool            VerifyExpression            () override ;
+        bool            VerifyExpressionInternal    () override ;
         ExprUsage       getSubExprAccessType        (const Expression *expr) const override ;
         TypeDecl *      getExpressionTypeInternal   () const override ;
 
@@ -2197,7 +2200,7 @@ namespace rexlang {
         FunctorDecl *callee_ = nullptr;
 
     protected:
-        bool        VerifyExpression            () override ;
+        bool        VerifyExpressionInternal    () override ;
         TypeDecl *  getExpressionTypeInternal   () const override ;
 
     public:
@@ -2244,7 +2247,7 @@ namespace rexlang {
         std::vector<Expression *> elements_;
 
     protected:
-        bool        VerifyExpression            () override ;
+        bool        VerifyExpressionInternal    () override ;
         TypeDecl *  getExpressionTypeInternal   () const override ;
 
     private:
@@ -2274,7 +2277,7 @@ namespace rexlang {
         time_t time_ = 0;
 
     protected:
-        bool        VerifyExpression            () override ;
+        bool        VerifyExpressionInternal    () override ;
         TypeDecl *  getExpressionTypeInternal   () const override ;
 
     private:
@@ -2302,7 +2305,7 @@ namespace rexlang {
         bool value_ = false;
 
     protected:
-        bool        VerifyExpression            () override ;
+        bool        VerifyExpressionInternal    () override ;
         TypeDecl *  getExpressionTypeInternal   () const override ;
 
     private:
@@ -2334,7 +2337,7 @@ namespace rexlang {
         enum type { kInt, kFloat } type_ = type::kInt;
 
     protected:
-        bool        VerifyExpression            () override ;
+        bool        VerifyExpressionInternal    () override ;
         TypeDecl *  getExpressionTypeInternal   () const override ;
 
     private:
@@ -2344,6 +2347,10 @@ namespace rexlang {
     public:
         explicit ValueOfDecimal(int   value) ;
         explicit ValueOfDecimal(float value) ;
+
+    public:
+        bool isIntValue  () const ;
+        bool isFloatValue() const ;
 
     public:
         SEMATIC_ANALYSIS_INTERNAL
@@ -2364,7 +2371,7 @@ namespace rexlang {
         TString string_literal_;
 
     protected:
-        bool        VerifyExpression            () override ;
+        bool        VerifyExpressionInternal    () override ;
         TypeDecl *  getExpressionTypeInternal   () const override ;
 
     private:

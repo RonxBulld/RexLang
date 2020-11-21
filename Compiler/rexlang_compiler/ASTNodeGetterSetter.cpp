@@ -795,6 +795,8 @@ namespace rexlang {
 
     void ValueOfDecimal::setIntValue  (int value)   { type_ = type::kInt;   int_val_   = value; }
     void ValueOfDecimal::setFloatValue(float value) { type_ = type::kFloat; float_val_ = value; }
+    bool ValueOfDecimal::isIntValue   () const      { return type_ == type::kInt; }
+    bool ValueOfDecimal::isFloatValue () const      { return type_ == type::kFloat; }
 
     /***************************************************
      * ValueOfString
