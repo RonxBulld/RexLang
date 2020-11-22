@@ -54,7 +54,7 @@ namespace rexlang {
 
     class StringPool {
     private:
-        StringPool();
+        StringPool() = default;
         static size_t max_string_size_;
         static std::map<std::string, StringRef> string_pool_;
     public:

@@ -7,6 +7,7 @@
 #include "StringRef.h"
 
 namespace rexlang {
+
     static std::string _kEmptyStr = "";
 
     /********************************************
@@ -82,7 +83,8 @@ namespace rexlang {
      * StringPool
      ********************************************/
 
-    size_t StringPool::max_string_size_ = 65536;
+    size_t                           StringPool::max_string_size_ = 65536;
+    std::map<std::string, StringRef> StringPool::string_pool_;
 
     StringRef StringPool::Create(const std::string &str) {
         auto found = string_pool_.find(str);
