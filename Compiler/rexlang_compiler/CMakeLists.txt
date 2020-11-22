@@ -36,7 +36,7 @@ IF(EXISTS ${PROJECT_SOURCE_DIR}/rexLang.g4)
             )
 ENDIF()
 
-ADD_SUBDIRECTORY(sematic_analysis)
+#ADD_SUBDIRECTORY(sematic_analysis)
 
 SET(Utilities-Src
         utilities/Diagnostic.cpp
@@ -74,7 +74,8 @@ SET(REXCompilerParse-Source
         rtti.h
         Constructors.cpp
         TypeConvert.cpp
-        VerifyExpression.cpp)
+        VerifyExpression.cpp
+        )
 
 if(NOT CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
     ADD_COMPILE_OPTIONS("-Wno-overloaded-virtual")
@@ -89,6 +90,6 @@ ADD_LIBRARY(REXCompilerParse
 ADD_DEPENDENCIES(REXCompilerParse GenerateParser)
 
 TARGET_LINK_LIBRARIES(REXCompilerParse
-        Sema
+#        Sema
         antlr4-runtime
         )

@@ -17,12 +17,11 @@ SET(Sematic-Src
         SematicAnalysis.h
         SematicAnalysisContext.cpp
         SematicAnalysisContext.h
-        SematicAnalysisUtils.cpp
         SematicAnalysisTypeAssert.cpp
         Sema.cpp
         SemaContext.cpp
         SemaContext.h
-        CompleteArguments.cpp)
+        )
 
 ADD_LIBRARY(${PROJECT_NAME}
         ${APISemaActions-Src}

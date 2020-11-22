@@ -3,7 +3,6 @@
 //
 
 #include "SematicAnalysis.h"
-#include "../TypeAssert.h"
 
 namespace rexlang {
 

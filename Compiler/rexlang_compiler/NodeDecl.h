@@ -286,6 +286,7 @@ namespace rexlang {
         virtual TagDecl * findDeclWithNameString(const StringRef &name) const ; // 沿着语法树搜索指定名称的定义
 
     public:
+#define REX_NO_SEMA_ANALY
 #ifndef REX_NO_SEMA_ANALY
         virtual void sematicAnalysisInternal(SemaContext &semaCtx) = 0;     // 在节点上执行语义分析
 #   define SEMATIC_ANALYSIS_INTERNAL void sematicAnalysisInternal(SemaContext &semaCtx) override ;
@@ -1226,7 +1227,7 @@ namespace rexlang {
         bool            isMemberOfThis      (MemberVariableDecl *memberVariDecl) const ;
         int             indexMemberOfThis   (MemberVariableDecl *memberVariDecl) const ;
 
-        TypeDecl *          promoteType(TypeDecl *otherType) const override ;
+        TypeDecl *      promoteType(TypeDecl *otherType) const override ;
 
     public:
         int Visit(class Visitor &visitor) override ;
