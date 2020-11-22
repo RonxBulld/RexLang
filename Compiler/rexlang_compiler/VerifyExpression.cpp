@@ -51,6 +51,36 @@ namespace rexlang {
         return this->NameComponent::VerifyExpressionInternal();
     }
 
+    bool ArrayIndex::VerifyExpressionInternal() {
+        VERIFY_SUB_EXPR(base_)  { assert(false); return false; }
+        VERIFY_SUB_EXPR(index_) { assert(false); return false; }
+
+        if (!getBaseId()->getExpressionType()->isIndexable()) {
+            assert(false);
+            return false;
+        }
+
+        return this->NameComponent::VerifyExpressionInternal();
+    }
+
+    bool FunctionCall::VerifyExpressionInternal() {
+        VERIFY_SUB_EXPR(name_) { assert(false); return false; }
+        for (Expression *argu : arguments_) {
+            VERIFY_SUB_EXPR(argu) { assert(false); return false; }
+        }
+
+        if (!matchFunctor(callee_)) {
+            assert(false);
+            return false;
+        }
+
+        return this->NameComponent::VerifyExpressionInternal();
+    }
+
+    bool TypeConvert::VerifyExpressionInternal() {
+        return isTypeConvertValid();
+    }
+
     bool UnaryExpression::VerifyExpressionInternal() {
 
         // 检查一元表达式是否合法
