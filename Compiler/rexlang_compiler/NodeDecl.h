@@ -2074,6 +2074,8 @@ namespace rexlang {
         void setFromExpression(Expression *expression) ;
         void setTargetType    (TypeDecl *  targetType) ;
 
+        bool isTypeConvertValid() const ;
+
     public:
         TypeConvert(TypeDecl *targetType, Expression *fromExpression) ;
 

@@ -379,6 +379,20 @@ namespace rexlang {
      * 类型转换判定
      *===-----------------------------------------------------===*/
 
+    bool TypeConvert::isTypeConvertValid() const {
+
+        // 目前只有数值型类型可以互相之间转换
+
+        TypeDecl *source_type = from_expression_->getExpressionType();
+        if (source_type->isNumerical() && target_type_->isNumerical()) {
+            return true;
+        } else {
+            assert(false);
+            return false;
+        }
+
+    }
+
     /*===-----------------------------------------------------===*
      * 赋值有效性判定
      *===-----------------------------------------------------===*/
