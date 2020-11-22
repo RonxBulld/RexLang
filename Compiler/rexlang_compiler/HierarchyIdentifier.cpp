@@ -30,6 +30,8 @@ namespace rexlang {
                 assert(false);
                 return nullptr;
             }
+        } else if (ArrayIndex *array_index = rtti::dyn_cast<ArrayIndex>(getParent())) {
+            return array_index->Forward();
         } else {
             assert(false);
             return nullptr;
@@ -45,6 +47,8 @@ namespace rexlang {
                 assert(false);
                 return nullptr;
             }
+        } else if (ArrayIndex *array_index = rtti::dyn_cast<ArrayIndex>(getParent())) {
+            return array_index->Backward();
         } else {
             assert(false);
             return nullptr;
