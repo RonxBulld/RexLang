@@ -152,7 +152,7 @@ namespace rexlang {
         }
 
 //        SematicAnalysis sematic_analysis;
-        bool sematic_success = false;
+        bool sematic_success = true;
 //        sematic_success = sematic_analysis.Run(this->major_translate_unit_);
 
         return sematic_success;
