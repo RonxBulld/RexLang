@@ -83,7 +83,7 @@ namespace rexlang {
         if (pass) {
             ret_code = pass->Call(projectDB);
         } else {
-            assert(false);
+            std::cerr << u8"没有可供 " << passName << " 调用的过程。" << std::endl;
             ret_code = -1;
         }
         return ret_code;
