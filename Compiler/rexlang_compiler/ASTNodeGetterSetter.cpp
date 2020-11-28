@@ -387,7 +387,6 @@ namespace rexlang {
                 return parameter_decl;
             }
         }
-        assert(false);
         return nullptr;
     }
 
