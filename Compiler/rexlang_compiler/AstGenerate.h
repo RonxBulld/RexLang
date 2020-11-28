@@ -15,6 +15,7 @@
 namespace rexlang {
 
     class REXCompilerInstance;
+    class ParseContext;
 
     class AstGenerate {
     private:
@@ -22,7 +23,7 @@ namespace rexlang {
         ASTContext *ast_context_ = nullptr;
         REXCompilerInstance *compiler_instance_ = nullptr;
 
-        std::vector<antlr4::tree::ParseTree *> parse_trees_;
+        std::vector<ParseContext *> parse_contexts_;
 
     public:
         explicit AstGenerate(REXCompilerInstance *compiler_instance);

@@ -15,6 +15,47 @@
 #include "CST2ASTConvert.h"
 
 namespace rexlang {
+
+    class ParseContext {
+    private:
+        antlr4::ANTLRInputStream    *IS     = nullptr ;
+        antlr4::CommonTokenStream   *CTS    = nullptr ;
+        rexLangLexer                *Lexer  = nullptr ;
+        rexLangParser               *Parser = nullptr ;
+        antlr4::tree::ParseTree     *Tree   = nullptr ;
+    public:
+        ParseContext(const std::string &code, const std::string &filename, Diagnostic *diagnostic) {
+            // 配置解析源
+
+            this->IS       = new antlr4::ANTLRInputStream(code);
+            this->IS->name = filename;
+            this->Lexer    = new rexLangLexer(IS);
+            this->CTS      = new antlr4::CommonTokenStream(Lexer);
+            this->Parser   = new rexLangParser(this->CTS);
+
+            // 设置自定义诊断监听器
+
+            this->Parser->removeErrorListeners();
+            this->Parser->addErrorListener(diagnostic);
+
+        }
+
+        ~ParseContext() {
+            delete IS;     IS     = nullptr;
+            delete CTS;    CTS    = nullptr;
+            delete Lexer;  Lexer  = nullptr;
+            delete Parser; Parser = nullptr;
+        }
+
+        antlr4::tree::ParseTree *run() {
+            return Tree = this->Parser->rexlang_src();
+        }
+
+        antlr4::tree::ParseTree *get() const {
+            return Tree;
+        }
+    };
+
     antlr4::tree::ParseTree *AstGenerate::buildCstFromCode(const std::string &code,
                                        const std::string &filename,
                                        const std::string &toolname) {
@@ -26,25 +67,12 @@ namespace rexlang {
                                                const std::string &filename,
                                                const std::string &toolname) {
 
-        // 配置解析源
-
-        antlr4::ANTLRInputStream __input_stream(code);
-        __input_stream.name = filename;
-
-        rexLangLexer __lexer(&__input_stream);
-        antlr4::CommonTokenStream __token_stream(&__lexer);
-
-        rexLangParser __parser(&__token_stream);
-
-        // 设置自定义诊断监听器
-
-        __parser.removeErrorListeners();
-        __parser.addErrorListener(diagnostic_);
+        ParseContext *parse_context = new ParseContext(code, filename, diagnostic_);
 
         // 执行语法分析，生成语法分析树
 
-        if (antlr4::tree::ParseTree *__tree = __parser.rexlang_src()) {
-            this->parse_trees_.push_back(__tree);
+        if (antlr4::tree::ParseTree *__tree = parse_context->run()) {
+            this->parse_contexts_.push_back(parse_context);
             return __tree;
         } else {
             assert(false);
@@ -58,7 +86,12 @@ namespace rexlang {
         // 遍历树以生成抽象语法树
 
         CST2ASTConvert ast_builder(ast_context_, diagnostic_, compiler_instance_);
-        return ast_builder.buildTUFromParseTrees(this->parse_trees_);
+        std::vector<antlr4::tree::ParseTree *> parse_trees;
+        for (ParseContext *parse_context : parse_contexts_) {
+            parse_trees.push_back(parse_context->get());
+        }
+
+        return ast_builder.buildTUFromParseTrees(parse_trees);
     }
 
     TranslateUnit *AstGenerate::buildAstFromCode(const std::string &code, const std::string &filename, const std::string &toolname) {
@@ -85,5 +118,9 @@ namespace rexlang {
         diagnostic_  = nullptr;
         ast_context_ = nullptr;
 
+        for (ParseContext *parse_context : parse_contexts_) {
+            delete parse_context;
+        }
+        parse_contexts_.clear();
     }
 }

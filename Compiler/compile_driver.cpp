@@ -4,6 +4,8 @@
 
 #include <fstream>
 #include <utility>
+#include <filesystem>
+
 #include "compile_driver.h"
 #include "rexlang_compiler/sematic_analysis/SematicAnalysis.h"
 #include "../lite_util/StringUtil.h"
@@ -119,12 +121,14 @@ namespace rexlang {
         FileEntry file_entry;
 
         for (const std::string &include_dir : program_db.GetIncludePath()) {
-            FileEntry test_file_entry = FileEntry::MakeFromFile(include_dir + "/" + filePath.str() + "." + program_db.GetDefaultLibraryHeadFileExt());
+            std::string temp_path = include_dir + "/" + filePath.str() + "." + program_db.GetDefaultLibraryHeadFileExt();
+            FileEntry test_file_entry = FileEntry::MakeFromFile(std::filesystem::absolute(temp_path));
             if (test_file_entry.Valid()) {
                 file_entry = test_file_entry;
                 break;
             }
         }
+
         return file_entry;
     }
 
