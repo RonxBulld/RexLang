@@ -832,7 +832,32 @@ namespace rexlang {
     antlrcpp::Any CST2ASTConvert::visitIdentifier(rexLangParser::IdentifierContext *context) {
         TString name = GetTextIfExist(context->IDENTIFIER()->getSymbol());
         assert(!prefix_component_stack_.empty());
-        IdentRefer* identifier = CreateNode<IdentRefer>(context, name.string_, prefix_component_stack_.top());
+        IdentDef *reference_to = nullptr;
+
+        // 查找定义
+        if (NameComponent *prefix = prefix_component_stack_.top()) {
+            TypeDecl *prefix_type = prefix->getExpressionType();
+            // prefix_type 应该是一个结构体
+            if (StructureDecl *structure_decl = rtti::dyn_cast<StructureDecl>(prefix_type)) {
+                if (BaseVariDecl *member = structure_decl->getElementWithName(name.string_)) {
+                    reference_to = member->getName();
+                } else {
+                    assert(false);
+                }
+            } else {
+                assert(false);
+            }
+        } else {
+            // 没有前缀则直接在符号域中开始检索
+            if (TagDecl *decl = ast_context_->currentScope()->findDeclWithNameString(name.string_)) {
+                reference_to = decl->getName();
+            } else {
+                assert(false);
+            }
+        }
+
+        assert(reference_to);
+        IdentRefer* identifier = CreateNode<IdentRefer>(context, reference_to);
         return NodeWarp(identifier);
     }
 

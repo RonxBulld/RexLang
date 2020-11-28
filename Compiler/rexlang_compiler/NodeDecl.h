@@ -1926,7 +1926,6 @@ namespace rexlang {
 
     /**
      * 普通名称组件
-     * 组件被创建后会主动寻找名称中指定的定义并且绑定
      */
     class IdentRefer : public NameComponent {
     private:
@@ -1939,10 +1938,10 @@ namespace rexlang {
         TypeDecl *  getExpressionTypeInternal   ()                       const override ;   // 该物件的数据类型
 
     public:
-        IdentRefer(const StringRef &name, NameComponent *prefix) ;
+        explicit IdentRefer(IdentDef *referenceTo) ;
 
     public:
-        IdentDef *      def         () const ;  // 获取指向的名称定义
+        IdentDef *      def         () const ;  // 计算并返回名称定义
 
         IdentRefer *    getBaseId   () const override ;
         TagDecl *       getDecl     () const ;  // 获取被引用的定义

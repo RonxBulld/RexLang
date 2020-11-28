@@ -23,13 +23,11 @@ namespace rexlang {
     private:
         ASTContext *ast_context_ = nullptr;
         REXCompilerInstance *compiler_instance_ = nullptr;
-        /*
-         * 待处理文件缓存
-         */
+        // 待处理文件缓存
         std::set<rexLangParser::Src_contentContext *> source_cache_;
-        /*
-         * 名称前缀栈
-         */
+        // 已分析库文件
+        std::set<std::string> parsed_files_;
+        // 名称前缀栈
         std::stack<NameComponent *> prefix_component_stack_;
 
     private:
