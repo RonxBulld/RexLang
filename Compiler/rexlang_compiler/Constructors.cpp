@@ -51,7 +51,10 @@ namespace rexlang {
      * ReferenceType
      ******************************************************************/
 
-    ReferenceType::ReferenceType(TypeDecl *pointeeType) : VariTypeDecl(nullptr), pointee_type_(pointeeType) {}
+    ReferenceType::ReferenceType(TypeDecl *pointeeType)
+            : VariTypeDecl(CreateNode<IdentDef>(pointeeType->getAstContext(), pointeeType->getNameRef().str() + "$ref"))
+            , pointee_type_(pointeeType) {
+    }
 
     /******************************************************************
      * IdentDef
@@ -107,7 +110,7 @@ namespace rexlang {
      ******************************************************************/
 
     ArrayDecl::ArrayDecl(TypeDecl *baseType, const std::vector<size_t> &dimensions)
-            : VariTypeDecl(CreateNode<IdentDef>(baseType->getAstContext(), "")),
+            : VariTypeDecl(CreateNode<IdentDef>(baseType->getAstContext(), baseType->getNameRef().str() + "$array")),
               base_type_(baseType), dimensions_(dimensions) {
     }
 
