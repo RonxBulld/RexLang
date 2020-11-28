@@ -1,6 +1,8 @@
-//
-// Created by rexfield on 2020/7/31.
-//
+/*
+ * 通过包装的方式将一个类型的节点转换为另一种类型
+ * Rex
+ * 2020/7/31
+ */
 
 #include "NodeDecl.h"
 
