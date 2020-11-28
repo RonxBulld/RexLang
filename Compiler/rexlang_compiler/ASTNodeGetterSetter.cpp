@@ -41,7 +41,6 @@ namespace rexlang {
      ***************************************************/
 
     void TranslateUnit::appendSourceFile(rexlang::SourceFile *sourceFile) {
-        sourceFile->registResourceTo(this);
         source_files_.emplace_back(sourceFile);
         setChild(sourceFile);
     }
