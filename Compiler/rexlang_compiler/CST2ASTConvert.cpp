@@ -3,6 +3,7 @@
 //
 
 #include <cstring>
+#include <filesystem>
 
 #include "gen/rexLangLexer.h"
 #include "gen/rexLangParser.h"
@@ -194,6 +195,7 @@ namespace rexlang {
 
         TString type_name = GetTextIfExist(ctx->type);
         VariTypeDecl *type = rtti::dyn_cast<VariTypeDecl>(ast_context_->getTranslateUnit()->getType(type_name.string_));
+        assert(type);
 
         ParameterDecl *parameter_decl = CreateNode<ParameterDecl>(ctx, type, name);
         parameter_decl->applyAttributes(GetTextVecIfExist(ctx->attributes));
