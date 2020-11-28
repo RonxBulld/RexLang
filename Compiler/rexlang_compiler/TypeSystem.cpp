@@ -6,11 +6,6 @@
 
 namespace rexlang {
 
-    BuiltinTypeDecl::BuiltinTypeDecl(const char *typeName, EnumOfBuiltinType typeEnum)
-        : VariTypeDecl(CreateNode<IdentDef>(getAstContext(), typeName)){
-        (void) typeEnum;
-    }
-
     /************************************************
      * 定义每个节点的 GetClassId 返回值
      ************************************************/
@@ -79,19 +74,19 @@ namespace rexlang {
      * 内建类型构造函数
      ************************************************/
 
-    BuiltinVoidType    ::BuiltinVoidType    () : BuiltinTypeDecl(TypeText(), BuiltinType()) { }
-    BuiltinCommonType  ::BuiltinCommonType  () : BuiltinTypeDecl(TypeText(), BuiltinType()) { }
-    BuiltinCharType    ::BuiltinCharType    () : BuiltinTypeDecl(TypeText(), BuiltinType()) { }
-    BuiltinIntegerType ::BuiltinIntegerType () : BuiltinTypeDecl(TypeText(), BuiltinType()) { }
-    BuiltinFloatType   ::BuiltinFloatType   () : BuiltinTypeDecl(TypeText(), BuiltinType()) { }
-    BuiltinBoolType    ::BuiltinBoolType    () : BuiltinTypeDecl(TypeText(), BuiltinType()) { }
-    BuiltinStringType  ::BuiltinStringType  () : BuiltinTypeDecl(TypeText(), BuiltinType()) { }
-    BuiltinDataSetType ::BuiltinDataSetType () : BuiltinTypeDecl(TypeText(), BuiltinType()) { }
-    BuiltinShortType   ::BuiltinShortType   () : BuiltinTypeDecl(TypeText(), BuiltinType()) { }
-    BuiltinLongType    ::BuiltinLongType    () : BuiltinTypeDecl(TypeText(), BuiltinType()) { }
-    BuiltinDatetimeType::BuiltinDatetimeType() : BuiltinTypeDecl(TypeText(), BuiltinType()) { }
-    BuiltinFuncPtrType ::BuiltinFuncPtrType () : BuiltinTypeDecl(TypeText(), BuiltinType()) { }
-    BuiltinDoubleType  ::BuiltinDoubleType  () : BuiltinTypeDecl(TypeText(), BuiltinType()) { }
+    BuiltinVoidType    ::BuiltinVoidType    (IdentDef *typeName) : BuiltinTypeDecl(typeName, BuiltinType()) { }
+    BuiltinCommonType  ::BuiltinCommonType  (IdentDef *typeName) : BuiltinTypeDecl(typeName, BuiltinType()) { }
+    BuiltinCharType    ::BuiltinCharType    (IdentDef *typeName) : BuiltinTypeDecl(typeName, BuiltinType()) { }
+    BuiltinIntegerType ::BuiltinIntegerType (IdentDef *typeName) : BuiltinTypeDecl(typeName, BuiltinType()) { }
+    BuiltinFloatType   ::BuiltinFloatType   (IdentDef *typeName) : BuiltinTypeDecl(typeName, BuiltinType()) { }
+    BuiltinBoolType    ::BuiltinBoolType    (IdentDef *typeName) : BuiltinTypeDecl(typeName, BuiltinType()) { }
+    BuiltinStringType  ::BuiltinStringType  (IdentDef *typeName) : BuiltinTypeDecl(typeName, BuiltinType()) { }
+    BuiltinDataSetType ::BuiltinDataSetType (IdentDef *typeName) : BuiltinTypeDecl(typeName, BuiltinType()) { }
+    BuiltinShortType   ::BuiltinShortType   (IdentDef *typeName) : BuiltinTypeDecl(typeName, BuiltinType()) { }
+    BuiltinLongType    ::BuiltinLongType    (IdentDef *typeName) : BuiltinTypeDecl(typeName, BuiltinType()) { }
+    BuiltinDatetimeType::BuiltinDatetimeType(IdentDef *typeName) : BuiltinTypeDecl(typeName, BuiltinType()) { }
+    BuiltinFuncPtrType ::BuiltinFuncPtrType (IdentDef *typeName) : BuiltinTypeDecl(typeName, BuiltinType()) { }
+    BuiltinDoubleType  ::BuiltinDoubleType  (IdentDef *typeName) : BuiltinTypeDecl(typeName, BuiltinType()) { }
 
     /************************************************
      * 内建类型 BuiltinType 返回值
@@ -237,19 +232,20 @@ namespace rexlang {
 
     bool TranslateUnit::InitBuiltinTypes() {
         auto ctx = this->getAstContext();
-        RegistBuiltinType(CreateNode<BuiltinVoidType    >(ctx));
-        RegistBuiltinType(CreateNode<BuiltinCommonType  >(ctx));
-        RegistBuiltinType(CreateNode<BuiltinCharType    >(ctx));
-        RegistBuiltinType(CreateNode<BuiltinIntegerType >(ctx));
-        RegistBuiltinType(CreateNode<BuiltinFloatType   >(ctx));
-        RegistBuiltinType(CreateNode<BuiltinBoolType    >(ctx));
-        RegistBuiltinType(CreateNode<BuiltinStringType  >(ctx));
-        RegistBuiltinType(CreateNode<BuiltinDataSetType >(ctx));
-        RegistBuiltinType(CreateNode<BuiltinShortType   >(ctx));
-        RegistBuiltinType(CreateNode<BuiltinLongType    >(ctx));
-        RegistBuiltinType(CreateNode<BuiltinDatetimeType>(ctx));
-        RegistBuiltinType(CreateNode<BuiltinFuncPtrType >(ctx));
-        RegistBuiltinType(CreateNode<BuiltinDoubleType  >(ctx));
+        assert(ctx);
+        RegistBuiltinType(CreateNode<BuiltinVoidType    >(ctx, CreateNode<IdentDef>(ctx, BuiltinVoidType    ::TypeText())));
+        RegistBuiltinType(CreateNode<BuiltinCommonType  >(ctx, CreateNode<IdentDef>(ctx, BuiltinCommonType  ::TypeText())));
+        RegistBuiltinType(CreateNode<BuiltinCharType    >(ctx, CreateNode<IdentDef>(ctx, BuiltinCharType    ::TypeText())));
+        RegistBuiltinType(CreateNode<BuiltinIntegerType >(ctx, CreateNode<IdentDef>(ctx, BuiltinIntegerType ::TypeText())));
+        RegistBuiltinType(CreateNode<BuiltinFloatType   >(ctx, CreateNode<IdentDef>(ctx, BuiltinFloatType   ::TypeText())));
+        RegistBuiltinType(CreateNode<BuiltinBoolType    >(ctx, CreateNode<IdentDef>(ctx, BuiltinBoolType    ::TypeText())));
+        RegistBuiltinType(CreateNode<BuiltinStringType  >(ctx, CreateNode<IdentDef>(ctx, BuiltinStringType  ::TypeText())));
+        RegistBuiltinType(CreateNode<BuiltinDataSetType >(ctx, CreateNode<IdentDef>(ctx, BuiltinDataSetType ::TypeText())));
+        RegistBuiltinType(CreateNode<BuiltinShortType   >(ctx, CreateNode<IdentDef>(ctx, BuiltinShortType   ::TypeText())));
+        RegistBuiltinType(CreateNode<BuiltinLongType    >(ctx, CreateNode<IdentDef>(ctx, BuiltinLongType    ::TypeText())));
+        RegistBuiltinType(CreateNode<BuiltinDatetimeType>(ctx, CreateNode<IdentDef>(ctx, BuiltinDatetimeType::TypeText())));
+        RegistBuiltinType(CreateNode<BuiltinFuncPtrType >(ctx, CreateNode<IdentDef>(ctx, BuiltinFuncPtrType ::TypeText())));
+        RegistBuiltinType(CreateNode<BuiltinDoubleType  >(ctx, CreateNode<IdentDef>(ctx, BuiltinDoubleType  ::TypeText())));
         return true;
     }
 
