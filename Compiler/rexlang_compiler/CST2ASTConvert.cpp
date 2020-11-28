@@ -305,11 +305,18 @@ namespace rexlang {
         std::vector<rexLangParser::Program_set_fileContext *> ctx_list = this->filterSources<rexLangParser::Program_set_fileContext>();
         for (rexLangParser::Program_set_fileContext * ctx : ctx_list) {
             for (antlr4::Token *token : ctx->libraries) {
-                TString library_name = GetTextIfExist(token);
+                StringRef library_name = GetTextIfExist(token).string_;
+                FileEntry library_file = compiler_instance_->detectLibraryFile(library_name);
+                if (library_file.Valid()) {
+                    const std::string &path = library_file.GetFilename();
+                    if (parsed_files_.insert(path).second == false) {
+                        continue;
+                    }
+                }
 
                 /// 此处调用 CompilerInstance 分析引用的库
 
-                antlr4::tree::ParseTree *parse_tree = compiler_instance_->processExternLibrary(library_name.string_);
+                antlr4::tree::ParseTree *parse_tree = compiler_instance_->processExternLibrary(library_name);
                 assert(parse_tree);
 
                 /// 就地对引用库进行进一步分析（一般情况下引用库接口文件是一组定义文件）
