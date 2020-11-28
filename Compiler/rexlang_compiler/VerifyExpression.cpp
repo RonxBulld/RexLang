@@ -44,7 +44,7 @@ namespace rexlang {
     }
 
     bool IdentRefer::VerifyExpressionInternal() {
-        if (!reference_) {
+        if (!def()) {
             assert(false);
             return false;
         }
