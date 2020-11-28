@@ -112,6 +112,9 @@ namespace rexlang {
             Expression *          & argument  = arguments [idx];
             ParameterDecl * const & parameter = parameters[idx];
 
+            TypeDecl *argu_ty  = argument->getExpressionType();
+            TypeDecl *param_ty = parameter->type();
+
             if (argument == nullptr) {
 
                 // 5.1. 如果实参为空指针
@@ -127,15 +130,12 @@ namespace rexlang {
 
             }
             /*else*/
-            if (parameter->type()->isArrayType() && argument != nullptr) {
+            if (param_ty->isArrayType() && argument != nullptr) {
 
                 // 5.2. 如果形参类型为数组，则实参必须为左值或左值引用（参考形参）数组变量，且元素类型严格一致
                 // 数组参数只能以引用方式传递
 
                 // 检查数组的元素类型是否匹配
-
-                TypeDecl *argu_ty  = argument->getExpressionType();
-                TypeDecl *param_ty = parameter->type();
 
                 if (!param_ty->compareTo(argu_ty)) {
                     assert(false);
@@ -149,7 +149,8 @@ namespace rexlang {
                 // 5.3. 如果形参参考属性为真，则实参必须为左值或左值引用（参考形参），并且变量类型严格一致
 
                 if (HierarchyIdentifier *hierarchy_identifier = argument->as<HierarchyIdentifier>()) {
-                    if (!parameter->type()->compareTo(hierarchy_identifier->getExpressionType())) {
+                    (void) hierarchy_identifier;
+                    if (!ReferenceType::peek(param_ty)->compareTo(ReferenceType::peek(argu_ty))) {
                         assert(false);
                         return false;
                     }
@@ -165,7 +166,6 @@ namespace rexlang {
                 // 5.4. 如果形参不具备上述属性
                 // 以传值的方式检查，允许隐式类型提升
 
-                TypeDecl *param_ty = parameter->type();
                 if (Expression * implicit_convert = argument->castTo(param_ty)) {
                     argument = implicit_convert;
 

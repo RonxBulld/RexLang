@@ -52,6 +52,8 @@ namespace rexlang {
         assert(this_type);
         assert(targetType);
         assert(getAstContext() == targetType->getAstContext());
+        this_type = ReferenceType::peek(this_type);
+        targetType = ReferenceType::peek(targetType);
         if (this_type == targetType) {
             return this;
         } else {
