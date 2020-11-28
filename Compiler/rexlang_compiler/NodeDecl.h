@@ -812,6 +812,7 @@ namespace rexlang {
          * 基本类型工具
          ********************************************************/
 
+        virtual bool    isBuiltinType       () const ;   // 是否为内置类型
         virtual bool    isVoidType          () const ;   // 是否为空类型
         virtual bool    isCommonType        () const ;   // 是否为通用型
         virtual bool    isCharType          () const ;   // 是否为字节型
@@ -928,9 +929,10 @@ namespace rexlang {
         virtual EnumOfBuiltinType GetBuiltinType() const = 0;
 
     public:
-        bool    isExtendBooleanType () const override;
-        bool    isNumerical         () const override;
-        bool    isIntegerCategory   () const override;
+        bool    isBuiltinType       () const override ;
+        bool    isExtendBooleanType () const override ;
+        bool    isNumerical         () const override ;
+        bool    isIntegerCategory   () const override ;
 
         virtual const char *GetTypeText () const = 0;
 

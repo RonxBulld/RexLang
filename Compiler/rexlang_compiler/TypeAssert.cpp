@@ -134,6 +134,7 @@ namespace rexlang {
      * 内置类型断言
      **********************************************************/
 
+    bool    TypeDecl            :: isBuiltinType        () const { return false; }
     bool    TypeDecl            :: isVoidType           () const { return false; }
     bool    TypeDecl            :: isCommonType         () const { return false; }
     bool    TypeDecl            :: isCharType           () const { return false; }
@@ -156,6 +157,7 @@ namespace rexlang {
     bool    TypeDecl            :: isAPICommandType     () const { return false; }
     bool    TypeDecl            :: isReferenceType      () const { return false; }
 
+    bool    BuiltinTypeDecl     :: isBuiltinType        () const { return true; }
     bool    BuiltinVoidType     :: isVoidType           () const { return true; }
     bool    BuiltinCommonType   :: isCommonType         () const { return true; }
     bool    BuiltinCharType     :: isCharType           () const { return true; }
