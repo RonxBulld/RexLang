@@ -898,7 +898,8 @@ namespace rexlang {
         explicit ReferenceType(TypeDecl *   pointeeType) ;
 
     public:
-        static ReferenceType *get(TypeDecl *   pointeeType) ;
+        static ReferenceType *get (TypeDecl *   pointeeType) ;
+        static TypeDecl *     peek(TypeDecl *type) ;
 
     public:
         TypeDecl *getPointee() const ;

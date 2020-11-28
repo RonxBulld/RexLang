@@ -5,6 +5,7 @@
  */
 
 #include "NodeDecl.h"
+#include "rtti.h"
 
 namespace rexlang {
 
@@ -14,6 +15,16 @@ namespace rexlang {
 
     ReferenceType *ReferenceType::get(TypeDecl *pointeeType) {
         return Node::Create<ReferenceType>(pointeeType->getAstContext(), pointeeType);
+    }
+
+    TypeDecl * ReferenceType::peek(TypeDecl *type) {
+        if (type->isReferenceType()) {
+            ReferenceType *reference_type = rtti::dyn_cast<ReferenceType>(type);
+            assert(reference_type);
+            return ReferenceType::peek(reference_type->getPointee());
+        } else {
+            return type;
+        }
     }
 
     /*===--------------------------------===*
