@@ -219,7 +219,7 @@ namespace rexlang {
      * 符号特性提取
      **********************************************************/
 
-    bool     ParameterDecl::isNullable         () const { return is_nullable_; }
+    bool ParameterDecl::isNullable() const { return is_nullable_; }
 
     bool ParameterDecl::shouldBeReference() const {
         TypeDecl *param_type = getType();
@@ -399,9 +399,29 @@ namespace rexlang {
      * 赋值有效性判定
      *===-----------------------------------------------------===*/
 
-    bool TypeDecl   ::isAssginValidFrom(TypeDecl *fromType) const { return false; }
-    bool FunctorDecl::isAssginValidFrom(TypeDecl *fromType) const { return false; }
-    bool ArrayDecl  ::isAssginValidFrom(TypeDecl *fromType) const { return compareTo(fromType); }
+    bool TypeDecl::isAssginValidFrom(TypeDecl *fromType) const {
+        // 1. 数值型之间可以相互赋值
+        if (isNumerical() && fromType->isNumerical()) { return true; }
+        // 2. 非内置类型要求类型必须一致
+        if (isBuiltinType() || fromType->isBuiltinType()) { return compareTo(fromType); }
+        // 3. 内置类型非数值型要求必须一致
+        if (!isNumerical() || !fromType->isNumerical()) { return compareTo(fromType); }
+        return false;
+    }
+
+    bool FunctorDecl::isAssginValidFrom(TypeDecl *fromType) const {
+        /*
+         * 可调用对象总是不可赋值的
+         */
+        return false;
+    }
+
+    bool ArrayDecl::isAssginValidFrom(TypeDecl *fromType) const {
+        /*
+         * 判定数组的可赋值等价于判定数组类型一致性
+         */
+        return compareTo(fromType);
+    }
 
     /*===-----------------------------------------------------===*
      * 可调用对象库类型断言
