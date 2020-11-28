@@ -1,0 +1,13 @@
+digraph G {
+    "tooling::BuildASTFromCodeWithArgs"->{"REXCompilerInstance::parseOnFile" "REXCompilerInstance::runSematicAnalysis"};
+    "REXCompilerInstance::runSematicAnalysis"->{"AstGenerate::buildAstFromCsts"};
+    "AstGenerate::buildAstFromCsts"->{"CST2ASTConvert::buildTUFromParseTrees"};
+    "CST2ASTConvert::buildTUFromParseTrees"->{"CST2ASTConvert::loadHeads"};
+    "CST2ASTConvert::loadHeads"->{"CST2ASTConvert::importLibraries"};
+    "CST2ASTConvert::importLibraries"->{"REXCompilerInstance::processExternLibrary" "CST2ASTConvert::loadHeads"};
+    "REXCompilerInstance::processExternLibrary"->{"REXCompilerInstance::parseOnFile"};
+    "REXCompilerInstance::parseOnFile"->{"REXCompilerInstance::buildCstFromCode"};
+    "REXCompilerInstance::buildCstFromCode"->{"AstGenerate::buildCstFromCode"};
+    "AstGenerate::buildCstFromCode"->{"AstGenerate::buildCstFromCodeWithArgs"};
+    "AstGenerate::buildCstFromCodeWithArgs"[shape=box];
+}
