@@ -11,8 +11,8 @@ namespace rexlang {
      ********************************************/
 
     TagDecl * IdentRefer::getDecl() const {
-        if (reference_) {
-            TagDecl *decl = reference_->decl();
+        if (IdentDef * ref = def()) {
+            TagDecl *decl = ref->decl();
             assert(decl);
             return decl;
         }
