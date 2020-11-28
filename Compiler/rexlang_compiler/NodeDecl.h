@@ -920,7 +920,7 @@ namespace rexlang {
      */
     class BuiltinTypeDecl : public VariTypeDecl {
     protected:
-        BuiltinTypeDecl(const char *typeName, EnumOfBuiltinType typeEnum) ;
+        BuiltinTypeDecl(IdentDef *typeName, EnumOfBuiltinType typeEnum) ;
 
     public:
         SEMATIC_ANALYSIS_INTERNAL
@@ -948,7 +948,7 @@ namespace rexlang {
      */
     class BuiltinVoidType : public BuiltinTypeDecl {
     public:
-        BuiltinVoidType() ;
+        explicit BuiltinVoidType(IdentDef *typeName) ;
 
     public:
         EnumOfBuiltinType   GetBuiltinType  () const override ;
@@ -966,7 +966,7 @@ namespace rexlang {
      */
     class BuiltinCommonType : public BuiltinTypeDecl {
     public:
-        BuiltinCommonType() ;
+        explicit BuiltinCommonType(IdentDef *typeName) ;
 
     public:
         EnumOfBuiltinType   GetBuiltinType  () const override ;
@@ -984,7 +984,7 @@ namespace rexlang {
      */
     class BuiltinCharType : public BuiltinTypeDecl {
     public:
-        BuiltinCharType() ;
+        explicit BuiltinCharType(IdentDef *typeName) ;
 
     public:
         EnumOfBuiltinType   GetBuiltinType  () const override ;
@@ -1004,7 +1004,7 @@ namespace rexlang {
      */
     class BuiltinIntegerType : public BuiltinTypeDecl {
     public:
-        BuiltinIntegerType() ;
+        explicit BuiltinIntegerType(IdentDef *typeName) ;
 
     public:
         EnumOfBuiltinType   GetBuiltinType  () const override ;
@@ -1024,7 +1024,7 @@ namespace rexlang {
      */
     class BuiltinFloatType : public BuiltinTypeDecl {
     public:
-        BuiltinFloatType() ;
+        explicit BuiltinFloatType(IdentDef *typeName) ;
 
     public:
         EnumOfBuiltinType   GetBuiltinType  () const override ;
@@ -1044,7 +1044,7 @@ namespace rexlang {
      */
     class BuiltinBoolType : public BuiltinTypeDecl {
     public:
-        BuiltinBoolType() ;
+        explicit BuiltinBoolType(IdentDef *typeName) ;
 
     public:
         EnumOfBuiltinType   GetBuiltinType  () const override ;
@@ -1063,7 +1063,7 @@ namespace rexlang {
      */
     class BuiltinStringType : public BuiltinTypeDecl {
     public:
-        BuiltinStringType() ;
+        explicit BuiltinStringType(IdentDef *typeName) ;
 
     public:
         EnumOfBuiltinType   GetBuiltinType          () const override ;
@@ -1087,7 +1087,7 @@ namespace rexlang {
      */
     class BuiltinDataSetType : public BuiltinTypeDecl {
     public:
-        BuiltinDataSetType() ;
+        explicit BuiltinDataSetType(IdentDef *typeName) ;
 
     public:
         EnumOfBuiltinType   GetBuiltinType          () const override ;
@@ -1111,7 +1111,7 @@ namespace rexlang {
      */
     class BuiltinShortType : public BuiltinTypeDecl {
     public:
-        BuiltinShortType() ;
+        explicit BuiltinShortType(IdentDef *typeName) ;
 
     public:
         EnumOfBuiltinType   GetBuiltinType  () const override ;
@@ -1131,7 +1131,7 @@ namespace rexlang {
      */
     class BuiltinLongType : public BuiltinTypeDecl {
     public:
-        BuiltinLongType() ;
+        explicit BuiltinLongType(IdentDef *typeName) ;
 
     public:
         EnumOfBuiltinType   GetBuiltinType  () const override ;
@@ -1151,7 +1151,7 @@ namespace rexlang {
      */
     class BuiltinDatetimeType : public BuiltinTypeDecl {
     public:
-        BuiltinDatetimeType() ;
+        explicit BuiltinDatetimeType(IdentDef *typeName) ;
 
     public:
         EnumOfBuiltinType   GetBuiltinType  () const override ;
@@ -1170,7 +1170,7 @@ namespace rexlang {
      */
     class BuiltinFuncPtrType : public BuiltinTypeDecl {
     public:
-        BuiltinFuncPtrType() ;
+        explicit BuiltinFuncPtrType(IdentDef *typeName) ;
 
     public:
         EnumOfBuiltinType   GetBuiltinType  () const override ;
@@ -1189,7 +1189,7 @@ namespace rexlang {
      */
     class BuiltinDoubleType : public BuiltinTypeDecl {
     public:
-        BuiltinDoubleType() ;
+        explicit BuiltinDoubleType(IdentDef *typeName) ;
 
     public:
         EnumOfBuiltinType   GetBuiltinType  () const override ;
@@ -2415,7 +2415,7 @@ namespace rexlang {
         SEMATIC_ANALYSIS_INTERNAL
 
     public:
-        void    appendSourceFile(SourceFile* sourceFile) ;
+        void    appendSourceFile(SourceFile* sourceFile) ;  // 简单的将文件添加到资源列表中
         bool    merge(TranslateUnit *other) ;   // 兼容性检查、冲突检查，并合并其它翻译单元
 
     public:
@@ -2437,6 +2437,7 @@ namespace rexlang {
         bool RegistBuiltinType(BuiltinTypeDecl *builtinTypeDecl);
 
     public:
+        TranslateUnit() ;
         bool InitBuiltinTypes();
 
     public:
