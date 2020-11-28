@@ -435,7 +435,17 @@ namespace rexlang {
         return NodeWarp(global_variable_decl);
     }
 
-    antlrcpp::Any CST2ASTConvert::visitEdition_spec  (rexLangParser::Edition_specContext *  context) { assert(false); return nullptr; }
+    antlrcpp::Any CST2ASTConvert::visitEdition_spec  (rexLangParser::Edition_specContext *  context) {
+        std::string edition_str = context->INTEGER_LITERAL()->toString();
+        char *E;
+        errno = 0;
+        long edition = strtol(edition_str.c_str(), &E, 10);
+        if (E == edition_str.c_str() || errno == ERANGE) {
+            assert(false);
+        }
+        return (unsigned int) edition;
+    }
+
     antlrcpp::Any CST2ASTConvert::visitStruct_declare(rexLangParser::Struct_declareContext *context) { assert(false); return nullptr; }
 
     // --- 局部变量 ---------------------------------------------------------------------------------
