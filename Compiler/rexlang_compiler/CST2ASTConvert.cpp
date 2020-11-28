@@ -276,6 +276,7 @@ namespace rexlang {
         TranslateUnit * translate_unit = ast_context_->getTranslateUnit();
         if(!translate_unit) {
             translate_unit = CreateNode<TranslateUnit>(context);
+            translate_unit->InitBuiltinTypes();
             ast_context_->setTranslateUnit(translate_unit);
         }
 
