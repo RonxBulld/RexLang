@@ -83,12 +83,13 @@ namespace rexlang {
 
     int tooling::GenerateCodeFromTranslateUnit(ProjectDB &projectDB) {
         int EC = 0;
-        if ((EC = Pass::Call("GenIR", projectDB))) { return EC; }
+        if ((EC = Pass::Call("EmitIR", projectDB))) { return EC; }
+        if ((EC = Pass::Call("GenHostCode", projectDB))) { return EC; }
         return EC;
     }
 
     int tooling::LinkExecuteFromObjects(ProjectDB &projectDB) {
-        return Pass::Call("Link", projectDB);
+        return Pass::Call("LinkExe", projectDB);
     }
 }
 
