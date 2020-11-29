@@ -1,21 +1,17 @@
 
 CMAKE_MINIMUM_REQUIRED(VERSION 3.7.2)
 
-PROJECT(IR CXX)
+PROJECT(GenIR CXX)
 
 INCLUDE(ref_llvm_pkg)
 
-ADD_LIBRARY(IR
+ADD_SUBDIRECTORY(LLVMIR)
+
+ADD_LIBRARY(${PROJECT_NAME}
         SimpleRTTI_ArguType.h
-        LLVMIR/EmitLLVMIR.cpp
-        LLVMIR/EmitLLVMIR.h
-        LLVMIR/LLVMRTIRBuilder.cpp
-        LLVMIR/LLVMRTIRBuilder.h
-        LLVMIR/Emitter.cpp
-        LLVMIR/Emitter.h
-        LLVMIR/DebugInfoMgr.cpp
-        LLVMIR/DebugInfoMgr.h
         GenIRPass.cpp
         )
 
-target_link_libraries(IR LLVM)
+target_link_libraries(${PROJECT_NAME}
+        GenLLIR
+        )
