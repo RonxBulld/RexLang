@@ -31,7 +31,7 @@ namespace rexlang {
         s[len] = 0;
     }
 
-    ProjectDB::ProjectDB() : translate_unit_(nullptr), main_entry_(nullptr) {
+    ProjectDB::ProjectDB() : translate_unit_(nullptr), main_entry_(nullptr), code_generator_interface_(nullptr) {
         char rnd_str[8+1];
         gen_random(rnd_str, sizeof(rnd_str) - 1);
         random_string_ = rnd_str;
@@ -95,5 +95,9 @@ namespace rexlang {
     void               ProjectDB::SetMainEntry(FunctorDecl *main_entry) { main_entry_ = main_entry; }
     const FunctorDecl *ProjectDB::GetMainEntry() const { return main_entry_; }
           FunctorDecl *ProjectDB::GetMainEntry()       { return main_entry_; }
+
+    void                                     ProjectDB::SetCodeGenerator(CodeGeneratorInterface *codeGeneratorInterface) { code_generator_interface_ = codeGeneratorInterface; }
+    const ProjectDB::CodeGeneratorInterface *ProjectDB::GetCodeGenerator() const { return code_generator_interface_; }
+          ProjectDB::CodeGeneratorInterface *ProjectDB::GetCodeGenerator()       { return code_generator_interface_; }
 
 }

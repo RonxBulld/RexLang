@@ -20,6 +20,13 @@ namespace rexlang {
      * 包含众多与项目相关的信息
      */
     class ProjectDB {
+    public:
+        class CodeGeneratorInterface {
+        public:
+            virtual ~CodeGeneratorInterface() = default ;
+            virtual int GenerateCode(const std::string &host, ProjectDB &projectDB) = 0 ;
+        };
+
     private:
         /*!
          * 随机字符串
@@ -53,6 +60,10 @@ namespace rexlang {
          * 主入口函数定义
          */
         FunctorDecl *main_entry_;
+        /*!
+         * 代码生成接口
+         */
+        CodeGeneratorInterface *code_generator_interface_;
 
     public:
         ProjectDB();
@@ -87,6 +98,11 @@ namespace rexlang {
         void                                SetMainEntry        (FunctorDecl *main_entry);
         FunctorDecl *                       GetMainEntry        ();
         const FunctorDecl *                 GetMainEntry        () const;
+
+        void                                SetCodeGenerator    (CodeGeneratorInterface *codeGeneratorInterface) ;
+        CodeGeneratorInterface *            GetCodeGenerator    ();
+        const CodeGeneratorInterface *      GetCodeGenerator    () const;
+
     };
 
 }
