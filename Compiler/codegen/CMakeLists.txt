@@ -6,8 +6,7 @@ PROJECT(CodeGen CXX)
 INCLUDE(ref_llvm_pkg)
 
 SET(CodeGen-Source
-        LLCodeGen.cpp
-        LLCodeGen.h
+        GenHostCodePass.cpp
         )
 
 ADD_LIBRARY(CodeGen
