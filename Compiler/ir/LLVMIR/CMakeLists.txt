@@ -14,6 +14,8 @@ ADD_LIBRARY(${PROJECT_NAME}
         DebugInfoMgr.h
         LLCodeGen.cpp
         LLCodeGen.h
+        LowAST.cpp
+        LowAST.h
 )
 
 target_link_libraries(${PROJECT_NAME} LLVM)

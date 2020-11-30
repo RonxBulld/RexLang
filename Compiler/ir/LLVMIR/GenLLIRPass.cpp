@@ -7,6 +7,7 @@
 #include "../../support/ProjectDB.h"
 #include "EmitLLVMIR.h"
 #include "LLCodeGen.h"
+#include "LowAST.h"
 
 namespace rexlang {
 
@@ -21,7 +22,7 @@ namespace rexlang {
             return 0;
         }
 
-        void UpdateEmitter(std::shared_ptr<EmitLLVMIR> emitter) {
+        void UpdateEmitter(const std::shared_ptr<EmitLLVMIR> &emitter) {
             emitter_ = emitter;
         }
 
@@ -34,6 +35,7 @@ namespace rexlang {
         GenLLIRPass() : Pass("EmitLLIR") {}
 
         int Call(ProjectDB &projectDB) override {
+            AstLowing(projectDB);
 
             // 生成LLVMIR
             std::shared_ptr<EmitLLVMIR> emitter(new EmitLLVMIR(projectDB.getTranslateUnit(), projectDB));
