@@ -6,6 +6,7 @@
 
 #include "LowAST.h"
 #include "../../rexlang_compiler/NodeDecl.h"
+#include "../../support/ProjectDB.h"
 
 namespace rexlang {
 
@@ -14,11 +15,29 @@ namespace rexlang {
         ProjectDB &project_db_ ;
 
     private:
-        // 创建启动函数
-        int CreateStartup() ;
+        // 创建启动和初始化函数
+        int CreateStartup() {
+            ASTContext &ast_context = project_db_.GetASTContext();
+            TranslateUnit *TU = ast_context.getTranslateUnit();
+
+            // 创建启动函数
+            IdentDef *RexStartupFnName = CreateNode<IdentDef>(&ast_context, "RexStartup");
+            assert(RexStartupFnName);
+            std::vector<ParameterDecl *> args;
+            FunctionDecl *startup_fn = CreateNode<FunctionDecl>(&ast_context, TU->getIntegerTy(), RexStartupFnName, args);
+            StatementBlock *startup_sb = CreateNode<StatementBlock>(&ast_context, std::vector<Statement *>());
+
+            // 创建初始化函数
+            IdentDef *InitFnName = CreateNode<IdentDef>(&ast_context, "RexInit");
+            assert(InitFnName);
+            FunctionDecl *init_fn = CreateNode<FunctionDecl>(&ast_context, TU->getVoidTy(), InitFnName, args);
+            StatementBlock *init_sb = CreateNode<StatementBlock>(&ast_context, std::vector<Statement *>());
+
+            return 0;
+        }
 
     private:
-        // 创建全局对象初始化函数
+        // 创建全局对象初始化
         int CreateGlobalObjectInitFunction() ;
 
         // 初始化全局数组
