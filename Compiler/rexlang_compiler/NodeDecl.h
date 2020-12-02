@@ -646,7 +646,7 @@ namespace rexlang {
         bool is_nullable_       = false; // 是否可空
 
     public:
-        ParameterDecl(VariTypeDecl *type, IdentDef *name) ;
+        ParameterDecl(VariTypeDecl *type, IdentDef *name, bool isVari = false) ;
 
     public:
         SEMATIC_ANALYSIS_INTERNAL

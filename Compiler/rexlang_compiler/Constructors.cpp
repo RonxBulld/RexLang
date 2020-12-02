@@ -43,8 +43,10 @@ namespace rexlang {
      * ParameterDecl
      ******************************************************************/
 
-    ParameterDecl::ParameterDecl(VariTypeDecl *type, IdentDef *name)
+    ParameterDecl::ParameterDecl(VariTypeDecl *type, IdentDef *name, bool isVari)
         : BaseVariDecl(type, name) {
+        if (isVari)
+            markAsVariParam();
     }
 
     /******************************************************************
