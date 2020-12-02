@@ -1425,7 +1425,7 @@ namespace rexlang {
     class ProgSetDecl : public TagDecl {
     private:
         NamedOrderDict<FileVariableDecl *>  file_static_variables_;
-        NamedOrderDict<FunctionDecl *>      function_decls_;
+        std::vector<FunctionDecl *>         function_decls_;
 
     public:
         explicit ProgSetDecl(IdentDef *name) ;
@@ -1437,8 +1437,8 @@ namespace rexlang {
         FileVariableDecl *  getFileVariableDecl (const StringRef &name) const ;
         FunctionDecl *      getFunctionDecl     (const StringRef &name) const ;
 
-        const NamedOrderDict<FileVariableDecl *> &  fileVariables   () ;
-        const NamedOrderDict<FunctionDecl *> &      functions       () ;
+        const NamedOrderDict<FileVariableDecl *> &  fileVariables   () const ;
+        const std::vector<FunctionDecl *> &         functions       () const ;
 
         std::vector<FunctorDecl *> getFuncSignatures() ;
 

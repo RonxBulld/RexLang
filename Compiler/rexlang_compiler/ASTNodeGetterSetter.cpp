@@ -462,7 +462,7 @@ namespace rexlang {
     }
 
     void ProgSetDecl::appendFunctionDecl(FunctionDecl *functionDecl) {
-        function_decls_[functionDecl->getNameRef()] = functionDecl;
+        function_decls_.push_back(functionDecl);
         setChild(functionDecl);
     }
 
@@ -476,24 +476,16 @@ namespace rexlang {
     }
 
     FunctionDecl *ProgSetDecl::getFunctionDecl(const StringRef &name) const {
-        auto found = function_decls_.find(name);
-        if (found != function_decls_.end()) {
-            return found->second;
-        } else {
-            return nullptr;
+        for (FunctionDecl *function_decl : function_decls_) {
+            if (function_decl->getNameRef() == name) {
+                return function_decl;
+            }
         }
+        return nullptr;
     }
 
-    const NamedOrderDict<FileVariableDecl *> &  ProgSetDecl::fileVariables()    { return file_static_variables_; }
-    const NamedOrderDict<FunctionDecl *> &      ProgSetDecl::functions    ()    { return function_decls_; }
-
-    std::vector<FunctorDecl *> ProgSetDecl::getFuncSignatures() {
-        std::vector<FunctorDecl *> signatures;
-        for (auto &item : function_decls_) {
-            signatures.push_back(item.second);
-        }
-        return signatures;
-    }
+    const NamedOrderDict<FileVariableDecl *> &  ProgSetDecl::fileVariables() const { return file_static_variables_; }
+    const std::vector<FunctionDecl *> &         ProgSetDecl::functions    () const { return function_decls_; }
 
     /***************************************************
      * FunctionDecl

@@ -289,7 +289,7 @@ namespace rexlang {
         PrevAction(node);
 
         TraverseNamedMap(node.fileVariables());
-        TraverseNamedMap(node.functions());
+        TraverseArray(node.functions());
 
         PostAction(node);
     }
