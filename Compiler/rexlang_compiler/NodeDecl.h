@@ -510,6 +510,11 @@ namespace rexlang {
         void                setDecl (TagDecl *tagDecl) ;
         TagDecl *           decl    () const ;
 
+        void                update  (const char *           id) ;
+        void                update  (const std::string &    id) ;
+        void                update  (const StringRef &      id) ;
+        void                update  (const TString &        id) ;
+
     public:
         int Visit(class Visitor &visitor) override ;
 

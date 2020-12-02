@@ -240,6 +240,11 @@ namespace rexlang {
     void                IdentDef::setDecl (TagDecl *tagDecl) { assert(tag_decl_ == nullptr); tag_decl_ = tagDecl; }
     TagDecl *           IdentDef::decl    () const           { return tag_decl_; }
 
+    void                IdentDef::update(const char *           id) { id_ = StringPool::Create(id); }
+    void                IdentDef::update(const std::string &    id) { id_ = StringPool::Create(id); }
+    void                IdentDef::update(const StringRef &      id) { id_ = id; }
+    void                IdentDef::update(const TString &        id) { id_ = id.string_; }
+
     /***************************************************
      * MacroDecl
      ***************************************************/
