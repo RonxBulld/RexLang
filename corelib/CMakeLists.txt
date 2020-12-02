@@ -1,9 +1,28 @@
 
 CMAKE_MINIMUM_REQUIRED(VERSION 3.7.2)
 
+#####################################################
+# RexStartup
+#####################################################
+
+PROJECT(rex_startup_kit C)
+
+ADD_LIBRARY(${PROJECT_NAME} STATIC
+        rex_startup.c
+        )
+
+INSTALL(TARGETS
+        ${PROJECT_NAME}
+        DESTINATION lib/rex
+        )
+
+#####################################################
+# CoreLib
+#####################################################
+
 PROJECT(corelib CXX)
 
-SET(corelib-Source
+SET(${PROJECT_NAME}-Source
         newcore.cpp
         newcore.h
         array_runtime_api.cpp
@@ -14,17 +33,17 @@ SET(corelib-Source
         struct_runtime_api.h
         )
 
-ADD_LIBRARY(corelib STATIC
-        ${corelib-Source}
+ADD_LIBRARY(${PROJECT_NAME} STATIC
+        ${${PROJECT_NAME}-Source}
         )
 
-file(COPY "corelib.txt" DESTINATION "${CMAKE_INCLUDE_OUTPUT_DIRECTORY}")
+file(COPY "${PROJECT_NAME}.txt" DESTINATION "${CMAKE_INCLUDE_OUTPUT_DIRECTORY}")
 
 INSTALL(FILES
-        corelib.txt
+        ${PROJECT_NAME}.txt
         DESTINATION include/rex
         )
 INSTALL(TARGETS
-        corelib
+        ${PROJECT_NAME}
         DESTINATION lib/rex
         )

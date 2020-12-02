@@ -117,7 +117,7 @@ ADD_SUBDIRECTORY(libtools)
 ADD_SUBDIRECTORY(corelib)
 
 ADD_CUSTOM_TARGET(REXLang)
-ADD_DEPENDENCIES(REXLang ${COMPILER_EXECUTE_NAME} corelib)
+ADD_DEPENDENCIES(REXLang ${COMPILER_EXECUTE_NAME} rex_startup_kit corelib)
 
 ######################################
 # 开启测试套件
