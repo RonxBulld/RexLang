@@ -22,6 +22,7 @@ namespace rexlang {
         int CreateStartup() {
             ASTContext &ast_context = project_db_.GetASTContext();
             TranslateUnit *TU = ast_context.getTranslateUnit();
+            assert(TU);
 
             // 创建虚拟的代码文件
 
@@ -130,6 +131,42 @@ namespace rexlang {
          * corelib/struct_runtime_api.h
          */
         void CreateImplicitSysApiDecl() {
+            ASTContext &ast_context = project_db_.GetASTContext();
+            TranslateUnit *TU = ast_context.getTranslateUnit();
+            assert(TU);
+
+            // 创建虚拟接口文件
+
+            APIDeclareFile *impl_api_df = CreateNode<APIDeclareFile>(&ast_context);
+            TU->appendSourceFile(impl_api_df);
+
+            auto create_corelib_api = [&ast_context, impl_api_df](
+                    VariTypeDecl *retType,
+                    const std::string &apiName,
+                    const std::vector<ParameterDecl *> &parameters
+            ) {
+                APICommandDecl *created_api = CreateNode<APICommandDecl>(
+                        &ast_context,
+                        retType,
+                        CreateNode<IdentDef>(&ast_context, apiName),
+                        parameters,
+                        LibraryType::kLTStatic,
+                        TString(StringPool::Create("corelib"), 0),
+                        CreateNode<IdentDef>(&ast_context, apiName)
+                );
+                impl_api_df->appendAPIDeclare(created_api);
+            };
+
+            create_corelib_api(
+                    ReferenceType::get(TU->getVoidTy()),
+                    "create_array",
+                    std::vector<ParameterDecl *>({
+                        CreateNode<ParameterDecl>(&ast_context, TU->getCharTy(), CreateNode<IdentDef>(&ast_context, "ty")),
+                        CreateNode<ParameterDecl>(&ast_context, TU->getIntegerTy(), CreateNode<IdentDef>(&ast_context, "dimn")),
+                        CreateNode<ParameterDecl>(&ast_context, TU->getIntegerTy(), CreateNode<IdentDef>(&ast_context, "..."), true)
+                    })
+            );
+
         }
 
     public:
