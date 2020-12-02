@@ -13,6 +13,8 @@ namespace rexlang {
     class Lower {
     private:
         ProjectDB &project_db_ ;
+        StatementBlock *startup_stmtblk_ = nullptr ;    // 启动函数语句块
+        StatementBlock *init_stmtblk_    = nullptr ;    // 初始化函数语句块
 
     private:
         // 创建启动和初始化函数
@@ -21,17 +23,37 @@ namespace rexlang {
             TranslateUnit *TU = ast_context.getTranslateUnit();
 
             // 创建启动函数
-            IdentDef *RexStartupFnName = CreateNode<IdentDef>(&ast_context, "RexStartup");
-            assert(RexStartupFnName);
+            IdentDef *rex_startup_fn_name = CreateNode<IdentDef>(&ast_context, "RexStartup");
+            assert(rex_startup_fn_name);
             std::vector<ParameterDecl *> args;
-            FunctionDecl *startup_fn = CreateNode<FunctionDecl>(&ast_context, TU->getIntegerTy(), RexStartupFnName, args);
-            StatementBlock *startup_sb = CreateNode<StatementBlock>(&ast_context, std::vector<Statement *>());
+            FunctionDecl *startup_fn = CreateNode<FunctionDecl>(&ast_context, TU->getIntegerTy(), rex_startup_fn_name, args);
+            startup_stmtblk_ = CreateNode<StatementBlock>(&ast_context, std::vector<Statement *>());
 
             // 创建初始化函数
-            IdentDef *InitFnName = CreateNode<IdentDef>(&ast_context, "RexInit");
-            assert(InitFnName);
-            FunctionDecl *init_fn = CreateNode<FunctionDecl>(&ast_context, TU->getVoidTy(), InitFnName, args);
-            StatementBlock *init_sb = CreateNode<StatementBlock>(&ast_context, std::vector<Statement *>());
+            IdentDef *init_fn_name = CreateNode<IdentDef>(&ast_context, "RexInit");
+            assert(init_fn_name);
+            FunctionDecl *init_fn = CreateNode<FunctionDecl>(&ast_context, TU->getVoidTy(), init_fn_name, args);
+            init_stmtblk_ = CreateNode<StatementBlock>(&ast_context, std::vector<Statement *>());
+
+            // 在启动函数中调用初始化函数
+            FunctionCall *call_init_fn = CreateNode<FunctionCall>(
+                    &ast_context,
+                    CreateNode<IdentRefer>(&ast_context, init_fn_name),
+                    init_fn,
+                    std::vector<Expression *>()
+            );
+            startup_stmtblk_->appendStatement(call_init_fn);
+
+            // 在启动函数中调用用户的入口函数，并将其返回值作为启动函数的返回值
+            FunctorDecl *entry_fn = project_db_.GetMainEntry();
+            FunctionCall *call_entry_fn = CreateNode<FunctionCall>(
+                    &ast_context,
+                    CreateNode<IdentRefer>(&ast_context, entry_fn->getName()),
+                    entry_fn,
+                    std::vector<Expression *>()
+            );
+            ReturnStmt *return_stmt = CreateNode<ReturnStmt>(&ast_context, call_entry_fn);
+            startup_stmtblk_->appendStatement(return_stmt);
 
             return 0;
         }
