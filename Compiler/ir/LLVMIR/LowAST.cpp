@@ -7,6 +7,7 @@
 #include "LowAST.h"
 #include "../../rexlang_compiler/NodeDecl.h"
 #include "../../support/ProjectDB.h"
+#include "../../rexlang_compiler/rtti.h"
 
 namespace rexlang {
 
@@ -88,7 +89,23 @@ namespace rexlang {
 
     private:
         // 重命名函数名
-        int MangleFunctionName() ;
+        int MangleFunctionName() {
+            // 1. 用户自定义函数名添加_前缀和#后缀
+            TranslateUnit *TU = project_db_.GetASTContext().getTranslateUnit();
+            for (SourceFile *source_file : TU->getSourceFiles()) {
+                if (ProgramSetFile *program_set_file = rtti::dyn_cast<ProgramSetFile>(source_file)) {
+                    if (ProgSetDecl *prog_set_decl = program_set_file->getProgramSetDecl()) {
+                        for (FunctionDecl *function_decl : prog_set_decl->functions()) {
+                            assert(function_decl);
+                            IdentDef *fn_name = function_decl->getName();
+                            std::string mangled_name = "_" + fn_name->id().str() + "#";
+                            fn_name->update(mangled_name);
+                        }
+                    }
+                }
+            }
+            return 0;
+        }
 
         // 重写字符串/字节集操作符
         int OverrideStringOperator() ;
