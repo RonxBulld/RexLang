@@ -71,12 +71,20 @@ namespace rexlang {
             return 0;
         }
 
-    private:
+    private:    // 全局字符串、字节集和数组
         // 创建全局对象初始化
-        int CreateGlobalObjectInitFunction() ;
+        int CreateGlobalObjectInitFunction() {
+            int EC = 0;
+            if ((EC = InitializeGlobalArray())) { return EC; }
+            if ((EC = InitializeGlobalString())) { return EC; }
+            return 0;
+        }
 
         // 初始化全局数组
-        int InitializeGlobalArray() ;
+        int InitializeGlobalArray() {
+            // 1. 创建数组对象
+            // 2. 设置数组维度
+        }
 
         // 初始化局部数组
         int InitializeLocalArray() ;
@@ -108,7 +116,21 @@ namespace rexlang {
         }
 
         // 重写字符串/字节集操作符
-        int OverrideStringOperator() ;
+        int OverrideStringOperator() {
+            // 1. 重写赋值操作符
+            // 2. 重写加法操作符
+            // 3. 重写索引操作符
+        }
+
+    private:    // 杂项辅助
+        /*
+         * 创建隐式系统API定义
+         * corelib/array_runtime_api.h
+         * corelib/string_runtime_api.h
+         * corelib/struct_runtime_api.h
+         */
+        void CreateImplicitSysApiDecl() {
+        }
 
     public:
         explicit Lower(ProjectDB &projectDB) : project_db_(projectDB) {
@@ -116,10 +138,10 @@ namespace rexlang {
 
         int Run() {
             int EC = 0;
-            if ((EC = CreateStartup())) { return EC; }
+            if ((EC = MangleFunctionName            ())) { return EC; }
+            if ((EC = CreateStartup                 ())) { return EC; }
             if ((EC = CreateGlobalObjectInitFunction())) { return EC; }
-            if ((EC = MangleFunctionName())) { return EC; }
-            if ((EC = OverrideStringOperator())) { return EC; }
+            if ((EC = OverrideStringOperator        ())) { return EC; }
             return 0;
         }
 
