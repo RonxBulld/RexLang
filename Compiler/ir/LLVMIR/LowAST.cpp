@@ -83,7 +83,33 @@ namespace rexlang {
 
         // 初始化全局数组
         int InitializeGlobalArray() {
+            TranslateUnit *TU = project_db_.getTranslateUnit();
+            ASTContext *ctx = TU->getAstContext();
+            std::vector<VariableDecl *> variables_of_array;
+            for (SourceFile *sf : TU->getSourceFiles()) {
+                if (ProgramSetFile *program_set_file = rtti::dyn_cast<ProgramSetFile>(sf)) {
+                    if (ProgSetDecl *prog_set_decl = program_set_file->getProgramSetDecl()) {
+                        for (auto &item : prog_set_decl->fileVariables()) {
+                            if (item.second->getType()->isArrayType()) {
+                                FileVariableDecl *file_vari_decl = item.second;
+                                assert(file_vari_decl);
+                                variables_of_array.push_back(file_vari_decl);
+                            }
+                        }
+                    }
+                } else if (GlobalVariableFile *global_variable_file = rtti::dyn_cast<GlobalVariableFile>(sf)) {
+                    for (auto &item : global_variable_file->getGlobalVariMap()) {
+                        if (item.second->getType()->isArrayType()) {
+                            GlobalVariableDecl *global_vari_decl = item.second;
+                            assert(global_vari_decl);
+                            variables_of_array.push_back(global_vari_decl);
+                        }
+                    }
+                }
+            }
             // 1. 创建数组对象
+            for (VariableDecl *variable_decl : variables_of_array) {
+            }
             // 2. 设置数组维度
         }
 
