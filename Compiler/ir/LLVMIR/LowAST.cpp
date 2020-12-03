@@ -184,7 +184,12 @@ namespace rexlang {
         }
 
         // 初始化局部数组
-        int InitializeLocalArray() ;
+        int InitializeLocalArray() {
+            /*
+             * 初始化局部数组和全局数组的差异是：
+             * 局部数组有静态和动态之分，初始化静态局部数组需要用acquire guard保证只有第一次到达语句时才执行初始化
+             */
+        }
 
         // 初始化全局字符串/字节集
         int InitializeGlobalString() ;
@@ -209,6 +214,13 @@ namespace rexlang {
                     }
                 }
             }
+            // 2. 根据变量的存储类型不同修改变量名
+            /*
+             * 全局变量
+             * 文件变量
+             * 局部变量
+             * 静态变量
+             */
             return 0;
         }
 
