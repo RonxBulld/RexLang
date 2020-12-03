@@ -32,6 +32,8 @@ namespace rexlang {
         StatementBlock *startup_stmtblk_ = nullptr ;    // 启动函数语句块
         StatementBlock *init_stmtblk_    = nullptr ;    // 初始化函数语句块
 
+        FunctorDecl *create_array_fn = nullptr ;
+
     private:    // 启动
         // 创建启动和初始化函数
         int CreateStartup() {
@@ -181,11 +183,11 @@ namespace rexlang {
             APIDeclareFile *impl_api_df = CreateNode<APIDeclareFile>(ctx);
             TU->appendSourceFile(impl_api_df);
 
-            auto create_corelib_api = [ctx, impl_api_df](
+            auto create_corelib_api = [ctx, impl_api_df] (
                     VariTypeDecl *retType,
                     const std::string &apiName,
                     const std::vector<ParameterDecl *> &parameters
-            ) {
+            ) -> FunctorDecl * {
                 APICommandDecl *created_api = CreateNode<APICommandDecl>(
                         ctx,
                         retType,
@@ -196,12 +198,13 @@ namespace rexlang {
                         CreateNode<IdentDef>(ctx, apiName)
                 );
                 impl_api_df->appendAPIDeclare(created_api);
+                return created_api;
             };
 
             VariTypeDecl *chrTy = TU->getCharTy(), *intTy = TU->getIntegerTy();
             VariTypeDecl *arrTy = ReferenceType::get(TU->getVoidTy());
 
-            create_corelib_api(
+            create_array_fn = create_corelib_api(
                     arrTy,
                     "create_array",
                     std::vector<ParameterDecl *>({
