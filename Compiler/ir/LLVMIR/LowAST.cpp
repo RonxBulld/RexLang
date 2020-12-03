@@ -131,39 +131,58 @@ namespace rexlang {
          * corelib/struct_runtime_api.h
          */
         void CreateImplicitSysApiDecl() {
-            ASTContext &ast_context = project_db_.GetASTContext();
-            TranslateUnit *TU = ast_context.getTranslateUnit();
+            ASTContext *ctx = &project_db_.GetASTContext();
+            TranslateUnit *TU = ctx->getTranslateUnit();
             assert(TU);
 
             // 创建虚拟接口文件
 
-            APIDeclareFile *impl_api_df = CreateNode<APIDeclareFile>(&ast_context);
+            APIDeclareFile *impl_api_df = CreateNode<APIDeclareFile>(ctx);
             TU->appendSourceFile(impl_api_df);
 
-            auto create_corelib_api = [&ast_context, impl_api_df](
+            auto create_corelib_api = [ctx, impl_api_df](
                     VariTypeDecl *retType,
                     const std::string &apiName,
                     const std::vector<ParameterDecl *> &parameters
             ) {
                 APICommandDecl *created_api = CreateNode<APICommandDecl>(
-                        &ast_context,
+                        ctx,
                         retType,
-                        CreateNode<IdentDef>(&ast_context, apiName),
+                        CreateNode<IdentDef>(ctx, apiName),
                         parameters,
                         LibraryType::kLTStatic,
                         TString(StringPool::Create("corelib"), 0),
-                        CreateNode<IdentDef>(&ast_context, apiName)
+                        CreateNode<IdentDef>(ctx, apiName)
                 );
                 impl_api_df->appendAPIDeclare(created_api);
             };
 
+            VariTypeDecl *chrTy = TU->getCharTy(), *intTy = TU->getIntegerTy();
+            VariTypeDecl *arrTy = ReferenceType::get(TU->getVoidTy());
+
             create_corelib_api(
-                    ReferenceType::get(TU->getVoidTy()),
+                    arrTy,
                     "create_array",
                     std::vector<ParameterDecl *>({
-                        CreateNode<ParameterDecl>(&ast_context, TU->getCharTy(), CreateNode<IdentDef>(&ast_context, "ty")),
-                        CreateNode<ParameterDecl>(&ast_context, TU->getIntegerTy(), CreateNode<IdentDef>(&ast_context, "dimn")),
-                        CreateNode<ParameterDecl>(&ast_context, TU->getIntegerTy(), CreateNode<IdentDef>(&ast_context, "..."), true)
+                        CreateNode<ParameterDecl>(ctx, chrTy, CreateNode<IdentDef>(ctx, "ty")),
+                        CreateNode<ParameterDecl>(ctx, intTy, CreateNode<IdentDef>(ctx, "dimn")),
+                        CreateNode<ParameterDecl>(ctx, intTy, CreateNode<IdentDef>(ctx, "..."), true)
+                    })
+            );
+
+            create_corelib_api(
+                    intTy,
+                    "get_array_dim_depth",
+                    std::vector<ParameterDecl *>({
+                        CreateNode<ParameterDecl>(ctx, arrTy, CreateNode<IdentDef>(ctx, "arr"))
+                    })
+            );
+
+            create_corelib_api(
+                    intTy,
+                    "get_array_size",
+                    std::vector<ParameterDecl *>({
+                        CreateNode<ParameterDecl>(ctx, arrTy, CreateNode<IdentDef>(ctx, "arr"))
                     })
             );
 
