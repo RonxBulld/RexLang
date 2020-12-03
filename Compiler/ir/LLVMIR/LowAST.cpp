@@ -124,10 +124,63 @@ namespace rexlang {
                     }
                 }
             }
-            // 1. 创建数组对象
+            // 创建数组对象
+            /*
+             * 例如：
+             * arr 整数型 1,1
+             * => arr = create_variable('d', 2, 1, 1)
+             * 例如：
+             * arr 字节型 数组
+             * => arr = create_varialbe('c', 1, 0)
+             *
+             * 后续的所有数组类型被当做句柄处理
+             */
+            assert(create_array_fn);
             for (VariableDecl *variable_decl : variables_of_array) {
+                ArrayDecl *vari_arr_ty = rtti::dyn_cast<ArrayDecl>(variable_decl->getType());
+                assert(vari_arr_ty);
+
+                // 收集数组信息
+
+                TypeDecl *base_ty = vari_arr_ty->getArrayBase();
+                std::vector<size_t> dimensions = vari_arr_ty->getDimensions();
+                if (dimensions.empty()) {
+                    dimensions.push_back(0);
+                }
+
+                // 准备数组对象创建参数
+
+                std::vector<Expression *> args_of_create_array;
+                args_of_create_array.push_back(CreateNode<ValueOfDecimal>(ctx, (int)mapping_type_to_sp(base_ty)));
+                args_of_create_array.push_back(CreateNode<ValueOfDecimal>(ctx, (int)dimensions.size()));
+                for (size_t dim : dimensions) {
+                    args_of_create_array.push_back(CreateNode<ValueOfDecimal>(ctx, (int) dim));
+                }
+
+                // 创建数组对象初始化语句
+
+                AssignStmt *assign_stmt = CreateNode<AssignStmt>(
+                        ctx,
+                        CreateNode<HierarchyIdentifier>(
+                                ctx,
+                                std::vector<NameComponent *>({
+                                    CreateNode<IdentRefer>(
+                                            ctx,
+                                            variable_decl->getName()
+                                    )
+                                })
+                        ),
+                        CreateNode<FunctionCall>(
+                                ctx,
+                                CreateNode<IdentRefer>(ctx, create_array_fn->getName()),
+                                create_array_fn,
+                                args_of_create_array
+                        )
+                );
+                init_stmtblk_->appendStatement(assign_stmt);
             }
-            // 2. 设置数组维度
+
+            return 0;
         }
 
         // 初始化局部数组
