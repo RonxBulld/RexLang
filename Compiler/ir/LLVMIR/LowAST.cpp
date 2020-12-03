@@ -8,8 +8,23 @@
 #include "../../rexlang_compiler/NodeDecl.h"
 #include "../../support/ProjectDB.h"
 #include "../../rexlang_compiler/rtti.h"
+#include "../SimpleRTTI_ArguType.h"
 
 namespace rexlang {
+
+    SimpleRTTI_ArguType mapping_type_to_sp(TypeDecl *type) {
+        if (type->isCharType    ()) { return SimpleRTTI_ArguType::kInt8;   }
+        if (type->isShortType   ()) { return SimpleRTTI_ArguType::kInt16;  }
+        if (type->isIntegerType ()) { return SimpleRTTI_ArguType::kInt32;  }
+        if (type->isLongType    ()) { return SimpleRTTI_ArguType::kInt64;  }
+        if (type->isFloatType   ()) { return SimpleRTTI_ArguType::kFloat;  }
+        if (type->isDoubleType  ()) { return SimpleRTTI_ArguType::kDouble; }
+        if (type->isArrayType   ()) { return SimpleRTTI_ArguType::kArray;  }
+        if (type->isStringType  ()) { return SimpleRTTI_ArguType::kString; }
+        if (type->isStructType  ()) { return SimpleRTTI_ArguType::kStruct; }
+        assert(false);
+        return SimpleRTTI_ArguType::kUnknow;
+    }
 
     class Lower {
     private:
