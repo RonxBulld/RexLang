@@ -6,7 +6,7 @@ PROJECT(${COMPILER_EXECUTE_NAME} CXX)
 INCLUDE_DIRECTORIES(/usr/local/include/antlr4-runtime)
 LINK_DIRECTORIES(/usr/local/lib)
 
-OPTION(ENABLE_GENIR "Enable generate IR." OFF)
+OPTION(ENABLE_GENIR "Enable generate IR." ON)
 OPTION(ENABLE_LINK  "Enable link module files to executable file." OFF)
 
 SET(ADDITION_LIBRARIES )
