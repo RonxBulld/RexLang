@@ -100,6 +100,74 @@ namespace rexlang {
             return 0;
         }
 
+        /*
+         * 初始化静态对象 非对象不需要初始化
+         * 例如：
+         * arr 整数型 1,1 静态
+         * => 如果真 (__static_guard_arr == 0)
+         *      如果真 (__cxa_guard_acquire(&__static_guard_arr))
+         *        arr = create_variable('d', 2, 1, 1)
+         *        __cxa_guard_release(&__static_guard_arr)
+         */
+        int InitStaticObject(LocalVariableDecl *staticLocalObj) {
+            assert(staticLocalObj->isStatic());
+
+            return 0;
+        }
+
+        /*
+         * 根据输入的数组变量节点生成初始化语句块
+         */
+        StatementBlock *HandleArrayInit(VariableDecl *arrayObject) const {
+            ASTContext *ctx = arrayObject->getAstContext();
+
+            ArrayDecl *vari_arr_ty = rtti::dyn_cast<ArrayDecl>(arrayObject->getType());
+            assert(vari_arr_ty);
+
+            // 收集数组信息
+
+            TypeDecl *base_ty = vari_arr_ty->getArrayBase();
+            std::vector<size_t> dimensions = vari_arr_ty->getDimensions();
+            if (dimensions.empty()) {
+                dimensions.push_back(0);
+            }
+
+            // 准备数组对象创建参数
+
+            std::vector<Expression *> args_of_create_array;
+            args_of_create_array.push_back(CreateNode<ValueOfDecimal>(ctx, (int) mapping_type_to_sp(base_ty)));
+            args_of_create_array.push_back(CreateNode<ValueOfDecimal>(ctx, (int) dimensions.size()));
+            for (size_t dim : dimensions) {
+                args_of_create_array.push_back(CreateNode<ValueOfDecimal>(ctx, (int) dim));
+            }
+
+            // 创建数组对象初始化语句
+
+            AssignStmt *assign_stmt = CreateNode<AssignStmt>(
+                    ctx,
+                    CreateNode<HierarchyIdentifier>(
+                            ctx,
+                            std::vector<NameComponent *>(
+                                    {
+                                            CreateNode<IdentRefer>(
+                                                    ctx,
+                                                    arrayObject->getName()
+                                            )
+                                    }
+                            )
+                    ),
+                    CreateNode<FunctionCall>(
+                            ctx,
+                            CreateNode<IdentRefer>(ctx, create_array_fn_->getName()),
+                            create_array_fn_,
+                            args_of_create_array
+                    )
+            );
+
+            StatementBlock *init_blk = CreateNode<StatementBlock>(ctx, std::vector<Statement *>({assign_stmt}));
+            return init_blk;
+        }
+
         // 初始化全局数组
         int InitializeGlobalArray() {
             TranslateUnit *TU = project_db_.getTranslateUnit();
@@ -140,49 +208,9 @@ namespace rexlang {
              *
              * 后续的所有数组类型被当做句柄处理
              */
-            assert(create_array_fn);
+            assert(create_array_fn_);
             for (VariableDecl *variable_decl : variables_of_array) {
-                ArrayDecl *vari_arr_ty = rtti::dyn_cast<ArrayDecl>(variable_decl->getType());
-                assert(vari_arr_ty);
-
-                // 收集数组信息
-
-                TypeDecl *base_ty = vari_arr_ty->getArrayBase();
-                std::vector<size_t> dimensions = vari_arr_ty->getDimensions();
-                if (dimensions.empty()) {
-                    dimensions.push_back(0);
-                }
-
-                // 准备数组对象创建参数
-
-                std::vector<Expression *> args_of_create_array;
-                args_of_create_array.push_back(CreateNode<ValueOfDecimal>(ctx, (int)mapping_type_to_sp(base_ty)));
-                args_of_create_array.push_back(CreateNode<ValueOfDecimal>(ctx, (int)dimensions.size()));
-                for (size_t dim : dimensions) {
-                    args_of_create_array.push_back(CreateNode<ValueOfDecimal>(ctx, (int) dim));
-                }
-
-                // 创建数组对象初始化语句
-
-                AssignStmt *assign_stmt = CreateNode<AssignStmt>(
-                        ctx,
-                        CreateNode<HierarchyIdentifier>(
-                                ctx,
-                                std::vector<NameComponent *>({
-                                    CreateNode<IdentRefer>(
-                                            ctx,
-                                            variable_decl->getName()
-                                    )
-                                })
-                        ),
-                        CreateNode<FunctionCall>(
-                                ctx,
-                                CreateNode<IdentRefer>(ctx, create_array_fn->getName()),
-                                create_array_fn,
-                                args_of_create_array
-                        )
-                );
-                init_stmtblk_->appendStatement(assign_stmt);
+                init_stmtblk_->appendStatement(HandleArrayInit(variable_decl));
             }
 
             return 0;
@@ -192,7 +220,8 @@ namespace rexlang {
         int InitializeLocalArray() {
             /*
              * 初始化局部数组和全局数组的差异是：
-             * 局部数组有静态和动态之分，初始化静态局部数组需要用acquire guard保证只有第一次到达语句时才执行初始化
+             * 全局数组的初始化动作放在Init函数中，局部数组的初始化动作放在变量声明处
+             * 局部数组有静态和动态之分，初始化静态局部数组需要用__rex_acquire_guard保证只有第一次到达语句时才执行初始化
              */
         }
 
