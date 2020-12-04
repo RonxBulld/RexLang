@@ -32,7 +32,9 @@ namespace rexlang {
         StatementBlock *startup_stmtblk_ = nullptr ;    // 启动函数语句块
         StatementBlock *init_stmtblk_    = nullptr ;    // 初始化函数语句块
 
-        FunctorDecl *create_array_fn = nullptr ;
+        FunctorDecl *create_array_fn_ = nullptr ;
+        FunctorDecl *__rex_acquire_guard_fn_ = nullptr ;
+        FunctorDecl *__rex_guard_release_fn_ = nullptr ;
 
     private:    // 启动
         // 创建启动和初始化函数
@@ -103,6 +105,9 @@ namespace rexlang {
             TranslateUnit *TU = project_db_.getTranslateUnit();
             ASTContext *ctx = TU->getAstContext();
             std::vector<VariableDecl *> variables_of_array;
+
+            // 收集程序集文件变量和全局变量
+
             for (SourceFile *sf : TU->getSourceFiles()) {
                 if (ProgramSetFile *program_set_file = rtti::dyn_cast<ProgramSetFile>(sf)) {
                     if (ProgSetDecl *prog_set_decl = program_set_file->getProgramSetDecl()) {
@@ -266,10 +271,11 @@ namespace rexlang {
                 return created_api;
             };
 
-            VariTypeDecl *chrTy = TU->getCharTy(), *intTy = TU->getIntegerTy();
+            VariTypeDecl *chrTy = TU->getCharTy(), *intTy = TU->getIntegerTy(), *voidTy = TU->getVoidTy();
             VariTypeDecl *arrTy = ReferenceType::get(TU->getVoidTy());
+            VariTypeDecl *voidptr = ReferenceType::get(TU->getVoidTy());
 
-            create_array_fn = create_corelib_api(
+            create_array_fn_ = create_corelib_api(
                     arrTy,
                     "create_array",
                     std::vector<ParameterDecl *>({
@@ -292,6 +298,22 @@ namespace rexlang {
                     "get_array_size",
                     std::vector<ParameterDecl *>({
                         CreateNode<ParameterDecl>(ctx, arrTy, CreateNode<IdentDef>(ctx, "arr"))
+                    })
+            );
+
+            __rex_acquire_guard_fn_ = create_corelib_api(
+                    intTy,
+                    "__rex_acquire_guard",
+                    std::vector<ParameterDecl *>({
+                        CreateNode<ParameterDecl>(ctx, voidptr, CreateNode<IdentDef>(ctx, "raw_guard_object"))
+                    })
+            );
+
+            __rex_guard_release_fn_ = create_corelib_api(
+                    voidTy,
+                    "__cxa_guard_release",
+                    std::vector<ParameterDecl *>({
+                        CreateNode<ParameterDecl>(ctx, voidptr, CreateNode<IdentDef>(ctx, "raw_guard_object"))
                     })
             );
 
