@@ -15,6 +15,8 @@ namespace rexlang {
         StringRef string_;
         size_t location_;
     public:
+        TString() ;
+        TString(StringRef string) ;
         TString(StringRef string, size_t location) ;
     public:
         bool operator<(const TString &rhs) const;

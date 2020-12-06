@@ -5,6 +5,11 @@
 #include "TString.h"
 
 namespace rexlang {
+    TString::TString() = default ;
+
+    TString::TString(StringRef string) : TString(string, 0) {
+    }
+
     TString::TString(StringRef string, size_t location)
         : string_(string), location_(location) {
     }
