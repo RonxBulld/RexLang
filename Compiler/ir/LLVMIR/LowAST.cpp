@@ -9,6 +9,7 @@
 #include "../../support/ProjectDB.h"
 #include "../../rexlang_compiler/rtti.h"
 #include "../SimpleRTTI_ArguType.h"
+#include "../../rexlang_compiler/ASTUtility.h"
 
 namespace rexlang {
 
@@ -105,12 +106,80 @@ namespace rexlang {
          * 例如：
          * arr 整数型 1,1 静态
          * => 如果真 (__static_guard_arr == 0)
-         *      如果真 (__cxa_guard_acquire(&__static_guard_arr))
+         *      如果真 (__rex_guard_acquire(&__static_guard_arr))
          *        arr = create_variable('d', 2, 1, 1)
-         *        __cxa_guard_release(&__static_guard_arr)
+         *        __rex_guard_release(&__static_guard_arr)
          */
         int InitStaticObject(LocalVariableDecl *staticLocalObj) {
             assert(staticLocalObj->isStatic());
+            ASTContext *ctx = staticLocalObj->getAstContext();
+            TranslateUnit *TU = ctx->getTranslateUnit();
+
+            // 创建守卫变量并添加到文件变量表
+
+            ProgSetDecl *prog_site = utility::FindSpecifyTypeParent<ProgSetDecl>(staticLocalObj);
+            assert(prog_site);
+            std::string static_guard_vari_name = "__static_guard_" + std::string(staticLocalObj->getNameStr());
+            FileVariableDecl *static_guard_vari = CreateNode<FileVariableDecl>(ctx, TU->getLongTy(), CreateNode<IdentDef>(ctx, static_guard_vari_name));
+            prog_site->appendFileStaticVari(static_guard_vari);
+
+            // 生成数组初始化语句
+
+            StatementBlock *init_blk = HandleArrayInit(staticLocalObj);
+
+            // 在初始化语句块末尾添加__rex_guard_release
+
+            FunctionCall *call_guard_release = CreateNode<FunctionCall>(
+                    ctx,
+                    CreateNode<IdentRefer>(ctx, __rex_guard_release_fn_->getName()),
+                    __rex_guard_release_fn_,
+                    std::vector<Expression *>({
+                        CreateNode<HierarchyIdentifier>(ctx,std::vector<NameComponent *>({CreateNode<IdentRefer>(ctx, static_guard_vari->getName())}))
+                    })
+            );
+            init_blk->appendStatement(call_guard_release);
+
+            // 双检测条件
+
+            Expression *conditional = CreateNode<BinaryExpression>(
+                    ctx,
+                    OperatorType(OperatorType::Opt::kOptAnd),
+                    CreateNode<BinaryExpression>(
+                            ctx,
+                            OperatorType(OperatorType::Opt::kOptEqual),
+                            CreateNode<HierarchyIdentifier>(ctx,std::vector<NameComponent *>({CreateNode<IdentRefer>(ctx, static_guard_vari->getName())})),
+                            CreateNode<ValueOfDecimal>(ctx, 0)
+                    ),
+                    CreateNode<BinaryExpression>(
+                            ctx,
+                            OperatorType(OperatorType::Opt::kOptNotEqual),
+                            CreateNode<FunctionCall>(
+                                    ctx,
+                                    CreateNode<IdentRefer>(ctx, __rex_acquire_guard_fn_->getName()),
+                                    __rex_acquire_guard_fn_,
+                                    std::vector<Expression *>({
+                                        CreateNode<HierarchyIdentifier>(ctx,std::vector<NameComponent *>({CreateNode<IdentRefer>(ctx, static_guard_vari->getName())}))
+                                    })
+                            ),
+                            CreateNode<ValueOfDecimal>(ctx, 0)
+                    )
+            );
+            IfStmt *static_init_once = CreateNode<IfStmt>(
+                    ctx,
+                    std::vector<IfStmt::BranchTy>({
+                        std::pair<Expression *, Statement *>(conditional, init_blk)
+                    }),
+                    nullptr
+            );
+
+            // 插入到函数体首部
+
+            FunctionDecl *function_decl = utility::FindSpecifyTypeParent<FunctionDecl>(staticLocalObj);
+            assert(function_decl);
+            StatementBlock *body = function_decl->getFunctionBody();
+            std::vector<Statement *> body_stmts = body->getStatements();
+            body_stmts.insert(body_stmts.begin(), static_init_once);
+            body->replaceStatements(body_stmts);
 
             return 0;
         }
@@ -330,19 +399,21 @@ namespace rexlang {
                     })
             );
 
+            ReferenceType *refLongTy = ReferenceType::get(TU->getLongTy());
+
             __rex_acquire_guard_fn_ = create_corelib_api(
                     intTy,
                     "__rex_acquire_guard",
                     std::vector<ParameterDecl *>({
-                        CreateNode<ParameterDecl>(ctx, voidptr, CreateNode<IdentDef>(ctx, "raw_guard_object"))
+                        CreateNode<ParameterDecl>(ctx, refLongTy, CreateNode<IdentDef>(ctx, "raw_guard_object"))
                     })
             );
 
             __rex_guard_release_fn_ = create_corelib_api(
                     voidTy,
-                    "__cxa_guard_release",
+                    "__rex_guard_release",
                     std::vector<ParameterDecl *>({
-                        CreateNode<ParameterDecl>(ctx, voidptr, CreateNode<IdentDef>(ctx, "raw_guard_object"))
+                        CreateNode<ParameterDecl>(ctx, refLongTy, CreateNode<IdentDef>(ctx, "raw_guard_object"))
                     })
             );
 
