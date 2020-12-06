@@ -6,12 +6,12 @@ ADD_LIBRARY(${PROJECT_NAME} OBJECT
 
         EmitLLVMIR.cpp
         EmitLLVMIR.h
-        LLVMRTIRBuilder.cpp
-        LLVMRTIRBuilder.h
-        Emitter.cpp
-        Emitter.h
-        DebugInfoMgr.cpp
-        DebugInfoMgr.h
+#        LLVMRTIRBuilder.cpp
+#        LLVMRTIRBuilder.h
+#        Emitter.cpp
+#        Emitter.h
+#        DebugInfoMgr.cpp
+#        DebugInfoMgr.h
         LLCodeGen.cpp
         LLCodeGen.h
         LowAST.cpp

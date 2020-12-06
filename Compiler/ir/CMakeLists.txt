@@ -13,7 +13,3 @@ ADD_LIBRARY(${PROJECT_NAME}
 
         $<TARGET_OBJECTS:GenLLIR>
         )
-
-target_link_libraries(${PROJECT_NAME}
-        GenLLIR
-        )
