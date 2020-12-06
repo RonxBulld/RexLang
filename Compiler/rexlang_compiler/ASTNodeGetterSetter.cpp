@@ -537,6 +537,10 @@ namespace rexlang {
         return statements_;
     }
 
+    void StatementBlock::replaceStatements(const std::vector<Statement *> &statements) {
+        statements_ = statements;
+    }
+
     /******************************************************
      * HierarchyIdentifier
      ******************************************************/

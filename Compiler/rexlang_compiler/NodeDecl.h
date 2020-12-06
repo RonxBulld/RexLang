@@ -1830,6 +1830,7 @@ namespace rexlang {
     public:
         void appendStatement(Statement *statement) ;
         const std::vector<Statement *> &getStatements() const ;
+        void replaceStatements(const std::vector<Statement *> &statements) ;
         SEMATIC_ANALYSIS_INTERNAL
 
     public:
