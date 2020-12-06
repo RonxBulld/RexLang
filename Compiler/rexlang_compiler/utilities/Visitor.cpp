@@ -79,7 +79,7 @@ namespace rexlang {
         VISIT_BASE(SourceFile, node);
         PrevAction(node);
 
-        TraverseNamedMap(node.getGlobalVariMap());
+        TraverseArray(node.getGlobalVariMap());
 
         PostAction(node);
     }
@@ -288,7 +288,7 @@ namespace rexlang {
         VISIT_BASE(TagDecl, node);
         PrevAction(node);
 
-        TraverseNamedMap(node.fileVariables());
+        TraverseArray(node.fileVariables());
         TraverseArray(node.functions());
 
         PostAction(node);

@@ -248,20 +248,16 @@ namespace rexlang {
             for (SourceFile *sf : TU->getSourceFiles()) {
                 if (ProgramSetFile *program_set_file = rtti::dyn_cast<ProgramSetFile>(sf)) {
                     if (ProgSetDecl *prog_set_decl = program_set_file->getProgramSetDecl()) {
-                        for (auto &item : prog_set_decl->fileVariables()) {
-                            if (item.second->getType()->isArrayType()) {
-                                FileVariableDecl *file_vari_decl = item.second;
-                                assert(file_vari_decl);
-                                variables_of_array.push_back(file_vari_decl);
+                        for (FileVariableDecl *item : prog_set_decl->fileVariables()) {
+                            if (item->getType()->isArrayType()) {
+                                variables_of_array.push_back(item);
                             }
                         }
                     }
                 } else if (GlobalVariableFile *global_variable_file = rtti::dyn_cast<GlobalVariableFile>(sf)) {
-                    for (auto &item : global_variable_file->getGlobalVariMap()) {
-                        if (item.second->getType()->isArrayType()) {
-                            GlobalVariableDecl *global_vari_decl = item.second;
-                            assert(global_vari_decl);
-                            variables_of_array.push_back(global_vari_decl);
+                    for (GlobalVariableDecl *item : global_variable_file->getGlobalVariMap()) {
+                        if (item->getType()->isArrayType()) {
+                            variables_of_array.push_back(item);
                         }
                     }
                 }

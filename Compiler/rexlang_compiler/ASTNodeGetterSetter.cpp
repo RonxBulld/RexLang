@@ -171,7 +171,7 @@ namespace rexlang {
      ***************************************************/
 
     void GlobalVariableFile::appendGlobalVariableDecl(GlobalVariableDecl *globalVariableDecl) {
-        global_variable_map_[globalVariableDecl->getNameRef()] = globalVariableDecl;
+        global_variable_map_.add(globalVariableDecl);
         setChild(globalVariableDecl);
     }
 
@@ -180,12 +180,7 @@ namespace rexlang {
     }
 
     GlobalVariableDecl *GlobalVariableFile::getGlobalVari(const StringRef &name) const {
-        auto found = global_variable_map_.find(name);
-        if (found != global_variable_map_.end()) {
-            return found->second;
-        } else {
-            return nullptr;
-        }
+        return global_variable_map_[name];
     }
 
     /***************************************************
@@ -457,35 +452,26 @@ namespace rexlang {
      ***************************************************/
 
     void ProgSetDecl::appendFileStaticVari(FileVariableDecl *variable) {
-        file_static_variables_[variable->getNameRef()] = variable;
-        setChild(variable);
+        assert(!file_static_variables_.has(variable->getNameRef()));
+        file_static_variables_.add(variable);
     }
 
     void ProgSetDecl::appendFunctionDecl(FunctionDecl *functionDecl) {
-        function_decls_.push_back(functionDecl);
+        assert(!function_decls_.has(functionDecl->getNameRef()));
+        function_decls_.add(functionDecl);
         setChild(functionDecl);
     }
 
     FileVariableDecl *ProgSetDecl::getFileVariableDecl(const StringRef &name) const {
-        auto found = file_static_variables_.find(name);
-        if (found != file_static_variables_.end()) {
-            return found->second;
-        } else {
-            return nullptr;
-        }
+        return file_static_variables_[name];
     }
 
     FunctionDecl *ProgSetDecl::getFunctionDecl(const StringRef &name) const {
-        for (FunctionDecl *function_decl : function_decls_) {
-            if (function_decl->getNameRef() == name) {
-                return function_decl;
-            }
-        }
-        return nullptr;
+        return function_decls_[name];
     }
 
-    const NamedOrderDict<FileVariableDecl *> &  ProgSetDecl::fileVariables() const { return file_static_variables_; }
-    const std::vector<FunctionDecl *> &         ProgSetDecl::functions    () const { return function_decls_; }
+    const DeclList<FileVariableDecl> &  ProgSetDecl::fileVariables() const { return file_static_variables_; }
+    const DeclList<FunctionDecl> &      ProgSetDecl::functions    () const { return function_decls_; }
 
     /***************************************************
      * FunctionDecl

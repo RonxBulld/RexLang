@@ -417,8 +417,8 @@ namespace rexlang {
         GlobalVariableFile* global_variable_file = CreateNode<GlobalVariableFile>(context);
         rexLangParser::Global_variable_listContext *gvari_list_ctx = context->global_variable_list();
         GlobalVariableFile::GlobalVariMapTy gvari_map = GetFromCtxIfExist<GlobalVariableFile::GlobalVariMapTy>(gvari_list_ctx);
-        for (auto &gvari_item : gvari_map) {
-            global_variable_file->appendGlobalVariableDecl(gvari_item.second);
+        for (GlobalVariableDecl *gvari_item : gvari_map) {
+            global_variable_file->appendGlobalVariableDecl(gvari_item);
         }
         return NodeWarp(global_variable_file);
     }
@@ -427,7 +427,7 @@ namespace rexlang {
         GlobalVariableFile::GlobalVariMapTy gvari_map;
         for (rexLangParser::Global_variable_itemContext *global_vari_decl_ctx : context->global_variable_item()) {
             GlobalVariableDecl *global_variable_decl = GetFromCtxIfExist<GlobalVariableDecl *>(global_vari_decl_ctx);
-            gvari_map[StringPool::Create(global_variable_decl->getNameStr())] = global_variable_decl;
+            gvari_map.add(global_variable_decl);
         }
         return gvari_map;
     }
