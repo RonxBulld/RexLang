@@ -10,6 +10,8 @@ ADD_SUBDIRECTORY(LLVMIR)
 ADD_LIBRARY(${PROJECT_NAME}
         SimpleRTTI_ArguType.h
         GenIRPass.cpp
+
+        $<TARGET_OBJECTS:GenLLIR>
         )
 
 target_link_libraries(${PROJECT_NAME}

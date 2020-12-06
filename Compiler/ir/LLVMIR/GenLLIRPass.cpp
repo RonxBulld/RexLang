@@ -47,5 +47,5 @@ namespace rexlang {
 
             return 0;
         }
-    };
+    } gen_llir_pass ;
 }

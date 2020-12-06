@@ -14,5 +14,6 @@ namespace rexlang {
             Pass::Call("EmitLLIR", projectDB);
             return 0;
         }
-    };
+    } gen_ir_pass ;
+
 }

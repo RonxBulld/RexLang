@@ -24,5 +24,5 @@ namespace rexlang {
                 return 3;
             }
         }
-    };
+    } gen_host_code_pass ;
 }

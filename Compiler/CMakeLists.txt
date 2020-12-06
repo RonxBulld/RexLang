@@ -15,7 +15,7 @@ ADD_SUBDIRECTORY(rexlang_compiler)
 IF (${ENABLE_GENIR})
     ADD_SUBDIRECTORY(ir)
     ADD_SUBDIRECTORY(codegen)
-    LIST(APPEND ADDITION_LIBRARIES IR;CodeGen)
+    LIST(APPEND ADDITION_LIBRARIES GenIR;CodeGen)
     IF (${ENABLE_LINK})
         ADD_SUBDIRECTORY(link)
         LIST(APPEND ADDITION_LIBRARIES LinkerAPI)
@@ -37,7 +37,11 @@ ADD_EXECUTABLE(${COMPILER_EXECUTE_NAME}
 TARGET_LINK_LIBRARIES(${COMPILER_EXECUTE_NAME}
         REXCompilerParse
         antlr4-runtime
+
+        -Wl,-whole-archive
         ${ADDITION_LIBRARIES}
+        -Wl,-no-whole-archive
+
         lite_util
         Support
         )

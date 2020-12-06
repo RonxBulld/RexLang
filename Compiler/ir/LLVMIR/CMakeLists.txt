@@ -1,7 +1,7 @@
 
 PROJECT(GenLLIR)
 
-ADD_LIBRARY(${PROJECT_NAME}
+ADD_LIBRARY(${PROJECT_NAME} OBJECT
         GenLLIRPass.cpp
 
         EmitLLVMIR.cpp
