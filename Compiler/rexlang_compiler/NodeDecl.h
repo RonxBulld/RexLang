@@ -23,6 +23,7 @@
 #include "../../lite_util/TString.h"
 #include "../../lite_util/ordered_map/ordered_map.h"
 #include "../../lite_util/ErrOr.h"
+#include "../../lite_util/DeclList.h"
 #include "ASTContext.h"
 
 namespace rexlang {
@@ -368,7 +369,7 @@ namespace rexlang {
      */
     class GlobalVariableFile : public SourceFile {
     public:
-        typedef NamedOrderDict<GlobalVariableDecl *> GlobalVariMapTy;
+        typedef DeclList<GlobalVariableDecl> GlobalVariMapTy;
 
     private:
         GlobalVariMapTy global_variable_map_;
@@ -1424,8 +1425,8 @@ namespace rexlang {
      */
     class ProgSetDecl : public TagDecl {
     private:
-        NamedOrderDict<FileVariableDecl *>  file_static_variables_;
-        std::vector<FunctionDecl *>         function_decls_;
+        DeclList<FileVariableDecl>  file_static_variables_;
+        DeclList<FunctionDecl>      function_decls_;
 
     public:
         explicit ProgSetDecl(IdentDef *name) ;
@@ -1437,8 +1438,8 @@ namespace rexlang {
         FileVariableDecl *  getFileVariableDecl (const StringRef &name) const ;
         FunctionDecl *      getFunctionDecl     (const StringRef &name) const ;
 
-        const NamedOrderDict<FileVariableDecl *> &  fileVariables   () const ;
-        const std::vector<FunctionDecl *> &         functions       () const ;
+        const DeclList<FileVariableDecl> &  fileVariables   () const ;
+        const DeclList<FunctionDecl> &      functions       () const ;
 
         std::vector<FunctorDecl *> getFuncSignatures() ;
 
