@@ -22,4 +22,4 @@ ADD_LIBRARY(lite_util
         ordered_map/ordered_hash.h
         ordered_map/ordered_map.h
         ordered_map/ordered_set.h
-        )
+        DeclList.cpp DeclList.h)
