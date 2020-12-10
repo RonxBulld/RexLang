@@ -34,6 +34,8 @@ namespace rexlang {
         StatementBlock *init_stmtblk_    = nullptr ;    // 初始化函数语句块
 
         FunctorDecl *create_array_fn_ = nullptr ;
+        FunctorDecl *create_string_fn_ = nullptr ;
+
         FunctorDecl *__rex_acquire_guard_fn_ = nullptr ;
         FunctorDecl *__rex_guard_release_fn_ = nullptr ;
 
@@ -381,8 +383,8 @@ namespace rexlang {
             };
 
             VariTypeDecl *chrTy = TU->getCharTy(), *intTy = TU->getIntegerTy(), *voidTy = TU->getVoidTy();
-            VariTypeDecl *arrTy = ReferenceType::get(TU->getVoidTy());
-            VariTypeDecl *voidptr = ReferenceType::get(TU->getVoidTy());
+            VariTypeDecl *voidPtr = ReferenceType::get(TU->getVoidTy());
+            VariTypeDecl *arrTy = voidPtr, *strTy = voidPtr;
 
             create_array_fn_ = create_corelib_api(
                     arrTy,
@@ -407,6 +409,14 @@ namespace rexlang {
                     "get_array_size",
                     std::vector<ParameterDecl *>({
                         CreateNode<ParameterDecl>(ctx, arrTy, CreateNode<IdentDef>(ctx, "arr"))
+                    })
+            );
+
+            create_string_fn_ = create_corelib_api(
+                    strTy,
+                    "create_string",
+                    std::vector<ParameterDecl *>({
+                        CreateNode<ParameterDecl>(ctx, TU->getLongTy(), CreateNode<IdentDef>(ctx, "str"))
                     })
             );
 
