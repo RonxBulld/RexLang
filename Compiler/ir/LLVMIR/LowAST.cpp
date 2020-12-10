@@ -445,6 +445,8 @@ namespace rexlang {
         }
 
         int Run() {
+            CreateImplicitSysApiDecl();
+
             int EC = 0;
             if ((EC = MangleFunctionName            ())) { return EC; }
             if ((EC = CreateStartup                 ())) { return EC; }
