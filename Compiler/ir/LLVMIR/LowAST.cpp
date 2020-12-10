@@ -96,13 +96,14 @@ namespace rexlang {
         // 创建全局对象初始化
         int CreateGlobalObjectInitFunction() {
             int EC = 0;
-            if ((EC = InitializeGlobalArray())) { return EC; }
-            if ((EC = InitializeGlobalString())) { return EC; }
+            std::vector<VariableDecl *> variables = CollectVariables();
+            if ((EC = InitializeGlobalArray(variables))) { return EC; }
+            if ((EC = InitializeGlobalString(variables))) { return EC; }
             return 0;
         }
 
         /*
-         * 初始化静态对象 非对象不需要初始化
+         * 初始化局部数组对象
          * 例如：
          * arr 整数型 1,1 静态
          * => 如果真 (__static_guard_arr == 0)
@@ -110,75 +111,79 @@ namespace rexlang {
          *        arr = create_variable('d', 2, 1, 1)
          *        __rex_guard_release(&__static_guard_arr)
          */
-        int InitStaticObject(LocalVariableDecl *staticLocalObj) const {
+        int InitLocalArrayObject(LocalVariableDecl *staticLocalObj) const {
             assert(staticLocalObj->isStatic());
             ASTContext *ctx = staticLocalObj->getAstContext();
             TranslateUnit *TU = ctx->getTranslateUnit();
 
-            // 创建守卫变量并添加到文件变量表
-
-            ProgSetDecl *prog_site = utility::FindSpecifyTypeParent<ProgSetDecl>(staticLocalObj);
-            assert(prog_site);
-            std::string static_guard_vari_name = "__static_guard_" + std::string(staticLocalObj->getNameStr());
-            FileVariableDecl *static_guard_vari = CreateNode<FileVariableDecl>(ctx, TU->getLongTy(), CreateNode<IdentDef>(ctx, static_guard_vari_name));
-            prog_site->appendFileStaticVari(static_guard_vari);
-
             // 生成数组初始化语句
 
             StatementBlock *init_blk = HandleArrayInit(staticLocalObj);
+            Statement *init_stmt = init_blk;
 
-            // 在初始化语句块末尾添加__rex_guard_release
+            if (staticLocalObj->isStatic()) {
 
-            FunctionCall *call_guard_release = CreateNode<FunctionCall>(
-                    ctx,
-                    CreateNode<IdentRefer>(ctx, __rex_guard_release_fn_->getName()),
-                    __rex_guard_release_fn_,
-                    std::vector<Expression *>({
-                        CreateNode<HierarchyIdentifier>(ctx,std::vector<NameComponent *>({CreateNode<IdentRefer>(ctx, static_guard_vari->getName())}))
-                    })
-            );
-            init_blk->appendStatement(call_guard_release);
+                // 创建守卫变量并添加到文件变量表
 
-            // 双检测条件
+                ProgSetDecl *prog_site = utility::FindSpecifyTypeParent<ProgSetDecl>(staticLocalObj);
+                assert(prog_site);
+                std::string static_guard_vari_name = "__static_guard_" + std::string(staticLocalObj->getNameStr());
+                FileVariableDecl *static_guard_vari = CreateNode<FileVariableDecl>(ctx, TU->getLongTy(), CreateNode<IdentDef>(ctx, static_guard_vari_name));
+                prog_site->appendFileStaticVari(static_guard_vari);
 
-            Expression *conditional = CreateNode<BinaryExpression>(
-                    ctx,
-                    OperatorType(OperatorType::Opt::kOptAnd),
-                    CreateNode<BinaryExpression>(
-                            ctx,
-                            OperatorType(OperatorType::Opt::kOptEqual),
-                            CreateNode<HierarchyIdentifier>(ctx,std::vector<NameComponent *>({CreateNode<IdentRefer>(ctx, static_guard_vari->getName())})),
-                            CreateNode<ValueOfDecimal>(ctx, 0)
-                    ),
-                    CreateNode<BinaryExpression>(
-                            ctx,
-                            OperatorType(OperatorType::Opt::kOptNotEqual),
-                            CreateNode<FunctionCall>(
-                                    ctx,
-                                    CreateNode<IdentRefer>(ctx, __rex_acquire_guard_fn_->getName()),
-                                    __rex_acquire_guard_fn_,
-                                    std::vector<Expression *>({
-                                        CreateNode<HierarchyIdentifier>(ctx,std::vector<NameComponent *>({CreateNode<IdentRefer>(ctx, static_guard_vari->getName())}))
-                                    })
-                            ),
-                            CreateNode<ValueOfDecimal>(ctx, 0)
-                    )
-            );
-            IfStmt *static_init_once = CreateNode<IfStmt>(
-                    ctx,
-                    std::vector<IfStmt::BranchTy>({
-                        std::pair<Expression *, Statement *>(conditional, init_blk)
-                    }),
-                    nullptr
-            );
+                // 在初始化语句块末尾添加__rex_guard_release
 
-            // 插入到函数体首部
+                FunctionCall *call_guard_release = CreateNode<FunctionCall>(
+                        ctx,
+                        CreateNode<IdentRefer>(ctx, __rex_guard_release_fn_->getName()),
+                        __rex_guard_release_fn_,
+                        std::vector<Expression *>({
+                            CreateNode<HierarchyIdentifier>(ctx, std::vector<NameComponent *>({CreateNode<IdentRefer>(ctx, static_guard_vari->getName())}))
+                        })
+                );
+                init_blk->appendStatement(call_guard_release);
+
+                // 双检测条件
+
+                Expression *conditional = CreateNode<BinaryExpression>(
+                        ctx,
+                        OperatorType(OperatorType::Opt::kOptAnd),
+                        CreateNode<BinaryExpression>(
+                                ctx,
+                                OperatorType(OperatorType::Opt::kOptEqual),
+                                CreateNode<HierarchyIdentifier>(ctx, std::vector<NameComponent *>({CreateNode<IdentRefer>(ctx, static_guard_vari->getName())})),
+                                CreateNode<ValueOfDecimal>(ctx, 0)
+                        ),
+                        CreateNode<BinaryExpression>(
+                                ctx,
+                                OperatorType(OperatorType::Opt::kOptNotEqual),
+                                CreateNode<FunctionCall>(
+                                        ctx,
+                                        CreateNode<IdentRefer>(ctx, __rex_acquire_guard_fn_->getName()),
+                                        __rex_acquire_guard_fn_,
+                                        std::vector<Expression *>({
+                                            CreateNode<HierarchyIdentifier>(ctx, std::vector<NameComponent *>({CreateNode<IdentRefer>(ctx, static_guard_vari->getName())}))
+                                        })
+                                ),
+                                CreateNode<ValueOfDecimal>(ctx, 0)
+                        )
+                );
+                init_stmt = CreateNode<IfStmt>(
+                        ctx,
+                        std::vector<IfStmt::BranchTy>({
+                            std::pair<Expression *, Statement *>(conditional, init_blk)
+                        }),
+                        nullptr
+                );
+            }
+
+            // 将初始化代码插入到函数体首部
 
             FunctionDecl *function_decl = utility::FindSpecifyTypeParent<FunctionDecl>(staticLocalObj);
             assert(function_decl);
             StatementBlock *body = function_decl->getFunctionBody();
             std::vector<Statement *> body_stmts = body->getStatements();
-            body_stmts.insert(body_stmts.begin(), static_init_once);
+            body_stmts.insert(body_stmts.begin(), init_stmt);
             body->replaceStatements(body_stmts);
 
             return 0;
@@ -186,6 +191,15 @@ namespace rexlang {
 
         /*
          * 根据输入的数组变量节点生成初始化语句块
+         * 初始化局部数组和全局数组的差异是：
+         * 全局数组的初始化动作放在Init函数中，局部数组的初始化动作放在变量声明处
+         * 局部数组有静态和动态之分，初始化静态局部数组需要用__rex_acquire_guard保证只有第一次到达语句时才执行初始化
+         * 例如：
+         * arr 整数型 1,1
+         * => arr = create_variable('d', 2, 1, 1)
+         * 例如：
+         * arr 字节型 数组
+         * => arr = create_varialbe('c', 1, 0)
          */
         StatementBlock *HandleArrayInit(VariableDecl *arrayObject) const {
             ASTContext *ctx = arrayObject->getAstContext();
@@ -237,64 +251,65 @@ namespace rexlang {
             return init_blk;
         }
 
-        // 初始化全局数组
-        int InitializeGlobalArray() {
+        /*
+         * 收集所有变量
+         * 包括：文件变量、局部变量、全局变量
+         */
+        std::vector<VariableDecl *> CollectVariables() const {
             TranslateUnit *TU = project_db_.getTranslateUnit();
             ASTContext *ctx = TU->getAstContext();
-            std::vector<VariableDecl *> variables_of_array;
-
-            // 收集程序集文件变量和全局变量
+            std::vector<VariableDecl *> variables;
 
             for (SourceFile *sf : TU->getSourceFiles()) {
                 if (ProgramSetFile *program_set_file = rtti::dyn_cast<ProgramSetFile>(sf)) {
                     if (ProgSetDecl *prog_set_decl = program_set_file->getProgramSetDecl()) {
-                        for (FileVariableDecl *item : prog_set_decl->fileVariables()) {
-                            if (item->getType()->isArrayType()) {
-                                variables_of_array.push_back(item);
+                        // 文件变量
+                        for (FileVariableDecl *file_vari : prog_set_decl->fileVariables()) {
+                            variables.push_back(file_vari);
+                        }
+                        // 局部变量
+                        for (FunctionDecl *function : prog_set_decl->functions()) {
+                            for (LocalVariableDecl *local_vari : function->getLocalVariables()) {
+                                variables.push_back(local_vari);
                             }
                         }
                     }
                 } else if (GlobalVariableFile *global_variable_file = rtti::dyn_cast<GlobalVariableFile>(sf)) {
-                    for (GlobalVariableDecl *item : global_variable_file->getGlobalVariMap()) {
-                        if (item->getType()->isArrayType()) {
-                            variables_of_array.push_back(item);
-                        }
+                    // 全局变量
+                    for (GlobalVariableDecl *global_vari : global_variable_file->getGlobalVariMap()) {
+                        variables.push_back(global_vari);
                     }
                 }
             }
-            // 创建数组对象
-            /*
-             * 例如：
-             * arr 整数型 1,1
-             * => arr = create_variable('d', 2, 1, 1)
-             * 例如：
-             * arr 字节型 数组
-             * => arr = create_varialbe('c', 1, 0)
-             *
-             * 后续的所有数组类型被当做句柄处理
-             */
+
+            return variables;
+        }
+
+        /*
+         * 初始化数组对象
+         */
+        int InitializeGlobalArray(const std::vector<VariableDecl *> &variables) const {
             assert(create_array_fn_);
-            for (VariableDecl *variable_decl : variables_of_array) {
-                init_stmtblk_->appendStatement(HandleArrayInit(variable_decl));
+            for (VariableDecl *vari : variables) {
+                if (vari->getType()->isArrayType()) {
+                    if (vari->isFileVariable() || vari->isGlobalVariable()) {
+
+                        // 文件变量和全局变量的初始化代码直接放到初始化函数中
+
+                        init_stmtblk_->appendStatement(HandleArrayInit(vari));
+                    }
+                    else if (LocalVariableDecl *local_vari = rtti::dyn_cast<LocalVariableDecl>(vari)) {
+                        int EC = InitLocalArrayObject(local_vari);
+                        assert(EC == 0);
+                    }
+                }
             }
 
             return 0;
         }
 
-        // 初始化局部数组
-        int InitializeLocalArray() {
-            /*
-             * 初始化局部数组和全局数组的差异是：
-             * 全局数组的初始化动作放在Init函数中，局部数组的初始化动作放在变量声明处
-             * 局部数组有静态和动态之分，初始化静态局部数组需要用__rex_acquire_guard保证只有第一次到达语句时才执行初始化
-             */
-        }
-
         // 初始化全局字符串/字节集
-        int InitializeGlobalString() ;
-
-        // 初始化局部字符串/字节集
-        int InitializeLocalString() ;
+        int InitializeGlobalString(const std::vector<VariableDecl *> &variables) ;
 
     private:
         // 重命名函数名
