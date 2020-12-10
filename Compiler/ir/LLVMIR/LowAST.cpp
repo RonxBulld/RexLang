@@ -252,6 +252,50 @@ namespace rexlang {
         }
 
         /*
+         * 初始化字符串对象
+         * 目前语言设计不支持自定义初始化值，所有的字符串初始化都是空字符串
+         * 例如
+         * str 文本型
+         * => str = create_string("")
+         */
+        StatementBlock *HandleStringInit(VariableDecl *stringObject) const {
+            ASTContext *ctx = stringObject->getAstContext();
+
+            assert(stringObject->getType()->isStringType());
+
+            // 准备字符串对象创建参数
+
+            std::vector<Expression *> args_of_create_string;
+            args_of_create_string.push_back(CreateNode<ValueOfString>(ctx, TString(StringPool::Create(""))));
+
+            // 创建字符串对象初始化语句
+
+            AssignStmt *assign_stmt = CreateNode<AssignStmt>(
+                    ctx,
+                    CreateNode<HierarchyIdentifier>(
+                            ctx,
+                            std::vector<NameComponent *>({
+                                CreateNode<IdentRefer>(
+                                        ctx,
+                                        stringObject->getName()
+                                )
+                            })
+                    ),
+                    CreateNode<FunctionCall>(
+                            ctx,
+                            CreateNode<IdentRefer>(ctx, create_string_fn_->getName()),
+                            create_string_fn_,
+                            args_of_create_string
+                    )
+            );
+
+            StatementBlock *init_blk = CreateNode<StatementBlock>(ctx, std::vector<Statement *>({assign_stmt}));
+            return init_blk;
+        }
+
+        StatementBlock *HandleDatasetInit(VariableDecl *datasetObject) const ;
+
+        /*
          * 收集所有变量
          * 包括：文件变量、局部变量、全局变量
          */
@@ -382,6 +426,7 @@ namespace rexlang {
 
             VariTypeDecl *chrTy = TU->getCharTy(), *intTy = TU->getIntegerTy(), *voidTy = TU->getVoidTy();
             VariTypeDecl *voidPtr = ReferenceType::get(TU->getVoidTy());
+            VariTypeDecl *pStrTy = ReferenceType::get(TU->getCharTy());
             VariTypeDecl *arrTy = voidPtr, *strTy = voidPtr;
 
             create_array_fn_ = create_corelib_api(
@@ -414,7 +459,7 @@ namespace rexlang {
                     strTy,
                     "create_string",
                     std::vector<ParameterDecl *>({
-                        CreateNode<ParameterDecl>(ctx, TU->getLongTy(), CreateNode<IdentDef>(ctx, "str"))
+                        CreateNode<ParameterDecl>(ctx, pStrTy, CreateNode<IdentDef>(ctx, "str"))
                     })
             );
 
