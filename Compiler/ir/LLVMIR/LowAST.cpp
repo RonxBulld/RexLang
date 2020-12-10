@@ -113,23 +113,23 @@ namespace rexlang {
          *        arr = create_variable('d', 2, 1, 1)
          *        __rex_guard_release(&__static_guard_arr)
          */
-        int InitLocalArrayObject(LocalVariableDecl *staticLocalObj) const {
-            assert(staticLocalObj->isStatic());
-            ASTContext *ctx = staticLocalObj->getAstContext();
+        int InitLocalArrayObject(LocalVariableDecl *localObj) const {
+            assert(localObj->isStatic());
+            ASTContext *ctx = localObj->getAstContext();
             TranslateUnit *TU = ctx->getTranslateUnit();
 
             // 生成数组初始化语句
 
-            StatementBlock *init_blk = HandleArrayInit(staticLocalObj);
+            StatementBlock *init_blk = HandleArrayInit(localObj);
             Statement *init_stmt = init_blk;
 
-            if (staticLocalObj->isStatic()) {
+            if (localObj->isStatic()) {
 
                 // 创建守卫变量并添加到文件变量表
 
-                ProgSetDecl *prog_site = utility::FindSpecifyTypeParent<ProgSetDecl>(staticLocalObj);
+                ProgSetDecl *prog_site = utility::FindSpecifyTypeParent<ProgSetDecl>(localObj);
                 assert(prog_site);
-                std::string static_guard_vari_name = "__static_guard_" + std::string(staticLocalObj->getNameStr());
+                std::string static_guard_vari_name = "__static_guard_" + std::string(localObj->getNameStr());
                 FileVariableDecl *static_guard_vari = CreateNode<FileVariableDecl>(ctx, TU->getLongTy(), CreateNode<IdentDef>(ctx, static_guard_vari_name));
                 prog_site->appendFileStaticVari(static_guard_vari);
 
@@ -181,7 +181,7 @@ namespace rexlang {
 
             // 将初始化代码插入到函数体首部
 
-            FunctionDecl *function_decl = utility::FindSpecifyTypeParent<FunctionDecl>(staticLocalObj);
+            FunctionDecl *function_decl = utility::FindSpecifyTypeParent<FunctionDecl>(localObj);
             assert(function_decl);
             StatementBlock *body = function_decl->getFunctionBody();
             std::vector<Statement *> body_stmts = body->getStatements();
@@ -232,14 +232,12 @@ namespace rexlang {
                     ctx,
                     CreateNode<HierarchyIdentifier>(
                             ctx,
-                            std::vector<NameComponent *>(
-                                    {
-                                            CreateNode<IdentRefer>(
-                                                    ctx,
-                                                    arrayObject->getName()
-                                            )
-                                    }
-                            )
+                            std::vector<NameComponent *>({
+                                CreateNode<IdentRefer>(
+                                        ctx,
+                                        arrayObject->getName()
+                                        )
+                            })
                     ),
                     CreateNode<FunctionCall>(
                             ctx,
