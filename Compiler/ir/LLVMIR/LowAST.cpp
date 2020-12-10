@@ -110,7 +110,7 @@ namespace rexlang {
          *        arr = create_variable('d', 2, 1, 1)
          *        __rex_guard_release(&__static_guard_arr)
          */
-        int InitStaticObject(LocalVariableDecl *staticLocalObj) {
+        int InitStaticObject(LocalVariableDecl *staticLocalObj) const {
             assert(staticLocalObj->isStatic());
             ASTContext *ctx = staticLocalObj->getAstContext();
             TranslateUnit *TU = ctx->getTranslateUnit();
