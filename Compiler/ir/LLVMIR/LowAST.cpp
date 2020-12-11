@@ -95,12 +95,12 @@ namespace rexlang {
         }
 
     private:    // 全局字符串、字节集和数组
-        // 创建全局对象初始化
-        int CreateGlobalObjectInitFunction() {
+        // TODO: 还有结构体
+        // 处理所有对象的初始化
+        int HandleAllObjectsInit() {
             int EC = 0;
             std::vector<VariableDecl *> variables = CollectVariables();
-            if ((EC = InitializeGlobalArray(variables))) { return EC; }
-            if ((EC = InitializeGlobalString(variables))) { return EC; }
+            if ((EC = InitializeObject(variables))) { return EC; }
             return 0;
         }
 
@@ -543,10 +543,10 @@ namespace rexlang {
             CreateImplicitSysApiDecl();
 
             int EC = 0;
-            if ((EC = MangleFunctionName            ())) { return EC; }
-            if ((EC = CreateStartup                 ())) { return EC; }
-            if ((EC = CreateGlobalObjectInitFunction())) { return EC; }
-            if ((EC = OverrideStringOperator        ())) { return EC; }
+            if ((EC = MangleFunctionName    ())) { return EC; }
+            if ((EC = CreateStartup         ())) { return EC; }
+            if ((EC = HandleAllObjectsInit  ())) { return EC; }
+            if ((EC = OverrideStringOperator())) { return EC; }
             return 0;
         }
 
