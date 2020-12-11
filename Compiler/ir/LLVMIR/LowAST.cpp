@@ -369,6 +369,17 @@ namespace rexlang {
         }
 
         /*
+         * 根据不同的类型调用不同的对象初始化函数
+         */
+        StatementBlock *HandleObjectInit(VariableDecl *object) const {
+            if (object->getType()->isArrayType  ()) { return HandleArrayInit  (object); }
+            if (object->getType()->isStringType ()) { return HandleStringInit (object); }
+            if (object->getType()->isDataSetType()) { return HandleDatasetInit(object); }
+            // TODO: 支持生成平凡类型的初始化语句
+            return nullptr;
+        }
+
+        /*
          * 初始化数组对象
          */
         int InitializeGlobalArray(const std::vector<VariableDecl *> &variables) const {
