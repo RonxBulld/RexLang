@@ -382,22 +382,25 @@ namespace rexlang {
         }
 
         /*
-         * 初始化数组对象
+         * 初始化对象
          */
-        int InitializeGlobalArray(const std::vector<VariableDecl *> &variables) const {
+        int InitializeObject(const std::vector<VariableDecl *> &variables) const {
             assert(create_array_fn_);
             for (VariableDecl *vari : variables) {
-                if (vari->getType()->isArrayType()) {
-                    if (vari->isFileVariable() || vari->isGlobalVariable()) {
+                if (vari->isFileVariable() || vari->isGlobalVariable()) {
 
-                        // 文件变量和全局变量的初始化代码直接放到初始化函数中
+                    // 文件变量和全局变量的初始化代码直接放到初始化函数中
 
-                        init_stmtblk_->appendStatement(HandleArrayInit(vari));
+                    if (StatementBlock *init_blk = HandleObjectInit(vari)) {
+                        init_stmtblk_->appendStatement(init_blk);
                     }
-                    else if (LocalVariableDecl *local_vari = rtti::dyn_cast<LocalVariableDecl>(vari)) {
-                        int EC = InitLocalArrayObject(local_vari);
-                        assert(EC == 0);
-                    }
+                }
+                else if (LocalVariableDecl *local_vari = rtti::dyn_cast<LocalVariableDecl>(vari)) {
+
+                    // 局部对象由独立函数处理
+
+                    int EC = InitLocalObject(local_vari);
+                    assert(EC == 0);
                 }
             }
 
