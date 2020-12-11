@@ -105,7 +105,8 @@ namespace rexlang {
         }
 
         /*
-         * 初始化局部数组对象
+         * 初始化局部对象
+         * 静态局部对象需要做特别初始化
          * 例如：
          * arr 整数型 1,1 静态
          * => 如果真 (__static_guard_arr == 0)
@@ -113,17 +114,18 @@ namespace rexlang {
          *        arr = create_variable('d', 2, 1, 1)
          *        __rex_guard_release(&__static_guard_arr)
          */
-        int InitLocalArrayObject(LocalVariableDecl *localObj) const {
-            assert(localObj->isStatic());
+        int InitLocalObject(LocalVariableDecl *localObj) const {
             ASTContext *ctx = localObj->getAstContext();
             TranslateUnit *TU = ctx->getTranslateUnit();
 
-            // 生成数组初始化语句
+            // 生成初始化语句
 
-            StatementBlock *init_blk = HandleArrayInit(localObj);
-            Statement *init_stmt = init_blk;
+            Statement *init_stmt = HandleObjectInit(localObj);
+            if (!init_stmt) { return 0; }
 
             if (localObj->isStatic()) {
+                StatementBlock *init_blk = rtti::dyn_cast<StatementBlock>(init_stmt);
+                assert(init_blk);
 
                 // 创建守卫变量并添加到文件变量表
 
@@ -401,9 +403,6 @@ namespace rexlang {
 
             return 0;
         }
-
-        // 初始化全局字符串/字节集
-        int InitializeGlobalString(const std::vector<VariableDecl *> &variables) ;
 
     private:
         // 重命名函数名
