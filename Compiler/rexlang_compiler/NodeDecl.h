@@ -711,6 +711,11 @@ namespace rexlang {
     public:
         int Visit(class Visitor &visitor) override ;
 
+        virtual bool isMemberVariable () const ;
+        virtual bool isGlobalVariable () const ;
+        virtual bool isLocalVariable  () const ;
+        virtual bool isFileVariable   () const ;
+
     public:
         static const NodeType GetClassId () ;
     };
@@ -727,6 +732,8 @@ namespace rexlang {
 
     public:
         int Visit(class Visitor &visitor) override ;
+
+        bool isGlobalVariable() const override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -755,6 +762,8 @@ namespace rexlang {
     public:
         int Visit(class Visitor &visitor) override ;
 
+        bool isMemberVariable() const override ;
+
     public:
         static const NodeType GetClassId () ;
     };
@@ -771,6 +780,8 @@ namespace rexlang {
 
     public:
         int Visit(class Visitor &visitor) override ;
+
+        bool isFileVariable() const override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -795,6 +806,8 @@ namespace rexlang {
 
     public:
         int Visit(class Visitor &visitor) override ;
+
+        bool isLocalVariable() const override ;
 
     public:
         static const NodeType GetClassId () ;

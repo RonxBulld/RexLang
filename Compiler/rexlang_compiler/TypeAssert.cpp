@@ -216,6 +216,20 @@ namespace rexlang {
     bool MacroDeclareFile  ::isMacroDeclareFile  () const { return true; }
 
     /**********************************************************
+     * 变量类型断言
+     **********************************************************/
+
+    bool VariableDecl::isMemberVariable () const { return false; }
+    bool VariableDecl::isGlobalVariable () const { return false; }
+    bool VariableDecl::isLocalVariable  () const { return false; }
+    bool VariableDecl::isFileVariable   () const { return false; }
+
+    bool MemberVariableDecl::isMemberVariable () const { return true; }
+    bool GlobalVariableDecl::isGlobalVariable () const { return true; }
+    bool LocalVariableDecl ::isLocalVariable  () const { return true; }
+    bool FileVariableDecl  ::isFileVariable   () const { return true; }
+
+    /**********************************************************
      * 符号特性提取
      **********************************************************/
 
