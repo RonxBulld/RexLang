@@ -478,7 +478,7 @@ namespace rexlang {
      ***************************************************/
 
     void FunctionDecl::appendLocalVariable(LocalVariableDecl *variableDecl) {
-        local_vari_[variableDecl->getNameRef()] = variableDecl;
+        local_vari_.add(variableDecl);
         setChild(variableDecl);
     }
 
@@ -488,16 +488,11 @@ namespace rexlang {
     }
 
     LocalVariableDecl *FunctionDecl::getLocalVari(const StringRef &name) const {
-        auto found = local_vari_.find(name);
-        if (found != local_vari_.end()) {
-            return found->second;
-        } else {
-            return nullptr;
-        }
+        return local_vari_[name];
     }
 
-    const NamedOrderDict<LocalVariableDecl *> & FunctionDecl::getLocalVariables() const { return local_vari_; }
-    StatementBlock *                            FunctionDecl::getFunctionBody  () const { return statement_list_; }
+    const DeclList<LocalVariableDecl> & FunctionDecl::getLocalVariables() const { return local_vari_; }
+    StatementBlock *                    FunctionDecl::getFunctionBody  () const { return statement_list_; }
 
     /***************************************************
      * APICommandDecl

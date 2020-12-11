@@ -1349,7 +1349,7 @@ namespace rexlang {
     class FunctionDecl : public FunctorDecl {
     private:
         // 局部变量列表
-        NamedOrderDict<LocalVariableDecl *> local_vari_;
+        DeclList<LocalVariableDecl> local_vari_;
         // 语句列表
         StatementBlock *statement_list_ = nullptr;
 
@@ -1363,9 +1363,9 @@ namespace rexlang {
         void     appendLocalVariable(LocalVariableDecl * variableDecl) ;
         void     setStatementBlock  (StatementBlock *    statementBlock) ;
 
-        LocalVariableDecl *                         getLocalVari     (const StringRef &name) const ;
-        const NamedOrderDict<LocalVariableDecl *> & getLocalVariables() const ;
-        StatementBlock *                            getFunctionBody  () const ;
+        LocalVariableDecl *                 getLocalVari     (const StringRef &name) const ;
+        const DeclList<LocalVariableDecl> & getLocalVariables() const ;
+        StatementBlock *                    getFunctionBody  () const ;
 
     public:
         bool    isStaticLibraryAPI  () const override ;
