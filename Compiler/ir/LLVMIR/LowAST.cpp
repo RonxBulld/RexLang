@@ -254,13 +254,12 @@ namespace rexlang {
         /*
          * 初始化字符串对象
          * 目前语言设计不支持自定义初始化值，所有的字符串初始化都是空字符串
-         * 例如
+         * 例如：
          * str 文本型
          * => str = create_string("")
          */
         StatementBlock *HandleStringInit(VariableDecl *stringObject) const {
             ASTContext *ctx = stringObject->getAstContext();
-
             assert(stringObject->getType()->isStringType());
 
             // 准备字符串对象创建参数
@@ -293,7 +292,47 @@ namespace rexlang {
             return init_blk;
         }
 
-        StatementBlock *HandleDatasetInit(VariableDecl *datasetObject) const ;
+        /*
+         * 初始化字节集对象
+         * 目前语言设计不支持自定义初始化值，所有的字节集初始化都是空字节集
+         * 字节集的操作复用字符串接口
+         * 例如：
+         * ds 字节集型
+         * => ds = create_string(0)
+         */
+        StatementBlock *HandleDatasetInit(VariableDecl *datasetObject) const {
+            ASTContext *ctx = datasetObject->getAstContext();
+            assert(datasetObject->getType()->isDataSetType());
+
+            // 准备字节集对象创建参数
+
+            std::vector<Expression *> args_of_create_dataset;
+            args_of_create_dataset.push_back(CreateNode<ValueOfDecimal>(ctx, (int) 0));
+
+            // 创建字节集对象初始化语句
+
+            AssignStmt *assign_stmt = CreateNode<AssignStmt>(
+                    ctx,
+                    CreateNode<HierarchyIdentifier>(
+                            ctx,
+                            std::vector<NameComponent *>({
+                                CreateNode<IdentRefer>(
+                                        ctx,
+                                        datasetObject->getName()
+                                )
+                            })
+                    ),
+                    CreateNode<FunctionCall>(
+                            ctx,
+                            CreateNode<IdentRefer>(ctx, create_string_fn_->getName()),
+                            create_string_fn_,
+                            args_of_create_dataset
+                    )
+            );
+
+            StatementBlock *init_blk = CreateNode<StatementBlock>(ctx, std::vector<Statement *>({assign_stmt}));
+            return init_blk;
+        }
 
         /*
          * 收集所有变量
