@@ -10,6 +10,7 @@
 #include "../../rexlang_compiler/rtti.h"
 #include "../SimpleRTTI_ArguType.h"
 #include "../../rexlang_compiler/ASTUtility.h"
+#include "../../rexlang_compiler/utilities/ASTBuilder.h"
 
 namespace rexlang {
 
@@ -30,6 +31,7 @@ namespace rexlang {
     class Lower {
     private:
         ProjectDB &project_db_ ;
+        ASTBuilder B;
         StatementBlock *startup_stmtblk_ = nullptr ;    // 启动函数语句块
         StatementBlock *init_stmtblk_    = nullptr ;    // 初始化函数语句块
 
@@ -48,32 +50,31 @@ namespace rexlang {
 
             // 创建虚拟的代码文件
 
-            ProgramSetFile *sys_fw_sf = CreateNode<ProgramSetFile>(&ast_context);
-            ProgSetDecl *sys_fw_ps = CreateNode<ProgSetDecl>(&ast_context, CreateNode<IdentDef>(&ast_context, "@system_fw"));
+            ProgramSetFile *sys_fw_sf = B.Create<ProgramSetFile>();
+            ProgSetDecl *sys_fw_ps = B.Create<ProgSetDecl>(B.Create<IdentDef>("@system_fw"));
             sys_fw_sf->appendProgramSetDecl(sys_fw_ps);
             TU->appendSourceFile(sys_fw_sf);
 
             // 创建启动函数
 
-            IdentDef *rex_startup_fn_name = CreateNode<IdentDef>(&ast_context, "RexStartup");
+            IdentDef *rex_startup_fn_name = B.Create<IdentDef>("RexStartup");
             assert(rex_startup_fn_name);
-            FunctionDecl *startup_fn = CreateNode<FunctionDecl>(&ast_context, TU->getIntegerTy(), rex_startup_fn_name, std::vector<ParameterDecl *>());
+            FunctionDecl *startup_fn = B.Create<FunctionDecl>(TU->getIntegerTy(), rex_startup_fn_name, std::vector<ParameterDecl *>());
             sys_fw_ps->appendFunctionDecl(startup_fn);
-            startup_stmtblk_ = CreateNode<StatementBlock>(&ast_context, std::vector<Statement *>());
+            startup_stmtblk_ = B.Create<StatementBlock>(std::vector<Statement *>());
 
             // 创建初始化函数
 
-            IdentDef *init_fn_name = CreateNode<IdentDef>(&ast_context, "RexInit");
+            IdentDef *init_fn_name = B.Create<IdentDef>("RexInit");
             assert(init_fn_name);
-            FunctionDecl *init_fn = CreateNode<FunctionDecl>(&ast_context, TU->getVoidTy(), init_fn_name, std::vector<ParameterDecl *>());
+            FunctionDecl *init_fn = B.Create<FunctionDecl>(TU->getVoidTy(), init_fn_name, std::vector<ParameterDecl *>());
             sys_fw_ps->appendFunctionDecl(init_fn);
-            init_stmtblk_ = CreateNode<StatementBlock>(&ast_context, std::vector<Statement *>());
+            init_stmtblk_ = B.Create<StatementBlock>(std::vector<Statement *>());
 
             // 在启动函数中调用初始化函数
 
-            FunctionCall *call_init_fn = CreateNode<FunctionCall>(
-                    &ast_context,
-                    CreateNode<IdentRefer>(&ast_context, init_fn->getName()),
+            FunctionCall *call_init_fn = B.Create<FunctionCall>(
+                    B.Create<IdentRefer>(init_fn->getName()),
                     init_fn,
                     std::vector<Expression *>()
             );
@@ -82,13 +83,12 @@ namespace rexlang {
             // 在启动函数中调用用户的入口函数，并将其返回值作为启动函数的返回值
 
             FunctorDecl *entry_fn = project_db_.GetMainEntry();
-            FunctionCall *call_entry_fn = CreateNode<FunctionCall>(
-                    &ast_context,
-                    CreateNode<IdentRefer>(&ast_context, entry_fn->getName()),
+            FunctionCall *call_entry_fn = B.Create<FunctionCall>(
+                    B.Create<IdentRefer>(entry_fn->getName()),
                     entry_fn,
                     std::vector<Expression *>()
             );
-            ReturnStmt *return_stmt = CreateNode<ReturnStmt>(&ast_context, call_entry_fn);
+            ReturnStmt *return_stmt = B.Create<ReturnStmt>(call_entry_fn);
             startup_stmtblk_->appendStatement(return_stmt);
 
             return 0;
@@ -115,8 +115,7 @@ namespace rexlang {
          *        __rex_guard_release(&__static_guard_arr)
          */
         int InitLocalObject(LocalVariableDecl *localObj) const {
-            ASTContext *ctx = localObj->getAstContext();
-            TranslateUnit *TU = ctx->getTranslateUnit();
+            TranslateUnit *TU = localObj->getTranslateUnit();
 
             // 生成初始化语句
 
@@ -132,48 +131,42 @@ namespace rexlang {
                 ProgSetDecl *prog_site = utility::FindSpecifyTypeParent<ProgSetDecl>(localObj);
                 assert(prog_site);
                 std::string static_guard_vari_name = "__static_guard_" + std::string(localObj->getNameStr());
-                FileVariableDecl *static_guard_vari = CreateNode<FileVariableDecl>(ctx, TU->getLongTy(), CreateNode<IdentDef>(ctx, static_guard_vari_name));
+                FileVariableDecl *static_guard_vari = B.Create<FileVariableDecl>(TU->getLongTy(), B.Create<IdentDef>(static_guard_vari_name));
                 prog_site->appendFileStaticVari(static_guard_vari);
 
                 // 在初始化语句块末尾添加__rex_guard_release
 
-                FunctionCall *call_guard_release = CreateNode<FunctionCall>(
-                        ctx,
-                        CreateNode<IdentRefer>(ctx, __rex_guard_release_fn_->getName()),
+                FunctionCall *call_guard_release = B.Create<FunctionCall>(
+                        B.Create<IdentRefer>(__rex_guard_release_fn_->getName()),
                         __rex_guard_release_fn_,
                         std::vector<Expression *>({
-                            CreateNode<HierarchyIdentifier>(ctx, std::vector<NameComponent *>({CreateNode<IdentRefer>(ctx, static_guard_vari->getName())}))
+                            B.Create<HierarchyIdentifier>(std::vector<NameComponent *>({B.Create<IdentRefer>(static_guard_vari->getName())}))
                         })
                 );
                 init_blk->appendStatement(call_guard_release);
 
                 // 双检测条件
 
-                Expression *conditional = CreateNode<BinaryExpression>(
-                        ctx,
+                Expression *conditional = B.Create<BinaryExpression>(
                         OperatorType(OperatorType::Opt::kOptAnd),
-                        CreateNode<BinaryExpression>(
-                                ctx,
+                        B.Create<BinaryExpression>(
                                 OperatorType(OperatorType::Opt::kOptEqual),
-                                CreateNode<HierarchyIdentifier>(ctx, std::vector<NameComponent *>({CreateNode<IdentRefer>(ctx, static_guard_vari->getName())})),
-                                CreateNode<ValueOfDecimal>(ctx, 0)
+                                B.Create<HierarchyIdentifier>(std::vector<NameComponent *>({B.Create<IdentRefer>(static_guard_vari->getName())})),
+                                B.Create<ValueOfDecimal>(0)
                         ),
-                        CreateNode<BinaryExpression>(
-                                ctx,
+                        B.Create<BinaryExpression>(
                                 OperatorType(OperatorType::Opt::kOptNotEqual),
-                                CreateNode<FunctionCall>(
-                                        ctx,
-                                        CreateNode<IdentRefer>(ctx, __rex_acquire_guard_fn_->getName()),
+                                B.Create<FunctionCall>(
+                                        B.Create<IdentRefer>(__rex_acquire_guard_fn_->getName()),
                                         __rex_acquire_guard_fn_,
                                         std::vector<Expression *>({
-                                            CreateNode<HierarchyIdentifier>(ctx, std::vector<NameComponent *>({CreateNode<IdentRefer>(ctx, static_guard_vari->getName())}))
+                                            B.Create<HierarchyIdentifier>(std::vector<NameComponent *>({B.Create<IdentRefer>(static_guard_vari->getName())}))
                                         })
                                 ),
-                                CreateNode<ValueOfDecimal>(ctx, 0)
+                                B.Create<ValueOfDecimal>(0)
                         )
                 );
-                init_stmt = CreateNode<IfStmt>(
-                        ctx,
+                init_stmt = B.Create<IfStmt>(
                         std::vector<IfStmt::BranchTy>({
                             std::pair<Expression *, Statement *>(conditional, init_blk)
                         }),
@@ -206,8 +199,6 @@ namespace rexlang {
          * => arr = create_varialbe('c', 1, 0)
          */
         StatementBlock *HandleArrayInit(VariableDecl *arrayObject) const {
-            ASTContext *ctx = arrayObject->getAstContext();
-
             ArrayDecl *vari_arr_ty = rtti::dyn_cast<ArrayDecl>(arrayObject->getType());
             assert(vari_arr_ty);
 
@@ -222,34 +213,30 @@ namespace rexlang {
             // 准备数组对象创建参数
 
             std::vector<Expression *> args_of_create_array;
-            args_of_create_array.push_back(CreateNode<ValueOfDecimal>(ctx, (int) mapping_type_to_sp(base_ty)));
-            args_of_create_array.push_back(CreateNode<ValueOfDecimal>(ctx, (int) dimensions.size()));
+            args_of_create_array.push_back(B.Create<ValueOfDecimal>((int) mapping_type_to_sp(base_ty)));
+            args_of_create_array.push_back(B.Create<ValueOfDecimal>((int) dimensions.size()));
             for (size_t dim : dimensions) {
-                args_of_create_array.push_back(CreateNode<ValueOfDecimal>(ctx, (int) dim));
+                args_of_create_array.push_back(B.Create<ValueOfDecimal>((int) dim));
             }
 
             // 创建数组对象初始化语句
 
-            AssignStmt *assign_stmt = CreateNode<AssignStmt>(
-                    ctx,
-                    CreateNode<HierarchyIdentifier>(
-                            ctx,
+            AssignStmt *assign_stmt = B.Create<AssignStmt>(
+                    B.Create<HierarchyIdentifier>(
                             std::vector<NameComponent *>({
-                                CreateNode<IdentRefer>(
-                                        ctx,
+                                B.Create<IdentRefer>(
                                         arrayObject->getName()
                                         )
                             })
                     ),
-                    CreateNode<FunctionCall>(
-                            ctx,
-                            CreateNode<IdentRefer>(ctx, create_array_fn_->getName()),
+                    B.Create<FunctionCall>(
+                            B.Create<IdentRefer>(create_array_fn_->getName()),
                             create_array_fn_,
                             args_of_create_array
                     )
             );
 
-            StatementBlock *init_blk = CreateNode<StatementBlock>(ctx, std::vector<Statement *>({assign_stmt}));
+            StatementBlock *init_blk = B.Create<StatementBlock>(std::vector<Statement *>({assign_stmt}));
             return init_blk;
         }
 
@@ -261,36 +248,31 @@ namespace rexlang {
          * => str = create_string("")
          */
         StatementBlock *HandleStringInit(VariableDecl *stringObject) const {
-            ASTContext *ctx = stringObject->getAstContext();
             assert(stringObject->getType()->isStringType());
 
             // 准备字符串对象创建参数
 
             std::vector<Expression *> args_of_create_string;
-            args_of_create_string.push_back(CreateNode<ValueOfString>(ctx, TString(StringPool::Create(""))));
+            args_of_create_string.push_back(B.Create<ValueOfString>(TString(StringPool::Create(""))));
 
             // 创建字符串对象初始化语句
 
-            AssignStmt *assign_stmt = CreateNode<AssignStmt>(
-                    ctx,
-                    CreateNode<HierarchyIdentifier>(
-                            ctx,
+            AssignStmt *assign_stmt = B.Create<AssignStmt>(
+                    B.Create<HierarchyIdentifier>(
                             std::vector<NameComponent *>({
-                                CreateNode<IdentRefer>(
-                                        ctx,
+                                B.Create<IdentRefer>(
                                         stringObject->getName()
                                 )
                             })
                     ),
-                    CreateNode<FunctionCall>(
-                            ctx,
-                            CreateNode<IdentRefer>(ctx, create_string_fn_->getName()),
+                    B.Create<FunctionCall>(
+                            B.Create<IdentRefer>(create_string_fn_->getName()),
                             create_string_fn_,
                             args_of_create_string
                     )
             );
 
-            StatementBlock *init_blk = CreateNode<StatementBlock>(ctx, std::vector<Statement *>({assign_stmt}));
+            StatementBlock *init_blk = B.Create<StatementBlock>(std::vector<Statement *>({assign_stmt}));
             return init_blk;
         }
 
@@ -303,36 +285,31 @@ namespace rexlang {
          * => ds = create_string(0)
          */
         StatementBlock *HandleDatasetInit(VariableDecl *datasetObject) const {
-            ASTContext *ctx = datasetObject->getAstContext();
             assert(datasetObject->getType()->isDataSetType());
 
             // 准备字节集对象创建参数
 
             std::vector<Expression *> args_of_create_dataset;
-            args_of_create_dataset.push_back(CreateNode<ValueOfDecimal>(ctx, (int) 0));
+            args_of_create_dataset.push_back(B.Create<ValueOfDecimal>((int) 0));
 
             // 创建字节集对象初始化语句
 
-            AssignStmt *assign_stmt = CreateNode<AssignStmt>(
-                    ctx,
-                    CreateNode<HierarchyIdentifier>(
-                            ctx,
+            AssignStmt *assign_stmt = B.Create<AssignStmt>(
+                    B.Create<HierarchyIdentifier>(
                             std::vector<NameComponent *>({
-                                CreateNode<IdentRefer>(
-                                        ctx,
+                                B.Create<IdentRefer>(
                                         datasetObject->getName()
                                 )
                             })
                     ),
-                    CreateNode<FunctionCall>(
-                            ctx,
-                            CreateNode<IdentRefer>(ctx, create_string_fn_->getName()),
+                    B.Create<FunctionCall>(
+                            B.Create<IdentRefer>(create_string_fn_->getName()),
                             create_string_fn_,
                             args_of_create_dataset
                     )
             );
 
-            StatementBlock *init_blk = CreateNode<StatementBlock>(ctx, std::vector<Statement *>({assign_stmt}));
+            StatementBlock *init_blk = B.Create<StatementBlock>(std::vector<Statement *>({assign_stmt}));
             return init_blk;
         }
 
@@ -342,7 +319,6 @@ namespace rexlang {
          */
         std::vector<VariableDecl *> CollectVariables() const {
             TranslateUnit *TU = project_db_.getTranslateUnit();
-            ASTContext *ctx = TU->getAstContext();
             std::vector<VariableDecl *> variables;
 
             for (SourceFile *sf : TU->getSourceFiles()) {
@@ -449,28 +425,26 @@ namespace rexlang {
          * corelib/struct_runtime_api.h
          */
         void CreateImplicitSysApiDecl() {
-            ASTContext *ctx = &project_db_.GetASTContext();
-            TranslateUnit *TU = ctx->getTranslateUnit();
+            TranslateUnit *TU = project_db_.getTranslateUnit();
             assert(TU);
 
             // 创建虚拟接口文件
 
-            APIDeclareFile *impl_api_df = CreateNode<APIDeclareFile>(ctx);
+            APIDeclareFile *impl_api_df = B.Create<APIDeclareFile>();
             TU->appendSourceFile(impl_api_df);
 
-            auto create_corelib_api = [ctx, impl_api_df] (
+            auto create_corelib_api = [this, impl_api_df] (
                     VariTypeDecl *retType,
                     const std::string &apiName,
                     const std::vector<ParameterDecl *> &parameters
             ) -> FunctorDecl * {
-                APICommandDecl *created_api = CreateNode<APICommandDecl>(
-                        ctx,
+                APICommandDecl *created_api = B.Create<APICommandDecl>(
                         retType,
-                        CreateNode<IdentDef>(ctx, apiName),
+                        B.Create<IdentDef>(apiName),
                         parameters,
                         LibraryType::kLTStatic,
                         TString(StringPool::Create("corelib"), 0),
-                        CreateNode<IdentDef>(ctx, apiName)
+                        B.Create<IdentDef>(apiName)
                 );
                 impl_api_df->appendAPIDeclare(created_api);
                 return created_api;
@@ -485,9 +459,9 @@ namespace rexlang {
                     arrTy,
                     "create_array",
                     std::vector<ParameterDecl *>({
-                        CreateNode<ParameterDecl>(ctx, chrTy, CreateNode<IdentDef>(ctx, "ty")),
-                        CreateNode<ParameterDecl>(ctx, intTy, CreateNode<IdentDef>(ctx, "dimn")),
-                        CreateNode<ParameterDecl>(ctx, intTy, CreateNode<IdentDef>(ctx, "..."), true)
+                        B.Create<ParameterDecl>(chrTy, B.Create<IdentDef>("ty")),
+                        B.Create<ParameterDecl>(intTy, B.Create<IdentDef>("dimn")),
+                        B.Create<ParameterDecl>(intTy, B.Create<IdentDef>("..."), true)
                     })
             );
 
@@ -495,7 +469,7 @@ namespace rexlang {
                     intTy,
                     "get_array_dim_depth",
                     std::vector<ParameterDecl *>({
-                        CreateNode<ParameterDecl>(ctx, arrTy, CreateNode<IdentDef>(ctx, "arr"))
+                        B.Create<ParameterDecl>(arrTy, B.Create<IdentDef>("arr"))
                     })
             );
 
@@ -503,7 +477,7 @@ namespace rexlang {
                     intTy,
                     "get_array_size",
                     std::vector<ParameterDecl *>({
-                        CreateNode<ParameterDecl>(ctx, arrTy, CreateNode<IdentDef>(ctx, "arr"))
+                        B.Create<ParameterDecl>(arrTy, B.Create<IdentDef>("arr"))
                     })
             );
 
@@ -511,7 +485,7 @@ namespace rexlang {
                     strTy,
                     "create_string",
                     std::vector<ParameterDecl *>({
-                        CreateNode<ParameterDecl>(ctx, pStrTy, CreateNode<IdentDef>(ctx, "str"))
+                        B.Create<ParameterDecl>(pStrTy, B.Create<IdentDef>("str"))
                     })
             );
 
@@ -521,7 +495,7 @@ namespace rexlang {
                     intTy,
                     "__rex_acquire_guard",
                     std::vector<ParameterDecl *>({
-                        CreateNode<ParameterDecl>(ctx, refLongTy, CreateNode<IdentDef>(ctx, "raw_guard_object"))
+                        B.Create<ParameterDecl>(refLongTy, B.Create<IdentDef>("raw_guard_object"))
                     })
             );
 
@@ -529,14 +503,15 @@ namespace rexlang {
                     voidTy,
                     "__rex_guard_release",
                     std::vector<ParameterDecl *>({
-                        CreateNode<ParameterDecl>(ctx, refLongTy, CreateNode<IdentDef>(ctx, "raw_guard_object"))
+                        B.Create<ParameterDecl>(refLongTy, B.Create<IdentDef>("raw_guard_object"))
                     })
             );
 
         }
 
     public:
-        explicit Lower(ProjectDB &projectDB) : project_db_(projectDB) {
+        explicit Lower(ProjectDB &projectDB)
+            : project_db_(projectDB), B(projectDB.getTranslateUnit()->getAstContext()) {
         }
 
         int Run() {
