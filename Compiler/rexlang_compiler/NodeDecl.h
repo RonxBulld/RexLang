@@ -580,6 +580,9 @@ namespace rexlang {
         const TString & getComment      () const                 ;
         const char *    getCommentStr   () const                 ;
 
+        virtual StringRef getSelfMangling() const ;
+                StringRef getMangling    () const ;
+
     public:
         SEMATIC_ANALYSIS_INTERNAL
 
