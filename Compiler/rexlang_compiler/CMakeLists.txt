@@ -75,7 +75,7 @@ SET(REXCompilerParse-Source
         Constructors.cpp
         TypeConvert.cpp
         VerifyExpression.cpp
-        )
+        utilities/ASTBuilder.cpp utilities/ASTBuilder.h)
 
 if(NOT CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
     ADD_COMPILE_OPTIONS("-Wno-overloaded-virtual")
