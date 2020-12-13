@@ -48,4 +48,12 @@ namespace rexlang {
         mangling_ss << "E";
     }
 
+    StringRef LocalVariableDecl::getSelfMangling() const {
+        StringRef mangling = TagDecl::getSelfMangling();;
+        if (isStatic()) {
+            mangling = StringPool::Create(rtti::dyn_cast<TagDecl>(getParent())->getSelfMangling().str(), mangling.str());
+        }
+        return mangling;
+    }
+
 }
