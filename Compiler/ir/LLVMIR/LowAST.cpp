@@ -130,7 +130,7 @@ namespace rexlang {
 
                 ProgSetDecl *prog_site = utility::FindSpecifyTypeParent<ProgSetDecl>(localObj);
                 assert(prog_site);
-                std::string static_guard_vari_name = "__static_guard_" + std::string(localObj->getNameStr());
+                std::string static_guard_vari_name = "$__static_guard_" + std::string(localObj->getNameStr());
                 FileVariableDecl *static_guard_vari = B.Create<FileVariableDecl>(TU->getLongTy(), B.Create<IdentDef>(static_guard_vari_name));
                 prog_site->appendFileStaticVari(static_guard_vari);
 
