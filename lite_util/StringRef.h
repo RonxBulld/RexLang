@@ -60,6 +60,12 @@ namespace rexlang {
     public:
         static StringRef Create(const std::string &str);
         static StringRef Create(const char *pstr);
+        template <typename Mty, typename ... Args> static StringRef Create(const Mty & m, const Args & ... args) {
+            std::vector<std::string> L({std::string(args)...});
+            std::string M(m);
+            M.append(L.begin(), L.end());
+            return StringPool::Create(M);
+        }
     };
 }
 
