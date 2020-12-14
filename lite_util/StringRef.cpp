@@ -86,7 +86,7 @@ namespace rexlang {
     size_t                           StringPool::max_string_size_ = 65536;
     std::map<std::string, StringRef> StringPool::string_pool_;
 
-    StringRef StringPool::Create(const std::string &str) {
+    StringRef StringPool::_Create(const std::string &str) {
         auto found = string_pool_.find(str);
         if (found == string_pool_.end()) {
             auto insres = string_pool_.insert({str, StringRef()});
@@ -98,7 +98,7 @@ namespace rexlang {
         return found->second;
     }
 
-    StringRef StringPool::Create(const char *pstr) {
+    StringRef StringPool::_Create(const char *pstr) {
         size_t slen = 0;
         while (slen < max_string_size_) {
             if (pstr[slen] == '\0') {

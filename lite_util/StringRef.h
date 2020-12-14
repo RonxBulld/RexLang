@@ -7,6 +7,7 @@
 
 #include <map>
 #include <string>
+#include <sstream>
 
 namespace rexlang {
 
@@ -57,14 +58,20 @@ namespace rexlang {
         StringPool() = default;
         static size_t max_string_size_;
         static std::map<std::string, StringRef> string_pool_;
+    private:
+        static void S(std::stringstream &ss, const StringRef &str)   { ss << str.str(); }
+        template <typename T>
+        static void S(std::stringstream &ss, T && v) { ss << v; }
+
+        static StringRef _Create(const std::string &str);
+        static StringRef _Create(const char *pstr);
     public:
-        static StringRef Create(const std::string &str);
-        static StringRef Create(const char *pstr);
-        template <typename Mty, typename ... Args> static StringRef Create(const Mty & m, const Args & ... args) {
-            std::vector<std::string> L({std::string(args)...});
-            std::string M(m);
-            M.append(L.begin(), L.end());
-            return StringPool::Create(M);
+        template <typename ... Args>
+        static StringRef Create(Args && ... args) {
+            std::stringstream ss;
+            int dummy[] = {0, (S(ss, std::forward<Args>(args)), 0)...};
+            (void) dummy;
+            return _Create(ss.str());
         }
     };
 }
