@@ -15,14 +15,18 @@ namespace rexlang {
     }
 
     StringRef TagDecl::getSelfMangling() const {
-        return StringPool::Create(std::to_string(getNameRef().size()), getNameRef().str());
+        return StringPool::Create(getNameRef().size(), getNameRef());
+    }
+
+    StringRef ParameterDecl::getSelfMangling() const {
+        return StringPool::Create(
+                rtti::dyn_cast<TagDecl>(getParent())->getSelfMangling(),
+                TagDecl::getSelfMangling()
+                );
     }
 
     StringRef ProgSetDecl::getSelfMangling() const {
-        std::stringstream mangling_ss;
-        mangling_ss << "N";
-        mangling_ss << TagDecl::getSelfMangling().str();
-        return StringPool::Create(mangling_ss.str());
+        return StringPool::Create("N", TagDecl::getSelfMangling());
     }
 
     StringRef FunctionDecl::getSelfMangling() const {
@@ -46,12 +50,14 @@ namespace rexlang {
         // 结束
 
         mangling_ss << "E";
+
+        return StringPool::Create(mangling_ss.str());
     }
 
     StringRef LocalVariableDecl::getSelfMangling() const {
         StringRef mangling = TagDecl::getSelfMangling();;
         if (isStatic()) {
-            mangling = StringPool::Create(rtti::dyn_cast<TagDecl>(getParent())->getSelfMangling().str(), mangling.str());
+            mangling = StringPool::Create(rtti::dyn_cast<TagDecl>(getParent())->getSelfMangling(), mangling);
         }
         return mangling;
     }
