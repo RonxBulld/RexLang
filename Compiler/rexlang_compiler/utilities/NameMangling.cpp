@@ -1,6 +1,7 @@
 /*
  * 本文件实现了针对声明类型节点的名称修饰
  * 暂时不支持指定以何种标准mangling
+ * TIPS:我知道现在的规则很扯淡不符合Itanium C++ ABI，但暂时没心思搞这个
  * Rexfield
  * 2020/12/13
  */
@@ -19,11 +20,13 @@ namespace rexlang {
         return StringPool::Create(getNameRef().size(), getNameRef());
     }
 
+    /*
+     * ParameterDecl
+     * 不会作为全局符号存储，直接返回自身符号即可
+     */
+
     StringRef ParameterDecl::getSelfMangling() const {
-        return StringPool::Create(
-                rtti::dyn_cast<TagDecl>(getParent())->getSelfMangling(),
-                TagDecl::getSelfMangling()
-                );
+        return TagDecl::getSelfMangling();
     }
 
     /*
@@ -136,4 +139,41 @@ namespace rexlang {
         return StringPool::Create("R", getPointee()->getSelfMangling());
     }
 
+    /*
+     * StructureDecl
+     * 在结构体名称前加"struct."
+     */
+
+    StringRef StructureDecl::getSelfMangling() const {
+        return StringPool::Create("struct.", getNameRef());
+    }
+    StringRef StructureDecl::getMangling() const {
+        return getSelfMangling();
+    }
+
+    /*
+     * ArrayDecl
+     * 在数组元素类型前加"A"
+     */
+
+    StringRef ArrayDecl::getSelfMangling() const {
+        return StringPool::Create("A", getArrayBase()->getSelfMangling());
+    }
+    StringRef ArrayDecl::getMangling() const {
+        return getSelfMangling();
+    }
+
+    StringRef BuiltinDatetimeType::getSelfMangling() const { return StringPool::Create("a"); }
+    StringRef BuiltinBoolType    ::getSelfMangling() const { return StringPool::Create("b"); }
+    StringRef BuiltinCharType    ::getSelfMangling() const { return StringPool::Create("c"); }
+    StringRef BuiltinDataSetType ::getSelfMangling() const { return StringPool::Create("d"); }
+    StringRef BuiltinDoubleType  ::getSelfMangling() const { return StringPool::Create("e"); }
+    StringRef BuiltinFloatType   ::getSelfMangling() const { return StringPool::Create("f"); }
+    StringRef BuiltinIntegerType ::getSelfMangling() const { return StringPool::Create("i"); }
+    StringRef BuiltinLongType    ::getSelfMangling() const { return StringPool::Create("l"); }
+    StringRef BuiltinFuncPtrType ::getSelfMangling() const { return StringPool::Create("p"); }
+    StringRef BuiltinShortType   ::getSelfMangling() const { return StringPool::Create("s"); }
+    StringRef BuiltinStringType  ::getSelfMangling() const { return StringPool::Create("t"); }
+    StringRef BuiltinVoidType    ::getSelfMangling() const { return StringPool::Create("v"); }
+    StringRef BuiltinCommonType  ::getSelfMangling() const { return StringPool::Create("x"); }
 }

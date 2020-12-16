@@ -661,6 +661,8 @@ namespace rexlang {
         void markAsVariParam () ;
         bool isVariParam     () const ;
 
+        StringRef getSelfMangling() const override ;
+
     public:
         int      getParamIndex  () const ;
         bool     isNullable     () const ;
@@ -738,6 +740,9 @@ namespace rexlang {
 
         bool isGlobalVariable() const override ;
 
+        StringRef getSelfMangling() const override ;
+        StringRef getMangling    () const override ;
+
     public:
         static const NodeType GetClassId () ;
     };
@@ -767,6 +772,8 @@ namespace rexlang {
 
         bool isMemberVariable() const override ;
 
+        StringRef getSelfMangling() const override ;
+
     public:
         static const NodeType GetClassId () ;
     };
@@ -785,6 +792,8 @@ namespace rexlang {
         int Visit(class Visitor &visitor) override ;
 
         bool isFileVariable() const override ;
+
+        StringRef getSelfMangling() const override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -806,6 +815,8 @@ namespace rexlang {
     public:
         void applyAttribute (const TString &attribute) override ;
         bool isStatic() const ;
+
+        StringRef getSelfMangling() const override ;
 
     public:
         int Visit(class Visitor &visitor) override ;
@@ -927,6 +938,8 @@ namespace rexlang {
         TypeDecl *getPointee() const ;
         bool isReferenceType() const override ;
 
+        StringRef getSelfMangling() const override ;
+
     public:
         SEMATIC_ANALYSIS_INTERNAL
 
@@ -980,6 +993,8 @@ namespace rexlang {
 
         TypeDecl *          promoteType(TypeDecl *otherType) const override ;
 
+        StringRef           getSelfMangling() const override ;
+
         static EnumOfBuiltinType    BuiltinType     () ;
         static const char *         TypeText        () ;
     };
@@ -997,6 +1012,8 @@ namespace rexlang {
         const char *        GetTypeText     () const override ;
 
         TypeDecl *          promoteType(TypeDecl *otherType) const override ;
+
+        StringRef           getSelfMangling() const override ;
 
         static EnumOfBuiltinType    BuiltinType     () ;
         static const char *         TypeText        () ;
@@ -1018,6 +1035,8 @@ namespace rexlang {
 
         TypeDecl *          promoteType(TypeDecl *otherType) const override ;
 
+        StringRef           getSelfMangling() const override ;
+
         static EnumOfBuiltinType    BuiltinType     () ;
         static const char *         TypeText        () ;
     };
@@ -1037,6 +1056,8 @@ namespace rexlang {
         bool                isUnyOptValid   (OperatorType opt) const override ;
 
         TypeDecl *          promoteType(TypeDecl *otherType) const override ;
+
+        StringRef           getSelfMangling() const override ;
 
         static EnumOfBuiltinType    BuiltinType     () ;
         static const char *         TypeText        () ;
@@ -1058,6 +1079,8 @@ namespace rexlang {
 
         TypeDecl *          promoteType(TypeDecl *otherType) const override ;
 
+        StringRef           getSelfMangling() const override ;
+
         static EnumOfBuiltinType    BuiltinType     () ;
         static const char *         TypeText        () ;
     };
@@ -1076,6 +1099,8 @@ namespace rexlang {
         bool                isBinOptValid   (OperatorType opt, VariTypeDecl *otherType) const override ;
 
         TypeDecl *          promoteType(TypeDecl *otherType) const override ;
+
+        StringRef           getSelfMangling() const override ;
 
         static EnumOfBuiltinType    BuiltinType     () ;
         static const char *         TypeText        () ;
@@ -1101,6 +1126,8 @@ namespace rexlang {
 
         TypeDecl *          evalIndexedElementTy     () const override ;
 
+        StringRef           getSelfMangling() const override ;
+
         static EnumOfBuiltinType    BuiltinType     () ;
         static const char *         TypeText        () ;
     };
@@ -1125,6 +1152,8 @@ namespace rexlang {
 
         TypeDecl *          evalIndexedElementTy     () const override ;
 
+        StringRef           getSelfMangling() const override ;
+
         static EnumOfBuiltinType    BuiltinType     () ;
         static const char *         TypeText        () ;
     };
@@ -1144,6 +1173,8 @@ namespace rexlang {
         bool                isUnyOptValid   (OperatorType opt) const override ;
 
         TypeDecl *          promoteType(TypeDecl *otherType) const override ;
+
+        StringRef           getSelfMangling() const override ;
 
         static EnumOfBuiltinType    BuiltinType     () ;
         static const char *         TypeText        () ;
@@ -1165,6 +1196,8 @@ namespace rexlang {
 
         TypeDecl *          promoteType(TypeDecl *otherType) const override ;
 
+        StringRef           getSelfMangling() const override ;
+
         static EnumOfBuiltinType    BuiltinType     () ;
         static const char *         TypeText        () ;
     };
@@ -1183,6 +1216,8 @@ namespace rexlang {
         bool                isBinOptValid   (OperatorType opt, VariTypeDecl *otherType) const override ;
 
         TypeDecl *          promoteType(TypeDecl *otherType) const override ;
+
+        StringRef           getSelfMangling() const override ;
 
         static EnumOfBuiltinType    BuiltinType     () ;
         static const char *         TypeText        () ;
@@ -1203,6 +1238,8 @@ namespace rexlang {
 
         TypeDecl *          promoteType(TypeDecl *otherType) const override ;
 
+        StringRef           getSelfMangling() const override ;
+
         static EnumOfBuiltinType    BuiltinType     () ;
         static const char *         TypeText        () ;
     };
@@ -1222,6 +1259,8 @@ namespace rexlang {
         bool                isUnyOptValid   (OperatorType opt) const override ;
 
         TypeDecl *          promoteType(TypeDecl *otherType) const override ;
+
+        StringRef           getSelfMangling() const override ;
 
         static EnumOfBuiltinType    BuiltinType     () ;
         static const char *         TypeText        () ;
@@ -1252,7 +1291,10 @@ namespace rexlang {
         bool            isMemberOfThis      (MemberVariableDecl *memberVariDecl) const ;
         int             indexMemberOfThis   (MemberVariableDecl *memberVariDecl) const ;
 
-        TypeDecl *      promoteType(TypeDecl *otherType) const override ;
+        TypeDecl *      promoteType         (TypeDecl *otherType) const override ;
+
+        StringRef       getSelfMangling     () const override ;
+        StringRef       getMangling         () const override ;
 
     public:
         int Visit(class Visitor &visitor) override ;
@@ -1287,6 +1329,9 @@ namespace rexlang {
         bool                isAssginValidFrom       (TypeDecl *fromType) const override ;
 
         TypeDecl *          getArrayBase            () const ;
+
+        StringRef           getSelfMangling         () const override ;
+        StringRef           getMangling             () const override ;
 
         SEMATIC_ANALYSIS_INTERNAL
 
@@ -1375,6 +1420,8 @@ namespace rexlang {
         bool    isDynamicLibraryAPI () const override ;
         bool    isFunctionType      () const override ;
 
+        StringRef getSelfMangling() const override ;
+
     public:
         TagDecl *findDeclWithNameString(const StringRef &name) const override ;
 
@@ -1428,6 +1475,9 @@ namespace rexlang {
         bool    isDynamicLibraryAPI () const override ;
         bool    isAPICommandType    () const override ;
 
+        StringRef getSelfMangling() const override ;
+        StringRef getMangling    () const override ;
+
     public:
         int Visit(class Visitor &visitor) override ;
 
@@ -1464,6 +1514,8 @@ namespace rexlang {
 
         TagDecl * findDeclWithNameString(const StringRef &name) const override ;
         TypeDecl* getType () const override ;
+
+        StringRef getSelfMangling() const override ;
 
     public:
         int Visit(class Visitor &visitor) override ;
