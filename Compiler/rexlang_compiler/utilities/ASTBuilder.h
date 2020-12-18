@@ -8,6 +8,7 @@
 #include "../NodeDecl.h"
 
 namespace rexlang {
+
     class ASTBuilder {
     private:
         ASTContext *ctx_;
@@ -18,7 +19,10 @@ namespace rexlang {
         Ty *Create(Args && ... args) const {
             return CreateNode<Ty>(ctx_, std::forward<Args>(args)...);
         }
+
+        FunctionCall *CreateFCall(FunctorDecl *callee, const std::vector<Expression *> &args = {}) const ;
     };
+
 }
 
 #endif //REXLANG_ASTBUILDER_H
