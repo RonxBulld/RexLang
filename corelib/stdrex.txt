@@ -1,0 +1,15 @@
+.版本 2
+
+.LIB命令 create_array, 长整数值, "corelib", "create_array#", , DebugTraceOut
+    .参数 ty, 字节型, , 类型字符
+    .参数 dimn, 整数型, , 维度长度
+    .参数 ..., 通用型, , 维度序列
+
+.LIB命令 create_string, , "corelib", "create_string", ,
+    .参数 str, 长整数型, , 初始化字符串地址
+
+.LIB命令 __rex_acquire_guard, , "corelib", "__rex_acquire_guard", ,
+    .参数 raw_guard_object, 长整数型, 传址, 锁对象
+
+.LIB命令 __rex_guard_release, , "corelib", "__rex_guard_release", ,
+    .参数 raw_guard_object, 长整数型, 传址, 锁对象
