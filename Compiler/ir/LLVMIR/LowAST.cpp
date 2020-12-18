@@ -378,13 +378,6 @@ namespace rexlang {
                     }
                 }
             }
-            // 2. 根据变量的存储类型不同修改变量名
-            /*
-             * 全局变量
-             * 文件变量
-             * 局部变量
-             * 静态变量
-             */
             return 0;
         }
 
@@ -397,7 +390,7 @@ namespace rexlang {
 
     private:    // 杂项辅助
         /*
-         * 创建隐式系统API定义
+         * 获取运行时API定义
          * corelib/array_runtime_api.h
          * corelib/string_runtime_api.h
          * corelib/struct_runtime_api.h
@@ -406,84 +399,16 @@ namespace rexlang {
             TranslateUnit *TU = project_db_.getTranslateUnit();
             assert(TU);
 
-            // 创建虚拟接口文件
-
-            APIDeclareFile *impl_api_df = B.Create<APIDeclareFile>();
-            TU->appendSourceFile(impl_api_df);
-
-            auto create_corelib_api = [this, impl_api_df] (
-                    VariTypeDecl *retType,
-                    const std::string &apiName,
-                    const std::vector<ParameterDecl *> &parameters
-            ) -> FunctorDecl * {
-                APICommandDecl *created_api = B.Create<APICommandDecl>(
-                        retType,
-                        B.Create<IdentDef>(apiName),
-                        parameters,
-                        LibraryType::kLTStatic,
-                        TString(StringPool::Create("corelib"), 0),
-                        B.Create<IdentDef>(apiName)
-                );
-                impl_api_df->appendAPIDeclare(created_api);
-                return created_api;
+            auto fetch_api = [TU](const std::string &apiName) -> FunctorDecl* {
+                FunctorDecl *api = TU->getFunctor(StringPool::Create(apiName));
+                assert(api);
+                return api;
             };
 
-            VariTypeDecl *chrTy = TU->getCharTy(), *intTy = TU->getIntegerTy(), *voidTy = TU->getVoidTy();
-            VariTypeDecl *voidPtr = ReferenceType::get(TU->getVoidTy());
-            VariTypeDecl *pStrTy = ReferenceType::get(TU->getCharTy());
-            VariTypeDecl *arrTy = voidPtr, *strTy = voidPtr;
-
-            create_array_fn_ = create_corelib_api(
-                    arrTy,
-                    "create_array",
-                    std::vector<ParameterDecl *>({
-                        B.Create<ParameterDecl>(chrTy, B.Create<IdentDef>("ty")),
-                        B.Create<ParameterDecl>(intTy, B.Create<IdentDef>("dimn")),
-                        B.Create<ParameterDecl>(intTy, B.Create<IdentDef>("..."), true)
-                    })
-            );
-
-            create_corelib_api(
-                    intTy,
-                    "get_array_dim_depth",
-                    std::vector<ParameterDecl *>({
-                        B.Create<ParameterDecl>(arrTy, B.Create<IdentDef>("arr"))
-                    })
-            );
-
-            create_corelib_api(
-                    intTy,
-                    "get_array_size",
-                    std::vector<ParameterDecl *>({
-                        B.Create<ParameterDecl>(arrTy, B.Create<IdentDef>("arr"))
-                    })
-            );
-
-            create_string_fn_ = create_corelib_api(
-                    strTy,
-                    "create_string",
-                    std::vector<ParameterDecl *>({
-                        B.Create<ParameterDecl>(pStrTy, B.Create<IdentDef>("str"))
-                    })
-            );
-
-            ReferenceType *refLongTy = ReferenceType::get(TU->getLongTy());
-
-            __rex_acquire_guard_fn_ = create_corelib_api(
-                    intTy,
-                    "__rex_acquire_guard",
-                    std::vector<ParameterDecl *>({
-                        B.Create<ParameterDecl>(refLongTy, B.Create<IdentDef>("raw_guard_object"))
-                    })
-            );
-
-            __rex_guard_release_fn_ = create_corelib_api(
-                    voidTy,
-                    "__rex_guard_release",
-                    std::vector<ParameterDecl *>({
-                        B.Create<ParameterDecl>(refLongTy, B.Create<IdentDef>("raw_guard_object"))
-                    })
-            );
+            create_array_fn_        = fetch_api("create_array");
+            create_string_fn_       = fetch_api("create_string");
+            __rex_acquire_guard_fn_ = fetch_api("__rex_acquire_guard");
+            __rex_guard_release_fn_ = fetch_api("__rex_guard_release");
 
         }
 
