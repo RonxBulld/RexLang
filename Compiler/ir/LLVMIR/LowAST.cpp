@@ -73,21 +73,13 @@ namespace rexlang {
 
             // 在启动函数中调用初始化函数
 
-            FunctionCall *call_init_fn = B.Create<FunctionCall>(
-                    B.Create<IdentRefer>(init_fn->getName()),
-                    init_fn,
-                    std::vector<Expression *>()
-            );
+            FunctionCall *call_init_fn = B.CreateFCall(init_fn);
             startup_stmtblk_->appendStatement(call_init_fn);
 
             // 在启动函数中调用用户的入口函数，并将其返回值作为启动函数的返回值
 
             FunctorDecl *entry_fn = project_db_.GetMainEntry();
-            FunctionCall *call_entry_fn = B.Create<FunctionCall>(
-                    B.Create<IdentRefer>(entry_fn->getName()),
-                    entry_fn,
-                    std::vector<Expression *>()
-            );
+            FunctionCall *call_entry_fn = B.CreateFCall(entry_fn);
             ReturnStmt *return_stmt = B.Create<ReturnStmt>(call_entry_fn);
             startup_stmtblk_->appendStatement(return_stmt);
 
@@ -136,12 +128,11 @@ namespace rexlang {
 
                 // 在初始化语句块末尾添加__rex_guard_release
 
-                FunctionCall *call_guard_release = B.Create<FunctionCall>(
-                        B.Create<IdentRefer>(__rex_guard_release_fn_->getName()),
+                FunctionCall *call_guard_release = B.CreateFCall(
                         __rex_guard_release_fn_,
-                        std::vector<Expression *>({
+                        {
                             B.Create<HierarchyIdentifier>(std::vector<NameComponent *>({B.Create<IdentRefer>(static_guard_vari->getName())}))
-                        })
+                        }
                 );
                 init_blk->appendStatement(call_guard_release);
 
@@ -156,12 +147,11 @@ namespace rexlang {
                         ),
                         B.Create<BinaryExpression>(
                                 OperatorType(OperatorType::Opt::kOptNotEqual),
-                                B.Create<FunctionCall>(
-                                        B.Create<IdentRefer>(__rex_acquire_guard_fn_->getName()),
+                                B.CreateFCall(
                                         __rex_acquire_guard_fn_,
-                                        std::vector<Expression *>({
+                                        {
                                             B.Create<HierarchyIdentifier>(std::vector<NameComponent *>({B.Create<IdentRefer>(static_guard_vari->getName())}))
-                                        })
+                                        }
                                 ),
                                 B.Create<ValueOfDecimal>(0)
                         )
@@ -229,11 +219,7 @@ namespace rexlang {
                                         )
                             })
                     ),
-                    B.Create<FunctionCall>(
-                            B.Create<IdentRefer>(create_array_fn_->getName()),
-                            create_array_fn_,
-                            args_of_create_array
-                    )
+                    B.CreateFCall(create_array_fn_, args_of_create_array)
             );
 
             StatementBlock *init_blk = B.Create<StatementBlock>(std::vector<Statement *>({assign_stmt}));
@@ -265,11 +251,7 @@ namespace rexlang {
                                 )
                             })
                     ),
-                    B.Create<FunctionCall>(
-                            B.Create<IdentRefer>(create_string_fn_->getName()),
-                            create_string_fn_,
-                            args_of_create_string
-                    )
+                    B.CreateFCall(create_string_fn_, args_of_create_string)
             );
 
             StatementBlock *init_blk = B.Create<StatementBlock>(std::vector<Statement *>({assign_stmt}));
@@ -302,11 +284,7 @@ namespace rexlang {
                                 )
                             })
                     ),
-                    B.Create<FunctionCall>(
-                            B.Create<IdentRefer>(create_string_fn_->getName()),
-                            create_string_fn_,
-                            args_of_create_dataset
-                    )
+                    B.CreateFCall(create_string_fn_, args_of_create_dataset)
             );
 
             StatementBlock *init_blk = B.Create<StatementBlock>(std::vector<Statement *>({assign_stmt}));
