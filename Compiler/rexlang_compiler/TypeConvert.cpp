@@ -31,16 +31,16 @@ namespace rexlang {
      * VariTypeDecl
      */
 
-    ArrayDecl *VariTypeDecl::getArrayToWithDimStr(const std::vector<size_t> &dims) {
-        return ArrayDecl::get(this, dims);
+    ArrayType *VariTypeDecl::getArrayToWithDimStr(const std::vector<size_t> &dims) {
+        return ArrayType::get(this, dims);
     }
 
     /*===--------------------------------===*
-     * ArrayDecl
+     * ArrayType
      */
 
-    ArrayDecl *ArrayDecl::get(TypeDecl *elementType, const std::vector<size_t> &dimensions) {
-        return CreateNode<ArrayDecl>(elementType->getAstContext(), elementType, dimensions);
+    ArrayType *ArrayType::get(TypeDecl *elementType, const std::vector<size_t> &dimensions) {
+        return CreateNode<ArrayType>(elementType->getAstContext(), elementType, dimensions);
     }
 
     /*===--------------------------------===*

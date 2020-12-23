@@ -69,7 +69,7 @@ namespace rexlang {
 
     class Decl;                 class TagDecl;                  class TypeDecl;
     class VariTypeDecl;         class StructureDecl;            class BuiltinTypeDecl;
-    class ArrayDecl;            class ReferenceType;            class MacroDecl;
+    class ArrayType;            class ReferenceType;            class MacroDecl;
 
     // Entity declare
 
@@ -115,7 +115,7 @@ namespace rexlang {
         kNTyIdentDef, kNTyTagDecl, kNTyVariableDecl, kNTyBaseVariDecl,
         kNTyGlobalVariableDecl, kNTyParameterDecl, kNTyMemberVariableDecl, kNTyFileVariableDecl,
         kNTyLocalVariableDecl, kNTyTypeDecl, kNTyVariTypeDecl, kNTyBuiltinTypeDecl,
-        kNTyArrayDecl, kNTyMacroDecl, kNTyStructureDecl, kNTyReferenceType,
+        kNTyArrayType, kNTyMacroDecl, kNTyStructureDecl, kNTyReferenceType,
         kNTyFunctorDecl, kNTyFunctionDecl, kNTyProgSetDecl, kNTyAPICommandDecl,
 
         kNTyStatement,
@@ -907,7 +907,7 @@ namespace rexlang {
         explicit VariTypeDecl(IdentDef *name);
 
     public:
-        ArrayDecl *getArrayToWithDimStr(const std::vector<size_t> &dims) ;
+        ArrayType *getArrayToWithDimStr(const std::vector<size_t> &dims) ;
 
         SEMATIC_ANALYSIS_INTERNAL
 
@@ -932,7 +932,7 @@ namespace rexlang {
 
     public:
         static ReferenceType *get (TypeDecl *   pointeeType) ;
-        static TypeDecl *     peek(TypeDecl *type) ;
+        static TypeDecl *     peek(TypeDecl *type) ;            // 获取引用的目标类型
 
     public:
         TypeDecl *getPointee() const ;
@@ -1308,7 +1308,7 @@ namespace rexlang {
      * 数组类型
      * 该节点不会在语法分析阶段产生，在语义分析阶段根据 VariableDecl 生成
      */
-    class ArrayDecl : public VariTypeDecl {
+    class ArrayType : public VariTypeDecl {
     private:
         // 元素类型
         TypeDecl *base_type_ = nullptr;
@@ -1316,7 +1316,7 @@ namespace rexlang {
         std::vector<size_t> dimensions_;
 
     public:
-        ArrayDecl(TypeDecl *baseType, const std::vector<size_t> &dimensions) ;
+        ArrayType(TypeDecl *baseType, const std::vector<size_t> &dimensions) ;
 
     public:
         bool                isIndexable             () const override ;
@@ -1336,7 +1336,7 @@ namespace rexlang {
         SEMATIC_ANALYSIS_INTERNAL
 
     public:
-        static ArrayDecl *get(TypeDecl *elementType, const std::vector<size_t> &dimensions) ;
+        static ArrayType *get(TypeDecl *elementType, const std::vector<size_t> &dimensions) ;
 
     public:
         int Visit(class Visitor &visitor) override ;

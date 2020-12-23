@@ -167,7 +167,7 @@ namespace rexlang {
         VariTypeDecl::sematicAnalysisInternal(semaCtx);
     }
 
-    void ArrayDecl::sematicAnalysisInternal(SemaContext &semaCtx) {
+    void ArrayType::sematicAnalysisInternal(SemaContext &semaCtx) {
         VariTypeDecl::sematicAnalysisInternal(semaCtx);
 
         assert(base_type_);
@@ -194,8 +194,8 @@ namespace rexlang {
 
         // 处理数组的情况
         if (is_array_) {
-            ArrayDecl *array_decl = ArrayDecl::get(getType(), dimensions_);
-            setValType(array_decl);
+            ArrayType *array_type = ArrayType::get(getType(), dimensions_);
+            setValType(array_type);
         }
     }
 

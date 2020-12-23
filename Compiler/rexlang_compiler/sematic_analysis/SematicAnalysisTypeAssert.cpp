@@ -11,8 +11,8 @@ namespace rexlang {
         assert(rhs_type);
         // - 可能是数组、内置类型、自定义类型
         {
-            ArrayDecl *lhs_array = lhs_type->as<ArrayDecl>();
-            ArrayDecl *rhs_array = rhs_type->as<ArrayDecl>();
+            ArrayType *lhs_array = lhs_type->as<ArrayType>();
+            ArrayType *rhs_array = rhs_type->as<ArrayType>();
             // 1. 至少有一个是数组
             if (lhs_array || rhs_array) {
                 if (lhs_array && rhs_array) {

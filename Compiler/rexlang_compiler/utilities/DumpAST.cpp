@@ -194,7 +194,7 @@ namespace rexlang {
         POST_ACTION();
     }
 
-    void DumpAST::Visit(ArrayDecl &node) {
+    void DumpAST::Visit(ArrayType &node) {
         PREV_ACTION();
 
         POST_ACTION();

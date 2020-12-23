@@ -34,7 +34,6 @@
 #include "../../rexlang_compiler/NodeDecl.h"
 #include "../../rexlang_compiler/ASTUtility.h"
 #include "../../support/ProjectDB.h"
-#include "../../rexlang_compiler/TypeAssert.h"
 #include "../SimpleRTTI_ArguType.h"
 
 namespace rexlang {
@@ -75,7 +74,7 @@ namespace rexlang {
 
     llvm::Function *IREmit::GetFunction(const std::string &function_name) {
         for (auto &functor_item : function_object_pool_) {
-            if (functor_item.first->name_.string_.str() == function_name) {
+            if (functor_item.first->getNameStr() == function_name) {
                 return functor_item.second;
             }
         }
@@ -460,7 +459,7 @@ namespace rexlang {
     llvm::Type *IREmit::_EmitImpl_(TypeDecl *typeDecl) {
         if (BuiltinTypeDecl *builtin_type_decl = typeDecl->as<BuiltinTypeDecl>()) {
             return Emit(builtin_type_decl);
-        } else if (ArrayDecl *array_decl = typeDecl->as<ArrayDecl>()) {
+        } else if (ArrayType *array_decl = typeDecl->as<ArrayType>()) {
             return Emit(array_decl);
         } else if (StructureDecl *structure_decl = typeDecl->as<StructureDecl>()) {
             return Emit(structure_decl);
@@ -498,9 +497,9 @@ namespace rexlang {
         return type;
     }
 
-    llvm::PointerType *IREmit::_EmitImpl_(ArrayDecl *arrayDecl) {
-        llvm::Type *element_type = GetType(arrayDecl->base_type_);
-        return RTBuilder.CreateArrayType(element_type, arrayDecl->dimensions_);
+    llvm::PointerType *IREmit::_EmitImpl_(ArrayType *arrayType) {
+        llvm::Type *element_type = GetType(arrayType->base_type_);
+        return RTBuilder.CreateArrayType(element_type, arrayType->dimensions_);
     }
 
     llvm::PointerType *IREmit::_EmitImpl_(StructureDecl *structureDecl) {
@@ -1612,7 +1611,7 @@ namespace rexlang {
     llvm::Value *           IREmit::Emit(LocalVariableDecl *    astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
     llvm::Type *            IREmit::Emit(TypeDecl *             astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
     llvm::Type *            IREmit::Emit(BuiltinTypeDecl *      astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
-    llvm::PointerType *     IREmit::Emit(ArrayDecl *            astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    llvm::PointerType *     IREmit::Emit(ArrayType *            astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
     llvm::PointerType *     IREmit::Emit(StructureDecl *        astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
     llvm::Function *        IREmit::Emit(FunctorDecl *          astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
     llvm::Function *        IREmit::Emit(FunctionDecl *         astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }

@@ -31,7 +31,7 @@ namespace rexlang {
             if (0) { case NodeType::kNTyReferenceType:       return "ReferenceType";       }
             if (0) { case NodeType::kNTyBuiltinTypeDecl:     return "BuiltinTypeDecl";     }
             if (0) { case NodeType::kNTyStructureDecl:       return "StructureDecl";       }
-            if (0) { case NodeType::kNTyArrayDecl:           return "ArrayDecl";           }
+            if (0) { case NodeType::kNTyArrayType:           return "ArrayType";           }
             if (0) { case NodeType::kNTyFunctorDecl:         return "FunctorDecl";         }
             if (0) { case NodeType::kNTyFunctionDecl:        return "FunctionDecl";        }
             if (0) { case NodeType::kNTyAPICommandDecl:      return "APICommandDecl";      }

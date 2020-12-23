@@ -32,7 +32,7 @@ namespace rexlang {
     const NodeType ReferenceType        ::GetClassId() { return NodeType::kNTyReferenceType; }
     const NodeType BuiltinTypeDecl      ::GetClassId() { return NodeType::kNTyBuiltinTypeDecl; }
     const NodeType StructureDecl        ::GetClassId() { return NodeType::kNTyStructureDecl; }
-    const NodeType ArrayDecl            ::GetClassId() { return NodeType::kNTyArrayDecl; }
+    const NodeType ArrayType            ::GetClassId() { return NodeType::kNTyArrayType; }
     const NodeType FunctorDecl          ::GetClassId() { return NodeType::kNTyFunctorDecl; }
     const NodeType FunctionDecl         ::GetClassId() { return NodeType::kNTyFunctionDecl; }
     const NodeType APICommandDecl       ::GetClassId() { return NodeType::kNTyAPICommandDecl; }
@@ -174,12 +174,12 @@ namespace rexlang {
     bool TypeDecl           ::isIndexable() const { return false; }
     bool BuiltinStringType  ::isIndexable() const { return true; }
     bool BuiltinDataSetType ::isIndexable() const { return true; }
-    bool ArrayDecl          ::isIndexable() const { return true; }
+    bool ArrayType          ::isIndexable() const { return true; }
 
     TypeDecl *TypeDecl           ::evalIndexedElementTy() const { return nullptr; }
     TypeDecl *BuiltinStringType  ::evalIndexedElementTy() const { return this->getTranslateUnit()->getCharTy(); }
     TypeDecl *BuiltinDataSetType ::evalIndexedElementTy() const { return this->getTranslateUnit()->getCharTy(); }
-    TypeDecl *ArrayDecl          ::evalIndexedElementTy() const { assert(base_type_); return base_type_; }
+    TypeDecl *ArrayType          ::evalIndexedElementTy() const { assert(base_type_); return base_type_; }
 
     /************************************************
      * 获取定义的索引维度
@@ -188,7 +188,7 @@ namespace rexlang {
     std::vector<size_t> TypeDecl           ::getDimensions() const { return {}; }
     std::vector<size_t> BuiltinStringType  ::getDimensions() const { return {0}; }
     std::vector<size_t> BuiltinDataSetType ::getDimensions() const { return {0}; }
-    std::vector<size_t> ArrayDecl          ::getDimensions() const { return this->dimensions_; }
+    std::vector<size_t> ArrayType          ::getDimensions() const { return this->dimensions_; }
 
     /**********************************************************
      * 维度数量是否可变
@@ -197,7 +197,7 @@ namespace rexlang {
      **********************************************************/
 
     bool TypeDecl           ::isFixedDimensions() const { return true; }
-    bool ArrayDecl          ::isFixedDimensions() const { return false; }
+    bool ArrayType          ::isFixedDimensions() const { return false; }
     bool BuiltinStringType  ::isFixedDimensions() const { return true; }
     bool BuiltinDataSetType ::isFixedDimensions() const { return true; }
 

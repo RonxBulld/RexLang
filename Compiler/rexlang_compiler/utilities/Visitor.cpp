@@ -174,7 +174,7 @@ namespace rexlang {
         PostAction(node);
     }
 
-    void Visitor::Visit(ArrayDecl &node) {
+    void Visitor::Visit(ArrayType &node) {
         HeadAction(node);
         VISIT_BASE(VariTypeDecl, node);
         PrevAction(node);
@@ -277,7 +277,7 @@ namespace rexlang {
         VISIT_BASE(FunctorDecl, node);
         PrevAction(node);
 
-        TraverseNamedMap(node.getLocalVariables());
+        TraverseArray(node.getLocalVariables());
         TraverseNode(node.getFunctionBody());
 
         PostAction(node);
@@ -623,7 +623,7 @@ namespace rexlang {
     int VariTypeDecl       ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
     int StructureDecl      ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
     int BuiltinTypeDecl    ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
-    int ArrayDecl          ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int ArrayType          ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
     int ReferenceType      ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
     int MacroDecl          ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
     int BaseVariDecl       ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }

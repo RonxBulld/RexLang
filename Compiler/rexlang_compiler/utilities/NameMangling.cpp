@@ -152,14 +152,14 @@ namespace rexlang {
     }
 
     /*
-     * ArrayDecl
+     * ArrayType
      * 在数组元素类型前加"A"
      */
 
-    StringRef ArrayDecl::getSelfMangling() const {
+    StringRef ArrayType::getSelfMangling() const {
         return StringPool::Create("A", getArrayBase()->getSelfMangling());
     }
-    StringRef ArrayDecl::getMangling() const {
+    StringRef ArrayType::getMangling() const {
         return getSelfMangling();
     }
 

@@ -115,7 +115,7 @@ namespace rexlang {
 
                 if (HierarchyIdentifier *hierarchy_identifier = arguments[idx]->as<HierarchyIdentifier>()) {
                     TypeDecl *argu_type = this->GetHierarchyIdentifierQualifiedType(hierarchy_identifier);
-                    if (argu_type->is<ArrayDecl>()) {
+                    if (argu_type->is<ArrayType>()) {
                         TypeDecl *param_arr_element_type = this->GetIndexableTypeElement(parameters[idx]->vari_type_decl_);
                         TypeDecl *argu_arr_element_type = this->GetIndexableTypeElement(argu_type);
                         if (param_arr_element_type != argu_arr_element_type) {

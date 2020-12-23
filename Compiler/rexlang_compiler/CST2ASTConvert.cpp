@@ -175,7 +175,7 @@ namespace rexlang {
         if (!dimension_str.string_.empty()) {
             auto err_or_dims = Str2Attr::str2Dimension(dimension_str.string_);
             assert(err_or_dims.NoError());
-            type = ArrayDecl::get(type, err_or_dims.Value());
+            type = ArrayType::get(type, err_or_dims.Value());
         }
 
         // 构造变量定义

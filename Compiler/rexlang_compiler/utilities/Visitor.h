@@ -48,7 +48,7 @@ namespace rexlang {
         virtual void Visit(VariTypeDecl        &node) ;
         virtual void Visit(StructureDecl       &node) ;
         virtual void Visit(BuiltinTypeDecl     &node) ;
-        virtual void Visit(ArrayDecl           &node) ;
+        virtual void Visit(ArrayType           &node) ;
         virtual void Visit(ReferenceType       &node) ;
         virtual void Visit(MacroDecl           &node) ;
 

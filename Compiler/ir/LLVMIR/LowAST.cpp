@@ -189,7 +189,7 @@ namespace rexlang {
          * => arr = create_varialbe('c', 1, 0)
          */
         StatementBlock *HandleArrayInit(VariableDecl *arrayObject) const {
-            ArrayDecl *vari_arr_ty = rtti::dyn_cast<ArrayDecl>(arrayObject->getType());
+            ArrayType *vari_arr_ty = rtti::dyn_cast<ArrayType>(arrayObject->getType());
             assert(vari_arr_ty);
 
             // 收集数组信息

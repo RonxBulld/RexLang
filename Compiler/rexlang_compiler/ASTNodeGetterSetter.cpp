@@ -317,7 +317,7 @@ namespace rexlang {
             is_nullable_  = true;
         }
         else if (Str2Attr::isNameOfArray(attribute.string_)) {
-            wrapTypeUse<ArrayDecl>(std::vector<size_t>());
+            wrapTypeUse<ArrayType>(std::vector<size_t>());
         }
         else {
             Decl::applyAttribute(attribute);
@@ -442,10 +442,10 @@ namespace rexlang {
     }
 
     /***************************************************
-     * ArrayDecl
+     * ArrayType
      ***************************************************/
 
-    TypeDecl *ArrayDecl::getArrayBase() const { return base_type_; }
+    TypeDecl *ArrayType::getArrayBase() const { return base_type_; }
 
     /***************************************************
      * ProgSetDecl

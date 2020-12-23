@@ -172,7 +172,7 @@ namespace rexlang {
     bool    BuiltinFuncPtrType  :: isFuncPtrType        () const { return true; }
     bool    BuiltinDoubleType   :: isDoubleType         () const { return true; }
     bool    StructureDecl       :: isStructType         () const { return true; }
-    bool    ArrayDecl           :: isArrayType          () const { return true; }
+    bool    ArrayType           :: isArrayType          () const { return true; }
     bool    FunctionDecl        :: isFunctionType       () const { return true; }
     bool    APICommandDecl      :: isAPICommandType     () const { return true; }
     bool    ReferenceType       :: isReferenceType      () const { return true; }
@@ -297,7 +297,7 @@ namespace rexlang {
      * 数组类型不接受任何二元运算
      */
 
-    bool ArrayDecl::isBinOptValid(OperatorType opt, VariTypeDecl *otherType) const { return false; }
+    bool ArrayType::isBinOptValid(OperatorType opt, VariTypeDecl *otherType) const { return false; }
 
     /*===-----------------------------------------------------===*
      * 结构体类型不接受任何二元运算
@@ -383,7 +383,7 @@ namespace rexlang {
      *===-----------------------------------------------------===*/
 
     bool  TypeDecl ::compareTo(TypeDecl *otherType) const { return otherType == this; }
-    bool  ArrayDecl::compareTo(TypeDecl *otherType) const {
+    bool  ArrayType::compareTo(TypeDecl *otherType) const {
         if (!otherType->isArrayType()) { return false; }
         TypeDecl *this_elem_ty = evalIndexedElementTy();
         TypeDecl *other_elem_ty = otherType->evalIndexedElementTy();
@@ -430,7 +430,7 @@ namespace rexlang {
         return false;
     }
 
-    bool ArrayDecl::isAssginValidFrom(TypeDecl *fromType) const {
+    bool ArrayType::isAssginValidFrom(TypeDecl *fromType) const {
         /*
          * 判定数组的可赋值等价于判定数组类型一致性
          */
