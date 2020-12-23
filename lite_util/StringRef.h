@@ -59,7 +59,9 @@ namespace rexlang {
         static size_t max_string_size_;
         static std::map<std::string, StringRef> string_pool_;
     private:
-        static void S(std::stringstream &ss, const StringRef &str)   { ss << str.str(); }
+        static void S(std::stringstream &ss, const StringRef &str)  { ss << str.str(); }
+        static void S(std::stringstream &ss, StringRef  & str)      { ss << str.str(); }
+        static void S(std::stringstream &ss, StringRef && str)      { ss << str.str(); }
         template <typename T>
         static void S(std::stringstream &ss, T && v) { ss << v; }
 
