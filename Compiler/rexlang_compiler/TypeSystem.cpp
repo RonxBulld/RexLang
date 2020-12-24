@@ -30,7 +30,7 @@ namespace rexlang {
     const NodeType TypeDecl             ::GetClassId() { return NodeType::kNTyTypeDecl; }
     const NodeType VariTypeDecl         ::GetClassId() { return NodeType::kNTyVariTypeDecl; }
     const NodeType ReferenceType        ::GetClassId() { return NodeType::kNTyReferenceType; }
-    const NodeType BuiltinTypeDecl      ::GetClassId() { return NodeType::kNTyBuiltinTypeDecl; }
+    const NodeType BuiltinType          ::GetClassId() { return NodeType::kNTyBuiltinType; }
     const NodeType StructureDecl        ::GetClassId() { return NodeType::kNTyStructureDecl; }
     const NodeType ArrayType            ::GetClassId() { return NodeType::kNTyArrayType; }
     const NodeType FunctorDecl          ::GetClassId() { return NodeType::kNTyFunctorDecl; }
@@ -74,91 +74,91 @@ namespace rexlang {
      * 内建类型构造函数
      ************************************************/
 
-    BuiltinVoidType    ::BuiltinVoidType    (IdentDef *typeName) : BuiltinTypeDecl(typeName, BuiltinType()) { }
-    BuiltinCommonType  ::BuiltinCommonType  (IdentDef *typeName) : BuiltinTypeDecl(typeName, BuiltinType()) { }
-    BuiltinCharType    ::BuiltinCharType    (IdentDef *typeName) : BuiltinTypeDecl(typeName, BuiltinType()) { }
-    BuiltinIntegerType ::BuiltinIntegerType (IdentDef *typeName) : BuiltinTypeDecl(typeName, BuiltinType()) { }
-    BuiltinFloatType   ::BuiltinFloatType   (IdentDef *typeName) : BuiltinTypeDecl(typeName, BuiltinType()) { }
-    BuiltinBoolType    ::BuiltinBoolType    (IdentDef *typeName) : BuiltinTypeDecl(typeName, BuiltinType()) { }
-    BuiltinStringType  ::BuiltinStringType  (IdentDef *typeName) : BuiltinTypeDecl(typeName, BuiltinType()) { }
-    BuiltinDataSetType ::BuiltinDataSetType (IdentDef *typeName) : BuiltinTypeDecl(typeName, BuiltinType()) { }
-    BuiltinShortType   ::BuiltinShortType   (IdentDef *typeName) : BuiltinTypeDecl(typeName, BuiltinType()) { }
-    BuiltinLongType    ::BuiltinLongType    (IdentDef *typeName) : BuiltinTypeDecl(typeName, BuiltinType()) { }
-    BuiltinDatetimeType::BuiltinDatetimeType(IdentDef *typeName) : BuiltinTypeDecl(typeName, BuiltinType()) { }
-    BuiltinFuncPtrType ::BuiltinFuncPtrType (IdentDef *typeName) : BuiltinTypeDecl(typeName, BuiltinType()) { }
-    BuiltinDoubleType  ::BuiltinDoubleType  (IdentDef *typeName) : BuiltinTypeDecl(typeName, BuiltinType()) { }
+    BuiltinVoidType    ::BuiltinVoidType    (IdentDef *typeName) : BuiltinType(typeName, builtinType()) { }
+    BuiltinCommonType  ::BuiltinCommonType  (IdentDef *typeName) : BuiltinType(typeName, builtinType()) { }
+    BuiltinCharType    ::BuiltinCharType    (IdentDef *typeName) : BuiltinType(typeName, builtinType()) { }
+    BuiltinIntegerType ::BuiltinIntegerType (IdentDef *typeName) : BuiltinType(typeName, builtinType()) { }
+    BuiltinFloatType   ::BuiltinFloatType   (IdentDef *typeName) : BuiltinType(typeName, builtinType()) { }
+    BuiltinBoolType    ::BuiltinBoolType    (IdentDef *typeName) : BuiltinType(typeName, builtinType()) { }
+    BuiltinStringType  ::BuiltinStringType  (IdentDef *typeName) : BuiltinType(typeName, builtinType()) { }
+    BuiltinDataSetType ::BuiltinDataSetType (IdentDef *typeName) : BuiltinType(typeName, builtinType()) { }
+    BuiltinShortType   ::BuiltinShortType   (IdentDef *typeName) : BuiltinType(typeName, builtinType()) { }
+    BuiltinLongType    ::BuiltinLongType    (IdentDef *typeName) : BuiltinType(typeName, builtinType()) { }
+    BuiltinDatetimeType::BuiltinDatetimeType(IdentDef *typeName) : BuiltinType(typeName, builtinType()) { }
+    BuiltinFuncPtrType ::BuiltinFuncPtrType (IdentDef *typeName) : BuiltinType(typeName, builtinType()) { }
+    BuiltinDoubleType  ::BuiltinDoubleType  (IdentDef *typeName) : BuiltinType(typeName, builtinType()) { }
 
     /************************************************
      * 内建类型 BuiltinType 返回值
      ************************************************/
 
-    EnumOfBuiltinType BuiltinVoidType    ::BuiltinType() { return EnumOfBuiltinType::kBTypeVoid;     }
-    EnumOfBuiltinType BuiltinCommonType  ::BuiltinType() { return EnumOfBuiltinType::kBTypeCommon;   }
-    EnumOfBuiltinType BuiltinCharType    ::BuiltinType() { return EnumOfBuiltinType::kBTypeChar;     }
-    EnumOfBuiltinType BuiltinIntegerType ::BuiltinType() { return EnumOfBuiltinType::kBTypeInteger;  }
-    EnumOfBuiltinType BuiltinFloatType   ::BuiltinType() { return EnumOfBuiltinType::kBTypeFloat;    }
-    EnumOfBuiltinType BuiltinBoolType    ::BuiltinType() { return EnumOfBuiltinType::kBTypeBool;     }
-    EnumOfBuiltinType BuiltinStringType  ::BuiltinType() { return EnumOfBuiltinType::kBTypeString;   }
-    EnumOfBuiltinType BuiltinDataSetType ::BuiltinType() { return EnumOfBuiltinType::kBTypeDataSet;  }
-    EnumOfBuiltinType BuiltinShortType   ::BuiltinType() { return EnumOfBuiltinType::kBTypeShort;    }
-    EnumOfBuiltinType BuiltinLongType    ::BuiltinType() { return EnumOfBuiltinType::kBTypeLong;     }
-    EnumOfBuiltinType BuiltinDatetimeType::BuiltinType() { return EnumOfBuiltinType::kBTypeDatetime; }
-    EnumOfBuiltinType BuiltinFuncPtrType ::BuiltinType() { return EnumOfBuiltinType::kBTypeFuncPtr;  }
-    EnumOfBuiltinType BuiltinDoubleType  ::BuiltinType() { return EnumOfBuiltinType::kBTypeDouble;   }
+    EnumOfBuiltinType BuiltinVoidType    ::builtinType() { return EnumOfBuiltinType::kBTypeVoid;     }
+    EnumOfBuiltinType BuiltinCommonType  ::builtinType() { return EnumOfBuiltinType::kBTypeCommon;   }
+    EnumOfBuiltinType BuiltinCharType    ::builtinType() { return EnumOfBuiltinType::kBTypeChar;     }
+    EnumOfBuiltinType BuiltinIntegerType ::builtinType() { return EnumOfBuiltinType::kBTypeInteger;  }
+    EnumOfBuiltinType BuiltinFloatType   ::builtinType() { return EnumOfBuiltinType::kBTypeFloat;    }
+    EnumOfBuiltinType BuiltinBoolType    ::builtinType() { return EnumOfBuiltinType::kBTypeBool;     }
+    EnumOfBuiltinType BuiltinStringType  ::builtinType() { return EnumOfBuiltinType::kBTypeString;   }
+    EnumOfBuiltinType BuiltinDataSetType ::builtinType() { return EnumOfBuiltinType::kBTypeDataSet;  }
+    EnumOfBuiltinType BuiltinShortType   ::builtinType() { return EnumOfBuiltinType::kBTypeShort;    }
+    EnumOfBuiltinType BuiltinLongType    ::builtinType() { return EnumOfBuiltinType::kBTypeLong;     }
+    EnumOfBuiltinType BuiltinDatetimeType::builtinType() { return EnumOfBuiltinType::kBTypeDatetime; }
+    EnumOfBuiltinType BuiltinFuncPtrType ::builtinType() { return EnumOfBuiltinType::kBTypeFuncPtr;  }
+    EnumOfBuiltinType BuiltinDoubleType  ::builtinType() { return EnumOfBuiltinType::kBTypeDouble;   }
 
     /**********************************************************
      * 获取内置类型枚举
      **********************************************************/
 
-    EnumOfBuiltinType  BuiltinVoidType    ::GetBuiltinType () const { return BuiltinVoidType    ::BuiltinType(); }
-    EnumOfBuiltinType  BuiltinCommonType  ::GetBuiltinType () const { return BuiltinCommonType  ::BuiltinType(); }
-    EnumOfBuiltinType  BuiltinCharType    ::GetBuiltinType () const { return BuiltinCharType    ::BuiltinType(); }
-    EnumOfBuiltinType  BuiltinIntegerType ::GetBuiltinType () const { return BuiltinIntegerType ::BuiltinType(); }
-    EnumOfBuiltinType  BuiltinFloatType   ::GetBuiltinType () const { return BuiltinFloatType   ::BuiltinType(); }
-    EnumOfBuiltinType  BuiltinBoolType    ::GetBuiltinType () const { return BuiltinBoolType    ::BuiltinType(); }
-    EnumOfBuiltinType  BuiltinStringType  ::GetBuiltinType () const { return BuiltinStringType  ::BuiltinType(); }
-    EnumOfBuiltinType  BuiltinDataSetType ::GetBuiltinType () const { return BuiltinDataSetType ::BuiltinType(); }
-    EnumOfBuiltinType  BuiltinShortType   ::GetBuiltinType () const { return BuiltinShortType   ::BuiltinType(); }
-    EnumOfBuiltinType  BuiltinLongType    ::GetBuiltinType () const { return BuiltinLongType    ::BuiltinType(); }
-    EnumOfBuiltinType  BuiltinDatetimeType::GetBuiltinType () const { return BuiltinDatetimeType::BuiltinType(); }
-    EnumOfBuiltinType  BuiltinFuncPtrType ::GetBuiltinType () const { return BuiltinFuncPtrType ::BuiltinType(); }
-    EnumOfBuiltinType  BuiltinDoubleType  ::GetBuiltinType () const { return BuiltinDoubleType  ::BuiltinType(); }
+    EnumOfBuiltinType  BuiltinVoidType    ::GetBuiltinType () const { return BuiltinVoidType    ::builtinType(); }
+    EnumOfBuiltinType  BuiltinCommonType  ::GetBuiltinType () const { return BuiltinCommonType  ::builtinType(); }
+    EnumOfBuiltinType  BuiltinCharType    ::GetBuiltinType () const { return BuiltinCharType    ::builtinType(); }
+    EnumOfBuiltinType  BuiltinIntegerType ::GetBuiltinType () const { return BuiltinIntegerType ::builtinType(); }
+    EnumOfBuiltinType  BuiltinFloatType   ::GetBuiltinType () const { return BuiltinFloatType   ::builtinType(); }
+    EnumOfBuiltinType  BuiltinBoolType    ::GetBuiltinType () const { return BuiltinBoolType    ::builtinType(); }
+    EnumOfBuiltinType  BuiltinStringType  ::GetBuiltinType () const { return BuiltinStringType  ::builtinType(); }
+    EnumOfBuiltinType  BuiltinDataSetType ::GetBuiltinType () const { return BuiltinDataSetType ::builtinType(); }
+    EnumOfBuiltinType  BuiltinShortType   ::GetBuiltinType () const { return BuiltinShortType   ::builtinType(); }
+    EnumOfBuiltinType  BuiltinLongType    ::GetBuiltinType () const { return BuiltinLongType    ::builtinType(); }
+    EnumOfBuiltinType  BuiltinDatetimeType::GetBuiltinType () const { return BuiltinDatetimeType::builtinType(); }
+    EnumOfBuiltinType  BuiltinFuncPtrType ::GetBuiltinType () const { return BuiltinFuncPtrType ::builtinType(); }
+    EnumOfBuiltinType  BuiltinDoubleType  ::GetBuiltinType () const { return BuiltinDoubleType  ::builtinType(); }
 
     /************************************************
-     * 定义内建类型节点的 TypeText 返回值
+     * 定义内建类型节点的 typeText 返回值
      ************************************************/
 
-    const char * BuiltinVoidType    ::TypeText() { return u8"<空类型>";    }
-    const char * BuiltinCommonType  ::TypeText() { return u8"通用型";      }
-    const char * BuiltinCharType    ::TypeText() { return u8"字节型";      }
-    const char * BuiltinIntegerType ::TypeText() { return u8"整数型";      }
-    const char * BuiltinFloatType   ::TypeText() { return u8"小数型";      }
-    const char * BuiltinBoolType    ::TypeText() { return u8"逻辑型";      }
-    const char * BuiltinStringType  ::TypeText() { return u8"文本型";      }
-    const char * BuiltinDataSetType ::TypeText() { return u8"字节集";      }
-    const char * BuiltinShortType   ::TypeText() { return u8"短整型";      }
-    const char * BuiltinLongType    ::TypeText() { return u8"长整数型";     }
-    const char * BuiltinDatetimeType::TypeText() { return u8"日期时间型";    }
-    const char * BuiltinFuncPtrType ::TypeText() { return u8"子程序指针";    }
-    const char * BuiltinDoubleType  ::TypeText() { return u8"双精度小数型";   }
+    const char * BuiltinVoidType    ::typeText() { return u8"<空类型>";    }
+    const char * BuiltinCommonType  ::typeText() { return u8"通用型";      }
+    const char * BuiltinCharType    ::typeText() { return u8"字节型";      }
+    const char * BuiltinIntegerType ::typeText() { return u8"整数型";      }
+    const char * BuiltinFloatType   ::typeText() { return u8"小数型";      }
+    const char * BuiltinBoolType    ::typeText() { return u8"逻辑型";      }
+    const char * BuiltinStringType  ::typeText() { return u8"文本型";      }
+    const char * BuiltinDataSetType ::typeText() { return u8"字节集";      }
+    const char * BuiltinShortType   ::typeText() { return u8"短整型";      }
+    const char * BuiltinLongType    ::typeText() { return u8"长整数型";     }
+    const char * BuiltinDatetimeType::typeText() { return u8"日期时间型";    }
+    const char * BuiltinFuncPtrType ::typeText() { return u8"子程序指针";    }
+    const char * BuiltinDoubleType  ::typeText() { return u8"双精度小数型";   }
 
     /************************************************
      * 定义内建类型节点的 GetTypeText 返回值
      ************************************************/
 
-    const char * BuiltinVoidType    ::GetTypeText() const { return BuiltinVoidType    ::TypeText(); }
-    const char * BuiltinCommonType  ::GetTypeText() const { return BuiltinCommonType  ::TypeText(); }
-    const char * BuiltinCharType    ::GetTypeText() const { return BuiltinCharType    ::TypeText(); }
-    const char * BuiltinIntegerType ::GetTypeText() const { return BuiltinIntegerType ::TypeText(); }
-    const char * BuiltinFloatType   ::GetTypeText() const { return BuiltinFloatType   ::TypeText(); }
-    const char * BuiltinBoolType    ::GetTypeText() const { return BuiltinBoolType    ::TypeText(); }
-    const char * BuiltinStringType  ::GetTypeText() const { return BuiltinStringType  ::TypeText(); }
-    const char * BuiltinDataSetType ::GetTypeText() const { return BuiltinDataSetType ::TypeText(); }
-    const char * BuiltinShortType   ::GetTypeText() const { return BuiltinShortType   ::TypeText(); }
-    const char * BuiltinLongType    ::GetTypeText() const { return BuiltinLongType    ::TypeText(); }
-    const char * BuiltinDatetimeType::GetTypeText() const { return BuiltinDatetimeType::TypeText(); }
-    const char * BuiltinFuncPtrType ::GetTypeText() const { return BuiltinFuncPtrType ::TypeText(); }
-    const char * BuiltinDoubleType  ::GetTypeText() const { return BuiltinDoubleType  ::TypeText(); }
+    const char * BuiltinVoidType    ::GetTypeText() const { return BuiltinVoidType    ::typeText(); }
+    const char * BuiltinCommonType  ::GetTypeText() const { return BuiltinCommonType  ::typeText(); }
+    const char * BuiltinCharType    ::GetTypeText() const { return BuiltinCharType    ::typeText(); }
+    const char * BuiltinIntegerType ::GetTypeText() const { return BuiltinIntegerType ::typeText(); }
+    const char * BuiltinFloatType   ::GetTypeText() const { return BuiltinFloatType   ::typeText(); }
+    const char * BuiltinBoolType    ::GetTypeText() const { return BuiltinBoolType    ::typeText(); }
+    const char * BuiltinStringType  ::GetTypeText() const { return BuiltinStringType  ::typeText(); }
+    const char * BuiltinDataSetType ::GetTypeText() const { return BuiltinDataSetType ::typeText(); }
+    const char * BuiltinShortType   ::GetTypeText() const { return BuiltinShortType   ::typeText(); }
+    const char * BuiltinLongType    ::GetTypeText() const { return BuiltinLongType    ::typeText(); }
+    const char * BuiltinDatetimeType::GetTypeText() const { return BuiltinDatetimeType::typeText(); }
+    const char * BuiltinFuncPtrType ::GetTypeText() const { return BuiltinFuncPtrType ::typeText(); }
+    const char * BuiltinDoubleType  ::GetTypeText() const { return BuiltinDoubleType  ::typeText(); }
 
     /************************************************
      * 类型的可调用性
@@ -205,47 +205,47 @@ namespace rexlang {
      * 注册及获取一个翻译单元中的内建类型
      ************************************************/
 
-    BuiltinTypeDecl *TranslateUnit::getBuiltinTy(EnumOfBuiltinType enumOfBuiltinType) const {
-        BuiltinTypeDecl *BT = builtin_type_map_.at(enumOfBuiltinType);
+    BuiltinType *TranslateUnit::getBuiltinTy(EnumOfBuiltinType enumOfBuiltinType) const {
+        BuiltinType *BT = builtin_type_map_.at(enumOfBuiltinType);
         assert(BT);
         return BT;
     }
-    BuiltinVoidType *     TranslateUnit::getVoidTy     () const { BuiltinTypeDecl *BT = builtin_type_map_.at(BuiltinVoidType    ::BuiltinType()); assert(BT); return (BuiltinVoidType *    ) BT; }
-    BuiltinCommonType *   TranslateUnit::getCommonTy   () const { BuiltinTypeDecl *BT = builtin_type_map_.at(BuiltinCommonType  ::BuiltinType()); assert(BT); return (BuiltinCommonType *  ) BT; }
-    BuiltinCharType *     TranslateUnit::getCharTy     () const { BuiltinTypeDecl *BT = builtin_type_map_.at(BuiltinCharType    ::BuiltinType()); assert(BT); return (BuiltinCharType *    ) BT; }
-    BuiltinIntegerType *  TranslateUnit::getIntegerTy  () const { BuiltinTypeDecl *BT = builtin_type_map_.at(BuiltinIntegerType ::BuiltinType()); assert(BT); return (BuiltinIntegerType * ) BT; }
-    BuiltinFloatType *    TranslateUnit::getFloatTy    () const { BuiltinTypeDecl *BT = builtin_type_map_.at(BuiltinFloatType   ::BuiltinType()); assert(BT); return (BuiltinFloatType *   ) BT; }
-    BuiltinBoolType *     TranslateUnit::getBoolTy     () const { BuiltinTypeDecl *BT = builtin_type_map_.at(BuiltinBoolType    ::BuiltinType()); assert(BT); return (BuiltinBoolType *    ) BT; }
-    BuiltinStringType *   TranslateUnit::getStringTy   () const { BuiltinTypeDecl *BT = builtin_type_map_.at(BuiltinStringType  ::BuiltinType()); assert(BT); return (BuiltinStringType *  ) BT; }
-    BuiltinDataSetType *  TranslateUnit::getDataSetTy  () const { BuiltinTypeDecl *BT = builtin_type_map_.at(BuiltinDataSetType ::BuiltinType()); assert(BT); return (BuiltinDataSetType * ) BT; }
-    BuiltinShortType *    TranslateUnit::getShortTy    () const { BuiltinTypeDecl *BT = builtin_type_map_.at(BuiltinShortType   ::BuiltinType()); assert(BT); return (BuiltinShortType *   ) BT; }
-    BuiltinLongType *     TranslateUnit::getLongTy     () const { BuiltinTypeDecl *BT = builtin_type_map_.at(BuiltinLongType    ::BuiltinType()); assert(BT); return (BuiltinLongType *    ) BT; }
-    BuiltinDatetimeType * TranslateUnit::getDatetimeTy () const { BuiltinTypeDecl *BT = builtin_type_map_.at(BuiltinDatetimeType::BuiltinType()); assert(BT); return (BuiltinDatetimeType *) BT; }
-    BuiltinFuncPtrType *  TranslateUnit::getFuncPtrTy  () const { BuiltinTypeDecl *BT = builtin_type_map_.at(BuiltinFuncPtrType ::BuiltinType()); assert(BT); return (BuiltinFuncPtrType * ) BT; }
-    BuiltinDoubleType *   TranslateUnit::getDoubleTy   () const { BuiltinTypeDecl *BT = builtin_type_map_.at(BuiltinDoubleType  ::BuiltinType()); assert(BT); return (BuiltinDoubleType *  ) BT; }
+    BuiltinVoidType *     TranslateUnit::getVoidTy     () const { BuiltinType *BT = builtin_type_map_.at(BuiltinVoidType    ::builtinType()); assert(BT); return (BuiltinVoidType *    ) BT; }
+    BuiltinCommonType *   TranslateUnit::getCommonTy   () const { BuiltinType *BT = builtin_type_map_.at(BuiltinCommonType  ::builtinType()); assert(BT); return (BuiltinCommonType *  ) BT; }
+    BuiltinCharType *     TranslateUnit::getCharTy     () const { BuiltinType *BT = builtin_type_map_.at(BuiltinCharType    ::builtinType()); assert(BT); return (BuiltinCharType *    ) BT; }
+    BuiltinIntegerType *  TranslateUnit::getIntegerTy  () const { BuiltinType *BT = builtin_type_map_.at(BuiltinIntegerType ::builtinType()); assert(BT); return (BuiltinIntegerType * ) BT; }
+    BuiltinFloatType *    TranslateUnit::getFloatTy    () const { BuiltinType *BT = builtin_type_map_.at(BuiltinFloatType   ::builtinType()); assert(BT); return (BuiltinFloatType *   ) BT; }
+    BuiltinBoolType *     TranslateUnit::getBoolTy     () const { BuiltinType *BT = builtin_type_map_.at(BuiltinBoolType    ::builtinType()); assert(BT); return (BuiltinBoolType *    ) BT; }
+    BuiltinStringType *   TranslateUnit::getStringTy   () const { BuiltinType *BT = builtin_type_map_.at(BuiltinStringType  ::builtinType()); assert(BT); return (BuiltinStringType *  ) BT; }
+    BuiltinDataSetType *  TranslateUnit::getDataSetTy  () const { BuiltinType *BT = builtin_type_map_.at(BuiltinDataSetType ::builtinType()); assert(BT); return (BuiltinDataSetType * ) BT; }
+    BuiltinShortType *    TranslateUnit::getShortTy    () const { BuiltinType *BT = builtin_type_map_.at(BuiltinShortType   ::builtinType()); assert(BT); return (BuiltinShortType *   ) BT; }
+    BuiltinLongType *     TranslateUnit::getLongTy     () const { BuiltinType *BT = builtin_type_map_.at(BuiltinLongType    ::builtinType()); assert(BT); return (BuiltinLongType *    ) BT; }
+    BuiltinDatetimeType * TranslateUnit::getDatetimeTy () const { BuiltinType *BT = builtin_type_map_.at(BuiltinDatetimeType::builtinType()); assert(BT); return (BuiltinDatetimeType *) BT; }
+    BuiltinFuncPtrType *  TranslateUnit::getFuncPtrTy  () const { BuiltinType *BT = builtin_type_map_.at(BuiltinFuncPtrType ::builtinType()); assert(BT); return (BuiltinFuncPtrType * ) BT; }
+    BuiltinDoubleType *   TranslateUnit::getDoubleTy   () const { BuiltinType *BT = builtin_type_map_.at(BuiltinDoubleType  ::builtinType()); assert(BT); return (BuiltinDoubleType *  ) BT; }
 
-    bool TranslateUnit::RegistBuiltinType(BuiltinTypeDecl *builtinTypeDecl) {
-        named_builtin_type_map_[StringPool::Create(builtinTypeDecl->GetTypeText())] = builtinTypeDecl;
-        builtin_type_map_      [builtinTypeDecl->GetBuiltinType()]                  = builtinTypeDecl;
+    bool TranslateUnit::RegistBuiltinType(BuiltinType *builtinType) {
+        named_builtin_type_map_[StringPool::Create(builtinType->GetTypeText())] = builtinType;
+        builtin_type_map_      [builtinType->GetBuiltinType()]                  = builtinType;
         return true;
     }
 
     bool TranslateUnit::InitBuiltinTypes() {
         auto ctx = this->getAstContext();
         assert(ctx);
-        RegistBuiltinType(CreateNode<BuiltinVoidType    >(ctx, CreateNode<IdentDef>(ctx, BuiltinVoidType    ::TypeText())));
-        RegistBuiltinType(CreateNode<BuiltinCommonType  >(ctx, CreateNode<IdentDef>(ctx, BuiltinCommonType  ::TypeText())));
-        RegistBuiltinType(CreateNode<BuiltinCharType    >(ctx, CreateNode<IdentDef>(ctx, BuiltinCharType    ::TypeText())));
-        RegistBuiltinType(CreateNode<BuiltinIntegerType >(ctx, CreateNode<IdentDef>(ctx, BuiltinIntegerType ::TypeText())));
-        RegistBuiltinType(CreateNode<BuiltinFloatType   >(ctx, CreateNode<IdentDef>(ctx, BuiltinFloatType   ::TypeText())));
-        RegistBuiltinType(CreateNode<BuiltinBoolType    >(ctx, CreateNode<IdentDef>(ctx, BuiltinBoolType    ::TypeText())));
-        RegistBuiltinType(CreateNode<BuiltinStringType  >(ctx, CreateNode<IdentDef>(ctx, BuiltinStringType  ::TypeText())));
-        RegistBuiltinType(CreateNode<BuiltinDataSetType >(ctx, CreateNode<IdentDef>(ctx, BuiltinDataSetType ::TypeText())));
-        RegistBuiltinType(CreateNode<BuiltinShortType   >(ctx, CreateNode<IdentDef>(ctx, BuiltinShortType   ::TypeText())));
-        RegistBuiltinType(CreateNode<BuiltinLongType    >(ctx, CreateNode<IdentDef>(ctx, BuiltinLongType    ::TypeText())));
-        RegistBuiltinType(CreateNode<BuiltinDatetimeType>(ctx, CreateNode<IdentDef>(ctx, BuiltinDatetimeType::TypeText())));
-        RegistBuiltinType(CreateNode<BuiltinFuncPtrType >(ctx, CreateNode<IdentDef>(ctx, BuiltinFuncPtrType ::TypeText())));
-        RegistBuiltinType(CreateNode<BuiltinDoubleType  >(ctx, CreateNode<IdentDef>(ctx, BuiltinDoubleType  ::TypeText())));
+        RegistBuiltinType(CreateNode<BuiltinVoidType    >(ctx, CreateNode<IdentDef>(ctx, BuiltinVoidType    ::typeText())));
+        RegistBuiltinType(CreateNode<BuiltinCommonType  >(ctx, CreateNode<IdentDef>(ctx, BuiltinCommonType  ::typeText())));
+        RegistBuiltinType(CreateNode<BuiltinCharType    >(ctx, CreateNode<IdentDef>(ctx, BuiltinCharType    ::typeText())));
+        RegistBuiltinType(CreateNode<BuiltinIntegerType >(ctx, CreateNode<IdentDef>(ctx, BuiltinIntegerType ::typeText())));
+        RegistBuiltinType(CreateNode<BuiltinFloatType   >(ctx, CreateNode<IdentDef>(ctx, BuiltinFloatType   ::typeText())));
+        RegistBuiltinType(CreateNode<BuiltinBoolType    >(ctx, CreateNode<IdentDef>(ctx, BuiltinBoolType    ::typeText())));
+        RegistBuiltinType(CreateNode<BuiltinStringType  >(ctx, CreateNode<IdentDef>(ctx, BuiltinStringType  ::typeText())));
+        RegistBuiltinType(CreateNode<BuiltinDataSetType >(ctx, CreateNode<IdentDef>(ctx, BuiltinDataSetType ::typeText())));
+        RegistBuiltinType(CreateNode<BuiltinShortType   >(ctx, CreateNode<IdentDef>(ctx, BuiltinShortType   ::typeText())));
+        RegistBuiltinType(CreateNode<BuiltinLongType    >(ctx, CreateNode<IdentDef>(ctx, BuiltinLongType    ::typeText())));
+        RegistBuiltinType(CreateNode<BuiltinDatetimeType>(ctx, CreateNode<IdentDef>(ctx, BuiltinDatetimeType::typeText())));
+        RegistBuiltinType(CreateNode<BuiltinFuncPtrType >(ctx, CreateNode<IdentDef>(ctx, BuiltinFuncPtrType ::typeText())));
+        RegistBuiltinType(CreateNode<BuiltinDoubleType  >(ctx, CreateNode<IdentDef>(ctx, BuiltinDoubleType  ::typeText())));
         return true;
     }
 

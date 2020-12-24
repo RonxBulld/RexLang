@@ -53,7 +53,7 @@ namespace rexlang {
         void Visit(TypeDecl &            node) override;
         void Visit(VariTypeDecl &        node) override;
         void Visit(StructureDecl &       node) override;
-        void Visit(BuiltinTypeDecl &     node) override;
+        void Visit(BuiltinType &         node) override;
         void Visit(ArrayType &           node) override;
         void Visit(ReferenceType &       node) override;
         void Visit(MacroDecl &           node) override;

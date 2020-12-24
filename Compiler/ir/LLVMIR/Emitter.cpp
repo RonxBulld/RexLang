@@ -457,7 +457,7 @@ namespace rexlang {
     }
 
     llvm::Type *IREmit::_EmitImpl_(TypeDecl *typeDecl) {
-        if (BuiltinTypeDecl *builtin_type_decl = typeDecl->as<BuiltinTypeDecl>()) {
+        if (BuiltinType *builtin_type_decl = typeDecl->as<BuiltinType>()) {
             return Emit(builtin_type_decl);
         } else if (ArrayType *array_decl = typeDecl->as<ArrayType>()) {
             return Emit(array_decl);
@@ -469,8 +469,8 @@ namespace rexlang {
         }
     }
 
-    llvm::Type *IREmit::_EmitImpl_(BuiltinTypeDecl *builtinTypeDecl) {
-        auto type_found = type_object_pool_.find(builtinTypeDecl);
+    llvm::Type *IREmit::_EmitImpl_(BuiltinType *builtinType) {
+        auto type_found = type_object_pool_.find(builtinType);
         llvm::Type *type = nullptr;
         if (type_found != type_object_pool_.end()) {
             if ((type = type_found->second)) {
@@ -479,21 +479,21 @@ namespace rexlang {
         }
 
 
-             if (builtinTypeDecl->isVoidType()) { type = Builder.getVoidTy(); }
-        else if (builtinTypeDecl->isCharType()) { type = Builder.getInt8Ty(); }
-        else if (builtinTypeDecl->isIntegerType()) { type = Builder.getInt32Ty(); }
-        else if (builtinTypeDecl->isFloatType()) { type = Builder.getFloatTy(); }
-        else if (builtinTypeDecl->isBoolType()) { type = Builder.getInt1Ty(); }
-        else if (builtinTypeDecl->isStringType()) { type = RTBuilder.getStringType(); } /*字符串对象指针*/
-        else if (builtinTypeDecl->isDataSetType()) { type = RTBuilder.getStringType(); } /*字节集对象指针*/
-        else if (builtinTypeDecl->isShortType()) { type = Builder.getInt16Ty(); }
-        else if (builtinTypeDecl->isLongType()) { type = Builder.getInt64Ty(); }
-        else if (builtinTypeDecl->isDatetimeType()) { type = Builder.getInt64Ty(); }
-        else if (builtinTypeDecl->isDoubleType()) { type = Builder.getDoubleTy(); }
-        else if (builtinTypeDecl->isFuncPtrType()) { type = Builder.getVoidTy()->getPointerTo(); }
+             if (builtinType->isVoidType())     { type = Builder.getVoidTy(); }
+        else if (builtinType->isCharType())     { type = Builder.getInt8Ty(); }
+        else if (builtinType->isIntegerType())  { type = Builder.getInt32Ty(); }
+        else if (builtinType->isFloatType())    { type = Builder.getFloatTy(); }
+        else if (builtinType->isBoolType())     { type = Builder.getInt1Ty(); }
+        else if (builtinType->isStringType())   { type = RTBuilder.getStringType(); } /*字符串对象指针*/
+        else if (builtinType->isDataSetType())  { type = RTBuilder.getStringType(); } /*字节集对象指针*/
+        else if (builtinType->isShortType())    { type = Builder.getInt16Ty(); }
+        else if (builtinType->isLongType())     { type = Builder.getInt64Ty(); }
+        else if (builtinType->isDatetimeType()) { type = Builder.getInt64Ty(); }
+        else if (builtinType->isDoubleType())   { type = Builder.getDoubleTy(); }
+        else if (builtinType->isFuncPtrType())  { type = Builder.getVoidTy()->getPointerTo(); }
         else { assert(false); return nullptr; }
 
-        type_object_pool_[builtinTypeDecl] = type;
+        type_object_pool_[builtinType] = type;
         return type;
     }
 
@@ -1610,7 +1610,7 @@ namespace rexlang {
     llvm::GlobalVariable *  IREmit::Emit(FileVariableDecl *     astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
     llvm::Value *           IREmit::Emit(LocalVariableDecl *    astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
     llvm::Type *            IREmit::Emit(TypeDecl *             astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
-    llvm::Type *            IREmit::Emit(BuiltinTypeDecl *      astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
+    llvm::Type *            IREmit::Emit(BuiltinType *          astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
     llvm::PointerType *     IREmit::Emit(ArrayType *            astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
     llvm::PointerType *     IREmit::Emit(StructureDecl *        astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }
     llvm::Function *        IREmit::Emit(FunctorDecl *          astNode) { OnEmitBegin(astNode); auto ret = _EmitImpl_(astNode); OnEmitEnd(astNode); return ret; }

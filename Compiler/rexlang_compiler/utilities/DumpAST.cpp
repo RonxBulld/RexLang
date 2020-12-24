@@ -188,7 +188,7 @@ namespace rexlang {
         POST_ACTION();
     }
 
-    void DumpAST::Visit(BuiltinTypeDecl &node) {
+    void DumpAST::Visit(BuiltinType &node) {
         PREV_ACTION();
 
         POST_ACTION();

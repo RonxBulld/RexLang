@@ -24,7 +24,7 @@ namespace rexlang {
         if (convertExpression->getExpressionType() == targetType) {
             // 类型一致，无需转换
             return MakeNoErrVal(convertExpression);
-        } else if (!targetType->is<BuiltinTypeDecl>() || !convertExpression->getExpressionType()->is<BuiltinTypeDecl>()) {
+        } else if (!targetType->is<BuiltinType>() || !convertExpression->getExpressionType()->is<BuiltinType>()) {
             // 其中有非内置类型，无法转换
             return MakeNoErrVal(convertExpression);
         } else {

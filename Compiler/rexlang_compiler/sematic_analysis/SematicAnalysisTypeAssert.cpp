@@ -29,8 +29,8 @@ namespace rexlang {
         }
         // - 两者都不是数组
         {
-            const BuiltinTypeDecl *lhs_builtin = lhs_type->as<BuiltinTypeDecl>();
-            const BuiltinTypeDecl *rhs_builtin = rhs_type->as<BuiltinTypeDecl>();
+            const BuiltinType *lhs_builtin = lhs_type->as<BuiltinType>();
+            const BuiltinType *rhs_builtin = rhs_type->as<BuiltinType>();
             // 2. 其中之一是内置类型
             if (lhs_builtin || rhs_builtin) {
                 if (lhs_builtin && rhs_builtin) {

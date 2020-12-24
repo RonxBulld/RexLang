@@ -157,7 +157,7 @@ namespace rexlang {
     bool    TypeDecl            :: isAPICommandType     () const { return false; }
     bool    TypeDecl            :: isReferenceType      () const { return false; }
 
-    bool    BuiltinTypeDecl     :: isBuiltinType        () const { return true; }
+    bool    BuiltinType         :: isBuiltinType        () const { return true; }
     bool    BuiltinVoidType     :: isVoidType           () const { return true; }
     bool    BuiltinCommonType   :: isCommonType         () const { return true; }
     bool    BuiltinCharType     :: isCharType           () const { return true; }
@@ -177,21 +177,21 @@ namespace rexlang {
     bool    APICommandDecl      :: isAPICommandType     () const { return true; }
     bool    ReferenceType       :: isReferenceType      () const { return true; }
 
-    bool BuiltinTypeDecl::isExtendBooleanType() const {
+    bool BuiltinType::isExtendBooleanType() const {
         if (this->isBoolType())    { return true; }
         if (this->isNumerical())   { return true; }
         if (this->isFuncPtrType()) { return true; }
         return false;
     }
 
-    bool BuiltinTypeDecl::isNumerical() const {
+    bool BuiltinType::isNumerical() const {
         if (this->isIntegerCategory()) { return true; }
         if (this->isFloatType())       { return true; }
         if (this->isDoubleType())      { return true; }
         return false;
     }
 
-    bool BuiltinTypeDecl::isIntegerCategory() const {
+    bool BuiltinType::isIntegerCategory() const {
         if (this->isCharType())    { return true; }
         if (this->isIntegerType()) { return true; }
         if (this->isShortType())   { return true; }
@@ -263,7 +263,7 @@ namespace rexlang {
     bool TypeDecl::isBinOptValid(OperatorType opt, VariTypeDecl *otherType) const { return false; }
 
     bool UnaryExpression::isUnaryOperateValid() const {
-        BuiltinTypeDecl *oprBuiltinType = this->operand_value_->getExpressionType()->as<BuiltinTypeDecl>();
+        BuiltinType *oprBuiltinType = this->operand_value_->getExpressionType()->as<BuiltinType>();
         if (oprBuiltinType == nullptr) {
             assert(false);
             return false;
@@ -273,8 +273,8 @@ namespace rexlang {
 
     bool BinaryExpression::isBinaryOperateValid() const {
         // 只有内置类型才能执行二元运算
-        BuiltinTypeDecl *lhsBuiltinType = this->lhs_->getExpressionType()->as<BuiltinTypeDecl>();
-        BuiltinTypeDecl *rhsBuiltinType = this->rhs_->getExpressionType()->as<BuiltinTypeDecl>();
+        BuiltinType *lhsBuiltinType = this->lhs_->getExpressionType()->as<BuiltinType>();
+        BuiltinType *rhsBuiltinType = this->rhs_->getExpressionType()->as<BuiltinType>();
         if (lhsBuiltinType == nullptr || rhsBuiltinType == nullptr) {
             assert(false);
             return false;

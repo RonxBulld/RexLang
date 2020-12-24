@@ -87,10 +87,10 @@ namespace rexlang {
     TypeDecl::TypeDecl(IdentDef *name) : TagDecl(name) {}
 
     /******************************************************************
-     * BuiltinTypeDecl
+     * BuiltinType
      ******************************************************************/
 
-    BuiltinTypeDecl::BuiltinTypeDecl(IdentDef *typeName, EnumOfBuiltinType typeEnum)
+    BuiltinType::BuiltinType(IdentDef *typeName, EnumOfBuiltinType typeEnum)
             : VariTypeDecl(typeName) {
         (void) typeEnum;
     }

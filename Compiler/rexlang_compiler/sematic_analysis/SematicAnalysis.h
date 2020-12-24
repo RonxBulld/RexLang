@@ -187,7 +187,7 @@ namespace rexlang {
          * 若找不到则返回空指针
          * hint 置空则默认为整数型
          */
-        TypeDecl * QueryTypeDeclWithName(TranslateUnit *translateUnit, const StringRef &name, SematicAnalysisContext *context, BuiltinTypeDecl *hint = nullptr);
+        TypeDecl * QueryTypeDeclWithName(TranslateUnit *translateUnit, const StringRef &name, SematicAnalysisContext *context, BuiltinType *hint = nullptr);
 
     public:
         bool Run(TranslateUnit * translateUnitPtr);

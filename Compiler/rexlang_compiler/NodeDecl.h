@@ -68,7 +68,7 @@ namespace rexlang {
     // Type declare
 
     class Decl;                 class TagDecl;                  class TypeDecl;
-    class VariTypeDecl;         class StructureDecl;            class BuiltinTypeDecl;
+    class VariTypeDecl;         class StructureDecl;            class BuiltinType;
     class ArrayType;            class ReferenceType;            class MacroDecl;
 
     // Entity declare
@@ -114,7 +114,7 @@ namespace rexlang {
         kNTyDecl,
         kNTyIdentDef, kNTyTagDecl, kNTyVariableDecl, kNTyBaseVariDecl,
         kNTyGlobalVariableDecl, kNTyParameterDecl, kNTyMemberVariableDecl, kNTyFileVariableDecl,
-        kNTyLocalVariableDecl, kNTyTypeDecl, kNTyVariTypeDecl, kNTyBuiltinTypeDecl,
+        kNTyLocalVariableDecl, kNTyTypeDecl, kNTyVariTypeDecl, kNTyBuiltinType,
         kNTyArrayType, kNTyMacroDecl, kNTyStructureDecl, kNTyReferenceType,
         kNTyFunctorDecl, kNTyFunctionDecl, kNTyProgSetDecl, kNTyAPICommandDecl,
 
@@ -954,9 +954,9 @@ namespace rexlang {
     /**
      * 内置类型定义
      */
-    class BuiltinTypeDecl : public VariTypeDecl {
+    class BuiltinType : public VariTypeDecl {
     protected:
-        BuiltinTypeDecl(IdentDef *typeName, EnumOfBuiltinType typeEnum) ;
+        BuiltinType(IdentDef *typeName, EnumOfBuiltinType typeEnum) ;
 
     public:
         SEMATIC_ANALYSIS_INTERNAL
@@ -982,7 +982,7 @@ namespace rexlang {
     /**
      * 内置类型-空类型
      */
-    class BuiltinVoidType : public BuiltinTypeDecl {
+    class BuiltinVoidType : public BuiltinType {
     public:
         explicit BuiltinVoidType(IdentDef *typeName) ;
 
@@ -995,14 +995,14 @@ namespace rexlang {
 
         StringRef           getSelfMangling() const override ;
 
-        static EnumOfBuiltinType    BuiltinType     () ;
-        static const char *         TypeText        () ;
+        static EnumOfBuiltinType    builtinType     () ;
+        static const char *         typeText        () ;
     };
 
     /**
      * 内置类型-通用型
      */
-    class BuiltinCommonType : public BuiltinTypeDecl {
+    class BuiltinCommonType : public BuiltinType {
     public:
         explicit BuiltinCommonType(IdentDef *typeName) ;
 
@@ -1015,14 +1015,14 @@ namespace rexlang {
 
         StringRef           getSelfMangling() const override ;
 
-        static EnumOfBuiltinType    BuiltinType     () ;
-        static const char *         TypeText        () ;
+        static EnumOfBuiltinType    builtinType     () ;
+        static const char *         typeText        () ;
     };
 
     /**
      * 内置类型-字符型
      */
-    class BuiltinCharType : public BuiltinTypeDecl {
+    class BuiltinCharType : public BuiltinType {
     public:
         explicit BuiltinCharType(IdentDef *typeName) ;
 
@@ -1037,14 +1037,14 @@ namespace rexlang {
 
         StringRef           getSelfMangling() const override ;
 
-        static EnumOfBuiltinType    BuiltinType     () ;
-        static const char *         TypeText        () ;
+        static EnumOfBuiltinType    builtinType     () ;
+        static const char *         typeText        () ;
     };
 
     /**
      * 内置类型-整数型
      */
-    class BuiltinIntegerType : public BuiltinTypeDecl {
+    class BuiltinIntegerType : public BuiltinType {
     public:
         explicit BuiltinIntegerType(IdentDef *typeName) ;
 
@@ -1059,14 +1059,14 @@ namespace rexlang {
 
         StringRef           getSelfMangling() const override ;
 
-        static EnumOfBuiltinType    BuiltinType     () ;
-        static const char *         TypeText        () ;
+        static EnumOfBuiltinType    builtinType     () ;
+        static const char *         typeText        () ;
     };
 
     /**
      * 内置类型-浮点型
      */
-    class BuiltinFloatType : public BuiltinTypeDecl {
+    class BuiltinFloatType : public BuiltinType {
     public:
         explicit BuiltinFloatType(IdentDef *typeName) ;
 
@@ -1081,14 +1081,14 @@ namespace rexlang {
 
         StringRef           getSelfMangling() const override ;
 
-        static EnumOfBuiltinType    BuiltinType     () ;
-        static const char *         TypeText        () ;
+        static EnumOfBuiltinType    builtinType     () ;
+        static const char *         typeText        () ;
     };
 
     /**
      * 内置类型-逻辑型
      */
-    class BuiltinBoolType : public BuiltinTypeDecl {
+    class BuiltinBoolType : public BuiltinType {
     public:
         explicit BuiltinBoolType(IdentDef *typeName) ;
 
@@ -1102,14 +1102,14 @@ namespace rexlang {
 
         StringRef           getSelfMangling() const override ;
 
-        static EnumOfBuiltinType    BuiltinType     () ;
-        static const char *         TypeText        () ;
+        static EnumOfBuiltinType    builtinType     () ;
+        static const char *         typeText        () ;
     };
 
     /**
      * 内置类型-文本型
      */
-    class BuiltinStringType : public BuiltinTypeDecl {
+    class BuiltinStringType : public BuiltinType {
     public:
         explicit BuiltinStringType(IdentDef *typeName) ;
 
@@ -1128,14 +1128,14 @@ namespace rexlang {
 
         StringRef           getSelfMangling() const override ;
 
-        static EnumOfBuiltinType    BuiltinType     () ;
-        static const char *         TypeText        () ;
+        static EnumOfBuiltinType    builtinType     () ;
+        static const char *         typeText        () ;
     };
 
     /**
      * 内置类型-字节集型
      */
-    class BuiltinDataSetType : public BuiltinTypeDecl {
+    class BuiltinDataSetType : public BuiltinType {
     public:
         explicit BuiltinDataSetType(IdentDef *typeName) ;
 
@@ -1154,14 +1154,14 @@ namespace rexlang {
 
         StringRef           getSelfMangling() const override ;
 
-        static EnumOfBuiltinType    BuiltinType     () ;
-        static const char *         TypeText        () ;
+        static EnumOfBuiltinType    builtinType     () ;
+        static const char *         typeText        () ;
     };
 
     /**
      * 内置类型-短整型
      */
-    class BuiltinShortType : public BuiltinTypeDecl {
+    class BuiltinShortType : public BuiltinType {
     public:
         explicit BuiltinShortType(IdentDef *typeName) ;
 
@@ -1176,14 +1176,14 @@ namespace rexlang {
 
         StringRef           getSelfMangling() const override ;
 
-        static EnumOfBuiltinType    BuiltinType     () ;
-        static const char *         TypeText        () ;
+        static EnumOfBuiltinType    builtinType     () ;
+        static const char *         typeText        () ;
     };
 
     /**
      * 内置类型-长整型
      */
-    class BuiltinLongType : public BuiltinTypeDecl {
+    class BuiltinLongType : public BuiltinType {
     public:
         explicit BuiltinLongType(IdentDef *typeName) ;
 
@@ -1198,14 +1198,14 @@ namespace rexlang {
 
         StringRef           getSelfMangling() const override ;
 
-        static EnumOfBuiltinType    BuiltinType     () ;
-        static const char *         TypeText        () ;
+        static EnumOfBuiltinType    builtinType     () ;
+        static const char *         typeText        () ;
     };
 
     /**
      * 内置类型-日期时间型
      */
-    class BuiltinDatetimeType : public BuiltinTypeDecl {
+    class BuiltinDatetimeType : public BuiltinType {
     public:
         explicit BuiltinDatetimeType(IdentDef *typeName) ;
 
@@ -1219,14 +1219,14 @@ namespace rexlang {
 
         StringRef           getSelfMangling() const override ;
 
-        static EnumOfBuiltinType    BuiltinType     () ;
-        static const char *         TypeText        () ;
+        static EnumOfBuiltinType    builtinType     () ;
+        static const char *         typeText        () ;
     };
 
     /**
      * 内置类型-函数指针型
      */
-    class BuiltinFuncPtrType : public BuiltinTypeDecl {
+    class BuiltinFuncPtrType : public BuiltinType {
     public:
         explicit BuiltinFuncPtrType(IdentDef *typeName) ;
 
@@ -1240,14 +1240,14 @@ namespace rexlang {
 
         StringRef           getSelfMangling() const override ;
 
-        static EnumOfBuiltinType    BuiltinType     () ;
-        static const char *         TypeText        () ;
+        static EnumOfBuiltinType    builtinType     () ;
+        static const char *         typeText        () ;
     };
 
     /**
      * 内置类型-双精度浮点型
      */
-    class BuiltinDoubleType : public BuiltinTypeDecl {
+    class BuiltinDoubleType : public BuiltinType {
     public:
         explicit BuiltinDoubleType(IdentDef *typeName) ;
 
@@ -1262,8 +1262,8 @@ namespace rexlang {
 
         StringRef           getSelfMangling() const override ;
 
-        static EnumOfBuiltinType    BuiltinType     () ;
-        static const char *         TypeText        () ;
+        static EnumOfBuiltinType    builtinType     () ;
+        static const char *         typeText        () ;
     };
 
     /**
@@ -2481,8 +2481,8 @@ namespace rexlang {
         std::vector<SourceFile *>   source_files_;  // 资源文件列表（包括全局变量定义、数据结构定义、类模块定义、DLL接口定义、子程序集合、宏资源）
         FunctorDecl *               main_entry_ = nullptr;  // 程序入口
 
-        NamedOrderDict<BuiltinTypeDecl *>                   named_builtin_type_map_;    // 内建类型命名索引
-        ordered_map<EnumOfBuiltinType, BuiltinTypeDecl *>   builtin_type_map_;          // 内建类型索引
+        NamedOrderDict<BuiltinType *>                   named_builtin_type_map_;    // 内建类型命名索引
+        ordered_map<EnumOfBuiltinType, BuiltinType *>   builtin_type_map_;          // 内建类型索引
 
     private:
         void setMainEnrty(FunctorDecl *functorDecl) ;   // 设置主入口函数
@@ -2510,14 +2510,14 @@ namespace rexlang {
         FunctorDecl *getMainEntry() const ;
 
     private:
-        bool RegistBuiltinType(BuiltinTypeDecl *builtinTypeDecl);
+        bool RegistBuiltinType(BuiltinType *builtinType);
 
     public:
         TranslateUnit() ;
         bool InitBuiltinTypes();
 
     public:
-        BuiltinTypeDecl *       getBuiltinTy    (EnumOfBuiltinType enumOfBuiltinType) const ;
+        BuiltinType *           getBuiltinTy    (EnumOfBuiltinType enumOfBuiltinType) const ;
         BuiltinVoidType *       getVoidTy       () const ;
         BuiltinCommonType *     getCommonTy     () const ;
         BuiltinCharType *       getCharTy       () const ;

@@ -163,7 +163,7 @@ namespace rexlang {
         SemaNamedMap(members_, semaCtx);
     }
 
-    void BuiltinTypeDecl::sematicAnalysisInternal(SemaContext &semaCtx) {
+    void BuiltinType::sematicAnalysisInternal(SemaContext &semaCtx) {
         VariTypeDecl::sematicAnalysisInternal(semaCtx);
     }
 

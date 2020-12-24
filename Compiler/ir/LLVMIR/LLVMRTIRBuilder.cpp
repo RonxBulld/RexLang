@@ -15,9 +15,9 @@ namespace rexlang {
 namespace rexlang {
 
     bool isOrdinaryType(TypeDecl *typeDecl) {
-        bool is_ordinary = typeDecl->is<BuiltinTypeDecl>();
+        bool is_ordinary = typeDecl->is<BuiltinType>();
         if (is_ordinary) {
-            BuiltinTypeDecl *builtin_type_decl = typeDecl->as<BuiltinTypeDecl>();
+            BuiltinType *builtin_type_decl = typeDecl->as<BuiltinType>();
             if (builtin_type_decl->isStringType() || builtin_type_decl->isDataSetType()) {
                 is_ordinary = false;
             }

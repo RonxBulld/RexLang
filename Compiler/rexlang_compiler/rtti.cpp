@@ -29,7 +29,7 @@ namespace rexlang {
             if (0) { case NodeType::kNTyTypeDecl:            return "TypeDecl";            }
             if (0) { case NodeType::kNTyVariTypeDecl:        return "VariTypeDecl";        }
             if (0) { case NodeType::kNTyReferenceType:       return "ReferenceType";       }
-            if (0) { case NodeType::kNTyBuiltinTypeDecl:     return "BuiltinTypeDecl";     }
+            if (0) { case NodeType::kNTyBuiltinType:         return "BuiltinType";     }
             if (0) { case NodeType::kNTyStructureDecl:       return "StructureDecl";       }
             if (0) { case NodeType::kNTyArrayType:           return "ArrayType";           }
             if (0) { case NodeType::kNTyFunctorDecl:         return "FunctorDecl";         }

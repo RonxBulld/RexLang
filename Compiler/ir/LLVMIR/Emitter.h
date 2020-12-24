@@ -129,7 +129,7 @@ namespace rexlang {
         llvm::GlobalVariable *  _EmitImpl_(FileVariableDecl *     fileVariableDecl);
         llvm::Value *           _EmitImpl_(LocalVariableDecl *    localVariableDecl);
         llvm::Type *            _EmitImpl_(TypeDecl *             typeDecl);
-        llvm::Type *            _EmitImpl_(BuiltinTypeDecl *      builtinTypeDecl);
+        llvm::Type *            _EmitImpl_(BuiltinType *          builtinType);
         llvm::PointerType *     _EmitImpl_(ArrayType *            arrayType);
         llvm::PointerType *     _EmitImpl_(StructureDecl *        structureDecl);
         llvm::Function *        _EmitImpl_(FunctorDecl *          functorDecl);
@@ -184,7 +184,7 @@ namespace rexlang {
          *************************************************************************/
 
         llvm::Type *            Emit(TypeDecl *             typeDecl);              //
-        llvm::Type *            Emit(BuiltinTypeDecl *      builtinTypeDecl);       //
+        llvm::Type *            Emit(BuiltinType *          builtinType);       //
         llvm::PointerType *     Emit(ArrayType *            arrayType);             // 创建数组 返回数组指针类型
         llvm::PointerType *     Emit(StructureDecl *        structureDecl);         // 创建结构体定义 返回结构体指针类型
         llvm::Function *        Emit(FunctorDecl *          functorDecl);           // 可调用对象声明 仅声明原型不定义内容

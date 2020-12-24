@@ -166,7 +166,7 @@ namespace rexlang {
         PostAction(node);
     }
 
-    void Visitor::Visit(BuiltinTypeDecl &node) {
+    void Visitor::Visit(BuiltinType &node) {
         HeadAction(node);
         VISIT_BASE(VariTypeDecl, node);
         PrevAction(node);
@@ -622,7 +622,7 @@ namespace rexlang {
     int TypeDecl           ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
     int VariTypeDecl       ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
     int StructureDecl      ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
-    int BuiltinTypeDecl    ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
+    int BuiltinType        ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
     int ArrayType          ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
     int ReferenceType      ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
     int MacroDecl          ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
