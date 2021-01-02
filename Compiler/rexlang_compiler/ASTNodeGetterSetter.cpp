@@ -519,7 +519,10 @@ namespace rexlang {
     }
 
     void StatementBlock::replaceStatements(const std::vector<Statement *> &statements) {
-        statements_ = statements;
+        statements_.clear();
+        for (Statement *stmt : statements) {
+            appendStatement(stmt);
+        }
     }
 
     /******************************************************
