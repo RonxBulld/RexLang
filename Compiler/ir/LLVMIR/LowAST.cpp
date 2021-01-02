@@ -40,6 +40,7 @@ namespace rexlang {
         FunctorDecl *copy_array_fn_   = nullptr ;
 
         FunctorDecl *create_string_fn_ = nullptr ;
+        FunctorDecl *copy_string_fn_   = nullptr ;
 
         FunctorDecl *__rex_acquire_guard_fn_ = nullptr ;
         FunctorDecl *__rex_guard_release_fn_ = nullptr ;
@@ -383,10 +384,46 @@ namespace rexlang {
         public:
             std::vector<Node *> nodes;
         };
-        // 重写字符串/字节集操作符
+        // 重写数组/字符串/字节集操作符
         int OverrideStringOperator() {
             OverrideCollector collector;
             project_db_.getTranslateUnit()->Visit(collector);
+            auto &nodes = collector.nodes;
+            for (Node *node : nodes) {
+                if (AssignStmt *assign_stmt = rtti::dyn_cast<AssignStmt>(node)) {
+                    // 获取左右表达式及类型
+                    Expression *lhs = assign_stmt->getLHS();
+                    Expression *rhs = assign_stmt->getRHS();
+                    TypeDecl *lhs_type = lhs->getExpressionType();
+                    TypeDecl *rhs_type = rhs->getExpressionType();
+
+                    // 选择与类型相应的复制方法并调用
+                    Statement *lowed_stmt = nullptr;
+                    if (lhs_type->isArrayType() && rhs_type->isArrayType()) {
+                        lowed_stmt = B.CreateFCall(copy_array_fn_, {lhs, rhs});
+                    }
+                    else if (lhs_type->isStringType() && rhs_type->isStringType()) {
+                        lowed_stmt = B.CreateFCall(copy_string_fn_, {lhs, rhs});
+                    }
+                    else if (lhs_type->isDataSetType() && rhs_type->isDataSetType()) {
+                        lowed_stmt = B.CreateFCall(copy_string_fn_, {lhs, rhs});
+                    }
+
+                    // 替换原赋值语句
+                    if (lowed_stmt) {
+                        StatementBlock *parent_blk = rtti::dyn_cast<StatementBlock>(node->getParent());
+                        assert(parent_blk);
+                        parent_blk->replaceStatement(assign_stmt, lowed_stmt);
+                    }
+                }
+                else if (BinaryExpression *bin_expr = rtti::dyn_cast<BinaryExpression>(node)) {
+                }
+                else if (ArrayIndex *array_index = rtti::dyn_cast<ArrayIndex>(node)) {
+                }
+                else {
+                    assert(false);
+                }
+            }
             return 0;
         }
 
@@ -410,6 +447,7 @@ namespace rexlang {
             create_array_fn_        = fetch_api("create_array");
             copy_array_fn_          = fetch_api("copy_array");
             create_string_fn_       = fetch_api("create_string");
+            copy_string_fn_         = fetch_api("copy_string");
             __rex_acquire_guard_fn_ = fetch_api("__rex_acquire_guard");
             __rex_guard_release_fn_ = fetch_api("__rex_guard_release");
 
