@@ -5,6 +5,10 @@
     .参数 dimn, 整数型, , 维度长度
     .参数 ..., 通用型, , 维度序列
 
+.LIB命令 copy_array, , "corelib", "copy_array", ,
+    .参数 arr_dest, 长整数型, , 目标数组
+    .参数 arr_src, 长整数型, , 源数组
+
 .LIB命令 create_string, , "corelib", "create_string", ,
     .参数 str, 长整数型, , 初始化字符串地址
 
