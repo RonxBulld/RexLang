@@ -348,44 +348,44 @@ namespace rexlang {
 
     void Visitor::Visit(WhileStmt &node) {
         HeadAction(node);
-        VISIT_BASE(LoopStatement, node);
         PrevAction(node);
 
         TraverseNode(node.getLoopCondition());
+        VISIT_BASE(LoopStatement, node);
 
         PostAction(node);
     }
 
     void Visitor::Visit(RangeForStmt &node) {
         HeadAction(node);
-        VISIT_BASE(LoopStatement, node);
         PrevAction(node);
 
         TraverseNode(node.getRangeSize());
         TraverseNode(node.getLoopVari());
+        VISIT_BASE(LoopStatement, node);
 
         PostAction(node);
     }
 
     void Visitor::Visit(ForStmt &node) {
         HeadAction(node);
-        VISIT_BASE(LoopStatement, node);
         PrevAction(node);
 
         TraverseNode(node.getStartValue());
         TraverseNode(node.getStopValue());
         TraverseNode(node.getStepValue());
         TraverseNode(node.getLoopVari());
+        VISIT_BASE(LoopStatement, node);
 
         PostAction(node);
     }
 
     void Visitor::Visit(DoWhileStmt &node) {
         HeadAction(node);
-        VISIT_BASE(LoopStatement, node);
         PrevAction(node);
 
         TraverseNode(node.getCondition());
+        VISIT_BASE(LoopStatement, node);
 
         PostAction(node);
     }
