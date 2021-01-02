@@ -11,6 +11,7 @@
 #include "../SimpleRTTI_ArguType.h"
 #include "../../rexlang_compiler/ASTUtility.h"
 #include "../../rexlang_compiler/utilities/ASTBuilder.h"
+#include "../../rexlang_compiler/utilities/Visitor.h"
 
 namespace rexlang {
 
@@ -36,6 +37,8 @@ namespace rexlang {
         StatementBlock *init_stmtblk_    = nullptr ;    // 初始化函数语句块
 
         FunctorDecl *create_array_fn_ = nullptr ;
+        FunctorDecl *copy_array_fn_   = nullptr ;
+
         FunctorDecl *create_string_fn_ = nullptr ;
 
         FunctorDecl *__rex_acquire_guard_fn_ = nullptr ;
@@ -362,11 +365,29 @@ namespace rexlang {
         }
 
     private:
+        // 收集需要被改写的节点
+        class OverrideCollector : public Visitor {
+        public:
+            // 1. 赋值操作符
+            void Visit(AssignStmt &node) override {
+                nodes.push_back(&node);
+            }
+            // 2. 加法操作符
+            void Visit(BinaryExpression &node) override {
+                nodes.push_back(&node);
+            }
+            // 3. 索引操作符
+            void Visit(ArrayIndex &node) override {
+                nodes.push_back(&node);
+            }
+        public:
+            std::vector<Node *> nodes;
+        };
         // 重写字符串/字节集操作符
         int OverrideStringOperator() {
-            // 1. 重写赋值操作符
-            // 2. 重写加法操作符
-            // 3. 重写索引操作符
+            OverrideCollector collector;
+            project_db_.getTranslateUnit()->Visit(collector);
+            return 0;
         }
 
     private:    // 杂项辅助
@@ -387,6 +408,7 @@ namespace rexlang {
             };
 
             create_array_fn_        = fetch_api("create_array");
+            copy_array_fn_          = fetch_api("copy_array");
             create_string_fn_       = fetch_api("create_string");
             __rex_acquire_guard_fn_ = fetch_api("__rex_acquire_guard");
             __rex_guard_release_fn_ = fetch_api("__rex_guard_release");
