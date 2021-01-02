@@ -525,6 +525,17 @@ namespace rexlang {
         }
     }
 
+    bool StatementBlock::replaceStatement(Statement *origin, Statement *stmt) {
+        for (size_t idx = 0, count = statements_.size(); idx < count; ++idx) {
+            if (statements_[idx] == origin) {
+                statements_[idx] = stmt;
+                setChild(stmt);
+                return true;
+            }
+        }
+        return false;
+    }
+
     /******************************************************
      * HierarchyIdentifier
      ******************************************************/
