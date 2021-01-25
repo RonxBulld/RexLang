@@ -13,8 +13,12 @@ namespace rexlang {
      * ReferenceType
      */
 
-    ReferenceType *ReferenceType::get(TypeDecl *pointeeType) {
-        return Node::Create<ReferenceType>(pointeeType->getAstContext(), pointeeType);
+    VariTypeDecl *ReferenceType::get(TypeDecl *pointeeType) {
+        if (!pointeeType->isReferenceType()) {
+            return Node::Create<ReferenceType>(pointeeType->getAstContext(), pointeeType);
+        } else {
+            return rtti::dyn_cast<ReferenceType>(pointeeType);
+        }
     }
 
     TypeDecl * ReferenceType::peek(TypeDecl *type) {

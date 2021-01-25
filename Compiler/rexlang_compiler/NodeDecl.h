@@ -225,7 +225,7 @@ namespace rexlang {
     /*===---------------------------------------===*
      * 节点基类
      *===---------------------------------------===*/
-    class __attribute__((annotate("BaseAstNode"))) Node {
+    class Node {
     private:
         size_t          node_id_            = 0;        // 节点ID
         ASTContext *    ast_context_        = nullptr;  // 语法树编译上下文
@@ -626,7 +626,9 @@ namespace rexlang {
         template <typename NewTy, typename ... Args>
         void wrapTypeUse(Args && ... args) {
             if (VariTypeDecl *__type = type()) {
-                updateType(NewTy::get(__type, args...));
+                VariTypeDecl *__warped = NewTy::get(__type, args...);
+                assert(__warped);
+                updateType(__warped);
             }
             else {
                 assert(false);
@@ -931,8 +933,8 @@ namespace rexlang {
         explicit ReferenceType(TypeDecl *   pointeeType) ;
 
     public:
-        static ReferenceType *get (TypeDecl *   pointeeType) ;
-        static TypeDecl *     peek(TypeDecl *type) ;            // 获取引用的目标类型
+        static VariTypeDecl *   get (TypeDecl *pointeeType) ;   // 获取指定类型的引用类型，如果已经是引用类型则返回其自身
+        static TypeDecl *       peek(TypeDecl *type) ;          // 获取引用的目标类型
 
     public:
         TypeDecl *getPointee() const ;
