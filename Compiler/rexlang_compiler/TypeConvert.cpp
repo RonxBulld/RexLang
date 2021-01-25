@@ -44,7 +44,12 @@ namespace rexlang {
      */
 
     ArrayType *ArrayType::get(TypeDecl *elementType, const std::vector<size_t> &dimensions) {
-        return CreateNode<ArrayType>(elementType->getAstContext(), elementType, dimensions);
+        if (!elementType->isArrayType()) {
+            return CreateNode<ArrayType>(elementType->getAstContext(), elementType, dimensions);
+        } else {
+            ArrayType *origin_array_ty = rtti::dyn_cast<ArrayType>(elementType);
+            return ArrayType::get(origin_array_ty->evalIndexedElementTy(), dimensions);
+        }
     }
 
     /*===--------------------------------===*

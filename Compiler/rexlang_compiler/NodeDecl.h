@@ -1338,7 +1338,7 @@ namespace rexlang {
         SEMATIC_ANALYSIS_INTERNAL
 
     public:
-        static ArrayType *get(TypeDecl *elementType, const std::vector<size_t> &dimensions) ;
+        static ArrayType *get(TypeDecl *elementType, const std::vector<size_t> &dimensions) ;   // 获取指定类型为元素的数组类型，如果已经是数组类型则返回由其元素类型创建的新数组类型
 
     public:
         int Visit(class Visitor &visitor) override ;
