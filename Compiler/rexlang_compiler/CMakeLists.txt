@@ -78,7 +78,7 @@ SET(REXCompilerParse-Source
         utilities/ASTBuilder.cpp
         utilities/ASTBuilder.h
         utilities/NameMangling.cpp
-        )
+        Replacement.cpp)
 
 if(NOT CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
     ADD_COMPILE_OPTIONS("-Wno-overloaded-virtual")

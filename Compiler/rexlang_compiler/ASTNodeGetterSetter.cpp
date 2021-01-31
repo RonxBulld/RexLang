@@ -9,6 +9,7 @@
 
 #include <cstring>
 #include "NodeDecl.h"
+#include "rtti.h"
 #include "utilities/Str2Attr.h"
 
 namespace rexlang {
@@ -540,6 +541,25 @@ namespace rexlang {
      * HierarchyIdentifier
      ******************************************************/
 
+    NameComponent *HierarchyIdentifier::getNameComponentAt(size_t idx) {
+        if (idx < name_components_.size()) {
+            return name_components_.at(idx);
+        } else {
+            assert(false);
+            return nullptr;
+        }
+    }
+
+    void HierarchyIdentifier::setNameComponentAt(size_t idx, NameComponent *nameComponent) {
+        if (idx < name_components_.size()) {
+            name_components_[idx] = nameComponent;
+            setChild(nameComponent);
+        } else {
+            assert(false);
+            return;
+        }
+    }
+
     const std::vector<NameComponent *> &HierarchyIdentifier::getNameComponents() { return name_components_; }
 
     int HierarchyIdentifier::indexOf(const NameComponent *component) const {
@@ -587,6 +607,10 @@ namespace rexlang {
         default_statement_ = statement;
         setChild(statement);
     }
+
+    void IfStmt::setConditionAt(size_t idx, Expression *condition) {}
+
+    void IfStmt::setBranchBodyAt(size_t idx, Statement *body) {}
 
     size_t          IfStmt::branchesCount() const           { return switches_.size() + (default_statement_ ? 1 : 0); }
     Expression *    IfStmt::conditionAt (size_t idx) const  { return switches_.at(idx).first;  }
@@ -665,12 +689,22 @@ namespace rexlang {
      * FunctionCall
      ***************************************************/
 
-    void FunctionCall::setName(IdentRefer *funcName) { name_ = funcName; setChild(funcName); }
+    IdentRefer *    FunctionCall::getName() const               { return name_; }
+    void            FunctionCall::setName(IdentRefer *funcName) { name_ = funcName; setChild(funcName); }
 
     void FunctionCall::appendArgument(Expression *argument) {
         assert(arguments_.size() < 255);
         arguments_.emplace_back(argument);
         setChild(argument);
+    }
+
+    void FunctionCall::setArgumentAt(size_t idx, Expression *argument) {
+        if (idx < arguments_.size()) {
+            arguments_[idx] = argument;
+            setChild(argument);
+        } else {
+            assert(false);
+        }
     }
 
     void FunctionCall::setArguments(const std::vector<Expression *> &arguments) {
@@ -730,11 +764,12 @@ namespace rexlang {
      * ArrayIndex
      ***************************************************/
 
-    void ArrayIndex::setBaseComponent(NameComponent *baseComponent) { base_  = baseComponent; setChild(baseComponent); }
-    void ArrayIndex::setIndexExpr    (Expression *   indexExpr)     { index_ = indexExpr;     setChild(indexExpr); }
+    NameComponent * ArrayIndex::getBaseComponent    () const                        { return base_; }
+    void            ArrayIndex::setBaseComponent    (NameComponent *baseComponent)  { base_  = baseComponent; setChild(baseComponent); }
+    void            ArrayIndex::setIndexExpr        (Expression *   indexExpr)      { index_ = indexExpr;     setChild(indexExpr); }
 
     /***************************************************
-     * _OperatorExpression
+     * OperatorExpression
      ***************************************************/
 
     void                 OperatedExpression::setOperator    (const OperatorType &     opt) { assert(!opt.isIllegal()); operator_type_ = opt; }
@@ -758,6 +793,13 @@ namespace rexlang {
 
     Expression *BinaryExpression::getLHS() { return lhs_; }
     Expression *BinaryExpression::getRHS() { return rhs_; }
+
+    /***************************************************
+     * FuncAddrExpression
+     ***************************************************/
+
+    void            FuncAddrExpression::setCallee   (FunctorDecl *callee)   { callee_ = callee; }
+    FunctorDecl *   FuncAddrExpression::getCallee   () const                { return callee_; }
 
     /***************************************************
      * ValueOfDataSet

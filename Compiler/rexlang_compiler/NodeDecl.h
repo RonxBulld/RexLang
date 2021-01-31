@@ -1547,6 +1547,7 @@ namespace rexlang {
 
     public:
         int Visit(class Visitor &visitor) override ;
+        virtual bool replaceChild(Node *origin, Node *goal) ;
 
     public:
         static const NodeType GetClassId () ;
@@ -1578,6 +1579,7 @@ namespace rexlang {
 
     public:
         int Visit(class Visitor &visitor) override ;
+        bool replaceChild(Node *origin, Node *goal) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -1593,6 +1595,7 @@ namespace rexlang {
 
     public:
         int Visit(class Visitor &visitor) override ;
+        bool replaceChild(Node *origin, Node *goal) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -1609,6 +1612,7 @@ namespace rexlang {
 
     public:
         int Visit(class Visitor &visitor) override ;
+        bool replaceChild(Node *origin, Node *goal) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -1626,6 +1630,7 @@ namespace rexlang {
 
     public:
         int Visit(class Visitor &visitor) override ;
+        bool replaceChild(Node *origin, Node *goal) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -1644,6 +1649,7 @@ namespace rexlang {
 
     public:
         int Visit(class Visitor &visitor) override ;
+        bool replaceChild(Node *origin, Node *goal) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -1673,6 +1679,7 @@ namespace rexlang {
 
     public:
         int Visit(class Visitor &visitor) override ;
+        bool replaceChild(Node *origin, Node *goal) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -1691,6 +1698,7 @@ namespace rexlang {
 
     public:
         int Visit(class Visitor &visitor) override ;
+        bool replaceChild(Node *origin, Node *goal) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -1719,8 +1727,10 @@ namespace rexlang {
     public:
         void        appendBranch    (Expression *condition, Statement *statement) ;
         void        setDefault      (Statement *statement) ;
+        void        setConditionAt  (size_t idx, Expression *condition) ;
+        void        setBranchBodyAt (size_t idx, Statement *body) ;
 
-        size_t      branchesCount   () const ;
+        size_t      branchesCount   () const ;              // 包括default分支在内的分支个数
         Expression *conditionAt     (size_t idx) const ;
         Statement * branchBodyAt    (size_t idx) const ;
         Statement * defaultBody     () const ;
@@ -1731,6 +1741,10 @@ namespace rexlang {
 
     public:
         int Visit(class Visitor &visitor) override ;
+
+        void replaceConditionAt (size_t idx, Expression *condition) ;
+        void replaceBranchBodyAt(size_t idx, Statement *statement) ;
+        bool replaceChild(Node *origin, Node *goal) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -1755,6 +1769,7 @@ namespace rexlang {
 
     public:
         int Visit(class Visitor &visitor) override ;
+        bool replaceChild(Node *origin, Node *goal) override ;
 
     public:
         SEMATIC_ANALYSIS_INTERNAL
@@ -1783,6 +1798,7 @@ namespace rexlang {
 
     public:
         int Visit(class Visitor &visitor) override ;
+        bool replaceChild(Node *origin, Node *goal) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -1814,6 +1830,7 @@ namespace rexlang {
 
     public:
         int Visit(class Visitor &visitor) override ;
+        bool replaceChild(Node *origin, Node *goal) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -1852,6 +1869,7 @@ namespace rexlang {
 
     public:
         int Visit(class Visitor &visitor) override ;
+        bool replaceChild(Node *origin, Node *goal) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -1879,6 +1897,7 @@ namespace rexlang {
 
     public:
         int Visit(class Visitor &visitor) override ;
+        bool replaceChild(Node *origin, Node *goal) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -1907,6 +1926,7 @@ namespace rexlang {
 
     public:
         int Visit(class Visitor &visitor) override ;
+        bool replaceChild(Node *origin, Node *goal) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -1940,6 +1960,7 @@ namespace rexlang {
 
     public:
         int Visit(class Visitor &visitor) override ;
+        bool replaceChild(Node *origin, Node *goal) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -1965,6 +1986,8 @@ namespace rexlang {
     public:
         void                                AppendComponent     (NameComponent *component) ;
         const std::vector<NameComponent *> &getNameComponents   () ;
+                          NameComponent *   getNameComponentAt  (size_t idx) ;
+        void                                setNameComponentAt  (size_t idx, NameComponent *nameComponent) ;
 
         /*
          * 查找指定组件在层次名称中的位置，返回一个非负整数
@@ -1977,6 +2000,7 @@ namespace rexlang {
 
     public:
         int Visit(class Visitor &visitor) override ;
+        bool replaceChild(Node *origin, Node *goal) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -1997,6 +2021,7 @@ namespace rexlang {
 
     public:
         int Visit(class Visitor &visitor) override ;
+        bool replaceChild(Node *origin, Node *goal) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -2027,6 +2052,7 @@ namespace rexlang {
 
     public:
         int Visit(class Visitor &visitor) override ;
+        bool replaceChild(Node *origin, Node *goal) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -2053,8 +2079,9 @@ namespace rexlang {
         ArrayIndex(NameComponent *baseComponent, Expression *indexExpression) ;
 
     public:
-        void setBaseComponent(NameComponent *baseComponent) ;
-        void setIndexExpr    (Expression *indexExpr) ;
+        NameComponent * getBaseComponent    () const ;
+        void            setBaseComponent    (NameComponent *baseComponent) ;
+        void            setIndexExpr        (Expression *indexExpr) ;
 
         /*
          * 获取数组索引组件的真实基对象
@@ -2063,7 +2090,7 @@ namespace rexlang {
          * func()[1][3]->func()
          */
         NameComponent * getIndexBase() const ;
-        IdentRefer *    getBaseId   () const override ;
+        IdentRefer *    getBaseId   () const override ;     // 获取IndexBased的IdRef
         Expression *    getIndex    () const ;
 
         /*
@@ -2081,6 +2108,7 @@ namespace rexlang {
 
     public:
         int Visit(class Visitor &visitor) override ;
+        bool replaceChild(Node *origin, Node *goal) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -2099,6 +2127,7 @@ namespace rexlang {
         bool matchFunctor   (FunctorDecl *  functorDecl) const ;    // 检查实参列表是否匹配指定可调用对象原型
 
         void setName            (IdentRefer * name) ;
+        void setArgumentAt      (size_t idx, Expression *argument) ;
         void setArguments       (const std::vector<Expression *> &arguments) ;
         void appendArgument     (Expression *   argument) ;
 
@@ -2113,6 +2142,7 @@ namespace rexlang {
     public:
         SEMATIC_ANALYSIS_INTERNAL
 
+        IdentRefer *                getName             () const ;
         IdentRefer *                getBaseId           () const override ;
         FunctorDecl *               getCallee           () const ;
         size_t                      getArgumentsCount   () const ;
@@ -2128,6 +2158,7 @@ namespace rexlang {
 
     public:
         int Visit(class Visitor &visitor) override ;
+        bool replaceChild(Node *origin, Node *goal) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -2167,6 +2198,7 @@ namespace rexlang {
 
     public:
         int Visit(class Visitor &visitor) override ;
+        bool replaceChild(Node *origin, Node *goal) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -2203,6 +2235,7 @@ namespace rexlang {
 
     public:
         int Visit(class Visitor &visitor) override ;
+        bool replaceChild(Node *origin, Node *goal) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -2233,6 +2266,7 @@ namespace rexlang {
 
     public:
         int Visit(class Visitor &visitor) override ;
+        bool replaceChild(Node *origin, Node *goal) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -2267,6 +2301,7 @@ namespace rexlang {
 
     public:
         int Visit(class Visitor &visitor) override ;
+        bool replaceChild(Node *origin, Node *goal) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -2283,6 +2318,7 @@ namespace rexlang {
     protected:
         bool        VerifyExpressionInternal    () override ;
         TypeDecl *  getExpressionTypeInternal   () const override ;
+        void        setCallee                   (FunctorDecl *callee) ;
 
     public:
         explicit FuncAddrExpression(FunctorDecl *callee) ;
@@ -2292,9 +2328,11 @@ namespace rexlang {
 
     public:
         ExprUsage getSubExprAccessType(const Expression *expr) const override ;
+        FunctorDecl *getCallee() const ;
 
     public:
         int Visit(class Visitor &visitor) override ;
+        bool replaceChild(Node *origin, Node *goal) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -2314,6 +2352,7 @@ namespace rexlang {
 
     public:
         int Visit(class Visitor &visitor) override ;
+        bool replaceChild(Node *origin, Node *goal) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -2344,6 +2383,7 @@ namespace rexlang {
 
     public:
         int Visit(class Visitor &visitor) override ;
+        bool replaceChild(Node *origin, Node *goal) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -2372,6 +2412,7 @@ namespace rexlang {
 
     public:
         int Visit(class Visitor &visitor) override ;
+        bool replaceChild(Node *origin, Node *goal) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -2400,6 +2441,7 @@ namespace rexlang {
 
     public:
         int Visit(class Visitor &visitor) override ;
+        bool replaceChild(Node *origin, Node *goal) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -2438,6 +2480,7 @@ namespace rexlang {
 
     public:
         int Visit(class Visitor &visitor) override ;
+        bool replaceChild(Node *origin, Node *goal) override ;
 
     public:
         static const NodeType GetClassId () ;
@@ -2466,6 +2509,7 @@ namespace rexlang {
 
     public:
         int Visit(class Visitor &visitor) override ;
+        bool replaceChild(Node *origin, Node *goal) override ;
 
     public:
         static const NodeType GetClassId () ;
