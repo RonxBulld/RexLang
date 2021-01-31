@@ -184,7 +184,7 @@ namespace rexlang {
             VERIFY_SUB_EXPR(argu) { assert(false); return false; }
         }
 
-        if (!matchFunctor(callee_)) {
+        if (!matchFunctor(getCallee())) {
             assert(false);
             return false;
         }

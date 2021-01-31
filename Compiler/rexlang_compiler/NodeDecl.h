@@ -2094,11 +2094,9 @@ namespace rexlang {
     private:
         IdentRefer *              name_ = nullptr;
         std::vector<Expression *> arguments_;
-        FunctorDecl *             callee_ = nullptr;
 
     private:
         bool matchFunctor   (FunctorDecl *  functorDecl) const ;    // 检查实参列表是否匹配指定可调用对象原型
-        void bindCallee     (FunctorDecl *  functorDecl) ;          // 将可调用对象绑定到函数调用节点
 
         void setName            (IdentRefer * name) ;
         void setArguments       (const std::vector<Expression *> &arguments) ;
