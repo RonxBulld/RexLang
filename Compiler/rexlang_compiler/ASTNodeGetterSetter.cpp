@@ -680,12 +680,8 @@ namespace rexlang {
         }
     }
 
-    void FunctionCall::bindCallee(FunctorDecl *functorDecl) {
-        callee_ = functorDecl;
-    }
-
     FunctorDecl *FunctionCall::getCallee() const {
-        return callee_;
+        return rtti::dyn_cast<FunctorDecl>(name_->def()->getParent());
     }
 
     size_t FunctionCall::getArgumentsCount() const {

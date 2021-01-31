@@ -263,7 +263,7 @@ namespace rexlang {
         setName(name);
         setArguments(arguments);
         if (matchFunctor(callee)) {
-            bindCallee(callee);
+            assert(callee == name->def()->getParent());
         } else {
             assert(false);
         }
