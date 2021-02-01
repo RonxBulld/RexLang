@@ -38,9 +38,11 @@ namespace rexlang {
 
         FunctorDecl *create_array_fn_ = nullptr ;
         FunctorDecl *copy_array_fn_   = nullptr ;
+        FunctorDecl *index_array_fn_  = nullptr ;
 
         FunctorDecl *create_string_fn_ = nullptr ;
         FunctorDecl *copy_string_fn_   = nullptr ;
+        FunctorDecl *concat_string_fn_ = nullptr ;
 
         FunctorDecl *__rex_acquire_guard_fn_ = nullptr ;
         FunctorDecl *__rex_guard_release_fn_ = nullptr ;
@@ -417,11 +419,59 @@ namespace rexlang {
                     }
                 }
                 else if (BinaryExpression *bin_expr = rtti::dyn_cast<BinaryExpression>(node)) {
+                    if (bin_expr->getOperator().getOperate() == OperatorType::Opt::kOptAdd) {
+                        // 获取左右表达式及类型
+                        Expression *lopt = bin_expr->getLHS();
+                        Expression *ropt = bin_expr->getRHS();
+                        TypeDecl *lopt_type = lopt->getExpressionType();
+                        TypeDecl *ropt_type = ropt->getExpressionType();
+
+                        // 选择与类型相应的拼接方法并调用
+                        Expression *lowed_expression = nullptr;
+                        if (lopt_type->isStringType() && ropt_type->isStringType()) {
+                            lowed_expression = B.CreateFCall(concat_string_fn_, {lopt, ropt});
+                        }
+                        else if (lopt_type->isDataSetType() && ropt_type->isDataSetType()) {
+                            lowed_expression = B.CreateFCall(concat_string_fn_, {lopt, ropt});
+                        }
+
+                        // 替换原拼接表达式
+                        if (lowed_expression) {
+                            if (Node *parent_node = node->getParent()) {
+                                if (Statement *parent_stmt = rtti::dyn_cast<Statement>(parent_node)) {
+                                    if (parent_stmt->replaceChild(bin_expr, lowed_expression) == false) {
+                                        assert(false);  // 未能成功替换原拼接表达式
+                                    }
+                                } else {
+                                    assert(false);  // 父节点不是语句或表达式，不符合逻辑
+                                }
+                            } else {
+                                assert(false);  // 不应当没有父节点
+                            }
+                        }
+                    } else {
+                        assert(false);  // 不支持加法以外的运算
+                    }
                 }
                 else if (ArrayIndex *array_index = rtti::dyn_cast<ArrayIndex>(node)) {
+                    ErrOr<std::vector<Expression *>> err_or_dims = array_index->getIndexesList();
+                    if (err_or_dims.NoError()) {
+                        std::vector<Expression *> dims = err_or_dims.Value();
+                        ValueOfDecimal *n = B.Create<ValueOfDecimal>((int) dims.size());
+                        dims.insert(dims.begin(), n);
+                        FunctionCall *lowed_index = B.CreateFCall(index_array_fn_, dims);
+                        assert(lowed_index);
+                        if (Statement *parent_stmt = rtti::dyn_cast<Statement>(node->getParent())) {
+                            if (parent_stmt->replaceChild(array_index, lowed_index) == false) {
+                                assert(false);
+                            }
+                        } else {
+                            assert(false);
+                        }
+                    }
                 }
                 else {
-                    assert(false);
+                    assert(false);  // 意外的混入了其他的东西
                 }
             }
             return 0;
@@ -446,8 +496,10 @@ namespace rexlang {
 
             create_array_fn_        = fetch_api("create_array");
             copy_array_fn_          = fetch_api("copy_array");
+            index_array_fn_       = fetch_api("index_array");
             create_string_fn_       = fetch_api("create_string");
             copy_string_fn_         = fetch_api("copy_string");
+            concat_string_fn_       = fetch_api("concat_string");
             __rex_acquire_guard_fn_ = fetch_api("__rex_acquire_guard");
             __rex_guard_release_fn_ = fetch_api("__rex_guard_release");
 
