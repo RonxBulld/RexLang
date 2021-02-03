@@ -40,14 +40,13 @@ namespace rexlang {
         } else {
             scope = LexicalBlocks.back();
         }
-        size_t line = astNode->ast_context_->getLineFromLocate(astNode->location_start_);
-        size_t column = astNode->ast_context_->getColumnFromLocate(astNode->location_start_);
+        size_t line = astNode->getLeftLine();
+        size_t column = astNode->getLeftColumn();
         llvm::DebugLoc debug_loc = llvm::DebugLoc::get(line, column, scope);
         return debug_loc;
     }
 
     bool DebugInfoMgr::ShouldBeGenerateDI(Node *astNode) {
-        // 判定是否生成调试信息的标准就是看这个节点是否在Subprogram或者Function中
         if (dynamic_cast<Statement*>(astNode)) {
             return true;
         } else if (dynamic_cast<FunctionDecl*>(astNode)) {
@@ -61,8 +60,8 @@ namespace rexlang {
 
     llvm::DICompileUnit *DebugInfoMgr::GetOrCreateDICompileUnit(const Node *node) {
         if (node) {
-            const StringRef &file_path = node->ast_context_->getFileFromLocate(node->location_start_);
-            return GetOrCreateDICompileUnit(file_path.str());
+            const char *file_path = node->getFileName();
+            return GetOrCreateDICompileUnit(file_path);
         } else {
             return nullptr;
         }
@@ -117,19 +116,18 @@ namespace rexlang {
     }
 
     llvm::DISubprogram *DebugInfoMgr::CreateFunctionDI(FunctorDecl *functor, llvm::Function *func_ir) {
-        size_t func_loc = functor->location_start_;
-        std::filesystem::path file_name(functor->ast_context_->getFileFromLocate(func_loc).str());
-        unsigned file_line = functor->ast_context_->GetLineNumber(functor->location_start_);
         // TODO:有必要的话需要执行 Name Mangle
-        StringRef mangled_name = functor->name_.string_;
+        StringRef mangled_name = StringPool::Create(functor->getFileName());
+        std::filesystem::path file_name { mangled_name.str() };
+        unsigned file_line = functor->getLeftLine();
 
         llvm::DIFile *Unit = TheDIBuilder.createFile(
                 file_name.filename().string(),
                 file_name.parent_path().string()
         );
         llvm::DISubprogram *FuncDI = TheDIBuilder.createFunction(
-                GetOrCreateDICompileUnit(file_name.string().c_str()),
-                functor->name_.string_.str(),
+                GetOrCreateDICompileUnit(file_name.string()),
+                mangled_name.str(),
                 mangled_name.str(),
                 Unit,
                 file_line,

@@ -29,15 +29,15 @@ namespace rexlang {
 
         /****** 触发事件 *******/
 
-        int OnEmitBegin (Node *astNode);
-        int OnEmitEnd   (Node *astNode);
+        int OnEmitBegin (Node *astNode);    // 将当前节点的位置注入到调试信息中
+        int OnEmitEnd   (Node *astNode);    // 从调试信息弹出当前节点的位置
 
     public:
 
         /****** 通用功能 *******/
 
-        llvm::DebugLoc  GetDebugLocation    (Node *astNode);
-        bool            ShouldBeGenerateDI  (Node *astNode);
+        llvm::DebugLoc  GetDebugLocation    (Node *astNode);    // 获取指定节点的调试行列信息
+        bool            ShouldBeGenerateDI  (Node *astNode);    // 判定是否生成调试信息的标准就是看这个节点是否在Subprogram或者Function中
 
         /******* 编译单元 *******/
 
