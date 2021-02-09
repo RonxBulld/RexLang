@@ -813,7 +813,8 @@ namespace rexlang {
      * ValueOfDatetime
      ***************************************************/
 
-    void ValueOfDatetime::setTime(time_t time) { time_ = time; }
+    void    ValueOfDatetime::setTime    (time_t time)   { time_ = time; }
+    time_t  ValueOfDatetime::getTime    () const        { return time_; }
 
     /***************************************************
      * ValueOfBool

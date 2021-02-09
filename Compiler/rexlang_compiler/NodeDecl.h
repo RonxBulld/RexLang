@@ -2406,6 +2406,7 @@ namespace rexlang {
 
     public:
         explicit ValueOfDatetime(time_t time) ;
+        time_t getTime() const ;
 
     public:
         SEMATIC_ANALYSIS_INTERNAL
