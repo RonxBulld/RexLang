@@ -3,7 +3,7 @@
 //
 
 #include <filesystem>
-
+#include "../../rexlang_compiler/rtti.h"
 #include "DebugInfoMgr.h"
 
 namespace rexlang {
@@ -47,11 +47,11 @@ namespace rexlang {
     }
 
     bool DebugInfoMgr::ShouldBeGenerateDI(Node *astNode) {
-        if (dynamic_cast<Statement*>(astNode)) {
+        if (rtti::dyn_cast<Statement>(astNode)) {
             return true;
-        } else if (dynamic_cast<FunctionDecl*>(astNode)) {
+        } else if (rtti::dyn_cast<FunctionDecl>(astNode)) {
             return true;
-        } else if (dynamic_cast<FunctorDecl*>(astNode)) {
+        } else if (rtti::dyn_cast<FunctorDecl>(astNode)) {
             return true;
         } else {
             return false;
