@@ -21,6 +21,10 @@
     .参数 str1, 长整数型, , 前字符串
     .参数 str2, 长整数型, , 后字符串
 
+.LIB命令 string_index, 字节型, "corelib", "string_index", ,
+    .参数 str, 长整数型, , 字符串
+    .参数 idx, 整数型, , 索引序号
+
 .LIB命令 __rex_acquire_guard, , "corelib", "__rex_acquire_guard", ,
     .参数 raw_guard_object, 长整数型, 传址, 锁对象
 
