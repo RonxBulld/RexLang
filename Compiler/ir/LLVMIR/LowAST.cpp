@@ -127,22 +127,25 @@ namespace rexlang {
     /*
      * 处理所有变量的初始化
      * 包括文件变量、全局变量、局部变量的初始化
+     * TODO: 成员变量
      */
     class VariInitLower : public LowingAction {
     private:
         VariableDecl *vari_ = nullptr;
+        TypeDecl *vari_origin_ty_ = nullptr ;
     public:
-        VariInitLower(VariableDecl *vari, LowingContext &ctx)
+        VariInitLower(VariableDecl *vari, TypeDecl *variOriginType, LowingContext &ctx)
         : vari_(vari)
+        , vari_origin_ty_(variOriginType)
         , LowingAction(ctx)
         {}
 
         class Creator : public LowingActionCreator {
         public:
             LowingAction *Create(Node *node, LowingContext &ctx) override {
-                // 文件变量、局部变量、全局变量
-                if (node->is<FileVariableDecl>() || node->is<LocalVariableDecl>() || node->is<GlobalVariableDecl>()) {
-                    return new VariInitLower(rtti::dyn_cast<VariableDecl>(node), ctx);
+                // 文件变量、局部变量、全局变量、成员变量
+                if (VariableDecl *variable_decl = rtti::dyn_cast<VariableDecl>(node)) {
+                    return new VariInitLower(variable_decl, variable_decl->getType(), ctx);
                 } else {
                     return nullptr;
                 }
@@ -155,10 +158,10 @@ namespace rexlang {
          * 路由函数
          * 根据不同的类型调用不同的对象初始化函数
          */
-        StatementBlock *HandleObjectInit(VariableDecl *object) const {
-            if (object->getType()->isArrayType  ()) { return HandleArrayInit  (object); }
-            if (object->getType()->isStringType ()) { return HandleStringInit (object); }
-            if (object->getType()->isDataSetType()) { return HandleDatasetInit(object); }
+        StatementBlock *HandleObjectInit() const {
+            if (vari_origin_ty_->isArrayType  ()) { return HandleArrayInit  (); }
+            if (vari_origin_ty_->isStringType ()) { return HandleStringInit (); }
+            if (vari_origin_ty_->isDataSetType()) { return HandleDatasetInit(); }
             // TODO: 支持生成平凡类型的初始化语句
             return nullptr;
         }
@@ -183,7 +186,7 @@ namespace rexlang {
 
             // 生成初始化语句
 
-            Statement *init_stmt = HandleObjectInit(localObj);
+            Statement *init_stmt = HandleObjectInit();
             if (!init_stmt) { return 0; }
 
             if (localObj->isStatic()) {
@@ -250,8 +253,8 @@ namespace rexlang {
          * arr 字节型 数组
          * => arr = create_varialbe('c', 1, 0)
          */
-        StatementBlock *HandleArrayInit(VariableDecl *arrayObject) const {
-            ArrayType *vari_arr_ty = rtti::dyn_cast<ArrayType>(arrayObject->getType());
+        StatementBlock *HandleArrayInit() const {
+            ArrayType *vari_arr_ty = rtti::dyn_cast<ArrayType>(vari_origin_ty_);
             assert(vari_arr_ty);
 
             // 收集数组信息
@@ -274,7 +277,7 @@ namespace rexlang {
             // 创建数组对象初始化语句
 
             AssignStmt *assign_stmt = B.Create<AssignStmt>(
-                    B.CreateHierName(arrayObject->getName()),
+                    B.CreateHierName(vari_->getName()),
                     B.CreateFCall(Ctx.getCreateArrayFn(), args_of_create_array)
             );
 
@@ -289,8 +292,8 @@ namespace rexlang {
          * str 文本型
          * => str = create_string("")
          */
-        StatementBlock *HandleStringInit(VariableDecl *stringObject) const {
-            assert(stringObject->getType()->isStringType());
+        StatementBlock *HandleStringInit() const {
+            assert(vari_origin_ty_->isStringType());
 
             // 准备字符串对象创建参数
 
@@ -300,7 +303,7 @@ namespace rexlang {
             // 创建字符串对象初始化语句
 
             AssignStmt *assign_stmt = B.Create<AssignStmt>(
-                    B.CreateHierName(stringObject->getName()),
+                    B.CreateHierName(vari_->getName()),
                     B.CreateFCall(Ctx.getCreateStringFn(), args_of_create_string)
             );
             StatementBlock *init_blk = B.CreateStatementBlock({assign_stmt});
@@ -315,8 +318,8 @@ namespace rexlang {
          * ds 字节集型
          * => ds = create_string(0)
          */
-        StatementBlock *HandleDatasetInit(VariableDecl *datasetObject) const {
-            assert(datasetObject->getType()->isDataSetType());
+        StatementBlock *HandleDatasetInit() const {
+            assert(vari_origin_ty_->isDataSetType());
 
             // 准备字节集对象创建参数
 
@@ -326,7 +329,7 @@ namespace rexlang {
             // 创建字节集对象初始化语句
 
             AssignStmt *assign_stmt = B.Create<AssignStmt>(
-                    B.CreateHierName(datasetObject->getName()),
+                    B.CreateHierName(vari_->getName()),
                     B.CreateFCall(Ctx.getCreateStringFn(), args_of_create_dataset)
             );
             StatementBlock *init_blk = B.CreateStatementBlock({assign_stmt});
@@ -338,7 +341,7 @@ namespace rexlang {
 
                 // 文件变量和全局变量的初始化代码直接放到初始化函数中
 
-                if (StatementBlock *init_blk = HandleObjectInit(vari_)) {
+                if (StatementBlock *init_blk = HandleObjectInit()) {
                     Ctx.getInitStmtBlk()->appendStatement(init_blk);
                 }
             } else if (LocalVariableDecl *local_vari = rtti::dyn_cast<LocalVariableDecl>(vari_)) {
