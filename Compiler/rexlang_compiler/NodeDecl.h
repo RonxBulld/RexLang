@@ -312,6 +312,11 @@ namespace rexlang {
         virtual GlobalVariableDecl * getGlobalVari(const StringRef &name) const ; // 在文件中查找全局变量
         virtual MacroDecl *          getMacro     (const StringRef &name) const ; // 在文件中查找宏定义
 
+        virtual std::vector<FunctorDecl *>          getFunctorList          () const ;
+        virtual std::vector<TypeDecl *>             getTypeList             () const ;
+        virtual std::vector<GlobalVariableDecl *>   getGlobalVariableList   () const ;
+        virtual std::vector<MacroDecl *>            getMacroList            () const ;
+
         virtual void registResourceTo   (TranslateUnit *translateUnit) ;   // 将资源注册到翻译单元
 
     public:
@@ -345,9 +350,11 @@ namespace rexlang {
     public:
         bool isProgramSetFile() const override ;
 
-        FunctorDecl *getFunctor(const StringRef &name) const override ;
-        ProgSetDecl *getProgSet(const StringRef &name) const override ;
-        ProgSetDecl *getProgSet()                      const ;
+        FunctorDecl *               getFunctor      (const StringRef &name) const override ;
+        std::vector<FunctorDecl *>  getFunctorList  () const override ;
+        ProgSetDecl *               getProgSet      (const StringRef &name) const override ;
+        ProgSetDecl *               getProgSet      ()                      const ;
+
 
     public:
         void appendReferenceLibName (const TString &libraryName) ;
@@ -378,9 +385,10 @@ namespace rexlang {
         SEMATIC_ANALYSIS_INTERNAL
 
     public:
-        void                    appendGlobalVariableDecl(GlobalVariableDecl *globalVariableDecl) ;
-        const GlobalVariMapTy & getGlobalVariMap        () const ;
-        GlobalVariableDecl *    getGlobalVari           (const StringRef &name) const override ;
+        void                                appendGlobalVariableDecl(GlobalVariableDecl *globalVariableDecl) ;
+        const GlobalVariMapTy &             getGlobalVariMap        () const ;
+        GlobalVariableDecl *                getGlobalVari           (const StringRef &name) const override ;
+        std::vector<GlobalVariableDecl *>   getGlobalVariableList   () const override ;
 
     public:
         bool isGlobalVariableFile() const override ;
@@ -412,6 +420,7 @@ namespace rexlang {
         void                    appendStructureDecl (StructureDecl *structureDecl) ;
         const StructDeclMapTy & getTypes            () const ;
         TypeDecl *              getType             (const StringRef &name) const override ;
+        std::vector<TypeDecl *> getTypeList         () const override ;
 
     public:
         bool isDataStructureFile() const override ;
@@ -437,9 +446,10 @@ namespace rexlang {
         SEMATIC_ANALYSIS_INTERNAL
 
     public:
-        void                appendAPIDeclare(APICommandDecl *apiCommandDecl) ;
-        const DllDefMapTy & getAPIDefMap    () const ;
-        FunctorDecl *       getFunctor      (const StringRef &name) const override ;
+        void                        appendAPIDeclare(APICommandDecl *apiCommandDecl) ;
+        const DllDefMapTy &         getAPIDefMap    () const ;
+        FunctorDecl *               getFunctor      (const StringRef &name) const override ;
+        std::vector<FunctorDecl *>  getFunctorList  () const override ;
 
     public:
         bool isAPIDeclareFile() const override ;
@@ -465,9 +475,10 @@ namespace rexlang {
         SEMATIC_ANALYSIS_INTERNAL
 
     public:
-        void                    appendMacroDeclare(MacroDecl *macroDecl) ;
-        const MacroDeclMapTy &  getMacroDeclMap   () const ;
-        MacroDecl *             getMacro          (const StringRef &name) const override ;
+        void                        appendMacroDeclare(MacroDecl *macroDecl) ;
+        const MacroDeclMapTy &      getMacroDeclMap   () const ;
+        MacroDecl *                 getMacro          (const StringRef &name) const override ;
+        std::vector<MacroDecl *>    getMacroList      () const override ;
 
     public:
         bool isMacroDeclareFile() const override ;
@@ -2547,6 +2558,11 @@ namespace rexlang {
         TypeDecl *              getType         (const StringRef &name) const ; // 在文件清单中查找类型
         GlobalVariableDecl *    getGlobalVari   (const StringRef &name) const ; // 在文件清单中查找全局变量
         MacroDecl *             getMacro        (const StringRef &name) const ; // 在文件清单中查找宏定义
+
+        std::vector<FunctorDecl *>          getFunctorList          () const ;
+        std::vector<TypeDecl *>             getTypeList             () const ;
+        std::vector<GlobalVariableDecl *>   getGlobalVariableList   () const ;
+        std::vector<MacroDecl *>            getMacroList            () const ;
 
     public:
         void     setSourceEdition(unsigned edition) ;
