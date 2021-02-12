@@ -384,6 +384,42 @@ namespace rexlang {
     };
 
     /*
+     * 将对复合类型的引用下降为长整数型
+     * 包括函数参数类型、函数返回值类型
+     */
+    class AggregateTypeLower : public LowingAction {
+    private:
+        FunctorDecl *functor_decl_ = nullptr ;
+    public:
+        AggregateTypeLower(FunctorDecl *functorDecl, LowingContext &ctx)
+        : functor_decl_(functorDecl)
+        , LowingAction(ctx)
+        {}
+
+        int Do() override {
+            if (isAggregateType(functor_decl_->getReturnType())) {
+                functor_decl_->updateReturnType(functor_decl_->getTranslateUnit()->getLongTy());
+            }
+            return 0;
+        }
+
+        class Creator : public LowingActionCreator {
+        public:
+            LowingAction *Create(Node *node, LowingContext &ctx) override {
+                if (FunctorDecl *functor_decl = rtti::dyn_cast<FunctorDecl>(node)) {
+                    return new AggregateTypeLower(functor_decl, ctx);
+                } else {
+                    return nullptr;
+                }
+            }
+
+            ~Creator() override = default;
+        };
+
+        ~AggregateTypeLower() override = default ;
+    };
+
+    /*
      * 处理复合类型的赋值
      */
     class AggregateAssignLower : public LowingAction {
@@ -681,6 +717,7 @@ namespace rexlang {
             std::vector<LowingActionCreator *> creators;
 
             creators.push_back(new VariInitLower           ::Creator());
+            creators.push_back(new AggregateTypeLower      ::Creator());
             creators.push_back(new AggregateAssignLower    ::Creator());
             creators.push_back(new AggregateBinaryExprLower::Creator());
             creators.push_back(new ArrayIndexLower         ::Creator());
