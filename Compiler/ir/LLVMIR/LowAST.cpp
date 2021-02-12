@@ -125,7 +125,7 @@ namespace rexlang {
      * 处理所有变量的初始化
      * 包括文件变量、全局变量、局部变量、参数变量的初始化
      * TODO: 成员变量
-     * TODO: 平凡变量
+     * 包括平凡类型和非凡类型的初始化
      */
     class VariInitLower : public LowingAction {
     private:
@@ -160,8 +160,13 @@ namespace rexlang {
             if (vari_origin_ty_->isArrayType  ()) { return HandleArrayInit  (); }
             if (vari_origin_ty_->isStringType ()) { return HandleStringInit (); }
             if (vari_origin_ty_->isDataSetType()) { return HandleDatasetInit(); }
-            // TODO: 支持生成平凡类型的初始化语句
-            return nullptr;
+
+            // 平凡类型的初始化语句
+
+            StatementBlock *init_normal = B.CreateStatementBlock({
+                B.Create<AssignStmt>(B.CreateHierName(base_vari_->getName()), B.CreateInt(0))
+            });
+            return init_normal;
         }
 
         /*
