@@ -112,28 +112,28 @@ namespace rexlang {
         LowingAction(LowingContext &ctx) : Ctx(ctx), B(ctx.getASTBuilder()) {}
         virtual int Do() = 0 ;
     public:
-        virtual ~LowingAction() {}
+        virtual ~LowingAction() = default ;
     };
 
     class LowingActionCreator {
     public:
-        virtual LowingAction *Create(Node *node, LowingContext &ctx) = 0;
+        virtual LowingAction *Create(Node *node, LowingContext &ctx) = 0 ;
         virtual ~LowingActionCreator() = default ;
     };
 
     /*
      * 处理所有变量的初始化
-     * 包括文件变量、全局变量、局部变量的初始化
+     * 包括文件变量、全局变量、局部变量、参数变量的初始化
      * TODO: 成员变量
      * TODO: 平凡变量
      */
     class VariInitLower : public LowingAction {
     private:
-        VariableDecl *vari_ = nullptr;
+        BaseVariDecl *base_vari_ = nullptr;
         TypeDecl *vari_origin_ty_ = nullptr ;
     public:
-        VariInitLower(VariableDecl *vari, TypeDecl *variOriginType, LowingContext &ctx)
-        : vari_(vari)
+        VariInitLower(BaseVariDecl *vari, TypeDecl *variOriginType, LowingContext &ctx)
+        : base_vari_(vari)
         , vari_origin_ty_(variOriginType)
         , LowingAction(ctx)
         {}
@@ -142,8 +142,8 @@ namespace rexlang {
         public:
             LowingAction *Create(Node *node, LowingContext &ctx) override {
                 // 文件变量、局部变量、全局变量、成员变量
-                if (VariableDecl *variable_decl = rtti::dyn_cast<VariableDecl>(node)) {
-                    return new VariInitLower(variable_decl, variable_decl->getType(), ctx);
+                if (BaseVariDecl *base_vari_decl = rtti::dyn_cast<BaseVariDecl>(node)) {
+                    return new VariInitLower(base_vari_decl, base_vari_decl->getType(), ctx);
                 } else {
                     return nullptr;
                 }
@@ -269,7 +269,7 @@ namespace rexlang {
 
             // 更新变量类型
 
-            vari_->updateType(vari_->getTranslateUnit()->getLongTy());
+            base_vari_->updateType(base_vari_->getTranslateUnit()->getLongTy());
 
             // 准备数组对象创建参数
 
@@ -283,7 +283,7 @@ namespace rexlang {
             // 创建数组对象初始化语句
 
             AssignStmt *assign_stmt = B.Create<AssignStmt>(
-                    B.CreateHierName(vari_->getName()),
+                    B.CreateHierName(base_vari_->getName()),
                     B.CreateFCall(Ctx.getCreateArrayFn(), args_of_create_array)
             );
 
@@ -309,12 +309,12 @@ namespace rexlang {
 
             // 更新变量类型
 
-            vari_->updateType(vari_->getTranslateUnit()->getLongTy());
+            base_vari_->updateType(base_vari_->getTranslateUnit()->getLongTy());
 
             // 创建字符串对象初始化语句
 
             AssignStmt *assign_stmt = B.Create<AssignStmt>(
-                    B.CreateHierName(vari_->getName()),
+                    B.CreateHierName(base_vari_->getName()),
                     B.CreateFCall(Ctx.getCreateStringFn(), args_of_create_string)
             );
             StatementBlock *init_blk = B.CreateStatementBlock({assign_stmt});
@@ -340,12 +340,12 @@ namespace rexlang {
 
             // 更新变量类型
 
-            vari_->updateType(vari_->getTranslateUnit()->getLongTy());
+            base_vari_->updateType(base_vari_->getTranslateUnit()->getLongTy());
 
             // 创建字节集对象初始化语句
 
             AssignStmt *assign_stmt = B.Create<AssignStmt>(
-                    B.CreateHierName(vari_->getName()),
+                    B.CreateHierName(base_vari_->getName()),
                     B.CreateFCall(Ctx.getCreateStringFn(), args_of_create_dataset)
             );
             StatementBlock *init_blk = B.CreateStatementBlock({assign_stmt});
@@ -353,19 +353,24 @@ namespace rexlang {
         }
 
         int Do() override {
-            if (vari_->isFileVariable() || vari_->isGlobalVariable()) {
+            if (base_vari_->is<FileVariableDecl>() || base_vari_->is<GlobalVariableDecl>()) {
 
                 // 文件变量和全局变量的初始化代码直接放到初始化函数中
 
                 if (StatementBlock *init_blk = HandleObjectInit()) {
                     Ctx.getInitStmtBlk()->appendStatement(init_blk);
                 }
-            } else if (LocalVariableDecl *local_vari = rtti::dyn_cast<LocalVariableDecl>(vari_)) {
+            } else if (LocalVariableDecl *local_vari = rtti::dyn_cast<LocalVariableDecl>(base_vari_)) {
 
                 // 局部对象由独立函数处理
 
                 int EC = InitLocalObject(local_vari);
                 assert(EC == 0);
+            } else if (ParameterDecl *parameter_decl = rtti::dyn_cast<ParameterDecl>(base_vari_)) {
+
+                // 参数变量仅修改类型即可
+
+                parameter_decl->updateType(parameter_decl->getTranslateUnit()->getLongTy());
             }
             return 0;
         }
@@ -637,7 +642,7 @@ namespace rexlang {
             std::vector<LowingActionCreator *> lower_creators_ ;
             LowingContext &lowing_context_;
         public:
-            std::vector<LowingAction *> lower_actions_ ;
+            std::vector<LowingAction *> lowing_actions_ ;
 
             LowerVisitor(const std::vector<LowingActionCreator *> &lowerCreators, LowingContext &lowingContext)
             : lower_creators_(lowerCreators)
@@ -647,9 +652,9 @@ namespace rexlang {
         public:
             void Visit(Node &node) override {
                 for (LowingActionCreator *creator : lower_creators_) {
-                    LowingAction *action = creator->Create(&node, lowing_context_);
-                    if (action) {
-                        lower_actions_.push_back(action);
+                    LowingAction *lowing_action = creator->Create(&node, lowing_context_);
+                    if (lowing_action) {
+                        lowing_actions_.push_back(lowing_action);
                     }
                 }
             }
@@ -678,7 +683,7 @@ namespace rexlang {
             LowerVisitor lower_visitor(creators, lowing_context_);
             project_db_.getTranslateUnit()->Visit(lower_visitor);
 
-            for (LowingAction *action : lower_visitor.lower_actions_) {
+            for (LowingAction *action : lower_visitor.lowing_actions_) {
                 action->Do();
                 delete action;
             }
