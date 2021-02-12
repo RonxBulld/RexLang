@@ -398,6 +398,8 @@ namespace rexlang {
         return -1;
     }
 
+    void FunctorDecl::updateReturnType(VariTypeDecl * returnType) { return_type_ = returnType; }
+
     TypeDecl *FunctorDecl::getReturnType() const { return return_type_; }
 
     bool FunctorDecl::hasVarArgs() const {

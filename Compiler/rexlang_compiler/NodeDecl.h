@@ -1379,8 +1379,9 @@ namespace rexlang {
         ParameterDecl * getParamByName  (const StringRef &name)              const ;
         int             getIndexOf      (const ParameterDecl *parameterDecl) const ;    // 不存在返回-1
 
-        TypeDecl *getReturnType() const ;
-        bool      hasVarArgs   () const ;
+        void        updateReturnType    (VariTypeDecl *returnType) ;
+        TypeDecl *  getReturnType       () const ;
+        bool        hasVarArgs          () const ;
 
         virtual bool    isStaticLibraryAPI  () const = 0;
         virtual bool    isDynamicLibraryAPI () const = 0;
