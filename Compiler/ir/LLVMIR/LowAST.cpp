@@ -77,9 +77,6 @@ namespace rexlang {
 
         /*
          * 获取运行时API定义
-         * corelib/array_runtime_api.h
-         * corelib/string_runtime_api.h
-         * corelib/struct_runtime_api.h
          */
         void CreateImplicitSysApiDeclFrom(TranslateUnit *TU) {
             assert(TU);
@@ -128,6 +125,7 @@ namespace rexlang {
      * 处理所有变量的初始化
      * 包括文件变量、全局变量、局部变量的初始化
      * TODO: 成员变量
+     * TODO: 平凡变量
      */
     class VariInitLower : public LowingAction {
     private:
@@ -173,13 +171,15 @@ namespace rexlang {
          * 局部对象有静态和动态之分，初始化静态局部对象需要用__rex_acquire_guard保证只有第一次到达语句时才执行初始化
          * 例1：
          * arr 整数型 1,1 静态
+         * => arr 长整数型
          * => 如果真 (__static_guard_arr == 0)
          *      如果真 (__rex_guard_acquire(&__static_guard_arr))
-         *        arr = create_variable('d', 2, 1, 1)
+         *        arr = create_array('d', 2, 1, 1)
          *        __rex_guard_release(&__static_guard_arr)
          * 例2：
          * arr 整数型 1,1
-         * => arr = create_variable('d', 2, 1, 1)
+         * => arr 长整数型
+         * => arr = create_array('d', 2, 1, 1)
          */
         int InitLocalObject(LocalVariableDecl *localObj) const {
             TranslateUnit *TU = localObj->getTranslateUnit();
@@ -248,10 +248,12 @@ namespace rexlang {
          * 根据输入的数组变量节点生成初始化语句块
          * 例1：
          * arr 整数型 1,1
-         * => arr = create_variable('d', 2, 1, 1)
+         * => arr 长整数型
+         * => arr = create_array('d', 2, 1, 1)
          * 例2：
          * arr 字节型 数组
-         * => arr = create_varialbe('c', 1, 0)
+         * => arr 长整数型
+         * => arr = create_array('c', 1, 0)
          */
         StatementBlock *HandleArrayInit() const {
             ArrayType *vari_arr_ty = rtti::dyn_cast<ArrayType>(vari_origin_ty_);
@@ -264,6 +266,10 @@ namespace rexlang {
             if (dimensions.empty()) {
                 dimensions.push_back(0);
             }
+
+            // 更新变量类型
+
+            vari_->updateType(vari_->getTranslateUnit()->getLongTy());
 
             // 准备数组对象创建参数
 
@@ -290,6 +296,7 @@ namespace rexlang {
          * 目前语言设计不支持自定义初始化值，所有的字符串初始化都是空字符串
          * 例如：
          * str 文本型
+         * => str 长整数型
          * => str = create_string("")
          */
         StatementBlock *HandleStringInit() const {
@@ -299,6 +306,10 @@ namespace rexlang {
 
             std::vector<Expression *> args_of_create_string;
             args_of_create_string.push_back(B.CreateStringLiteral(""));
+
+            // 更新变量类型
+
+            vari_->updateType(vari_->getTranslateUnit()->getLongTy());
 
             // 创建字符串对象初始化语句
 
@@ -316,6 +327,7 @@ namespace rexlang {
          * 字节集的操作复用字符串接口
          * 例如：
          * ds 字节集型
+         * => ds 长整数型
          * => ds = create_string(0)
          */
         StatementBlock *HandleDatasetInit() const {
@@ -324,7 +336,11 @@ namespace rexlang {
             // 准备字节集对象创建参数
 
             std::vector<Expression *> args_of_create_dataset;
-            args_of_create_dataset.push_back(B.Create<ValueOfDecimal>((int) 0));
+            args_of_create_dataset.push_back(B.CreateInt(0));
+
+            // 更新变量类型
+
+            vari_->updateType(vari_->getTranslateUnit()->getLongTy());
 
             // 创建字节集对象初始化语句
 
