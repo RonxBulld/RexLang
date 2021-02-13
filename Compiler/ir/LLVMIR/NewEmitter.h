@@ -34,10 +34,35 @@ namespace rexlang {
         int OnEmitBegin (Node *astNode) ;
         int OnEmitEnd   (Node *astNode) ;
 
-        bool DefineMainEntryAndInitFunc() ;
+        bool DefineMainEntry() ;
+        llvm::GlobalVariable *CreateGlobalVariable(TypeDecl *type, const std::string &name) ;
+
+        /****************************************************************************
+         * 这是一组路由函数，用于在对基类 Emit 时便捷的转发到子类的 Emit 处理中
+         ****************************************************************************/
+        template<typename RetTy, typename BaseTy>
+        RetTy EmitNavigate(BaseTy *node);
+        template <typename RetTy, typename BaseTy, typename AlternativeTy, typename ... AlternativesTy>
+        RetTy EmitNavigate(BaseTy *node) ;
+        /****************************************************************************/
 
         DEF_EMIT(llvm::Module, TranslateUnit, TU)
         DEF_EMIT(llvm::GlobalVariable, GlobalVariableDecl, globalVariDecl)
+        DEF_EMIT(llvm::Type, TypeDecl, type)
+
+        DEF_EMIT(llvm::Type, BuiltinVoidType, builtinVoidType)
+        DEF_EMIT(llvm::Type, BuiltinCommonType, builtinCommonType)
+        DEF_EMIT(llvm::Type, BuiltinCharType, builtinCharType)
+        DEF_EMIT(llvm::Type, BuiltinIntegerType, builtinIntegerType)
+        DEF_EMIT(llvm::Type, BuiltinFloatType, builtinFloatType)
+        DEF_EMIT(llvm::Type, BuiltinBoolType, builtinBoolType)
+        DEF_EMIT(llvm::Type, BuiltinStringType, builtinStringType)
+        DEF_EMIT(llvm::Type, BuiltinDataSetType, builtinDataSetType)
+        DEF_EMIT(llvm::Type, BuiltinShortType, builtinShortType)
+        DEF_EMIT(llvm::Type, BuiltinLongType, builtinLongType)
+        DEF_EMIT(llvm::Type, BuiltinDatetimeType, builtinDatetimeType)
+        DEF_EMIT(llvm::Type, BuiltinFuncPtrType, builtinFuncPtrType)
+        DEF_EMIT(llvm::Type, BuiltinDoubleType, builtinDoubleType)
 
     public:
         NewEmitter() ;

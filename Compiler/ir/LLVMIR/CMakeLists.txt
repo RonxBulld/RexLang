@@ -8,10 +8,10 @@ ADD_LIBRARY(${PROJECT_NAME} OBJECT
         EmitLLVMIR.h
 #        LLVMRTIRBuilder.cpp
 #        LLVMRTIRBuilder.h
-#        Emitter.cpp
-#        Emitter.h
-#        DebugInfoMgr.cpp
-#        DebugInfoMgr.h
+        NewEmitter.cpp
+        NewEmitter.h
+        DebugInfoMgr.cpp
+        DebugInfoMgr.h
         LLCodeGen.cpp
         LLCodeGen.h
         LowAST.cpp

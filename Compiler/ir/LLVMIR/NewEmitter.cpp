@@ -91,13 +91,15 @@ namespace rexlang {
         return 0;
     }
 
-    bool NewEmitter::DefineMainEntryAndInitFunc() {
-
-        // 声明主入口函数
-        // int main(int argc, char **argv) ;
+    /*
+     * 声明主入口函数
+     * int main(int argc, char **argv) ;
+     */
+    bool NewEmitter::DefineMainEntry() {
 
         std::vector<llvm::Type *> parameters_type = {Builder.getInt32Ty(), Builder.getInt8PtrTy()->getPointerTo()};
         llvm::FunctionType *main_fn_ty = llvm::FunctionType::get(Builder.getInt32Ty(), parameters_type, false);
+
         SysEntryFunc = llvm::Function::Create(main_fn_ty, llvm::Function::ExternalLinkage, "main", TheModule);
         (SysEntryFunc->arg_begin() + 0)->setName("argc");
         (SysEntryFunc->arg_begin() + 1)->setName("argv");
@@ -106,9 +108,44 @@ namespace rexlang {
         return true;
     }
 
+    /*
+     * 根据指定的类型和名称，创建全局变量
+     */
+    llvm::GlobalVariable *NewEmitter::CreateGlobalVariable(TypeDecl *type, const std::string &name) {
+        llvm::Type *_vari_type = Emit(type);
+        llvm::GlobalVariable *gvari = new llvm::GlobalVariable(
+                /* Module */                    *TheModule,
+                /* Type */                      _vari_type,
+                /* isConstant */                  false,
+                /* Linkage */                   llvm::GlobalValue::LinkageTypes::ExternalLinkage,
+                /* Initializer */               nullptr,
+                /* Name */                      name,
+                /* InsertBefore */              nullptr,
+                /* ThreadLocalMode */           llvm::GlobalVariable::ThreadLocalMode::NotThreadLocal,
+                /* AddressSpace */              0,
+                /* isExternallyInitialized */   false
+        );
+        gvari->setAlignment(4);
+        return gvari;
+    }
+
+    template<typename RetTy, typename BaseTy>
+    RetTy NewEmitter::EmitNavigate(BaseTy *node) {
+        return RetTy{};
+    }
+
+    template<typename RetTy, typename BaseTy, typename AlternativeTy, typename ... AlternativesTy>
+    RetTy NewEmitter::EmitNavigate(BaseTy *node) {
+        if (AlternativeTy *p = rtti::dyn_cast<AlternativeTy>(node)) {
+            return Emit(p);
+        } else {
+            return EmitNavigate<RetTy, BaseTy, AlternativesTy...>(node);
+        }
+    }
+
     llvm::Module *NewEmitter::impl_EmitTranslateUnit(TranslateUnit *TU) {
         RexDbgMgr.GetOrCreateDICompileUnit(TU->getFileName());
-        DefineMainEntryAndInitFunc();
+        DefineMainEntry();
 
         // 全局变量
 
@@ -135,6 +172,33 @@ namespace rexlang {
             }
         }
 
-        return 0;
+        return TheModule;
     }
+
+    llvm::GlobalVariable *NewEmitter::impl_EmitGlobalVariableDecl(GlobalVariableDecl *globalVariDecl) {
+        CreateGlobalVariable(globalVariDecl->getType(), globalVariDecl->getNameRef().str());
+        return nullptr;
+    }
+
+    llvm::Type *NewEmitter::impl_EmitTypeDecl(TypeDecl *type) {
+        llvm::Type *ty = EmitNavigate<
+                llvm::Type *
+                , TypeDecl
+                , BuiltinVoidType
+                , BuiltinCommonType
+                , BuiltinCharType
+                , BuiltinIntegerType
+                , BuiltinFloatType
+                , BuiltinBoolType
+                , BuiltinStringType
+                , BuiltinDataSetType
+                , BuiltinShortType
+                , BuiltinLongType
+                , BuiltinDatetimeType
+                , BuiltinFuncPtrType
+                , BuiltinDoubleType
+                >(type);
+        return ty;
+    }
+
 }
