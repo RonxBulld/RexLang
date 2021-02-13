@@ -75,6 +75,12 @@ namespace rexlang {
         return TheModule;
     }
 
+    llvm::Module *NewEmitter::TakeModule() {
+        llvm::Module *tmp = TheModule;
+        TheModule = nullptr;
+        return tmp;
+    }
+
     int NewEmitter::OnEmitBegin(Node *astNode) {
         RexDbgMgr.OnEmitBegin(astNode);
         return 0;

@@ -44,6 +44,7 @@ namespace rexlang {
         ~NewEmitter() ;
 
         llvm::Module *GetModule() const ;
+        llvm::Module *TakeModule() ;
     };
 
 #undef DEF_EMIT
