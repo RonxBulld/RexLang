@@ -136,6 +136,7 @@ namespace rexlang {
 
     template<typename RetTy, typename BaseTy, typename AlternativeTy, typename ... AlternativesTy>
     RetTy NewEmitter::EmitNavigate(BaseTy *node) {
+        static_assert(std::is_base_of<BaseTy, AlternativeTy>::value, "The alternative type is not a derived type of the base class.");
         if (AlternativeTy *p = rtti::dyn_cast<AlternativeTy>(node)) {
             return Emit(p);
         } else {
