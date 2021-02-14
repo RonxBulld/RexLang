@@ -71,6 +71,10 @@ namespace rexlang {
         delete TheModule;
     }
 
+    llvm::Module *NewEmitter::Gen(ProjectDB &projectDB) {
+        return Emit(projectDB.getTranslateUnit());
+    }
+
     llvm::Module *NewEmitter::GetModule() const {
         return TheModule;
     }
@@ -188,6 +192,11 @@ namespace rexlang {
                 assert(false);
                 function->eraseFromParent();
             }
+        }
+
+        if (llvm::verifyModule(*TheModule)) {
+            llvm::outs() << "\n\n";
+            assert(false);
         }
 
         return TheModule;

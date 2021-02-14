@@ -9,6 +9,8 @@
 
 namespace rexlang {
 
+    class ProjectDB;
+
 #define DEF_EMIT(RET_TY,NODE_TY,NAME) RET_TY *impl_Emit##NODE_TY(NODE_TY *NAME) ; \
                                       RET_TY *Emit(NODE_TY *NAME) { \
                                           OnEmitBegin(NAME); \
@@ -75,6 +77,8 @@ namespace rexlang {
     public:
         NewEmitter() ;
         ~NewEmitter() ;
+
+        llvm::Module *Gen(ProjectDB &projectDB) ;
 
         llvm::Module *GetModule() const ;
         llvm::Module *TakeModule() ;
