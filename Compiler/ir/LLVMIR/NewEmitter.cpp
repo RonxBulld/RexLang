@@ -111,12 +111,12 @@ namespace rexlang {
     /*
      * 根据指定的类型和名称，创建全局变量
      */
-    llvm::GlobalVariable *NewEmitter::CreateGlobalVariable(TypeDecl *type, const std::string &name) {
+    llvm::GlobalVariable *NewEmitter::CreateGlobalVariable(VariTypeDecl *type, const std::string &name) {
         llvm::Type *_vari_type = Emit(type);
         llvm::GlobalVariable *gvari = new llvm::GlobalVariable(
                 /* Module */                    *TheModule,
                 /* Type */                      _vari_type,
-                /* isConstant */                  false,
+                /* isConstant */                false,
                 /* Linkage */                   llvm::GlobalValue::LinkageTypes::ExternalLinkage,
                 /* Initializer */               nullptr,
                 /* Name */                      name,
@@ -148,22 +148,39 @@ namespace rexlang {
         RexDbgMgr.GetOrCreateDICompileUnit(TU->getFileName());
         DefineMainEntry();
 
-        // 全局变量
+        // 声明全局变量
 
         for (GlobalVariableDecl *gvari : TU->getGlobalVariableList()) {
-            Emit(gvari);
+            llvm::GlobalVariable *llvm_gvari = Emit(gvari);
+            variable_map_[gvari] = llvm_gvari;
         }
 
-        // TODO: 文件变量
-        // TODO: 函数声明
-        // TODO: 函数定义
+        // 声明文件变量
 
+        for (FileVariableDecl *fvari : TU->getFileVariableList()) {
+            llvm::GlobalVariable *llvm_fvari = Emit(fvari);
+            variable_map_[fvari] = llvm_fvari;
+        }
+
+        // 声明函数
+
+        for (FunctorDecl *decl : TU->getFunctorList()) {
+            llvm::FunctionType *func_ty = Emit(decl);
+            functor_map_[decl] = func_ty;
+        }
+
+        // 定义函数
+
+        for (FunctionDecl *func : TU->getFunctionList()) {
+            llvm::Function *llvm_func = Emit(func);
+            function_map_[func] = llvm_func;
+        }
 
         DebInfoBuilder.finalize();
 
         // 检查所有函数
 
-        for (auto &functor_object : functor_map_) {
+        for (auto &functor_object : function_map_) {
             llvm::Function *function = functor_object.second;
             if (llvm::verifyFunction(*function, &llvm::outs())) {
                 llvm::outs() << "\n\n";
@@ -177,14 +194,19 @@ namespace rexlang {
     }
 
     llvm::GlobalVariable *NewEmitter::impl_EmitGlobalVariableDecl(GlobalVariableDecl *globalVariDecl) {
-        CreateGlobalVariable(globalVariDecl->getType(), globalVariDecl->getNameRef().str());
-        return nullptr;
+        llvm::GlobalVariable *gvari = CreateGlobalVariable(globalVariDecl->type(), globalVariDecl->getNameRef().str());
+        return gvari;
     }
 
-    llvm::Type *NewEmitter::impl_EmitTypeDecl(TypeDecl *type) {
+    llvm::GlobalVariable *NewEmitter::impl_EmitFileVariableDecl(FileVariableDecl *fileVariableDecl) {
+        llvm::GlobalVariable *fvari = CreateGlobalVariable(fileVariableDecl->type(), fileVariableDecl->getMangling().str()); // 这里需要注意命名冲突问题
+        return fvari;
+    }
+
+    llvm::Type *NewEmitter::impl_EmitVariTypeDecl(VariTypeDecl *type) {
         llvm::Type *ty = EmitNavigate<
                 llvm::Type *
-                , TypeDecl
+                , VariTypeDecl
                 , BuiltinVoidType
                 , BuiltinCommonType
                 , BuiltinCharType
@@ -198,8 +220,33 @@ namespace rexlang {
                 , BuiltinDatetimeType
                 , BuiltinFuncPtrType
                 , BuiltinDoubleType
+                , ReferenceType
+                , StructureDecl
+                , ArrayType
                 >(type);
         return ty;
+    }
+
+    llvm::Type *NewEmitter::impl_EmitBuiltinVoidType    (BuiltinVoidType     *builtinVoidType    ) {                return Builder.getVoidTy  ()                ; }
+    llvm::Type *NewEmitter::impl_EmitBuiltinCommonType  (BuiltinCommonType   *builtinCommonType  ) { assert(false); return Builder.getInt64Ty ()                ; }
+    llvm::Type *NewEmitter::impl_EmitBuiltinCharType    (BuiltinCharType     *builtinCharType    ) {                return Builder.getInt8Ty  ()                ; }
+    llvm::Type *NewEmitter::impl_EmitBuiltinIntegerType (BuiltinIntegerType  *builtinIntegerType ) {                return Builder.getInt32Ty ()                ; }
+    llvm::Type *NewEmitter::impl_EmitBuiltinFloatType   (BuiltinFloatType    *builtinFloatType   ) {                return Builder.getFloatTy ()                ; }
+    llvm::Type *NewEmitter::impl_EmitBuiltinBoolType    (BuiltinBoolType     *builtinBoolType    ) {                return Builder.getInt1Ty  ()                ; }
+    llvm::Type *NewEmitter::impl_EmitBuiltinStringType  (BuiltinStringType   *builtinStringType  ) { assert(false); return Builder.getInt64Ty ()                ; }
+    llvm::Type *NewEmitter::impl_EmitBuiltinDataSetType (BuiltinDataSetType  *builtinDataSetType ) { assert(false); return Builder.getInt64Ty ()                ; }
+    llvm::Type *NewEmitter::impl_EmitBuiltinShortType   (BuiltinShortType    *builtinShortType   ) {                return Builder.getInt16Ty ()                ; }
+    llvm::Type *NewEmitter::impl_EmitBuiltinLongType    (BuiltinLongType     *builtinLongType    ) {                return Builder.getInt64Ty ()                ; }
+    llvm::Type *NewEmitter::impl_EmitBuiltinDatetimeType(BuiltinDatetimeType *builtinDatetimeType) {                return Builder.getInt64Ty ()                ; }
+    llvm::Type *NewEmitter::impl_EmitBuiltinFuncPtrType (BuiltinFuncPtrType  *builtinFuncPtrType ) {                return Builder.getVoidTy  ()->getPointerTo(); }
+    llvm::Type *NewEmitter::impl_EmitBuiltinDoubleType  (BuiltinDoubleType   *builtinDoubleType  ) {                return Builder.getDoubleTy()                ; }
+    llvm::Type *NewEmitter::impl_EmitStructureDecl      (StructureDecl       *structureDecl      ) { assert(false); return Builder.getInt64Ty ()                ; }
+    llvm::Type *NewEmitter::impl_EmitArrayType          (ArrayType           *arrayType          ) { assert(false); return Builder.getInt64Ty ()                ; }
+
+    llvm::Type *NewEmitter::impl_EmitReferenceType(ReferenceType *referenceType) {
+        VariTypeDecl *vari_ty = rtti::dyn_cast<VariTypeDecl>(referenceType->getPointee());
+        assert(vari_ty);
+        return Emit(vari_ty)->getPointerTo();
     }
 
 }

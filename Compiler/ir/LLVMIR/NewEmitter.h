@@ -25,7 +25,9 @@ namespace rexlang {
         DebugInfoMgr        RexDbgMgr       ;
 
     private:
-        ordered_map<FunctorDecl *, llvm::Function *> functor_map_ ;
+        ordered_map<FunctorDecl *, llvm::FunctionType *> functor_map_ ;
+        ordered_map<FunctionDecl *, llvm::Function *> function_map_ ;
+        ordered_map<BaseVariDecl *, llvm::Value *> variable_map_ ;
 
     private:
         llvm::Function *    SysEntryFunc    = nullptr ;
@@ -35,7 +37,7 @@ namespace rexlang {
         int OnEmitEnd   (Node *astNode) ;
 
         bool DefineMainEntry() ;
-        llvm::GlobalVariable *CreateGlobalVariable(TypeDecl *type, const std::string &name) ;
+        llvm::GlobalVariable *CreateGlobalVariable(VariTypeDecl *type, const std::string &name) ;
 
         /****************************************************************************
          * 这是一组路由函数，用于在对基类 Emit 时便捷的转发到子类的 Emit 处理中
@@ -48,7 +50,10 @@ namespace rexlang {
 
         DEF_EMIT(llvm::Module, TranslateUnit, TU)
         DEF_EMIT(llvm::GlobalVariable, GlobalVariableDecl, globalVariDecl)
-        DEF_EMIT(llvm::Type, TypeDecl, type)
+        DEF_EMIT(llvm::GlobalVariable, FileVariableDecl, fileVariableDecl)
+        DEF_EMIT(llvm::Type, VariTypeDecl, type)
+        DEF_EMIT(llvm::FunctionType, FunctorDecl, functorDecl)
+        DEF_EMIT(llvm::Function, FunctionDecl, functionDecl)
 
         DEF_EMIT(llvm::Type, BuiltinVoidType, builtinVoidType)
         DEF_EMIT(llvm::Type, BuiltinCommonType, builtinCommonType)
@@ -63,6 +68,9 @@ namespace rexlang {
         DEF_EMIT(llvm::Type, BuiltinDatetimeType, builtinDatetimeType)
         DEF_EMIT(llvm::Type, BuiltinFuncPtrType, builtinFuncPtrType)
         DEF_EMIT(llvm::Type, BuiltinDoubleType, builtinDoubleType)
+        DEF_EMIT(llvm::Type, ReferenceType, referenceType)
+        DEF_EMIT(llvm::Type, StructureDecl, structureDecl)
+        DEF_EMIT(llvm::Type, ArrayType, arrayType)
 
     public:
         NewEmitter() ;
