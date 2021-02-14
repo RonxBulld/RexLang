@@ -315,6 +315,7 @@ namespace rexlang {
         virtual std::vector<FunctorDecl *>          getFunctorList          () const ;
         virtual std::vector<TypeDecl *>             getTypeList             () const ;
         virtual std::vector<GlobalVariableDecl *>   getGlobalVariableList   () const ;
+        virtual std::vector<FileVariableDecl *>     getFileVariableList     () const ;
         virtual std::vector<MacroDecl *>            getMacroList            () const ;
 
         virtual void registResourceTo   (TranslateUnit *translateUnit) ;   // 将资源注册到翻译单元
@@ -350,10 +351,11 @@ namespace rexlang {
     public:
         bool isProgramSetFile() const override ;
 
-        FunctorDecl *               getFunctor      (const StringRef &name) const override ;
-        std::vector<FunctorDecl *>  getFunctorList  () const override ;
-        ProgSetDecl *               getProgSet      (const StringRef &name) const override ;
-        ProgSetDecl *               getProgSet      ()                      const ;
+        FunctorDecl *                   getFunctor          (const StringRef &name) const override ;
+        std::vector<FunctorDecl *>      getFunctorList      () const override ;
+        ProgSetDecl *                   getProgSet          (const StringRef &name) const override ;
+        ProgSetDecl *                   getProgSet          ()                      const ;
+        std::vector<FileVariableDecl *> getFileVariableList () const override ;
 
 
     public:
@@ -2562,6 +2564,7 @@ namespace rexlang {
         std::vector<FunctorDecl *>          getFunctorList          () const ;
         std::vector<TypeDecl *>             getTypeList             () const ;
         std::vector<GlobalVariableDecl *>   getGlobalVariableList   () const ;
+        std::vector<FileVariableDecl *>     getFileVariableList     () const ;
         std::vector<MacroDecl *>            getMacroList            () const ;
 
     public:

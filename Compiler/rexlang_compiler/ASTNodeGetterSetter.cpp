@@ -123,6 +123,10 @@ namespace rexlang {
         return getList(source_files_, &SourceFile::getGlobalVariableList);
     }
 
+    std::vector<FileVariableDecl *> TranslateUnit::getFileVariableList() const {
+        return getList(source_files_, &SourceFile::getFileVariableList);
+    }
+
     std::vector<MacroDecl *> TranslateUnit::getMacroList() const {
         return getList(source_files_, &SourceFile::getMacroList);
     }
@@ -145,6 +149,7 @@ namespace rexlang {
     std::vector<FunctorDecl *>          SourceFile::getFunctorList          () const { return {}; }
     std::vector<TypeDecl *>             SourceFile::getTypeList             () const { return {}; }
     std::vector<GlobalVariableDecl *>   SourceFile::getGlobalVariableList   () const { return {}; }
+    std::vector<FileVariableDecl *>     SourceFile::getFileVariableList     () const { return {}; }
     std::vector<MacroDecl *>            SourceFile::getMacroList            () const { return {}; }
 
     /***************************************************
@@ -193,6 +198,16 @@ namespace rexlang {
 
     ProgSetDecl * ProgramSetFile::getProgSet() const {
         return program_set_declares_;
+    }
+
+    std::vector<FileVariableDecl *> ProgramSetFile::getFileVariableList() const {
+        std::vector<FileVariableDecl *> list;
+        if (program_set_declares_) {
+            for (auto &item : program_set_declares_->fileVariables()) {
+                list.push_back(item);
+            }
+        }
+        return list;
     }
 
     /***************************************************
