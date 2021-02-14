@@ -5,16 +5,15 @@
 #include <llvm/Support/FileSystem.h>
 
 #include "EmitLLVMIR.h"
-#include "Emitter.h"
+#include "NewEmitter.h"
 
 namespace rexlang {
 
     EmitLLVMIR::EmitLLVMIR(TranslateUnit *translateUnit, ProjectDB &projectDB) {
-        emitter = new IREmit;
-        emitter->Emit(translateUnit);
+        emitter = new NewEmitter;
+        emitter->Gen(projectDB);
         llvm::Module *TheModule = GetModule();
         assert(TheModule);
-        llvm::verifyModule(*TheModule);
     }
 
     void EmitLLVMIR::WriteOutIR() {

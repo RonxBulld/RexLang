@@ -13,7 +13,7 @@ namespace llvm {
 
 namespace rexlang {
 
-    class IREmit;
+    class NewEmitter;
     class LLCodeGen;
     class ProjectDB;
 
@@ -28,7 +28,7 @@ namespace rexlang {
         llvm::Module *GetModule() const;
 
     private:
-        IREmit *emitter = nullptr;
+        NewEmitter *emitter = nullptr;
     };
 
 }
