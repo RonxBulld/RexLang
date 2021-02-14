@@ -313,6 +313,7 @@ namespace rexlang {
         virtual MacroDecl *          getMacro     (const StringRef &name) const ; // 在文件中查找宏定义
 
         virtual std::vector<FunctorDecl *>          getFunctorList          () const ;
+        virtual std::vector<FunctionDecl *>         getFunctionList         () const ;
         virtual std::vector<TypeDecl *>             getTypeList             () const ;
         virtual std::vector<GlobalVariableDecl *>   getGlobalVariableList   () const ;
         virtual std::vector<FileVariableDecl *>     getFileVariableList     () const ;
@@ -353,6 +354,7 @@ namespace rexlang {
 
         FunctorDecl *                   getFunctor          (const StringRef &name) const override ;
         std::vector<FunctorDecl *>      getFunctorList      () const override ;
+        std::vector<FunctionDecl *>     getFunctionList     () const override ;
         ProgSetDecl *                   getProgSet          (const StringRef &name) const override ;
         ProgSetDecl *                   getProgSet          ()                      const ;
         std::vector<FileVariableDecl *> getFileVariableList () const override ;
@@ -2562,6 +2564,7 @@ namespace rexlang {
         MacroDecl *             getMacro        (const StringRef &name) const ; // 在文件清单中查找宏定义
 
         std::vector<FunctorDecl *>          getFunctorList          () const ;
+        std::vector<FunctionDecl *>         getFunctionList         () const ;
         std::vector<TypeDecl *>             getTypeList             () const ;
         std::vector<GlobalVariableDecl *>   getGlobalVariableList   () const ;
         std::vector<FileVariableDecl *>     getFileVariableList     () const ;

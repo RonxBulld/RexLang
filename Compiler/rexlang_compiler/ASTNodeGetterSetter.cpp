@@ -111,6 +111,10 @@ namespace rexlang {
         return getList(source_files_, &SourceFile::getFunctorList);
     }
 
+    std::vector<FunctionDecl *> TranslateUnit::getFunctionList() const {
+        return getList(source_files_, &SourceFile::getFunctionList);
+    }
+
     std::vector<TypeDecl *> TranslateUnit::getTypeList() const {
         std::vector<TypeDecl *> list = getList(source_files_, &SourceFile::getTypeList);
         for (auto &item : builtin_type_map_) {
@@ -147,6 +151,7 @@ namespace rexlang {
     MacroDecl *          SourceFile::getMacro     (const StringRef &name) const { return nullptr; }
 
     std::vector<FunctorDecl *>          SourceFile::getFunctorList          () const { return {}; }
+    std::vector<FunctionDecl *>         SourceFile::getFunctionList         () const { return {}; }
     std::vector<TypeDecl *>             SourceFile::getTypeList             () const { return {}; }
     std::vector<GlobalVariableDecl *>   SourceFile::getGlobalVariableList   () const { return {}; }
     std::vector<FileVariableDecl *>     SourceFile::getFileVariableList     () const { return {}; }
@@ -179,6 +184,16 @@ namespace rexlang {
 
     std::vector<FunctorDecl *> ProgramSetFile::getFunctorList() const {
         std::vector<FunctorDecl *> list;
+        if (program_set_declares_) {
+            for (auto &item : program_set_declares_->functions()) {
+                list.push_back(item);
+            }
+        }
+        return list;
+    }
+
+    std::vector<FunctionDecl *> ProgramSetFile::getFunctionList() const {
+        std::vector<FunctionDecl *> list;
         if (program_set_declares_) {
             for (auto &item : program_set_declares_->functions()) {
                 list.push_back(item);
