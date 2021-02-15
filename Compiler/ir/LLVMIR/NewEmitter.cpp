@@ -163,6 +163,7 @@ namespace rexlang {
         // 声明全局变量
 
         for (GlobalVariableDecl *gvari : TU->getGlobalVariableList()) {
+            assert(variable_map_[gvari]);
             llvm::GlobalVariable *llvm_gvari = Emit(gvari);
             variable_map_[gvari] = llvm_gvari;
         }
@@ -170,6 +171,7 @@ namespace rexlang {
         // 声明文件变量
 
         for (FileVariableDecl *fvari : TU->getFileVariableList()) {
+            assert(variable_map_[fvari]);
             llvm::GlobalVariable *llvm_fvari = Emit(fvari);
             variable_map_[fvari] = llvm_fvari;
         }
@@ -177,6 +179,7 @@ namespace rexlang {
         // 声明函数
 
         for (FunctorDecl *decl : TU->getFunctorList()) {
+            assert(functor_map_[decl]);
             llvm::FunctionType *func_ty = Emit(decl);
             functor_map_[decl] = func_ty;
         }
@@ -184,6 +187,7 @@ namespace rexlang {
         // 定义函数
 
         for (FunctionDecl *func : TU->getFunctionList()) {
+            assert(function_map_[func]);
             llvm::Function *llvm_func = Emit(func);
             function_map_[func] = llvm_func;
         }
