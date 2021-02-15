@@ -152,6 +152,14 @@ namespace rexlang {
         RexDbgMgr.GetOrCreateDICompileUnit(TU->getFileName());
         DefineMainEntry();
 
+        // 声明类型
+
+        for (VariTypeDecl *vari_type : TU->getVariTypeList()) {
+            assert(varitype_map_[vari_type]);
+            llvm::Type *llvm_varitype = Emit(vari_type);
+            varitype_map_[vari_type] = llvm_varitype;
+        }
+
         // 声明全局变量
 
         for (GlobalVariableDecl *gvari : TU->getGlobalVariableList()) {
