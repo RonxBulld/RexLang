@@ -38,6 +38,8 @@
 
 namespace rexlang {
 
+    /*****************************************************************************************************************/
+
     NewEmitter::NewEmitter()
     : TheModule(new llvm::Module("a.ll", TheContext))
     , Builder(llvm::IRBuilder<>(TheContext))
@@ -85,6 +87,8 @@ namespace rexlang {
         return tmp;
     }
 
+    /*****************************************************************************************************************/
+
     int NewEmitter::OnEmitBegin(Node *astNode) {
         RexDbgMgr.OnEmitBegin(astNode);
         return 0;
@@ -94,6 +98,8 @@ namespace rexlang {
         RexDbgMgr.OnEmitEnd(astNode);
         return 0;
     }
+
+    /*****************************************************************************************************************/
 
     /*
      * 声明主入口函数
@@ -116,10 +122,11 @@ namespace rexlang {
      * 根据指定的类型和名称，创建全局变量
      */
     llvm::GlobalVariable *NewEmitter::CreateGlobalVariable(VariTypeDecl *type, const std::string &name) {
-        llvm::Type *_vari_type = Emit(type);
+        llvm::Type *vari_type = varitype_map_[type];
+        assert(vari_type);
         llvm::GlobalVariable *gvari = new llvm::GlobalVariable(
                 /* Module */                    *TheModule,
-                /* Type */                      _vari_type,
+                /* Type */                      vari_type,
                 /* isConstant */                false,
                 /* Linkage */                   llvm::GlobalValue::LinkageTypes::ExternalLinkage,
                 /* Initializer */               nullptr,
@@ -147,6 +154,8 @@ namespace rexlang {
             return EmitNavigate<RetTy, BaseTy, AlternativesTy...>(node);
         }
     }
+
+    /*****************************************************************************************************************/
 
     llvm::Module *NewEmitter::impl_EmitTranslateUnit(TranslateUnit *TU) {
         RexDbgMgr.GetOrCreateDICompileUnit(TU->getFileName());
@@ -196,15 +205,17 @@ namespace rexlang {
 
         // 检查所有函数
 
-        for (auto &functor_object : function_map_) {
-            llvm::Function *function = functor_object.second;
-            if (llvm::verifyFunction(*function, &llvm::outs())) {
+        for (auto &item : function_map_) {
+            llvm::Function *llvm_function = item.second;
+            if (llvm::verifyFunction(*llvm_function, &llvm::outs())) {
                 llvm::outs() << "\n\n";
                 TheModule->print(llvm::outs(), nullptr);
                 assert(false);
-                function->eraseFromParent();
+                llvm_function->eraseFromParent();
             }
         }
+
+        // 检查整个模块
 
         if (llvm::verifyModule(*TheModule)) {
             llvm::outs() << "\n\n";
@@ -223,6 +234,153 @@ namespace rexlang {
         llvm::GlobalVariable *fvari = CreateGlobalVariable(fileVariableDecl->type(), fileVariableDecl->getMangling().str()); // 这里需要注意命名冲突问题
         return fvari;
     }
+
+    /*****************************************************************************************************************/
+
+    llvm::FunctionType *NewEmitter::impl_EmitFunctorDecl(FunctorDecl *functorDecl) {
+
+        // 构建形参声明
+
+        bool is_vari_arg = false;
+        std::vector<ParameterDecl *> parameters = functorDecl->getParameters();
+        if (!parameters.empty() && parameters.back()->isVariParam()) {
+            is_vari_arg = true;
+            parameters.pop_back();
+        }
+
+        std::vector<llvm::Type *> parameter_types;
+        for (ParameterDecl *parameter_decl : parameters) {
+            llvm::Type *parameter_type = varitype_map_[parameter_decl->type()];
+            assert(parameter_type);
+            parameter_types.push_back(parameter_type);
+        }
+
+        // 构建返回值类型
+
+        llvm::Type *return_type = varitype_map_[functorDecl->getReturnType()];
+        assert(return_type);
+
+        // 构建函数原型
+
+        llvm::FunctionType *functor_type = llvm::FunctionType::get(return_type, parameter_types, is_vari_arg);
+        assert(functor_type);
+
+        return functor_type;
+
+    }
+
+    llvm::Function *NewEmitter::impl_EmitFunctionDecl(FunctionDecl *functionDecl) {
+        const std::string &function_name = functionDecl->getMangling().str();
+        std::cout << "生成函数：" << function_name << std::endl;
+
+        llvm::FunctionType *prototype = functor_map_[functionDecl];
+        assert(prototype);
+
+        // 构建函数声明
+
+        llvm::Function *llvm_function = llvm::Function::Create(prototype, llvm::Function::ExternalLinkage, function_name, TheModule);
+
+        // 设置参数名
+
+        unsigned idx = 0;
+        for (auto &param : llvm_function->args()) {
+            ParameterDecl *parameter = functionDecl->getParameterAt(idx);
+            assert(parameter);
+            param.setName(parameter->getNameRef().str());
+            idx++;
+        }
+
+        // 进入函数体
+
+        TheFunction = llvm_function;
+        TheASTFunction = functionDecl;
+        llvm::DISubprogram *subprogram_di = RexDbgMgr.CreateFunctionDI(functionDecl, llvm_function);
+        llvm_function->setSubprogram(subprogram_di);
+        RexDbgMgr.PushLexicalScope(subprogram_di);
+
+        // 开始创建函数体
+
+        llvm::BasicBlock *basic_block = llvm::BasicBlock::Create(TheContext, "entry", llvm_function);
+        Builder.SetInsertPoint(basic_block);
+
+        // 创建返回值
+
+        llvm::BasicBlock *ret_bb = llvm::BasicBlock::Create(TheContext, "return", llvm_function);
+        TheReturnBB = ret_bb;
+        llvm::Value *return_value_ptr = nullptr;
+        if (!functionDecl->getReturnType()->isVoidType()) {
+            llvm::Type *ret_type = varitype_map_[functionDecl->getReturnType()];
+            assert(ret_type);
+            return_value_ptr = Builder.CreateAlloca(ret_type, nullptr, "ret");
+        }
+        TheReturnValue = return_value_ptr;
+
+        // 创建参数变量
+
+        for (ParameterDecl *param_vari_item : functionDecl->getParameters()) {
+            assert(variable_map_[param_vari_item]);
+            llvm::Value *param_var = Emit(param_vari_item);
+            variable_map_[param_vari_item] = param_var;
+        }
+
+        // 创建局部变量
+
+        for (auto &local_vari_item : functionDecl->getLocalVariables()) {
+            assert(variable_map_[local_vari_item]);
+            llvm::Value *local_var = Emit(local_vari_item);
+            variable_map_[local_vari_item] = local_var;
+        }
+
+        // 处理语句
+
+        std::shared_ptr<BasicBlockRange> bb_range{Emit(functionDecl->getFunctionBody())};
+        assert(bb_range->head && bb_range->tail);
+
+        // 尾块跳转到返回块
+
+        Builder.SetInsertPoint(bb_range->tail);
+        Builder.CreateBr(ret_bb);
+
+        // 检查分支是否收束
+
+        for (llvm::BasicBlock &bb : llvm_function->getBasicBlockList()) {
+            if (llvm::succ_size(&bb) == 0 && &bb != ret_bb) {
+
+                // 基本块后继数量为0且不为返回块，表示这是一个悬空的分支尾块，一般情况下是不允许出现的，这会导致CFG错误
+
+                assert(false);
+                Builder.SetInsertPoint(&bb);
+                Builder.CreateBr(ret_bb);
+            }
+        }
+
+        // 创建返回语句
+
+        Builder.SetInsertPoint(ret_bb);
+        if (!functionDecl->getReturnType()->isVoidType()) {
+            llvm::Value *return_value = Builder.CreateLoad(return_value_ptr);
+            Builder.CreateRet(return_value);
+        } else {
+            Builder.CreateRetVoid();
+        }
+
+        // 离开函数体
+
+        DebInfoBuilder.finalizeSubprogram(subprogram_di);
+
+        // 清理上下文
+
+        TheASTFunction  = nullptr ;
+        TheFunction     = nullptr ;
+        TheReturnBB     = nullptr ;
+        TheReturnValue  = nullptr ;
+
+        RexDbgMgr.PopLexicalScope();
+
+        return llvm_function;
+    }
+
+    /*****************************************************************************************************************/
 
     llvm::Type *NewEmitter::impl_EmitVariTypeDecl(VariTypeDecl *type) {
         llvm::Type *ty = EmitNavigate<
