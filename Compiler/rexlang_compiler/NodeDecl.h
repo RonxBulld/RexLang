@@ -314,7 +314,7 @@ namespace rexlang {
 
         virtual std::vector<FunctorDecl *>          getFunctorList          () const ;
         virtual std::vector<FunctionDecl *>         getFunctionList         () const ;
-        virtual std::vector<TypeDecl *>             getTypeList             () const ;
+        virtual std::vector<VariTypeDecl *>         getVariTypeList         () const ;
         virtual std::vector<GlobalVariableDecl *>   getGlobalVariableList   () const ;
         virtual std::vector<FileVariableDecl *>     getFileVariableList     () const ;
         virtual std::vector<MacroDecl *>            getMacroList            () const ;
@@ -421,10 +421,10 @@ namespace rexlang {
         SEMATIC_ANALYSIS_INTERNAL
 
     public:
-        void                    appendStructureDecl (StructureDecl *structureDecl) ;
-        const StructDeclMapTy & getTypes            () const ;
-        TypeDecl *              getType             (const StringRef &name) const override ;
-        std::vector<TypeDecl *> getTypeList         () const override ;
+        void                        appendStructureDecl (StructureDecl *structureDecl) ;
+        const StructDeclMapTy &     getTypes            () const ;
+        TypeDecl *                  getType             (const StringRef &name) const override ;
+        std::vector<VariTypeDecl *> getVariTypeList     () const override ;
 
     public:
         bool isDataStructureFile() const override ;
@@ -1394,9 +1394,9 @@ namespace rexlang {
         ParameterDecl * getParamByName  (const StringRef &name)              const ;
         int             getIndexOf      (const ParameterDecl *parameterDecl) const ;    // 不存在返回-1
 
-        void        updateReturnType    (VariTypeDecl *returnType) ;
-        TypeDecl *  getReturnType       () const ;
-        bool        hasVarArgs          () const ;
+        void            updateReturnType    (VariTypeDecl *returnType) ;
+        VariTypeDecl *  getReturnType       () const ;
+        bool            hasVarArgs          () const ;
 
         virtual bool    isStaticLibraryAPI  () const = 0;
         virtual bool    isDynamicLibraryAPI () const = 0;
@@ -2565,7 +2565,7 @@ namespace rexlang {
 
         std::vector<FunctorDecl *>          getFunctorList          () const ;
         std::vector<FunctionDecl *>         getFunctionList         () const ;
-        std::vector<TypeDecl *>             getTypeList             () const ;
+        std::vector<VariTypeDecl *>         getVariTypeList         () const ;
         std::vector<GlobalVariableDecl *>   getGlobalVariableList   () const ;
         std::vector<FileVariableDecl *>     getFileVariableList     () const ;
         std::vector<MacroDecl *>            getMacroList            () const ;

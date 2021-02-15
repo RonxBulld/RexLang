@@ -115,8 +115,8 @@ namespace rexlang {
         return getList(source_files_, &SourceFile::getFunctionList);
     }
 
-    std::vector<TypeDecl *> TranslateUnit::getTypeList() const {
-        std::vector<TypeDecl *> list = getList(source_files_, &SourceFile::getTypeList);
+    std::vector<VariTypeDecl *> TranslateUnit::getVariTypeList() const {
+        std::vector<VariTypeDecl *> list = getList(source_files_, &SourceFile::getVariTypeList);
         for (auto &item : builtin_type_map_) {
             list.push_back(item.second);
         }
@@ -152,7 +152,7 @@ namespace rexlang {
 
     std::vector<FunctorDecl *>          SourceFile::getFunctorList          () const { return {}; }
     std::vector<FunctionDecl *>         SourceFile::getFunctionList         () const { return {}; }
-    std::vector<TypeDecl *>             SourceFile::getTypeList             () const { return {}; }
+    std::vector<VariTypeDecl *>         SourceFile::getVariTypeList         () const { return {}; }
     std::vector<GlobalVariableDecl *>   SourceFile::getGlobalVariableList   () const { return {}; }
     std::vector<FileVariableDecl *>     SourceFile::getFileVariableList     () const { return {}; }
     std::vector<MacroDecl *>            SourceFile::getMacroList            () const { return {}; }
@@ -238,8 +238,8 @@ namespace rexlang {
         return structure_decl_map_;
     }
 
-    std::vector<TypeDecl *> DataStructureFile::getTypeList() const {
-        std::vector<TypeDecl *> list;
+    std::vector<VariTypeDecl *> DataStructureFile::getVariTypeList() const {
+        std::vector<VariTypeDecl *> list;
         for (auto &item : structure_decl_map_) {
             list.push_back(item.second);
         }
@@ -512,7 +512,7 @@ namespace rexlang {
 
     void FunctorDecl::updateReturnType(VariTypeDecl * returnType) { return_type_ = returnType; }
 
-    TypeDecl *FunctorDecl::getReturnType() const { return return_type_; }
+    VariTypeDecl *FunctorDecl::getReturnType() const { return return_type_; }
 
     bool FunctorDecl::hasVarArgs() const {
         for (ParameterDecl *parameter_decl : parameters_) {
