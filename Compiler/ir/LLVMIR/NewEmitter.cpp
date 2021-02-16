@@ -165,6 +165,10 @@ namespace rexlang {
         }
     }
 
+    llvm::ConstantInt *NewEmitter::CreateInt(uint64_t intValue, unsigned int nBits, bool isSigned) {
+        return llvm::ConstantInt::get(TheContext, llvm::APInt(nBits, intValue, isSigned));
+    }
+
     template<typename RetTy, typename BaseTy>
     RetTy NewEmitter::EmitNavigate(BaseTy *node) {
         return RetTy{};
@@ -181,6 +185,7 @@ namespace rexlang {
     }
 
     /*****************************************************************************************************************/
+    // region 全局部分
 
     llvm::Module *NewEmitter::impl_EmitTranslateUnit(TranslateUnit *TU) {
         RexDbgMgr.GetOrCreateDICompileUnit(TU->getFileName());
@@ -260,6 +265,7 @@ namespace rexlang {
         return fvari;
     }
 
+    // endregion
     /*****************************************************************************************************************/
     // region 函数相关
 
@@ -295,7 +301,7 @@ namespace rexlang {
 
     }
 
-    llvm::Value *NewEmitter::impl_EmitParameterDecl(ParameterDecl *parameterDecl) {
+    llvm::AllocaInst *NewEmitter::impl_EmitParameterDecl(ParameterDecl *parameterDecl) {
         llvm::Type *param_type = varitype_map_[parameterDecl->type()];
         assert(param_type);
 
@@ -467,6 +473,161 @@ namespace rexlang {
                 , StatementBlock
                 >(statement);
         return bb_range;
+    }
+
+    NewEmitter::BasicBlockRange NewEmitter::impl_EmitAssignStmt(AssignStmt *assignStmt) {
+        // TODO:
+        return NewEmitter::BasicBlockRange();
+    }
+
+    NewEmitter::BasicBlockRange NewEmitter::impl_EmitContinueStmt(ContinueStmt *continueStmt) {
+        // TODO:
+        return NewEmitter::BasicBlockRange();
+    }
+
+    NewEmitter::BasicBlockRange NewEmitter::impl_EmitBreakStmt(BreakStmt *breakStmt) {
+        // TODO:
+        return NewEmitter::BasicBlockRange();
+    }
+
+    NewEmitter::BasicBlockRange NewEmitter::impl_EmitReturnStmt(ReturnStmt *returnStmt) {
+        // TODO:
+        return NewEmitter::BasicBlockRange();
+    }
+
+    NewEmitter::BasicBlockRange NewEmitter::impl_EmitExitStmt(ExitStmt *exitStmt) {
+        // TODO:
+        return NewEmitter::BasicBlockRange();
+    }
+
+    NewEmitter::BasicBlockRange NewEmitter::impl_EmitIfStmt(IfStmt *ifStmt) {
+        // TODO:
+        return NewEmitter::BasicBlockRange();
+    }
+
+    NewEmitter::BasicBlockRange NewEmitter::impl_EmitWhileStmt(WhileStmt *whileStmt) {
+        // TODO:
+        return NewEmitter::BasicBlockRange();
+    }
+
+    NewEmitter::BasicBlockRange NewEmitter::impl_EmitRangeForStmt(RangeForStmt *rangeForStmt) {
+        // TODO:
+        return NewEmitter::BasicBlockRange();
+    }
+
+    NewEmitter::BasicBlockRange NewEmitter::impl_EmitForStmt(ForStmt *forStmt) {
+        // TODO:
+        return NewEmitter::BasicBlockRange();
+    }
+
+    NewEmitter::BasicBlockRange NewEmitter::impl_EmitDoWhileStmt(DoWhileStmt *doWhileStmt) {
+        // TODO:
+        return NewEmitter::BasicBlockRange();
+    }
+
+    NewEmitter::BasicBlockRange NewEmitter::impl_EmitStatementBlock(StatementBlock *statementBlock) {
+        // TODO:
+        return NewEmitter::BasicBlockRange();
+    }
+    // endregion
+    /*****************************************************************************************************************/
+    // region 表达式相关
+
+    llvm::Value *NewEmitter::impl_EmitExpression(Expression *expression) {
+        llvm::Value *value = EmitNavigate<
+                llvm::Value *
+                , Expression
+                , HierarchyIdentifier
+                , NameComponent
+                , TypeConvert
+                , UnaryExpression
+                , BinaryExpression
+                , ValueOfDataSet
+                , ValueOfDatetime
+                , ValueOfBool
+                , ValueOfDecimal
+                , ValueOfString
+                >(expression);
+        return value;
+    }
+
+    llvm::Value *NewEmitter::impl_EmitHierarchyIdentifier(HierarchyIdentifier *hierarchyIdentifier) {
+        NameComponent *back_component = hierarchyIdentifier->getNameComponents().back();
+        return Emit(back_component);
+    }
+
+    llvm::Value *NewEmitter::impl_EmitNameComponent(NameComponent *nameComponent) {
+        llvm::Value *value = EmitNavigate<
+                llvm::Value *
+                , NameComponent
+                , IdentRefer
+                , ArrayIndex
+                , FunctionCall
+                >(nameComponent);
+        return value;
+    }
+
+    llvm::Value *NewEmitter::impl_EmitIdentRefer(IdentRefer *identRefer) {
+        // TODO:
+        return nullptr;
+    }
+
+    llvm::Value *NewEmitter::impl_EmitArrayIndex(ArrayIndex *arrayIndex) {
+        // TODO:
+        return nullptr;
+    }
+
+    llvm::Value *NewEmitter::impl_EmitFunctionCall(FunctionCall *functionCall) {
+        // TODO:
+        return nullptr;
+    }
+
+    llvm::Value *NewEmitter::impl_EmitTypeConvert(TypeConvert *typeConvert) {
+        // TODO:
+        return nullptr;
+    }
+
+    llvm::Value *NewEmitter::impl_EmitUnaryExpression(UnaryExpression *unaryExpression) {
+        // TODO:
+        return nullptr;
+    }
+
+    llvm::Value *NewEmitter::impl_EmitBinaryExpression(BinaryExpression *binaryExpression) {
+        // TODO:
+        return nullptr;
+    }
+
+    llvm::Value *NewEmitter::impl_EmitValueOfDataSet(ValueOfDataSet *valueOfDataSet) {
+        // TODO:
+        return nullptr;
+    }
+
+    llvm::Value *NewEmitter::impl_EmitValueOfDatetime(ValueOfDatetime *valueOfDatetime) {
+        return CreateInt(valueOfDatetime->getTime(), 64, false);
+    }
+
+    llvm::Value *NewEmitter::impl_EmitValueOfBool(ValueOfBool *valueOfBool) {
+        return CreateInt((int) valueOfBool->Value(), 1, false);
+    }
+
+    llvm::Value *NewEmitter::impl_EmitValueOfDecimal(ValueOfDecimal *valueOfDecimal) {
+        if (valueOfDecimal->isIntValue()) {
+            return CreateInt(valueOfDecimal->getAsInt(), 32, true);
+        }
+        else if (valueOfDecimal->isFloatValue()) {
+            return llvm::ConstantFP::get(TheContext, llvm::APFloat(valueOfDecimal->getAsFloat()));
+        }
+        else {
+            assert(false);
+            return nullptr;
+        }
+    }
+
+    llvm::Value *NewEmitter::impl_EmitValueOfString(ValueOfString *valueOfString) {
+
+        // 创建指向字符串常量值的对象，就不需要Load了
+
+        return Builder.CreateGlobalStringPtr(valueOfString->Value().string_.str(), "$.pstr");
     }
 
     // endregion
