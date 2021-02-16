@@ -236,6 +236,7 @@ namespace rexlang {
     }
 
     /*****************************************************************************************************************/
+    // region 函数相关
 
     llvm::FunctionType *NewEmitter::impl_EmitFunctorDecl(FunctorDecl *functorDecl) {
 
@@ -373,12 +374,12 @@ namespace rexlang {
 
         // 处理语句
 
-        std::shared_ptr<BasicBlockRange> bb_range{Emit(functionDecl->getFunctionBody())};
-        assert(bb_range->head && bb_range->tail);
+        BasicBlockRange bb_range = Emit(functionDecl->getFunctionBody());
+        assert(bb_range.head && bb_range.tail);
 
         // 尾块跳转到返回块
 
-        Builder.SetInsertPoint(bb_range->tail);
+        Builder.SetInsertPoint(bb_range.tail);
         Builder.CreateBr(ret_bb);
 
         // 检查分支是否收束
@@ -420,8 +421,32 @@ namespace rexlang {
         return llvm_function;
     }
 
+    // endregion
     /*****************************************************************************************************************/
+    // region 语句相关
 
+    NewEmitter::BasicBlockRange NewEmitter::impl_EmitStatement(Statement *statement) {
+        BasicBlockRange bb_range = EmitNavigate<
+                BasicBlockRange
+                , Statement
+                , AssignStmt
+                , ContinueStmt
+                , BreakStmt
+                , ReturnStmt
+                , ExitStmt
+                , IfStmt
+                , WhileStmt
+                , RangeForStmt
+                , ForStmt
+                , DoWhileStmt
+                , StatementBlock
+                >(statement);
+        return bb_range;
+    }
+
+    // endregion
+    /*****************************************************************************************************************/
+    // region 类型相关
     llvm::Type *NewEmitter::impl_EmitVariTypeDecl(VariTypeDecl *type) {
         llvm::Type *ty = EmitNavigate<
                 llvm::Type *
@@ -468,4 +493,6 @@ namespace rexlang {
         return Emit(vari_ty)->getPointerTo();
     }
 
+    // endregion
+    /*****************************************************************************************************************/
 }
