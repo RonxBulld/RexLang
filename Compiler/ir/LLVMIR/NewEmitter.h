@@ -83,7 +83,7 @@ namespace rexlang {
          */
         DEF_EMIT(llvm::FunctionType *, FunctorDecl      , functorDecl      )
         DEF_EMIT(llvm::Function     *, FunctionDecl     , functionDecl     )
-        DEF_EMIT(llvm::Value        *, ParameterDecl    , parameterDecl    )
+        DEF_EMIT(llvm::AllocaInst   *, ParameterDecl    , parameterDecl    )
         DEF_EMIT(llvm::Value        *, LocalVariableDecl, localVariableDecl)
         /**********************************************************************************************/
 
@@ -102,6 +102,24 @@ namespace rexlang {
         DEF_EMIT(BasicBlockRange, ForStmt       , forStmt       )
         DEF_EMIT(BasicBlockRange, DoWhileStmt   , doWhileStmt   )
         DEF_EMIT(BasicBlockRange, StatementBlock, statementBlock)
+        /**********************************************************************************************/
+
+        /**********************************************************************************************
+         * 表达式相关
+         */
+        DEF_EMIT(llvm::Value *, Expression         , expression         )
+        DEF_EMIT(llvm::Value *, HierarchyIdentifier, hierarchyIdentifier)
+        DEF_EMIT(llvm::Value *, IdentRefer         , identRefer         )
+        DEF_EMIT(llvm::Value *, ArrayIndex         , arrayIndex         )
+        DEF_EMIT(llvm::Value *, FunctionCall       , functionCall       )
+        DEF_EMIT(llvm::Value *, TypeConvert        , typeConvert        )
+        DEF_EMIT(llvm::Value *, UnaryExpression    , unaryExpression    )
+        DEF_EMIT(llvm::Value *, BinaryExpression   , binaryExpression   )
+        DEF_EMIT(llvm::Value *, ValueOfDataSet     , valueOfDataSet     )
+        DEF_EMIT(llvm::Value *, ValueOfDatetime    , valueOfDatetime    )
+        DEF_EMIT(llvm::Value *, ValueOfBool        , valueOfBool        )
+        DEF_EMIT(llvm::Value *, ValueOfDecimal     , valueOfDecimal     )
+        DEF_EMIT(llvm::Value *, ValueOfString      , valueOfString      )
         /**********************************************************************************************/
 
         /**********************************************************************************************
