@@ -934,22 +934,26 @@ namespace rexlang {
      * ValueOfBool
      ***************************************************/
 
-    void ValueOfBool::setBool(bool boolValue) { value_ = boolValue; }
+    void ValueOfBool::setBool   (bool boolValue)    { value_ = boolValue; }
+    bool ValueOfBool::Value     () const            { return value_; }
 
     /***************************************************
      * ValueOfDecimal
      ***************************************************/
 
-    void ValueOfDecimal::setIntValue  (int value)   { type_ = type::kInt;   int_val_   = value; }
-    void ValueOfDecimal::setFloatValue(float value) { type_ = type::kFloat; float_val_ = value; }
-    bool ValueOfDecimal::isIntValue   () const      { return type_ == type::kInt; }
-    bool ValueOfDecimal::isFloatValue () const      { return type_ == type::kFloat; }
+    void    ValueOfDecimal::setIntValue     (int value)     { type_ = type::kInt;   int_val_   = value; }
+    void    ValueOfDecimal::setFloatValue   (float value)   { type_ = type::kFloat; float_val_ = value; }
+    bool    ValueOfDecimal::isIntValue      () const        { return type_ == type::kInt; }
+    bool    ValueOfDecimal::isFloatValue    () const        { return type_ == type::kFloat; }
+    int     ValueOfDecimal::getAsInt        () const        { return int_val_; }
+    float   ValueOfDecimal::getAsFloat      () const        { return float_val_; }
 
     /***************************************************
      * ValueOfString
      ***************************************************/
 
-    void ValueOfString::setStringLiteral(const TString &literal) { string_literal_ = literal; }
+    void            ValueOfString::setStringLiteral (const TString &literal)    { string_literal_ = literal; }
+    const TString & ValueOfString::Value            () const                    { return string_literal_; }
 
     /******************************************************************
      * TypeConvert

@@ -2452,6 +2452,7 @@ namespace rexlang {
 
     public:
         ValueOfBool(bool boolValue) ;
+        bool Value() const ;
 
     public:
         SEMATIC_ANALYSIS_INTERNAL
@@ -2489,8 +2490,10 @@ namespace rexlang {
         explicit ValueOfDecimal(float value) ;
 
     public:
-        bool isIntValue  () const ;
-        bool isFloatValue() const ;
+        bool    isIntValue  () const ;
+        bool    isFloatValue() const ;
+        int     getAsInt    () const ;
+        float   getAsFloat  () const ;
 
     public:
         SEMATIC_ANALYSIS_INTERNAL
@@ -2520,6 +2523,7 @@ namespace rexlang {
 
     public:
         explicit ValueOfString(const TString &literal) ;
+        const TString &Value() const ;
 
     public:
         SEMATIC_ANALYSIS_INTERNAL
