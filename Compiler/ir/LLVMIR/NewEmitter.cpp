@@ -140,6 +140,31 @@ namespace rexlang {
         return gvari;
     }
 
+    bool NewEmitter::RequestLoadBeforeRead(llvm::Value *value) const {
+        if (llvm::dyn_cast<llvm::GlobalVariable>(value)) {      // 全局变量
+            return true;
+        }
+        else if (llvm::dyn_cast<llvm::AllocaInst>(value)) {     // 局部变量
+            return true;
+        }
+        else if (llvm::dyn_cast<llvm::Argument>(value)) {       // 参数值
+            // 在函数体中使用时，参数当然表示调用函数时使用的实际参数的值。
+            // 但是不应当走到这个分支，因为在函数开始的时候就已经被加载到局部变量了。
+            assert(false);
+            return false;
+        }
+        else if (llvm::dyn_cast<llvm::LoadInst>(value)) {       // 已加载对象
+            return false;
+        }
+        else if (llvm::dyn_cast<llvm::Constant>(value)) {       // 常量
+            return false;
+        }
+        else {
+            assert(false);
+            return false;
+        }
+    }
+
     template<typename RetTy, typename BaseTy>
     RetTy NewEmitter::EmitNavigate(BaseTy *node) {
         return RetTy{};

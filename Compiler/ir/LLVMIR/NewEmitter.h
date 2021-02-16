@@ -59,6 +59,7 @@ namespace rexlang {
 
         bool DefineMainEntry() ;
         llvm::GlobalVariable *CreateGlobalVariable(VariTypeDecl *type, const std::string &name) ;
+        bool RequestLoadBeforeRead(llvm::Value *value) const ;      // 仅用来判断LLVM对象是否需要Load
 
         /**********************************************************************************************
          * 这是一组路由函数，用于在对基类 Emit 时便捷的转发到子类的 Emit 处理中
