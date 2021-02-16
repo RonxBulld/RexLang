@@ -583,7 +583,46 @@ namespace rexlang {
     }
 
     llvm::Value *NewEmitter::impl_EmitTypeConvert(TypeConvert *typeConvert) {
-        // TODO:
+        // 由于目前没有泛型和指针
+        // 类型转换主要是数值性类型之间的转换，即：
+        // 1、不同长度的整数转换
+        // 2、不同长度的浮点转换
+        // 3、整数转浮点
+        // 4、浮点转整数
+
+        VariTypeDecl *source_ty = rtti::dyn_cast<VariTypeDecl>(typeConvert->getSourceType());
+        assert(source_ty);
+        llvm::Type *source_llty = varitype_map_[source_ty];
+        assert(source_llty);
+
+        VariTypeDecl *target_ty = rtti::dyn_cast<VariTypeDecl>(typeConvert->getTargetType());
+        assert(target_ty);
+        llvm::Type *target_llty = varitype_map_[target_ty];
+        assert(target_llty);
+
+        llvm::Value *value = Emit(typeConvert->getSourceExpr());
+
+        if (source_ty->isNumerical() && target_ty->isNumerical()) {
+            if (source_ty->isIntegerCategory() && target_ty->isIntegerCategory()) {
+                return Builder.CreateIntCast(value, target_llty, true);
+            }
+            else if (source_ty->isIntegerCategory() && target_ty->isFloatCategory()) {
+                return Builder.CreateSIToFP(value, target_llty);
+            }
+            else if (source_ty->isFloatCategory() && target_ty->isIntegerCategory()) {
+                return Builder.CreateFPToSI(value, target_llty);
+            }
+            else if (source_ty->isFloatCategory() && target_ty->isFloatCategory()) {
+                return Builder.CreateFPCast(value, target_llty);
+            }
+            else {
+                assert(false);
+            }
+        }
+        else {
+            assert(false);
+        }
+
         return nullptr;
     }
 
@@ -598,8 +637,18 @@ namespace rexlang {
     }
 
     llvm::Value *NewEmitter::impl_EmitValueOfDataSet(ValueOfDataSet *valueOfDataSet) {
-        // TODO:
-        return nullptr;
+        std::vector<llvm::Constant *> elements;
+        for (Expression *element_expr : valueOfDataSet->elements()) {
+            llvm::Constant *e = llvm::dyn_cast<llvm::Constant>(Emit(element_expr));
+            assert(e->getType()->isIntegerTy(8));
+            elements.push_back(e);
+        }
+
+        // 创建数组数据
+
+        llvm::ArrayType *arr_ty = llvm::ArrayType::get(Builder.getInt8Ty(), elements.size());
+        llvm::Constant *init_val = llvm::ConstantArray::get(arr_ty, elements);
+        return init_val;
     }
 
     llvm::Value *NewEmitter::impl_EmitValueOfDatetime(ValueOfDatetime *valueOfDatetime) {
