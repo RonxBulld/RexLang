@@ -880,6 +880,7 @@ namespace rexlang {
         virtual bool    isExtendBooleanType () const ;   // 类型是否具有扩展布尔性
         virtual bool    isNumerical         () const ;   // 类型是否具有数值性
         virtual bool    isIntegerCategory   () const ;   // 类型是否整数族
+        virtual bool    isFloatCategory     () const ;   // 类型是否浮点族
         virtual bool    isArrayType         () const ;   // 是否为数组
         virtual bool    isFunctionType      () const ;   // 是否为函数
         virtual bool    isAPICommandType    () const ;   // 是否为外部API
@@ -986,6 +987,7 @@ namespace rexlang {
         bool    isExtendBooleanType () const override ;
         bool    isNumerical         () const override ;
         bool    isIntegerCategory   () const override ;
+        bool    isFloatCategory     () const override ;
 
         virtual const char *GetTypeText () const = 0;
 

@@ -152,6 +152,7 @@ namespace rexlang {
     bool    TypeDecl            :: isExtendBooleanType  () const { return false; }
     bool    TypeDecl            :: isNumerical          () const { return false; }
     bool    TypeDecl            :: isIntegerCategory    () const { return false; }
+    bool    TypeDecl            :: isFloatCategory      () const { return false; }
     bool    TypeDecl            :: isArrayType          () const { return false; }
     bool    TypeDecl            :: isFunctionType       () const { return false; }
     bool    TypeDecl            :: isAPICommandType     () const { return false; }
@@ -186,8 +187,7 @@ namespace rexlang {
 
     bool BuiltinType::isNumerical() const {
         if (this->isIntegerCategory()) { return true; }
-        if (this->isFloatType())       { return true; }
-        if (this->isDoubleType())      { return true; }
+        if (this->isFloatCategory())   { return true; }
         return false;
     }
 
@@ -196,6 +196,12 @@ namespace rexlang {
         if (this->isIntegerType()) { return true; }
         if (this->isShortType())   { return true; }
         if (this->isLongType())    { return true; }
+        return false;
+    }
+
+    bool BuiltinType::isFloatCategory() const {
+        if (this->isFloatType())  { return true; }
+        if (this->isDoubleType()) { return true; }
         return false;
     }
 
