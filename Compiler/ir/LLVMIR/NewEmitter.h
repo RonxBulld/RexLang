@@ -11,10 +11,10 @@ namespace rexlang {
 
     class ProjectDB;
 
-#define DEF_EMIT(RET_TY,NODE_TY,NAME) RET_TY *impl_Emit##NODE_TY(NODE_TY *NAME) ; \
-                                      RET_TY *Emit(NODE_TY *NAME) { \
+#define DEF_EMIT(RET_TY,NODE_TY,NAME) RET_TY impl_Emit##NODE_TY(NODE_TY *NAME) ; \
+                                      RET_TY Emit(NODE_TY *NAME) { \
                                           OnEmitBegin(NAME); \
-                                          RET_TY *r = impl_Emit##NODE_TY(NAME); \
+                                          RET_TY r = impl_Emit##NODE_TY(NAME); \
                                           OnEmitEnd(NAME); \
                                           return r; \
                                       }
@@ -69,22 +69,22 @@ namespace rexlang {
         RetTy EmitNavigate(BaseTy *node) ;
         /*********************************************************************************************/
 
-        DEF_EMIT(llvm::Module, TranslateUnit, TU)
+        DEF_EMIT(llvm::Module *, TranslateUnit, TU)
 
         /**********************************************************************************************
          * 全局变量相关
          */
-        DEF_EMIT(llvm::GlobalVariable, GlobalVariableDecl, globalVariDecl  )
-        DEF_EMIT(llvm::GlobalVariable, FileVariableDecl  , fileVariableDecl)
+        DEF_EMIT(llvm::GlobalVariable *, GlobalVariableDecl, globalVariDecl  )
+        DEF_EMIT(llvm::GlobalVariable *, FileVariableDecl  , fileVariableDecl)
         /**********************************************************************************************/
 
         /**********************************************************************************************
          * 函数相关
          */
-        DEF_EMIT(llvm::FunctionType, FunctorDecl      , functorDecl      )
-        DEF_EMIT(llvm::Function    , FunctionDecl     , functionDecl     )
-        DEF_EMIT(llvm::Value       , ParameterDecl    , parameterDecl    )
-        DEF_EMIT(llvm::Value       , LocalVariableDecl, localVariableDecl)
+        DEF_EMIT(llvm::FunctionType *, FunctorDecl      , functorDecl      )
+        DEF_EMIT(llvm::Function     *, FunctionDecl     , functionDecl     )
+        DEF_EMIT(llvm::Value        *, ParameterDecl    , parameterDecl    )
+        DEF_EMIT(llvm::Value        *, LocalVariableDecl, localVariableDecl)
         /**********************************************************************************************/
 
         /**********************************************************************************************
@@ -96,23 +96,23 @@ namespace rexlang {
         /**********************************************************************************************
          * 类型相关
          */
-        DEF_EMIT(llvm::Type, VariTypeDecl       , type               )
-        DEF_EMIT(llvm::Type, BuiltinVoidType    , builtinVoidType    )
-        DEF_EMIT(llvm::Type, BuiltinCommonType  , builtinCommonType  )
-        DEF_EMIT(llvm::Type, BuiltinCharType    , builtinCharType    )
-        DEF_EMIT(llvm::Type, BuiltinIntegerType , builtinIntegerType )
-        DEF_EMIT(llvm::Type, BuiltinFloatType   , builtinFloatType   )
-        DEF_EMIT(llvm::Type, BuiltinBoolType    , builtinBoolType    )
-        DEF_EMIT(llvm::Type, BuiltinStringType  , builtinStringType  )
-        DEF_EMIT(llvm::Type, BuiltinDataSetType , builtinDataSetType )
-        DEF_EMIT(llvm::Type, BuiltinShortType   , builtinShortType   )
-        DEF_EMIT(llvm::Type, BuiltinLongType    , builtinLongType    )
-        DEF_EMIT(llvm::Type, BuiltinDatetimeType, builtinDatetimeType)
-        DEF_EMIT(llvm::Type, BuiltinFuncPtrType , builtinFuncPtrType )
-        DEF_EMIT(llvm::Type, BuiltinDoubleType  , builtinDoubleType  )
-        DEF_EMIT(llvm::Type, ReferenceType      , referenceType      )
-        DEF_EMIT(llvm::Type, StructureDecl      , structureDecl      )
-        DEF_EMIT(llvm::Type, ArrayType          , arrayType          )
+        DEF_EMIT(llvm::Type *, VariTypeDecl       , type               )
+        DEF_EMIT(llvm::Type *, BuiltinVoidType    , builtinVoidType    )
+        DEF_EMIT(llvm::Type *, BuiltinCommonType  , builtinCommonType  )
+        DEF_EMIT(llvm::Type *, BuiltinCharType    , builtinCharType    )
+        DEF_EMIT(llvm::Type *, BuiltinIntegerType , builtinIntegerType )
+        DEF_EMIT(llvm::Type *, BuiltinFloatType   , builtinFloatType   )
+        DEF_EMIT(llvm::Type *, BuiltinBoolType    , builtinBoolType    )
+        DEF_EMIT(llvm::Type *, BuiltinStringType  , builtinStringType  )
+        DEF_EMIT(llvm::Type *, BuiltinDataSetType , builtinDataSetType )
+        DEF_EMIT(llvm::Type *, BuiltinShortType   , builtinShortType   )
+        DEF_EMIT(llvm::Type *, BuiltinLongType    , builtinLongType    )
+        DEF_EMIT(llvm::Type *, BuiltinDatetimeType, builtinDatetimeType)
+        DEF_EMIT(llvm::Type *, BuiltinFuncPtrType , builtinFuncPtrType )
+        DEF_EMIT(llvm::Type *, BuiltinDoubleType  , builtinDoubleType  )
+        DEF_EMIT(llvm::Type *, ReferenceType      , referenceType      )
+        DEF_EMIT(llvm::Type *, StructureDecl      , structureDecl      )
+        DEF_EMIT(llvm::Type *, ArrayType          , arrayType          )
         /**********************************************************************************************/
 
     public:
