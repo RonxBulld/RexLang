@@ -269,6 +269,46 @@ namespace rexlang {
 
     }
 
+    llvm::Value *NewEmitter::impl_EmitParameterDecl(ParameterDecl *parameterDecl) {
+        llvm::Type *param_type = varitype_map_[parameterDecl->type()];
+        assert(param_type);
+
+        // 创建参数在栈内的空间
+
+        llvm::AllocaInst *alloca_param = Builder.CreateAlloca(param_type, nullptr, parameterDecl->getNameRef().str());
+
+        // 将参数值加载到栈内存中
+
+        llvm::Argument *argument = TheFunction->arg_begin() + parameterDecl->getParamIndex();
+        Builder.CreateStore(argument, alloca_param);
+
+        return alloca_param;
+    }
+
+    llvm::Value *NewEmitter::impl_EmitLocalVariableDecl(LocalVariableDecl *localVariableDecl) {
+        llvm::Type *local_vari_type = varitype_map_[localVariableDecl->type()];
+        assert(local_vari_type);
+        const std::string &name = localVariableDecl->getMangling().str();
+
+        if (!localVariableDecl->isStatic()) {
+
+            // 非静态变量在栈上创建
+
+            llvm::AllocaInst *llvm_local_vari = Builder.CreateAlloca(local_vari_type, nullptr, name);
+            llvm_local_vari->setAlignment(4);
+            return llvm_local_vari;
+
+        } else {
+
+            // 静态变量作为全局变量创建
+
+            llvm::GlobalVariable *llvm_static_local_vari = CreateGlobalVariable(localVariableDecl->type(), name);
+            llvm_static_local_vari->setLinkage(llvm::GlobalValue::LinkageTypes::InternalLinkage);
+            return llvm_static_local_vari;
+
+        }
+    }
+
     llvm::Function *NewEmitter::impl_EmitFunctionDecl(FunctionDecl *functionDecl) {
         const std::string &function_name = functionDecl->getMangling().str();
         std::cout << "生成函数：" << function_name << std::endl;
