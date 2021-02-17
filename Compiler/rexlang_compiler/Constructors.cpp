@@ -234,8 +234,8 @@ namespace rexlang {
 
     IdentRefer::IdentRefer(IdentDef *referenceTo, NameComponent * prefix) {
         reference_ = referenceTo;
-        prefix_ = prefix;
-        setChild(prefix_);
+        if ((prefix_ = prefix))
+            setChild(prefix_);
     }
 
     /******************************************************************
