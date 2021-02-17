@@ -6,9 +6,9 @@
 
 namespace rexlang {
 
-    FunctionCall *ASTBuilder::CreateFCall(FunctorDecl *callee, const std::vector<Expression *> &args) const {
+    FunctionCall *ASTBuilder::CreateFCall(FunctorDecl *callee, NameComponent *prefix, const std::vector<Expression *> &args) const {
         return Create<FunctionCall>(
-                Create<IdentRefer>(callee->getName()),
+                Create<IdentRefer>(callee->getName(), prefix),
                 callee,
                 args
         );

@@ -20,7 +20,7 @@ namespace rexlang {
             return CreateNode<Ty>(ctx_, std::forward<Args>(args)...);
         }
 
-        FunctionCall *CreateFCall(FunctorDecl *callee, const std::vector<Expression *> &args = {}) const ;
+        FunctionCall *CreateFCall(FunctorDecl *callee, NameComponent *prefix, const std::vector<Expression *> &args = {}) const ;
         StatementBlock *CreateStatementBlock(const std::vector<Statement *> &stmts = {}) const ;
         ValueOfString *CreateStringLiteral(const char *cStr) const ;
         ValueOfDecimal *CreateInt(int d) const ;
