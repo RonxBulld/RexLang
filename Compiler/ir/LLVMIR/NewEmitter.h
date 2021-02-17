@@ -37,7 +37,7 @@ namespace rexlang {
          * 定义和声明的缓存
          */
         ordered_map<FunctorDecl  *, llvm::FunctionType *> functor_map_  ;
-        ordered_map<FunctionDecl *, llvm::Function     *> function_map_ ;
+        ordered_map<FunctorDecl  *, llvm::Function     *> function_map_ ;
         ordered_map<BaseVariDecl *, llvm::Value        *> variable_map_ ;
         ordered_map<VariTypeDecl *, llvm::Type         *> varitype_map_ ;
         /*********************************************************************************************/
@@ -83,10 +83,10 @@ namespace rexlang {
         /**********************************************************************************************
          * 函数相关
          */
-        DEF_EMIT(llvm::FunctionType *, FunctorDecl      , functorDecl      )
-        DEF_EMIT(llvm::Function     *, FunctionDecl     , functionDecl     )
-        DEF_EMIT(llvm::AllocaInst   *, ParameterDecl    , parameterDecl    )
-        DEF_EMIT(llvm::Value        *, LocalVariableDecl, localVariableDecl)
+        DEF_EMIT(llvm::Function   *, FunctorDecl      , functorDecl      )
+        DEF_EMIT(llvm::Function   *, FunctionDecl     , functionDecl     )
+        DEF_EMIT(llvm::AllocaInst *, ParameterDecl    , parameterDecl    )
+        DEF_EMIT(llvm::Value      *, LocalVariableDecl, localVariableDecl)
         /**********************************************************************************************/
 
         /**********************************************************************************************

@@ -219,8 +219,9 @@ namespace rexlang {
 
         for (FunctorDecl *decl : TU->getFunctorList()) {
             assert(functor_map_[decl]);
-            llvm::FunctionType *func_ty = Emit(decl);
-            functor_map_[decl] = func_ty;
+            llvm::Function *llvm_func = Emit(decl);
+            function_map_[decl] = llvm_func;
+            functor_map_[decl] = llvm_func->getFunctionType();
         }
 
         // 定义函数
@@ -269,7 +270,7 @@ namespace rexlang {
     /*****************************************************************************************************************/
     // region 函数相关
 
-    llvm::FunctionType *NewEmitter::impl_EmitFunctorDecl(FunctorDecl *functorDecl) {
+    llvm::Function *NewEmitter::impl_EmitFunctorDecl(FunctorDecl *functorDecl) {
 
         // 构建形参声明
 
@@ -294,10 +295,25 @@ namespace rexlang {
 
         // 构建函数原型
 
-        llvm::FunctionType *functor_type = llvm::FunctionType::get(return_type, parameter_types, is_vari_arg);
-        assert(functor_type);
+        llvm::FunctionType *prototype = llvm::FunctionType::get(return_type, parameter_types, is_vari_arg);
+        assert(prototype);
 
-        return functor_type;
+        // 构建函数声明
+
+        const std::string &function_name = functorDecl->getMangling().str();
+        llvm::Function *llvm_function = llvm::Function::Create(prototype, llvm::Function::ExternalLinkage, function_name, TheModule);
+
+        // 设置参数名
+
+        unsigned idx = 0;
+        for (auto &param : llvm_function->args()) {
+            ParameterDecl *parameter = functorDecl->getParameterAt(idx);
+            assert(parameter);
+            param.setName(parameter->getNameRef().str());
+            idx++;
+        }
+
+        return llvm_function;
 
     }
 
@@ -345,22 +361,8 @@ namespace rexlang {
         const std::string &function_name = functionDecl->getMangling().str();
         std::cout << "生成函数：" << function_name << std::endl;
 
-        llvm::FunctionType *prototype = functor_map_[functionDecl];
-        assert(prototype);
-
-        // 构建函数声明
-
-        llvm::Function *llvm_function = llvm::Function::Create(prototype, llvm::Function::ExternalLinkage, function_name, TheModule);
-
-        // 设置参数名
-
-        unsigned idx = 0;
-        for (auto &param : llvm_function->args()) {
-            ParameterDecl *parameter = functionDecl->getParameterAt(idx);
-            assert(parameter);
-            param.setName(parameter->getNameRef().str());
-            idx++;
-        }
+        llvm::Function *llvm_function = function_map_[functionDecl];
+        assert(llvm_function);
 
         // 进入函数体
 
