@@ -565,6 +565,10 @@ namespace rexlang {
         TString        ret_type_name = GetTextIfExist(context->type);
         VariTypeDecl * ret_type      = rtti::dyn_cast<VariTypeDecl>(TU->getType(ret_type_name.string_));
 
+        if (ret_type == nullptr) {
+            ret_type = TU->getVoidTy();
+        }
+
         APICommandDecl *lib_api_decl = CreateNode<APICommandDecl>(context,
                 /*retType*/     ret_type,
                 /*name*/        CreateNode<IdentDef>(context->name, name),
@@ -613,6 +617,10 @@ namespace rexlang {
         TString         name            = RemoveRoundQuotes(GetTextIfExist(context->name));
         TString         ret_type_name   = GetTextIfExist(context->type);
         VariTypeDecl *  ret_type        = rtti::dyn_cast<VariTypeDecl>(TU->getType(ret_type_name.string_));
+
+        if (ret_type == nullptr) {
+            ret_type = TU->getVoidTy();
+        }
 
         FunctionDecl *function_decl = CreateNode<FunctionDecl>(context,
                 /*retType*/    ret_type,
