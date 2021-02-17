@@ -1,5 +1,12 @@
 /*
  * 抽象语法树下降器
+ * - 处理所有变量的初始化
+ * - 将对复合类型的引用下降为长整数型
+ * - 处理复合类型的赋值
+ * - 处理复合类型的二元操作
+ * - 处理数组索引
+ * TODO: - 处理可空
+ * TODO: - 处理参考
  * Rexfield
  * 2020/11/29
  */
@@ -164,7 +171,7 @@ namespace rexlang {
             // 平凡类型的初始化语句
 
             StatementBlock *init_normal = B.CreateStatementBlock({
-                B.Create<AssignStmt>(B.CreateHierName(base_vari_->getName()), B.CreateInt(0))
+                B.Create<AssignStmt>(B.Create<IdentRefer>(base_vari_->getName(), nullptr), B.CreateInt(0))
             });
             return init_normal;
         }
@@ -210,8 +217,9 @@ namespace rexlang {
 
                 FunctionCall *call_guard_release = B.CreateFCall(
                         Ctx.getRexGuardReleaseFn(),
+                        nullptr,
                         {
-                                B.CreateHierName(static_guard_vari->getName())
+                                B.Create<IdentRefer>(static_guard_vari->getName(), nullptr)
                         }
                 );
                 init_blk->appendStatement(call_guard_release);
@@ -221,14 +229,15 @@ namespace rexlang {
                 Expression *conditional = B.Create<BinaryExpression>(
                         OperatorType(OperatorType::Opt::kOptAnd),
                         B.CreateEqual(
-                                B.CreateHierName(static_guard_vari->getName()),
+                                B.Create<IdentRefer>(static_guard_vari->getName(), nullptr),
                                 B.CreateInt(0)
                         ),
                         B.CreateNotEqual(
                                 B.CreateFCall(
                                         Ctx.getRexAcquireGuardFn(),
+                                        nullptr,
                                         {
-                                                B.CreateHierName(static_guard_vari->getName())
+                                                B.Create<IdentRefer>(static_guard_vari->getName(), nullptr)
                                         }
                                 ),
                                 B.CreateInt(0)
@@ -288,8 +297,8 @@ namespace rexlang {
             // 创建数组对象初始化语句
 
             AssignStmt *assign_stmt = B.Create<AssignStmt>(
-                    B.CreateHierName(base_vari_->getName()),
-                    B.CreateFCall(Ctx.getCreateArrayFn(), args_of_create_array)
+                    B.Create<IdentRefer>(base_vari_->getName(), nullptr),
+                    B.CreateFCall(Ctx.getCreateArrayFn(), nullptr, args_of_create_array)
             );
 
             StatementBlock *init_blk = B.CreateStatementBlock({assign_stmt});
@@ -319,8 +328,8 @@ namespace rexlang {
             // 创建字符串对象初始化语句
 
             AssignStmt *assign_stmt = B.Create<AssignStmt>(
-                    B.CreateHierName(base_vari_->getName()),
-                    B.CreateFCall(Ctx.getCreateStringFn(), args_of_create_string)
+                    B.Create<IdentRefer>(base_vari_->getName(), nullptr),
+                    B.CreateFCall(Ctx.getCreateStringFn(), nullptr, args_of_create_string)
             );
             StatementBlock *init_blk = B.CreateStatementBlock({assign_stmt});
             return init_blk;
@@ -350,8 +359,8 @@ namespace rexlang {
             // 创建字节集对象初始化语句
 
             AssignStmt *assign_stmt = B.Create<AssignStmt>(
-                    B.CreateHierName(base_vari_->getName()),
-                    B.CreateFCall(Ctx.getCreateStringFn(), args_of_create_dataset)
+                    B.Create<IdentRefer>(base_vari_->getName(), nullptr),
+                    B.CreateFCall(Ctx.getCreateStringFn(), nullptr, args_of_create_dataset)
             );
             StatementBlock *init_blk = B.CreateStatementBlock({assign_stmt});
             return init_blk;
@@ -474,7 +483,7 @@ namespace rexlang {
             Expression *lhs = assign_stmt_->getLHS();
             Expression *rhs = assign_stmt_->getRHS();
             if (copy_fn_) {
-                Statement *lowed_stmt = B.CreateFCall(copy_fn_, {lhs, rhs});
+                Statement *lowed_stmt = B.CreateFCall(copy_fn_, nullptr, {lhs, rhs});
 
                 // 替换原赋值语句
 
@@ -544,7 +553,7 @@ namespace rexlang {
             Expression *lopt = binary_expression_->getLHS();
             Expression *ropt = binary_expression_->getRHS();
             if (concat_fn_) {
-                Expression *lowed_expression = B.CreateFCall(concat_fn_, {lopt, ropt});
+                Expression *lowed_expression = B.CreateFCall(concat_fn_, nullptr, {lopt, ropt});
 
                 // 替换原拼接表达式
 
@@ -613,7 +622,7 @@ namespace rexlang {
             assert(vari);
             args.insert(args.begin(), vari);
 
-            FunctionCall *lowed_index = B.CreateFCall(Ctx.getIndexArrayFn(), args);
+            FunctionCall *lowed_index = B.CreateFCall(Ctx.getIndexArrayFn(), nullptr, args);
             assert(lowed_index);
 
             Statement *parent_stmt = rtti::dyn_cast<Statement>(array_index_->getParent());
@@ -665,13 +674,13 @@ namespace rexlang {
 
             // 在启动函数中调用初始化函数
 
-            FunctionCall *call_init_fn = B.CreateFCall(init_fn);
+            FunctionCall *call_init_fn = B.CreateFCall(init_fn, nullptr);
             startup_stmtblk_->appendStatement(call_init_fn);
 
             // 在启动函数中调用用户的入口函数，并将其返回值作为启动函数的返回值
 
             FunctorDecl *entry_fn = project_db_.GetMainEntry();
-            FunctionCall *call_entry_fn = B.CreateFCall(entry_fn);
+            FunctionCall *call_entry_fn = B.CreateFCall(entry_fn, nullptr);
             ReturnStmt *return_stmt = B.Create<ReturnStmt>(call_entry_fn);
             startup_stmtblk_->appendStatement(return_stmt);
 
