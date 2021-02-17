@@ -194,7 +194,7 @@ namespace rexlang {
         // 声明类型
 
         for (VariTypeDecl *vari_type : TU->getVariTypeList()) {
-            assert(varitype_map_[vari_type]);
+            assert(varitype_map_[vari_type] == nullptr);
             llvm::Type *llvm_varitype = Emit(vari_type);
             varitype_map_[vari_type] = llvm_varitype;
         }
@@ -202,7 +202,7 @@ namespace rexlang {
         // 声明全局变量
 
         for (GlobalVariableDecl *gvari : TU->getGlobalVariableList()) {
-            assert(variable_map_[gvari]);
+            assert(variable_map_[gvari] == nullptr);
             llvm::GlobalVariable *llvm_gvari = Emit(gvari);
             variable_map_[gvari] = llvm_gvari;
         }
@@ -210,7 +210,7 @@ namespace rexlang {
         // 声明文件变量
 
         for (FileVariableDecl *fvari : TU->getFileVariableList()) {
-            assert(variable_map_[fvari]);
+            assert(variable_map_[fvari] == nullptr);
             llvm::GlobalVariable *llvm_fvari = Emit(fvari);
             variable_map_[fvari] = llvm_fvari;
         }
@@ -218,7 +218,7 @@ namespace rexlang {
         // 声明函数
 
         for (FunctorDecl *decl : TU->getFunctorList()) {
-            assert(functor_map_[decl]);
+            assert(functor_map_[decl] == nullptr);
             llvm::Function *llvm_func = Emit(decl);
             function_map_[decl] = llvm_func;
             functor_map_[decl] = llvm_func->getFunctionType();
@@ -227,9 +227,7 @@ namespace rexlang {
         // 定义函数
 
         for (FunctionDecl *func : TU->getFunctionList()) {
-            assert(function_map_[func]);
             llvm::Function *llvm_func = Emit(func);
-            function_map_[func] = llvm_func;
         }
 
         DebInfoBuilder.finalize();
@@ -374,8 +372,8 @@ namespace rexlang {
 
         // 开始创建函数体
 
-        llvm::BasicBlock *basic_block = llvm::BasicBlock::Create(TheContext, "entry", llvm_function);
-        Builder.SetInsertPoint(basic_block);
+        llvm::BasicBlock *entry_bb = llvm::BasicBlock::Create(TheContext, "entry", llvm_function);
+        Builder.SetInsertPoint(entry_bb);
 
         // 创建返回值
 
@@ -392,7 +390,7 @@ namespace rexlang {
         // 创建参数变量
 
         for (ParameterDecl *param_vari_item : functionDecl->getParameters()) {
-            assert(variable_map_[param_vari_item]);
+            assert(variable_map_[param_vari_item] == nullptr);
             llvm::Value *param_var = Emit(param_vari_item);
             variable_map_[param_vari_item] = param_var;
         }
@@ -400,7 +398,7 @@ namespace rexlang {
         // 创建局部变量
 
         for (auto &local_vari_item : functionDecl->getLocalVariables()) {
-            assert(variable_map_[local_vari_item]);
+            assert(variable_map_[local_vari_item] == nullptr);
             llvm::Value *local_var = Emit(local_vari_item);
             variable_map_[local_vari_item] = local_var;
         }
@@ -739,21 +737,21 @@ namespace rexlang {
                 llvm::Type *
                 , VariTypeDecl
                 , BuiltinVoidType
-                , BuiltinCommonType
+//                , BuiltinCommonType
                 , BuiltinCharType
                 , BuiltinIntegerType
                 , BuiltinFloatType
                 , BuiltinBoolType
-                , BuiltinStringType
-                , BuiltinDataSetType
+//                , BuiltinStringType
+//                , BuiltinDataSetType
                 , BuiltinShortType
                 , BuiltinLongType
                 , BuiltinDatetimeType
                 , BuiltinFuncPtrType
                 , BuiltinDoubleType
                 , ReferenceType
-                , StructureDecl
-                , ArrayType
+//                , StructureDecl
+//                , ArrayType
                 >(type);
         return ty;
     }
