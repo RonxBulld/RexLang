@@ -90,6 +90,8 @@ namespace rexlang {
     DumpAST::DumpAST(std::ostream &OS) : DumpASTWritter(OS) {
     }
 
+    DumpAST::~DumpAST() = default ;
+
     /*===-------------------------------------===*
      * 实现DumpAST各节点内容输出
      */

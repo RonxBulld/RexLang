@@ -11,7 +11,7 @@ namespace rexlang {
 
     class Visitor {
     public:
-        virtual ~Visitor() ;
+        virtual ~Visitor() = default ;
 
     public:     // 基础例程
 

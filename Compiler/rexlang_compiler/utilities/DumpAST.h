@@ -37,6 +37,7 @@ namespace rexlang {
     class DumpAST : public Visitor, private DumpASTWritter {
     public:
         explicit DumpAST(std::ostream &OS) ;
+        ~DumpAST() override ;
 
     public:
         void Visit(Node &                node) override;
