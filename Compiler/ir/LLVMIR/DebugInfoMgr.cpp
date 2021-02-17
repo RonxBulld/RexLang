@@ -72,7 +72,7 @@ namespace rexlang {
         std::string filename;
         std::string directory;
         if (!dir.has_filename()) {
-            assert(false);
+            // assert(false);
             return nullptr;
         }
         filename = dir.filename().string();
