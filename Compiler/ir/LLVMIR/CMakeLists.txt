@@ -18,4 +18,4 @@ ADD_LIBRARY(${PROJECT_NAME} OBJECT
         LowAST.h
 )
 
-target_link_libraries(${PROJECT_NAME} LLVM)
+target_link_libraries(${PROJECT_NAME} LLVM REXCompilerParse)
