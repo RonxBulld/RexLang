@@ -408,6 +408,9 @@ namespace rexlang {
         BasicBlockRange bb_range = Emit(functionDecl->getFunctionBody());
         assert(bb_range.head && bb_range.tail);
 
+        Builder.SetInsertPoint(entry_bb);
+        Builder.CreateBr(bb_range.head);
+
         // 尾块跳转到返回块
 
         Builder.SetInsertPoint(bb_range.tail);
@@ -526,8 +529,9 @@ namespace rexlang {
     }
 
     NewEmitter::BasicBlockRange NewEmitter::impl_EmitStatementBlock(StatementBlock *statementBlock) {
+        llvm::BasicBlock *bb = llvm::BasicBlock::Create(TheContext, "", TheFunction);
         // TODO:
-        return NewEmitter::BasicBlockRange();
+        return NewEmitter::BasicBlockRange{bb, bb};
     }
     // endregion
     /*****************************************************************************************************************/
