@@ -459,16 +459,6 @@ namespace rexlang {
         PostAction(node);
     }
 
-    void Visitor::Visit(HierarchyIdentifier &node) {
-        HeadAction(node);
-        VISIT_BASE(Expression, node);
-        PrevAction(node);
-
-        TraverseArray(node.getNameComponents());
-
-        PostAction(node);
-    }
-
     void Visitor::Visit(NameComponent &node) {
         HeadAction(node);
         VISIT_BASE(Expression, node);
@@ -653,7 +643,6 @@ namespace rexlang {
     int ReturnStmt         ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
     int ExitStmt           ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
     int Expression         ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
-    int HierarchyIdentifier::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
     int NameComponent      ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
     int IdentRefer         ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
     int ArrayIndex         ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }

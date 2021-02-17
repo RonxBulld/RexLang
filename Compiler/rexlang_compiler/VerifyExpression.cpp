@@ -13,17 +13,6 @@ namespace rexlang {
         return VerifyExpressionInternal();
     }
 
-    bool HierarchyIdentifier::VerifyExpressionInternal() {
-
-        // 验证所有子式
-
-        for (NameComponent *component : getNameComponents()) {
-            VERIFY_SUB_EXPR(component) { assert(false); return false; }
-        }
-
-        return true;
-    }
-
     bool NameComponent::VerifyExpressionInternal() {
 
         // 如果前面有名称组件那么只能是结构体
@@ -148,8 +137,7 @@ namespace rexlang {
 
                 // 5.3. 如果形参参考属性为真，则实参必须为左值或左值引用（参考形参），并且变量类型严格一致
 
-                if (HierarchyIdentifier *hierarchy_identifier = argument->as<HierarchyIdentifier>()) {
-                    (void) hierarchy_identifier;
+                if (argument->is<IdentRefer>() || argument->is<ArrayIndex>()) {
                     if (!ReferenceType::peek(param_ty)->compareTo(ReferenceType::peek(argu_ty))) {
                         assert(false);
                         return false;

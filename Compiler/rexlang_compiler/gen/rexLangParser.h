@@ -1,5 +1,5 @@
 
-// Generated from /home/rexfield/RexLang/Compiler/rexlang_compiler/rexLang.g4 by ANTLR 4.7.2
+// Generated from /mnt/d/Project/RexLang/Compiler/rexlang_compiler/rexLang.g4 by ANTLR 4.7.2
 
 #pragma once
 
@@ -40,10 +40,9 @@ public:
     RuleParameter_decl_list = 19, RuleParameter_decl = 20, RuleVari_parameter_decl = 21, 
     RuleStatement_list = 22, RuleStatement = 23, RuleSwitch_statement = 24, 
     RuleLoop_statement = 25, RuleCondition_statement = 26, RuleControl_statement = 27, 
-    RuleHierarchy_identifier = 28, RuleName_component = 29, RuleExpression = 30, 
-    RuleData_set_value = 31, RuleDatetime_value = 32, RuleDatetime_value_core = 33, 
-    RuleMacro_value = 34, RuleFunc_ptr = 35, RuleBool_value = 36, RuleNumber = 37, 
-    RuleString_value = 38
+    RuleName_component = 28, RuleExpression = 29, RuleData_set_value = 30, 
+    RuleDatetime_value = 31, RuleDatetime_value_core = 32, RuleMacro_value = 33, 
+    RuleFunc_ptr = 34, RuleBool_value = 35, RuleNumber = 36, RuleString_value = 37
   };
 
   rexLangParser(antlr4::TokenStream *input);
@@ -84,7 +83,6 @@ public:
   class Loop_statementContext;
   class Condition_statementContext;
   class Control_statementContext;
-  class Hierarchy_identifierContext;
   class Name_componentContext;
   class ExpressionContext;
   class Data_set_valueContext;
@@ -644,7 +642,7 @@ public:
   public:
     AssignStatementContext(StatementContext *ctx);
 
-    Hierarchy_identifierContext *hierarchy_identifier();
+    Name_componentContext *name_component();
     ExpressionContext *expression();
     antlr4::tree::TerminalNode *K_ASSIGN_OPT();
     antlr4::tree::TerminalNode *K_AECOM_OPT();
@@ -701,12 +699,12 @@ public:
     RangeForContext(Loop_statementContext *ctx);
 
     rexLangParser::ExpressionContext *times_expr = nullptr;
-    rexLangParser::Hierarchy_identifierContext *loop_variable = nullptr;
+    rexLangParser::Name_componentContext *loop_variable = nullptr;
     rexLangParser::Statement_listContext *loop_body = nullptr;
     antlr4::tree::TerminalNode *NEWLINE();
     ExpressionContext *expression();
     Statement_listContext *statement_list();
-    Hierarchy_identifierContext *hierarchy_identifier();
+    Name_componentContext *name_component();
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
 
@@ -720,13 +718,13 @@ public:
     rexLangParser::ExpressionContext *loop_start = nullptr;
     rexLangParser::ExpressionContext *loop_end = nullptr;
     rexLangParser::ExpressionContext *loop_step = nullptr;
-    rexLangParser::Hierarchy_identifierContext *loop_variable = nullptr;
+    rexLangParser::Name_componentContext *loop_variable = nullptr;
     rexLangParser::Statement_listContext *loop_body = nullptr;
     antlr4::tree::TerminalNode *NEWLINE();
     std::vector<ExpressionContext *> expression();
     ExpressionContext* expression(size_t i);
     Statement_listContext *statement_list();
-    Hierarchy_identifierContext *hierarchy_identifier();
+    Name_componentContext *name_component();
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
 
@@ -867,24 +865,6 @@ public:
 
   Control_statementContext* control_statement();
 
-  class  Hierarchy_identifierContext : public antlr4::ParserRuleContext {
-  public:
-    rexLangParser::Name_componentContext *name_componentContext = nullptr;;
-    std::vector<Name_componentContext *> components;;
-    Hierarchy_identifierContext(antlr4::ParserRuleContext *parent, size_t invokingState);
-    virtual size_t getRuleIndex() const override;
-    std::vector<Name_componentContext *> name_component();
-    Name_componentContext* name_component(size_t i);
-
-    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
-    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
-
-    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
-   
-  };
-
-  Hierarchy_identifierContext* hierarchy_identifier();
-
   class  Name_componentContext : public antlr4::ParserRuleContext {
   public:
     Name_componentContext(antlr4::ParserRuleContext *parent, size_t invokingState);
@@ -907,6 +887,18 @@ public:
     Name_componentContext *name_component();
     std::vector<ExpressionContext *> expression();
     ExpressionContext* expression(size_t i);
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+  };
+
+  class  HierarchyContext : public Name_componentContext {
+  public:
+    HierarchyContext(Name_componentContext *ctx);
+
+    Name_componentContext *name_component();
+    antlr4::tree::TerminalNode *IDENTIFIER();
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
 
@@ -970,7 +962,7 @@ public:
     Bool_valueContext *bool_value();
     Macro_valueContext *macro_value();
     String_valueContext *string_value();
-    Hierarchy_identifierContext *hierarchy_identifier();
+    Name_componentContext *name_component();
     Func_ptrContext *func_ptr();
     Datetime_valueContext *datetime_value();
     Data_set_valueContext *data_set_value();

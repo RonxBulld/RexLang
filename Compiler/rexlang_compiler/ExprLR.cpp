@@ -106,24 +106,12 @@ namespace rexlang {
     }
 
     /********************************************************
-     * 层次名称
-     ********************************************************/
-
-    ExprUsage HierarchyIdentifier::getSubExprAccessType(const Expression *expr) const {
-        auto &NCS = this->name_components_;
-        assert(!NCS.empty());
-             if (expr == NCS.back())                                   { return this->getLRType(); }
-        else if (std::find(NCS.begin(), NCS.end(), expr) != NCS.end()) { return R; }
-        else { assert(false);                                            return U; }
-    }
-
-    /********************************************************
      * 一元、二元表达式
      ********************************************************/
 
     ExprUsage UnaryExpression::getSubExprAccessType(const Expression *expr) const {
         if (expr == operand_value_) { return R; }
-        else { assert(false);              return U; }
+        else { assert(false);         return U; }
     }
 
     ExprUsage BinaryExpression::getSubExprAccessType(const Expression *expr) const {

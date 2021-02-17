@@ -65,7 +65,6 @@ SET(REXCompilerParse-Source
         ASTUtility.cpp
         ASTUtility.h
         TypeSystem.cpp
-        HierarchyIdentifier.cpp
         ExprLR.cpp
         ASTNodeGetterSetter.cpp
         Symbols.cpp

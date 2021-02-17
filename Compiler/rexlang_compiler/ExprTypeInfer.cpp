@@ -16,18 +16,6 @@ namespace rexlang {
      * 实现各表达式叶子节点的 getExpressionTypeInternal
      **************************************************************/
 
-    TypeDecl *HierarchyIdentifier::getExpressionTypeInternal() const {
-        assert(name_components_.empty() == false);
-
-        // HierarchyIdentifier 会试图获取所有组件的类型，但是只以最后一个组件类型作为返回类型
-
-        TypeDecl *type = nullptr;
-        for (NameComponent *name_component : name_components_) {
-            type = name_component->getExpressionType();
-        }
-        return type;
-    }
-
     TypeDecl *IdentRefer::getExpressionTypeInternal() const {
         TagDecl *tag_decl = this->getDecl();
         return tag_decl->getType();

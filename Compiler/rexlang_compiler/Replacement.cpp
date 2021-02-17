@@ -118,14 +118,6 @@ namespace rexlang {
     bool Expression::replaceChild(Node *origin, Node *goal) {
         return Statement::replaceChild(origin, goal);
     }
-    bool HierarchyIdentifier::replaceChild(Node *origin, Node *goal) {
-        size_t idx = 0, count = name_components_.size();
-        auto CompReplPred = [this, &idx](HierarchyIdentifier &, NameComponent *goal) { this->setNameComponentAt(idx, rtti::dyn_cast<NameComponent>(goal)); };
-        for (; idx < count; ++idx) {
-            TRY_REPLACE(getNameComponentAt(idx), CompReplPred);
-        }
-        return Expression::replaceChild(origin, goal);
-    }
     bool NameComponent::replaceChild(Node *origin, Node *goal) {
         return Expression::replaceChild(origin, goal);
     }

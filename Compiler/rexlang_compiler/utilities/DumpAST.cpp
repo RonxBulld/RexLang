@@ -374,12 +374,6 @@ namespace rexlang {
         POST_ACTION();
     }
 
-    void DumpAST::Visit(HierarchyIdentifier &node) {
-        PREV_ACTION();
-
-        POST_ACTION();
-    }
-
     void DumpAST::Visit(NameComponent &node) {
         PREV_ACTION();
 

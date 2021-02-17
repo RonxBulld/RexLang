@@ -1,5 +1,5 @@
 
-// Generated from /home/rexfield/RexLang/Compiler/rexlang_compiler/rexLang.g4 by ANTLR 4.7.2
+// Generated from /mnt/d/Project/RexLang/Compiler/rexlang_compiler/rexLang.g4 by ANTLR 4.7.2
 
 #pragma once
 
@@ -138,11 +138,11 @@ public:
   virtual void enterExitStmt(rexLangParser::ExitStmtContext * /*ctx*/) override { }
   virtual void exitExitStmt(rexLangParser::ExitStmtContext * /*ctx*/) override { }
 
-  virtual void enterHierarchy_identifier(rexLangParser::Hierarchy_identifierContext * /*ctx*/) override { }
-  virtual void exitHierarchy_identifier(rexLangParser::Hierarchy_identifierContext * /*ctx*/) override { }
-
   virtual void enterFuncCall(rexLangParser::FuncCallContext * /*ctx*/) override { }
   virtual void exitFuncCall(rexLangParser::FuncCallContext * /*ctx*/) override { }
+
+  virtual void enterHierarchy(rexLangParser::HierarchyContext * /*ctx*/) override { }
+  virtual void exitHierarchy(rexLangParser::HierarchyContext * /*ctx*/) override { }
 
   virtual void enterIdentifier(rexLangParser::IdentifierContext * /*ctx*/) override { }
   virtual void exitIdentifier(rexLangParser::IdentifierContext * /*ctx*/) override { }

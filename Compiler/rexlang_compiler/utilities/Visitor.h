@@ -81,7 +81,6 @@ namespace rexlang {
         virtual void Visit(ExitStmt            &node) ;
 
         virtual void Visit(Expression          &node) ;
-        virtual void Visit(HierarchyIdentifier &node) ;
         virtual void Visit(NameComponent       &node) ;
         virtual void Visit(IdentRefer          &node) ;
         virtual void Visit(ArrayIndex          &node) ;

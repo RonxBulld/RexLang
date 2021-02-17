@@ -1,5 +1,5 @@
 
-// Generated from /home/rexfield/RexLang/Compiler/rexlang_compiler/rexLang.g4 by ANTLR 4.7.2
+// Generated from /mnt/d/Project/RexLang/Compiler/rexlang_compiler/rexLang.g4 by ANTLR 4.7.2
 
 #pragma once
 
@@ -177,11 +177,11 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitHierarchy_identifier(rexLangParser::Hierarchy_identifierContext *ctx) override {
+  virtual antlrcpp::Any visitFuncCall(rexLangParser::FuncCallContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitFuncCall(rexLangParser::FuncCallContext *ctx) override {
+  virtual antlrcpp::Any visitHierarchy(rexLangParser::HierarchyContext *ctx) override {
     return visitChildren(ctx);
   }
 

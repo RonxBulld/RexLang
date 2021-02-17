@@ -1,5 +1,5 @@
 
-// Generated from /home/rexfield/RexLang/Compiler/rexlang_compiler/rexLang.g4 by ANTLR 4.7.2
+// Generated from /mnt/d/Project/RexLang/Compiler/rexlang_compiler/rexLang.g4 by ANTLR 4.7.2
 
 #pragma once
 
@@ -100,9 +100,9 @@ public:
 
     virtual antlrcpp::Any visitExitStmt(rexLangParser::ExitStmtContext *context) = 0;
 
-    virtual antlrcpp::Any visitHierarchy_identifier(rexLangParser::Hierarchy_identifierContext *context) = 0;
-
     virtual antlrcpp::Any visitFuncCall(rexLangParser::FuncCallContext *context) = 0;
+
+    virtual antlrcpp::Any visitHierarchy(rexLangParser::HierarchyContext *context) = 0;
 
     virtual antlrcpp::Any visitIdentifier(rexLangParser::IdentifierContext *context) = 0;
 

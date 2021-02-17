@@ -58,7 +58,6 @@ digraph G {
     "RangeForStmt" -> "LoopStatement";
     "ForStmt" -> "LoopStatement";
     "DoWhileStmt" -> "LoopStatement";
-    "HierarchyIdentifier" -> "Expression";
     "NameComponent" -> "Expression";
     "TypeConvert" -> "Expression";
     "_OperatorExpression" -> "Expression";

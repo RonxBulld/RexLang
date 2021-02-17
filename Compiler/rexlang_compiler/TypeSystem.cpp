@@ -52,7 +52,6 @@ namespace rexlang {
     const NodeType DoWhileStmt          ::GetClassId() { return NodeType::kNTyDoWhileStmt; }
     const NodeType StatementBlock       ::GetClassId() { return NodeType::kNTyStatementBlock; }
     const NodeType Expression           ::GetClassId() { return NodeType::kNTyExpression; }
-    const NodeType HierarchyIdentifier  ::GetClassId() { return NodeType::kNTyHierarchyIdentifier; }
     const NodeType NameComponent        ::GetClassId() { return NodeType::kNTyNameComponent; }
     const NodeType IdentRefer           ::GetClassId() { return NodeType::kNTyIdentRefer; }
     const NodeType ArrayIndex           ::GetClassId() { return NodeType::kNTyArrayIndex; }

@@ -88,7 +88,7 @@ namespace rexlang {
 
     // Expression
 
-    class Expression;           class HierarchyIdentifier;      class NameComponent;
+    class Expression;           class NameComponent;
     class IdentRefer;           class ArrayIndex;               class FunctionCall;
     class UnaryExpression;      class BinaryExpression;         class OperatedExpression;
     class TypeConvert;
@@ -125,8 +125,8 @@ namespace rexlang {
         kNTyExitStmt,
 
         kNTyExpression,
-        kNTyHierarchyIdentifier, kNTyNameComponent, kNTyIdentRefer, kNTyArrayIndex,
-        kNTyFunctionCall, kNTyUnaryExpression, kNTyBinaryExpression, kNTyOperatorExpression,
+        kNTyNameComponent, kNTyIdentRefer, kNTyArrayIndex, kNTyFunctionCall,
+        kNTyUnaryExpression, kNTyBinaryExpression, kNTyOperatorExpression,
 
         kNTyTypeConvert, kNTyFuncAddrExpression,
 
@@ -1576,22 +1576,22 @@ namespace rexlang {
      */
     class AssignStmt : public Statement {
     private:
-        HierarchyIdentifier* lhs_ = nullptr;
-        Expression* rhs_ = nullptr;
+        NameComponent   * lhs_ = nullptr;
+        Expression      * rhs_ = nullptr;
 
     protected:
         ExprUsage getSubExprAccessType(const Expression *expr) const override ;
 
     private:
-        void setLHS(HierarchyIdentifier *lhs) ;
-        void setRHS(Expression *rhs) ;
+        void setLHS(NameComponent * lhs) ;
+        void setRHS(Expression *    rhs) ;
 
     public:
-        AssignStmt(HierarchyIdentifier *lhs, Expression *rhs) ;
+        AssignStmt(NameComponent *lhs, Expression *rhs) ;
 
     public:
-        HierarchyIdentifier *   getLHS() const ;
-        Expression *            getRHS() const ;
+        NameComponent * getLHS() const ;
+        Expression *    getRHS() const ;
 
         SEMATIC_ANALYSIS_INTERNAL
 
@@ -1828,21 +1828,21 @@ namespace rexlang {
      */
     class RangeForStmt : public LoopStatement {
     private:
-        Expression *            range_size_ = nullptr;
-        HierarchyIdentifier *   loop_vari_  = nullptr;
+        Expression *    range_size_ = nullptr;
+        NameComponent * loop_vari_  = nullptr;
 
     protected:
         ExprUsage getSubExprAccessType(const Expression *expr) const override ;
 
     public:
-        RangeForStmt(Expression *rangeSize, HierarchyIdentifier *loopVari, Statement *loopBody) ;
+        RangeForStmt(Expression *rangeSize, NameComponent *loopVari, Statement *loopBody) ;
 
     public:
-        void setRangeSize    (Expression *rangeSize) ;
-        void setLoopVariable (HierarchyIdentifier *loopVari) ;
+        void setRangeSize    (Expression *      rangeSize) ;
+        void setLoopVariable (NameComponent *   loopVari) ;
 
-        Expression *            getRangeSize () const ;
-        HierarchyIdentifier *   getLoopVari  () const ;
+        Expression *    getRangeSize () const ;
+        NameComponent * getLoopVari  () const ;
 
         SEMATIC_ANALYSIS_INTERNAL
 
@@ -1860,28 +1860,28 @@ namespace rexlang {
      */
     class ForStmt : public LoopStatement {
     private:
-        Expression *          start_value_ = nullptr;
-        Expression *          stop_value_  = nullptr;
-        Expression *          step_value_  = nullptr;
-        HierarchyIdentifier * loop_vari_   = nullptr;
+        Expression *    start_value_ = nullptr;
+        Expression *    stop_value_  = nullptr;
+        Expression *    step_value_  = nullptr;
+        NameComponent * loop_vari_   = nullptr;
 
     private:
-        void setStartValue(Expression *startValue) ;
-        void setStopValue (Expression *stopValue)  ;
-        void setStepValue (Expression *stepValue)  ;
-        void setLoopVari  (HierarchyIdentifier *loopVari) ;
+        void setStartValue(Expression *     startValue) ;
+        void setStopValue (Expression *     stopValue)  ;
+        void setStepValue (Expression *     stepValue)  ;
+        void setLoopVari  (NameComponent *  loopVari) ;
 
     protected:
         ExprUsage getSubExprAccessType(const Expression *expr) const override ;
 
     public:
-        ForStmt(Expression *startValue, Expression *stopValue, Expression *stepValue, HierarchyIdentifier *loopVari, Statement *loopBody) ;
+        ForStmt(Expression *startValue, Expression *stopValue, Expression *stepValue, NameComponent *loopVari, Statement *loopBody) ;
 
     public:
-        Expression *            getStartValue () const ;
-        Expression *            getStopValue  () const ;
-        Expression *            getStepValue  () const ;
-        HierarchyIdentifier *   getLoopVari   () const ;
+        Expression *    getStartValue () const ;
+        Expression *    getStopValue  () const ;
+        Expression *    getStepValue  () const ;
+        NameComponent * getLoopVari   () const ;
 
         SEMATIC_ANALYSIS_INTERNAL
 
@@ -1986,53 +1986,9 @@ namespace rexlang {
     };
 
     /**
-     * 多层名称序列
-     * 该节点用于表示通过英文句点`.'连接的多层引用结构
-     */
-    class HierarchyIdentifier : public Expression {
-    private:
-        std::vector<NameComponent *> name_components_;
-
-    protected:
-        bool        VerifyExpressionInternal    ()                             override ;
-        ExprUsage   getSubExprAccessType        (const Expression *expr) const override ;
-        TypeDecl *  getExpressionTypeInternal   ()                       const override ;
-
-    public:
-        explicit HierarchyIdentifier(const std::vector<NameComponent *> &nameComponents) ;
-
-    public:
-        void                                AppendComponent     (NameComponent *component) ;
-        const std::vector<NameComponent *> &getNameComponents   () ;
-                          NameComponent *   getNameComponentAt  (size_t idx) ;
-        void                                setNameComponentAt  (size_t idx, NameComponent *nameComponent) ;
-
-        /*
-         * 查找指定组件在层次名称中的位置，返回一个非负整数
-         * 若指定组件不在层次名称中，则返回-1
-         */
-        int indexOf(const NameComponent *component) const ;
-
-    public:
-        SEMATIC_ANALYSIS_INTERNAL
-
-    public:
-        int Visit(class Visitor &visitor) override ;
-        bool replaceChild(Node *origin, Node *goal) override ;
-
-    public:
-        static const NodeType GetClassId () ;
-
-    };
-
-    /**
      * 单个命名组件
      */
     class NameComponent : public Expression {
-    public:
-        NameComponent * Forward     () const ;
-        NameComponent * Backward    () const ;
-
     public:
         bool                VerifyExpressionInternal() override;
         virtual IdentRefer *getBaseId() const = 0;    // 获取组件的确切名称对象
@@ -2053,6 +2009,8 @@ namespace rexlang {
     private:
         // 引用目标
         IdentDef *reference_ = nullptr;
+        // 前缀
+        NameComponent *prefix_ = nullptr;
 
     protected:
         bool        VerifyExpressionInternal    () override;
@@ -2060,13 +2018,14 @@ namespace rexlang {
         TypeDecl *  getExpressionTypeInternal   ()                       const override ;   // 该物件的数据类型
 
     public:
-        explicit IdentRefer(IdentDef *referenceTo) ;
+        explicit IdentRefer(IdentDef *referenceTo, NameComponent * prefix) ;
 
     public:
         IdentDef *      def         () const ;  // 计算并返回名称定义
 
         IdentRefer *    getBaseId   () const override ;
         TagDecl *       getDecl     () const ;  // 获取被引用的定义
+        NameComponent * prefix      () const ;  // 获取前缀
 
     public:
         int Visit(class Visitor &visitor) override ;

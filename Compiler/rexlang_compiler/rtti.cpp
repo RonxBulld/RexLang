@@ -51,7 +51,6 @@ namespace rexlang {
             if (0) { case NodeType::kNTyDoWhileStmt:         return "DoWhileStmt";         }
             if (0) { case NodeType::kNTyStatementBlock:      return "StatementBlock";      }
             if (0) { case NodeType::kNTyExpression:          return "Expression";          }
-            if (0) { case NodeType::kNTyHierarchyIdentifier: return "HierarchyIdentifier"; }
             if (0) { case NodeType::kNTyNameComponent:       return "NameComponent";       }
             if (0) { case NodeType::kNTyIdentRefer:          return "IdentRefer";          }
             if (0) { case NodeType::kNTyArrayIndex:          return "ArrayIndex";          }

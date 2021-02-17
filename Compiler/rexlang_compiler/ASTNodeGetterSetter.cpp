@@ -651,47 +651,15 @@ namespace rexlang {
         return false;
     }
 
-    /******************************************************
-     * HierarchyIdentifier
-     ******************************************************/
-
-    NameComponent *HierarchyIdentifier::getNameComponentAt(size_t idx) {
-        if (idx < name_components_.size()) {
-            return name_components_.at(idx);
-        } else {
-            assert(false);
-            return nullptr;
-        }
-    }
-
-    void HierarchyIdentifier::setNameComponentAt(size_t idx, NameComponent *nameComponent) {
-        if (idx < name_components_.size()) {
-            name_components_[idx] = nameComponent;
-            setChild(nameComponent);
-        } else {
-            assert(false);
-            return;
-        }
-    }
-
-    const std::vector<NameComponent *> &HierarchyIdentifier::getNameComponents() { return name_components_; }
-
-    int HierarchyIdentifier::indexOf(const NameComponent *component) const {
-        if (!component) { return -1; }
-        auto found = std::find(name_components_.begin(), name_components_.end(), component);
-        if (found == name_components_.end()) { return -1; }
-        return std::distance(name_components_.begin(), found);
-    }
-
     /***************************************************
      * AssignStmt
      ***************************************************/
 
-    void AssignStmt::setLHS(HierarchyIdentifier *lhs) { lhs_ = lhs; setChild(lhs); }
-    void AssignStmt::setRHS(Expression *rhs)          { rhs_ = rhs; setChild(rhs); }
+    void AssignStmt::setLHS(NameComponent * lhs)    { lhs_ = lhs; setChild(lhs); }
+    void AssignStmt::setRHS(Expression *    rhs)    { rhs_ = rhs; setChild(rhs); }
 
-    HierarchyIdentifier *   AssignStmt::getLHS() const { return lhs_; }
-    Expression *            AssignStmt::getRHS() const { return rhs_; }
+    NameComponent * AssignStmt::getLHS() const { return lhs_; }
+    Expression *    AssignStmt::getRHS() const { return rhs_; }
 
     /***************************************************
      * LoopControlStmt
@@ -763,25 +731,25 @@ namespace rexlang {
      * RangeForStmt
      ***************************************************/
 
-    void RangeForStmt::setRangeSize   (Expression *         rangeSize) { range_size_ = rangeSize; setChild(rangeSize); }
-    void RangeForStmt::setLoopVariable(HierarchyIdentifier *loopVari)  { loop_vari_  = loopVari;  setChild(loopVari); }
+    void RangeForStmt::setRangeSize   (Expression *     rangeSize) { range_size_ = rangeSize; setChild(rangeSize); }
+    void RangeForStmt::setLoopVariable(NameComponent *  loopVari)  { loop_vari_  = loopVari;  setChild(loopVari); }
 
-    Expression *         RangeForStmt::getRangeSize () const { return range_size_; }
-    HierarchyIdentifier *RangeForStmt::getLoopVari  () const { return loop_vari_;  }
+    Expression *    RangeForStmt::getRangeSize () const { return range_size_; }
+    NameComponent * RangeForStmt::getLoopVari  () const { return loop_vari_;  }
 
     /***************************************************
      * ForStmt
      ***************************************************/
 
-    void ForStmt::setStartValue(Expression *startValue)        { start_value_ = startValue; setChild(startValue); }
-    void ForStmt::setStopValue (Expression *stopValue)         { stop_value_  = stopValue;  setChild(stopValue); }
-    void ForStmt::setStepValue (Expression *stepValue)         { step_value_  = stepValue;  setChild(stepValue); }
-    void ForStmt::setLoopVari  (HierarchyIdentifier *loopVari) { loop_vari_   = loopVari;   setChild(loopVari); }
+    void ForStmt::setStartValue(Expression *startValue)     { start_value_ = startValue; setChild(startValue); }
+    void ForStmt::setStopValue (Expression *stopValue)      { stop_value_  = stopValue;  setChild(stopValue); }
+    void ForStmt::setStepValue (Expression *stepValue)      { step_value_  = stepValue;  setChild(stepValue); }
+    void ForStmt::setLoopVari  (NameComponent *loopVari)    { loop_vari_   = loopVari;   setChild(loopVari); }
 
-    Expression *            ForStmt::getStartValue () const { return start_value_; }
-    Expression *            ForStmt::getStopValue  () const { return stop_value_ ; }
-    Expression *            ForStmt::getStepValue  () const { return step_value_ ; }
-    HierarchyIdentifier *   ForStmt::getLoopVari   () const { return loop_vari_  ; }
+    Expression *    ForStmt::getStartValue () const { return start_value_; }
+    Expression *    ForStmt::getStopValue  () const { return stop_value_ ; }
+    Expression *    ForStmt::getStepValue  () const { return step_value_ ; }
+    NameComponent * ForStmt::getLoopVari   () const { return loop_vari_  ; }
 
     /***************************************************
      * DoWhileStmt
@@ -872,7 +840,8 @@ namespace rexlang {
      * IdentRefer
      ***************************************************/
 
-    IdentDef * IdentRefer::def() const { return reference_; }
+    IdentDef *      IdentRefer::def     () const { return reference_; }
+    NameComponent * IdentRefer::prefix  () const { return prefix_; }
 
     /***************************************************
      * ArrayIndex

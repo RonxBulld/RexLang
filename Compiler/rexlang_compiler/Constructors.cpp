@@ -162,7 +162,7 @@ namespace rexlang {
      * AssignStmt
      ******************************************************************/
 
-    AssignStmt::AssignStmt(HierarchyIdentifier *lhs, Expression *rhs) {
+    AssignStmt::AssignStmt(NameComponent *lhs, Expression *rhs) {
         setLHS(lhs);
         setRHS(rhs);
         // TODO: Must add assignable check.
@@ -199,13 +199,13 @@ namespace rexlang {
         setLoopCondition(condition);
     }
 
-    RangeForStmt::RangeForStmt(Expression *rangeSize, HierarchyIdentifier *loopVari, Statement *loopBody)
+    RangeForStmt::RangeForStmt(Expression *rangeSize, NameComponent *loopVari, Statement *loopBody)
         : LoopStatement(loopBody) {
         setRangeSize(rangeSize);
         setLoopVariable(loopVari);
     }
 
-    ForStmt::ForStmt(Expression *startValue, Expression *stopValue, Expression *stepValue, HierarchyIdentifier *loopVari, Statement *loopBody)
+    ForStmt::ForStmt(Expression *startValue, Expression *stopValue, Expression *stepValue, NameComponent *loopVari, Statement *loopBody)
         : LoopStatement(loopBody) {
         setStartValue(startValue);
         setStopValue (stopValue) ;
@@ -229,21 +229,13 @@ namespace rexlang {
     }
 
     /******************************************************************
-     * HierarchyIdentifier
-     ******************************************************************/
-
-    HierarchyIdentifier::HierarchyIdentifier(const std::vector<NameComponent *> &nameComponents) {
-        for (NameComponent *name_component : nameComponents) {
-            AppendComponent(name_component);
-        }
-    }
-
-    /******************************************************************
      * IdentRefer
      ******************************************************************/
 
-    IdentRefer::IdentRefer(IdentDef *referenceTo) {
+    IdentRefer::IdentRefer(IdentDef *referenceTo, NameComponent * prefix) {
         reference_ = referenceTo;
+        prefix_ = prefix;
+        setChild(prefix_);
     }
 
     /******************************************************************

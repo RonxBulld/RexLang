@@ -14,13 +14,6 @@ namespace rexlang {
         );
     }
 
-    HierarchyIdentifier *ASTBuilder::CreateHierName(IdentDef *pointee) const {
-        assert(pointee);
-        return Create<HierarchyIdentifier>(
-                std::vector<NameComponent *>({Create<IdentRefer>(pointee)})
-        );
-    }
-
     StatementBlock *ASTBuilder::CreateStatementBlock(const std::vector<Statement *> &stmts) const {
         return Create<StatementBlock>(stmts);
     }

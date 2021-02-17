@@ -151,12 +151,12 @@ statement_list
     ;
 
 statement
-    : condition_statement                                           # ConditionStatement
-    | hierarchy_identifier (K_ASSIGN_OPT | K_AECOM_OPT) expression  # AssignStatement
-    | expression                                                    # ExpressionStatement
-    | loop_statement                                                # LoopStatement
-    | switch_statement                                              # SwitchStatement
-    | control_statement                                             # ControlStatement
+    : condition_statement                                       # ConditionStatement
+    | name_component (K_ASSIGN_OPT | K_AECOM_OPT) expression    # AssignStatement
+    | expression                                                # ExpressionStatement
+    | loop_statement                                            # LoopStatement
+    | switch_statement                                          # SwitchStatement
+    | control_statement                                         # ControlStatement
     ;
 
 switch_statement
@@ -177,12 +177,12 @@ loop_statement
       '.判断循环尾' '(' ')'
                                                                                         # While
 
-    | '.计次循环首' '(' times_expr=expression ',' loop_variable=hierarchy_identifier? ')' NEWLINE
+    | '.计次循环首' '(' times_expr=expression ',' loop_variable=name_component? ')' NEWLINE
       loop_body=statement_list
       '.计次循环尾' '(' ')'
                                                                                         # RangeFor
 
-    | '.变量循环首' '(' loop_start=expression ',' loop_end=expression ',' loop_step=expression (',' loop_variable=hierarchy_identifier)? ')' NEWLINE
+    | '.变量循环首' '(' loop_start=expression ',' loop_end=expression ',' loop_step=expression (',' loop_variable=name_component)? ')' NEWLINE
       loop_body=statement_list
       '.变量循环尾' '(' ')'
                                                                                         # For
@@ -212,14 +212,11 @@ control_statement
     | '结束' '(' ')'                                    # ExitStmt
     ;
 
-hierarchy_identifier
-    : components+=name_component ('.' components+=name_component)*
-    ;
-
 name_component
     : IDENTIFIER                                                                    # Identifier
     | name_component '(' arguments+=expression? (',' arguments+=expression?)* ')'   # FuncCall
     | name_component '[' expression ']'                                             # ArrayIndex
+    | name_component '.' IDENTIFIER                                                 # Hierarchy
     ;
 
 expression
@@ -249,7 +246,7 @@ expression
     | bool_value                                                # OptElement
     | macro_value                                               # OptElement
     | string_value                                              # OptElement
-    | hierarchy_identifier                                      # OptElement
+    | name_component                                            # OptElement
     | func_ptr                                                  # OptElement
     | datetime_value                                            # OptElement
     | data_set_value                                            # OptElement

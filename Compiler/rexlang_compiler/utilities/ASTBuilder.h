@@ -21,7 +21,6 @@ namespace rexlang {
         }
 
         FunctionCall *CreateFCall(FunctorDecl *callee, const std::vector<Expression *> &args = {}) const ;
-        HierarchyIdentifier *CreateHierName(IdentDef *pointee) const ;
         StatementBlock *CreateStatementBlock(const std::vector<Statement *> &stmts = {}) const ;
         ValueOfString *CreateStringLiteral(const char *cStr) const ;
         ValueOfDecimal *CreateInt(int d) const ;

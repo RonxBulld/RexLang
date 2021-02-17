@@ -438,7 +438,7 @@ namespace rexlang {
         return NodeWarp(global_variable_decl);
     }
 
-    antlrcpp::Any CST2ASTConvert::visitEdition_spec  (rexLangParser::Edition_specContext *  context) {
+    antlrcpp::Any CST2ASTConvert::visitEdition_spec(rexLangParser::Edition_specContext *  context) {
         std::string edition_str = context->INTEGER_LITERAL()->toString();
         char *E;
         errno = 0;
@@ -673,8 +673,8 @@ namespace rexlang {
     // --- 赋值语句 ---------------------------------------------------------------------------------
 
     antlrcpp::Any CST2ASTConvert::visitAssignStatement(rexLangParser::AssignStatementContext *context) {
-        HierarchyIdentifier *lhs         = GetFromCtxIfExist<HierarchyIdentifier *>(context->hierarchy_identifier());
-        Expression *         rhs         = GetFromCtxIfExist<Expression *>(context->expression());
+        NameComponent * lhs     = GetFromCtxIfExist<NameComponent *>(context->name_component());
+        Expression *    rhs     = GetFromCtxIfExist<Expression *>(context->expression());
 
         AssignStmt *assign_stmt = CreateNode<AssignStmt>(context, lhs, rhs);
         return NodeWarp(assign_stmt);
@@ -741,28 +741,28 @@ namespace rexlang {
     }
 
     antlrcpp::Any CST2ASTConvert::visitWhile(rexLangParser::WhileContext *context) {
-        Expression *condition = GetFromCtxIfExist<Expression*>(context->condition_expr);
-        Statement * loop_body = GetFromCtxIfExist<Statement*>(context->loop_body);
+        Expression * condition = GetFromCtxIfExist<Expression *>(context->condition_expr);
+        Statement  * loop_body = GetFromCtxIfExist<Statement  *>(context->loop_body     );
 
         WhileStmt *while_stmt = CreateNode<WhileStmt>(context, condition, loop_body);
         return NodeWarp(while_stmt);
     }
 
     antlrcpp::Any CST2ASTConvert::visitRangeFor(rexLangParser::RangeForContext *context) {
-        Expression *            range_size  = GetFromCtxIfExist<Expression *>         (context->times_expr);
-        HierarchyIdentifier *   loop_vari   = GetFromCtxIfExist<HierarchyIdentifier *>(context->loop_variable);
-        Statement *             loop_body   = GetFromCtxIfExist<Statement *>          (context->loop_body);
+        Expression    * range_size  = GetFromCtxIfExist<Expression    *>(context->times_expr   );
+        NameComponent * loop_vari   = GetFromCtxIfExist<NameComponent *>(context->loop_variable);
+        Statement     * loop_body   = GetFromCtxIfExist<Statement     *>(context->loop_body    );
 
         RangeForStmt* range_for_stmt = CreateNode<RangeForStmt>(context, range_size, loop_vari, loop_body);
         return NodeWarp(range_for_stmt);
     }
 
     antlrcpp::Any CST2ASTConvert::visitFor(rexLangParser::ForContext *context) {
-        Expression *            start_value = GetFromCtxIfExist<Expression*>(context->loop_start);
-        Expression *            stop_value  = GetFromCtxIfExist<Expression*>(context->loop_end);
-        Expression *            step_value  = GetFromCtxIfExist<Expression*>(context->loop_step);
-        HierarchyIdentifier *   loop_vari   = GetFromCtxIfExist<HierarchyIdentifier*>(context->loop_variable);
-        Statement *             loop_body   = GetFromCtxIfExist<Statement*>(context->loop_body);
+        Expression    * start_value = GetFromCtxIfExist<Expression    *>(context->loop_start   );
+        Expression    * stop_value  = GetFromCtxIfExist<Expression    *>(context->loop_end     );
+        Expression    * step_value  = GetFromCtxIfExist<Expression    *>(context->loop_step    );
+        NameComponent * loop_vari   = GetFromCtxIfExist<NameComponent *>(context->loop_variable);
+        Statement     * loop_body   = GetFromCtxIfExist<Statement     *>(context->loop_body    );
 
         ForStmt* for_stmt = CreateNode<ForStmt>(context, start_value, stop_value, step_value, loop_vari, loop_body);
         return NodeWarp(for_stmt);
@@ -814,21 +814,6 @@ namespace rexlang {
 
     // --- 名称组件表达式 ---------------------------------------------------------------------------------
 
-    antlrcpp::Any CST2ASTConvert::visitHierarchy_identifier(rexLangParser::Hierarchy_identifierContext *context) {
-        std::vector<NameComponent *> name_components;
-
-        prefix_component_stack_.push(nullptr);  // 维护前缀栈上下文
-        for (auto *name_component_ctx : context->components) {
-            NameComponent* name_component = GetFromCtxIfExist<NameComponent*, true>(name_component_ctx);
-            name_components.push_back(name_component);
-            prefix_component_stack_.top() = name_component;
-        }
-        prefix_component_stack_.pop();  // 维护前缀栈上下文
-
-        HierarchyIdentifier* hierarchy_identifier = CreateNode<HierarchyIdentifier>(context, name_components);
-        return NodeWarp(hierarchy_identifier);
-    }
-
     antlrcpp::Any CST2ASTConvert::visitFuncCall(rexLangParser::FuncCallContext *context) {
         TranslateUnit *TU = ast_context_->getTranslateUnit();
 
@@ -850,35 +835,40 @@ namespace rexlang {
     }
 
     antlrcpp::Any CST2ASTConvert::visitIdentifier(rexLangParser::IdentifierContext *context) {
-        TString name = GetTextIfExist(context->IDENTIFIER()->getSymbol());
-        assert(!prefix_component_stack_.empty());
-        IdentDef *reference_to = nullptr;
+        StringRef id_str = GetTextIfExist(context->IDENTIFIER()->getSymbol()).string_;
+        assert(id_str.str().empty() == false);
 
-        // 查找定义
-        if (NameComponent *prefix = prefix_component_stack_.top()) {
-            TypeDecl *prefix_type = prefix->getExpressionType();
-            // prefix_type 应该是一个结构体
-            if (StructureDecl *structure_decl = rtti::dyn_cast<StructureDecl>(prefix_type)) {
-                if (BaseVariDecl *member = structure_decl->getElementWithName(name.string_)) {
-                    reference_to = member->getName();
-                } else {
-                    assert(false);
-                }
+        if (TagDecl *decl = ast_context_->currentScope()->findDeclWithNameString(id_str)) {
+            IdentDef *reference_to = decl->getName();
+            assert(reference_to);
+            IdentRefer* identifier = CreateNode<IdentRefer>(context, reference_to, nullptr);
+            return NodeWarp(identifier);
+        } else {
+            assert(false);
+        }
+        return NodeWarp(nullptr);
+    }
+
+    antlrcpp::Any CST2ASTConvert::visitHierarchy(rexLangParser::HierarchyContext *context) {
+        NameComponent *prefix = GetFromCtxIfExist<NameComponent *, true>(context->name_component());
+        TypeDecl *prefix_type = prefix->getExpressionType();
+        assert(prefix_type);
+
+        if (StructureDecl *structure_decl = rtti::dyn_cast<StructureDecl>(prefix_type)) {
+            StringRef id_str = GetTextIfExist(context->IDENTIFIER()->getSymbol()).string_;
+            assert(id_str.str().empty() == false);
+            if (BaseVariDecl *member = structure_decl->getElementWithName(id_str)) {
+                IdentDef *reference_to = member->getName();
+                assert(reference_to);
+                IdentRefer *identifier = CreateNode<IdentRefer>(context, reference_to, prefix);
+                return NodeWarp(identifier);
             } else {
                 assert(false);
             }
         } else {
-            // 没有前缀则直接在符号域中开始检索
-            if (TagDecl *decl = ast_context_->currentScope()->findDeclWithNameString(name.string_)) {
-                reference_to = decl->getName();
-            } else {
-                assert(false);
-            }
+            assert(false);
         }
-
-        assert(reference_to);
-        IdentRefer* identifier = CreateNode<IdentRefer>(context, reference_to);
-        return NodeWarp(identifier);
+        return NodeWarp(nullptr);
     }
 
     antlrcpp::Any CST2ASTConvert::visitArrayIndex(rexLangParser::ArrayIndexContext *context) {
