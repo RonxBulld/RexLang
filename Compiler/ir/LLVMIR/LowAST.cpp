@@ -680,6 +680,7 @@ namespace rexlang {
             // 在启动函数中调用用户的入口函数，并将其返回值作为启动函数的返回值
 
             FunctorDecl *entry_fn = project_db_.GetMainEntry();
+            assert(entry_fn);
             FunctionCall *call_entry_fn = B.CreateFCall(entry_fn, nullptr);
             ReturnStmt *return_stmt = B.Create<ReturnStmt>(call_entry_fn);
             startup_stmtblk_->appendStatement(return_stmt);
