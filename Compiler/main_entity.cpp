@@ -65,6 +65,14 @@ int main(int argc, char *argv[]) {
     std::cout << u8"开始编译..." << std::endl;
     rexlang::TranslateUnit *translate_unit_ptr = rexlang::tooling::BuildASTFromFiles(project_db, "demo");
     project_db.setTranslateUnit(translate_unit_ptr);
+    if (translate_unit_ptr) {
+        if (rexlang::FunctorDecl *main_entry = translate_unit_ptr->getFunctor(rexlang::StringPool::Create(project_db.GetMainEntryName()))) {
+            project_db.SetMainEntry(main_entry);
+        } else {
+            std::cout << u8"没有找到主入口函数：" << project_db.GetMainEntryName() << std::endl;
+            return 1;
+        }
+    }
     if (!translate_unit_ptr) {
         std::cout << u8"编译失败..." << std::endl;
         return 1;
