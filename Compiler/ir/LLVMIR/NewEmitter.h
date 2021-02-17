@@ -110,7 +110,6 @@ namespace rexlang {
          * 表达式相关
          */
         DEF_EMIT(llvm::Value *, Expression         , expression         )
-        DEF_EMIT(llvm::Value *, HierarchyIdentifier, hierarchyIdentifier)
         DEF_EMIT(llvm::Value *, NameComponent      , nameComponent      )
         DEF_EMIT(llvm::Value *, IdentRefer         , identRefer         )
         DEF_EMIT(llvm::Value *, ArrayIndex         , arrayIndex         )

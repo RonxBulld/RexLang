@@ -539,7 +539,6 @@ namespace rexlang {
         llvm::Value *value = EmitNavigate<
                 llvm::Value *
                 , Expression
-                , HierarchyIdentifier
                 , NameComponent
                 , TypeConvert
                 , UnaryExpression
@@ -551,11 +550,6 @@ namespace rexlang {
                 , ValueOfString
                 >(expression);
         return value;
-    }
-
-    llvm::Value *NewEmitter::impl_EmitHierarchyIdentifier(HierarchyIdentifier *hierarchyIdentifier) {
-        NameComponent *back_component = hierarchyIdentifier->getNameComponents().back();
-        return Emit(back_component);
     }
 
     llvm::Value *NewEmitter::impl_EmitNameComponent(NameComponent *nameComponent) {
@@ -570,7 +564,7 @@ namespace rexlang {
     }
 
     llvm::Value *NewEmitter::impl_EmitIdentRefer(IdentRefer *identRefer) {
-        NameComponent *forward = identRefer->Forward();
+        NameComponent *forward = identRefer->prefix();
         assert(forward == nullptr);     // TODO: 先不支持结构体
 
         // 具名对象可能是：全局变量、文件变量、局部变量、函数
@@ -613,15 +607,31 @@ namespace rexlang {
     }
 
     llvm::Value *NewEmitter::impl_EmitArrayIndex(ArrayIndex *arrayIndex) {
-        assert(false);
+        assert(false);      // 这个应该在 Lowing 时被处理为 API 调用
         return nullptr;
     }
 
     llvm::Value *NewEmitter::impl_EmitFunctionCall(FunctionCall *functionCall) {
-        NameComponent *forward = functionCall->Forward();
-        assert(forward == nullptr);     // TODO: 先不支持结构体
-        // TODO:
-        return nullptr;
+        NameComponent *callee = functionCall->getName();
+        assert(callee);
+        llvm::Value *llvm_callee = Emit(callee);
+        assert(llvm_callee);
+
+        if (llvm::Function *f = llvm::dyn_cast<llvm::Function>(llvm_callee)) {
+            std::vector<llvm::Value *> arguments_ir;
+            for (Expression *argument : functionCall->getArguments()) {
+                llvm::Value *argument_ir = Emit(argument);
+                assert(argument_ir);
+                arguments_ir.push_back(argument_ir);
+            }
+
+            // TODO: 打包传参
+
+            return Builder.CreateCall(f, arguments_ir);
+        } else {
+            assert(false);
+            return nullptr;
+        }
     }
 
     llvm::Value *NewEmitter::impl_EmitTypeConvert(TypeConvert *typeConvert) {
