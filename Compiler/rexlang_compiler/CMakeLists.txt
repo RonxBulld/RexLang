@@ -49,6 +49,9 @@ SET(Utilities-Src
         utilities/Visitor.h
         utilities/DumpAST.cpp
         utilities/DumpAST.h
+        utilities/ASTBuilder.cpp
+        utilities/ASTBuilder.h
+        utilities/NameMangling.cpp
         )
 
 SET(REXCompilerParse-Source
@@ -74,10 +77,8 @@ SET(REXCompilerParse-Source
         Constructors.cpp
         TypeConvert.cpp
         VerifyExpression.cpp
-        utilities/ASTBuilder.cpp
-        utilities/ASTBuilder.h
-        utilities/NameMangling.cpp
-        Replacement.cpp)
+        Replacement.cpp
+        )
 
 if(NOT CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
     ADD_COMPILE_OPTIONS("-Wno-overloaded-virtual")

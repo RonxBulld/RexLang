@@ -35,10 +35,10 @@ ADD_EXECUTABLE(${COMPILER_EXECUTE_NAME}
         )
 
 TARGET_LINK_LIBRARIES(${COMPILER_EXECUTE_NAME}
-        REXCompilerParse
         antlr4-runtime
 
         -Wl,-whole-archive
+        REXCompilerParse
         ${ADDITION_LIBRARIES}
         -Wl,-no-whole-archive
 
