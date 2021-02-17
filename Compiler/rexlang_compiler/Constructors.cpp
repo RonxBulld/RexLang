@@ -20,6 +20,10 @@ namespace rexlang {
     TranslateUnit::TranslateUnit() {
     }
 
+    TranslateUnit::~TranslateUnit() {
+        delete getAstContext();
+    }
+
     /******************************************************************
      * TagDecl
      ******************************************************************/

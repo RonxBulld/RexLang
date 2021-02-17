@@ -2548,6 +2548,7 @@ namespace rexlang {
 
     public:
         TranslateUnit() ;
+        ~TranslateUnit() ;
         bool InitBuiltinTypes();
 
     public:

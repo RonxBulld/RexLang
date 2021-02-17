@@ -113,7 +113,7 @@ namespace rexlang {
     AstGenerate::~AstGenerate() {
 
         delete diagnostic_;
-        delete ast_context_;
+        /*delete ast_context_;*/
 
         diagnostic_  = nullptr;
         ast_context_ = nullptr;
