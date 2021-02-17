@@ -14,10 +14,14 @@ namespace rexlang {
     }
 
     bool NameComponent::VerifyExpressionInternal() {
+        return true;
+    }
+
+    bool IdentRefer::VerifyExpressionInternal() {
 
         // 如果前面有名称组件那么只能是结构体
 
-        if (NameComponent *forward = Forward()) {
+        if (NameComponent *forward = prefix()) {
             StructureDecl *structure = forward->getExpressionType()->as<StructureDecl>();
             if (!structure) {
                 assert(false);
@@ -29,10 +33,6 @@ namespace rexlang {
             }
         }
 
-        return true;
-    }
-
-    bool IdentRefer::VerifyExpressionInternal() {
         if (!def()) {
             assert(false);
             return false;
