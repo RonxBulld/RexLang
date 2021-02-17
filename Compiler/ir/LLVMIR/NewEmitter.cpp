@@ -424,8 +424,6 @@ namespace rexlang {
                 // 基本块后继数量为0且不为返回块，表示这是一个悬空的分支尾块，一般情况下是不允许出现的，这会导致CFG错误
 
                 assert(false);
-                Builder.SetInsertPoint(&bb);
-                Builder.CreateBr(ret_bb);
             }
         }
 
