@@ -42,6 +42,7 @@ namespace rexlang {
         }
         std::filesystem::remove(temp_directory_path_);
         std::filesystem::create_directories(temp_directory_path_);
+        main_entry_name_ = u8"_启动子程序";
     }
 
     bool ProjectDB::ApplyArgument(const ArgumentParser &argumentParser) {
