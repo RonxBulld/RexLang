@@ -281,11 +281,11 @@ namespace rexlang {
             parameters.pop_back();
         }
 
-        std::vector<llvm::Type *> parameter_types;
+        std::vector<llvm::Type *> parameter_lltypes;
         for (ParameterDecl *parameter_decl : parameters) {
             llvm::Type *parameter_type = varitype_map_[parameter_decl->type()];
             assert(parameter_type);
-            parameter_types.push_back(parameter_type);
+            parameter_lltypes.push_back(parameter_type);
         }
 
         // 构建返回值类型
@@ -295,7 +295,7 @@ namespace rexlang {
 
         // 构建函数原型
 
-        llvm::FunctionType *prototype = llvm::FunctionType::get(return_type, parameter_types, is_vari_arg);
+        llvm::FunctionType *prototype = llvm::FunctionType::get(return_type, parameter_lltypes, is_vari_arg);
         assert(prototype);
 
         // 构建函数声明
@@ -570,16 +570,56 @@ namespace rexlang {
     }
 
     llvm::Value *NewEmitter::impl_EmitIdentRefer(IdentRefer *identRefer) {
-        // TODO:
+        NameComponent *forward = identRefer->Forward();
+        assert(forward == nullptr);     // TODO: 先不支持结构体
+
+        // 具名对象可能是：全局变量、文件变量、局部变量、函数
+
+        TagDecl *decl = identRefer->def()->decl();
+        assert(decl);
+        if (GlobalVariableDecl *gvari = rtti::dyn_cast<GlobalVariableDecl>(decl)) {
+            llvm::Value *v = variable_map_[gvari];
+            assert(v);
+            return v;
+        }
+        else if (FileVariableDecl *fvari = rtti::dyn_cast<FileVariableDecl>(decl)) {
+            llvm::Value *v = variable_map_[fvari];
+            assert(v);
+            return v;
+        }
+        else if (LocalVariableDecl *lvari = rtti::dyn_cast<LocalVariableDecl>(decl)) {
+            llvm::Value *v = variable_map_[lvari];
+            assert(v);
+            return v;
+        }
+        else if (MemberVariableDecl *mvari = rtti::dyn_cast<MemberVariableDecl>(decl)) {
+            assert(false);
+            return nullptr;
+        }
+        else if (ParameterDecl *pvari = rtti::dyn_cast<ParameterDecl>(decl)) {
+            llvm::Value *v = variable_map_[pvari];
+            assert(v);
+            return v;
+        }
+        else if (FunctorDecl *functor = rtti::dyn_cast<FunctorDecl>(decl)) {
+            llvm::Function *f = function_map_[functor];
+            assert(f);
+            return f;
+        }
+        else {
+            assert(false);
+        }
         return nullptr;
     }
 
     llvm::Value *NewEmitter::impl_EmitArrayIndex(ArrayIndex *arrayIndex) {
-        // TODO:
+        assert(false);
         return nullptr;
     }
 
     llvm::Value *NewEmitter::impl_EmitFunctionCall(FunctionCall *functionCall) {
+        NameComponent *forward = functionCall->Forward();
+        assert(forward == nullptr);     // TODO: 先不支持结构体
         // TODO:
         return nullptr;
     }
