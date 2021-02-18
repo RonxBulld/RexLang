@@ -105,7 +105,7 @@ namespace rexlang {
      * 声明主入口函数
      * int main(int argc, char **argv) ;
      */
-    bool NewEmitter::DefineMainEntry() {
+    bool NewEmitter::DeclareMainEntry() {
 
         std::vector<llvm::Type *> parameters_type = {Builder.getInt32Ty(), Builder.getInt8PtrTy()->getPointerTo()};
         llvm::FunctionType *main_fn_ty = llvm::FunctionType::get(Builder.getInt32Ty(), parameters_type, false);
@@ -116,6 +116,36 @@ namespace rexlang {
         SysEntryFunc->setDSOLocal(true);
 
         return true;
+    }
+
+    bool NewEmitter::DefineMainEntry(llvm::Function *userEntry) {
+
+        // 入口块
+
+        llvm::BasicBlock *entry_block = llvm::BasicBlock::Create(TheContext, "entry", SysEntryFunc);
+        Builder.SetInsertPoint(entry_block);
+
+        // 返回值空间
+
+        llvm::AllocaInst *return_alloca = Builder.CreateAlloca(Builder.getInt32Ty(), nullptr, "$ret");
+
+        // 参数空间
+
+        llvm::AllocaInst *argc_alloca = Builder.CreateAlloca(SysEntryFunc->getFunctionType()->getParamType(0), nullptr, "$argc_alloca");
+        llvm::AllocaInst *argv_alloca = Builder.CreateAlloca(SysEntryFunc->getFunctionType()->getParamType(1), nullptr, "$argv_alloca");
+        llvm::Value *argc = Builder.CreateStore((SysEntryFunc->arg_begin() + 0), argc_alloca);
+        llvm::Value *argv = Builder.CreateStore((SysEntryFunc->arg_begin() + 1), argv_alloca);
+
+        // 用户入口进入块
+
+        llvm::BasicBlock *user_entry_block = llvm::BasicBlock::Create(TheContext, "call_user_func", SysEntryFunc);
+        Builder.CreateBr(user_entry_block);
+        Builder.SetInsertPoint(user_entry_block);
+        llvm::CallInst *call_user_entry = Builder.CreateCall(userEntry);
+        assert(call_user_entry);
+        llvm::ReturnInst *ret_sys = Builder.CreateRet(call_user_entry);
+        assert(ret_sys);
+
     }
 
     /*
@@ -189,7 +219,7 @@ namespace rexlang {
 
     llvm::Module *NewEmitter::impl_EmitTranslateUnit(TranslateUnit *TU) {
         RexDbgMgr.GetOrCreateDICompileUnit(TU->getFileName());
-        DefineMainEntry();
+        DeclareMainEntry();
 
         // 声明类型
 
@@ -223,6 +253,12 @@ namespace rexlang {
             function_map_[decl] = llvm_func;
             functor_map_[decl] = llvm_func->getFunctionType();
         }
+
+        // 定义主入口
+
+        llvm::Function *main_entry = function_map_[TU->getFunctor(StringPool::Create("RexStartup"))];
+        assert(main_entry);
+        DefineMainEntry(main_entry);
 
         // 定义函数
 
