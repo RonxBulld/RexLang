@@ -8,13 +8,13 @@
 #include "Linker.h"
 
 namespace rexlang {
-    class GenIRPass : public Pass {
+    class LinkPass : public Pass {
     public:
-        GenIRPass() : Pass("Link") {}
+        LinkPass() : Pass("LinkExe") {}
 
         int Call(ProjectDB &projectDB) override {
             Linker linker;
             return linker.LinkProject(projectDB);
         }
-    };
+    } link_pass;
 }
