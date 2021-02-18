@@ -39,9 +39,9 @@ namespace rexlang {
 
             // 生成LLVMIR
             std::shared_ptr<EmitLLVMIR> emitter(new EmitLLVMIR(projectDB.getTranslateUnit(), projectDB));
-//            emitter.WriteOutIR();
+            emitter->WriteOutIR();
 
-            // 指定代码生成方式
+            // 指定目标代码生成方式
             gen_code_with_llir.UpdateEmitter(emitter);
             projectDB.SetCodeGenerator(&gen_code_with_llir);
 
