@@ -577,7 +577,11 @@ namespace rexlang {
      * 带有名称和注释的命名声明基本结构
      */
     class TagDecl : public Decl {
+    public:    // 属性列表
+        enum class LinkageManglingStyle { MS_C, MS_CXX };
     private:
+        // 链接时签名方式
+        LinkageManglingStyle linkage_mangling_style_ = LinkageManglingStyle::MS_CXX;
         // 声明名称
         IdentDef *name_ = nullptr;
         // 注释
@@ -597,6 +601,9 @@ namespace rexlang {
 
         virtual StringRef getSelfMangling() const ;
         virtual StringRef getMangling    () const ;
+
+        void                    setLinkageManglingStyle(LinkageManglingStyle manglingStyle) ;
+        LinkageManglingStyle    getLinkageManglingStyle() const ;
 
     public:
         SEMATIC_ANALYSIS_INTERNAL

@@ -395,6 +395,9 @@ namespace rexlang {
     const TString &     TagDecl::getComment     () const                   { return comment_; }
     const char *        TagDecl::getCommentStr  () const                   { return comment_.string_.c_str(); }
 
+    void                            TagDecl::setLinkageManglingStyle(FunctorDecl::LinkageManglingStyle manglingStyle)   { linkage_mangling_style_ = manglingStyle; }
+    TagDecl::LinkageManglingStyle   TagDecl::getLinkageManglingStyle() const                                            { return linkage_mangling_style_; }
+
     /***************************************************
      * BaseVariDecl
      ***************************************************/
