@@ -56,6 +56,7 @@ namespace rexlang {
         user_level_args.insert(user_level_args.end(), { "-o",       targetFilename });
         user_level_args.insert(user_level_args.end(), { "-target",  target_triple });
         user_level_args.insert(user_level_args.end(), { "-lstdc++" });
+        user_level_args.insert(user_level_args.end(), { "-lrex_startup_kit" });
 
 #else
 
@@ -89,7 +90,6 @@ namespace rexlang {
         std::filesystem::path link_exec = program_db.GetProgramPath();
         link_exec = link_exec.parent_path() / LINKER;
         std::vector<std::string> user_level_args = BuildUserLevelLinkCommandArgs();
-        std::string link_args_str = StringUtil::Join<std::vector<std::string>, std::string>(user_level_args, " ");
 
         // 执行连接
 
@@ -141,8 +141,7 @@ namespace rexlang {
 #   else
 #       error "Unknow what the linker switch style."
 #   endif
-		link_args_str = "";
-        link_args_str = StringUtil::Join<std::vector<std::string>, std::string>(ld_program_args, " ");
+        std::string link_args_str = StringUtil::Join<std::vector<std::string>, std::string>(ld_program_args, " ");
         std::string link_cmdline = link_exec.string() + " " + link_args_str;
         int link_ret = system(link_cmdline.c_str());
 

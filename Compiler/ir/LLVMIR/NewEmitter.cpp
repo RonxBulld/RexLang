@@ -102,53 +102,6 @@ namespace rexlang {
     /*****************************************************************************************************************/
 
     /*
-     * 声明主入口函数
-     * int main(int argc, char **argv) ;
-     */
-    bool NewEmitter::DeclareMainEntry() {
-
-        std::vector<llvm::Type *> parameters_type = {Builder.getInt32Ty(), Builder.getInt8PtrTy()->getPointerTo()};
-        llvm::FunctionType *main_fn_ty = llvm::FunctionType::get(Builder.getInt32Ty(), parameters_type, false);
-
-        SysEntryFunc = llvm::Function::Create(main_fn_ty, llvm::Function::ExternalLinkage, "main", TheModule);
-        (SysEntryFunc->arg_begin() + 0)->setName("argc");
-        (SysEntryFunc->arg_begin() + 1)->setName("argv");
-        SysEntryFunc->setDSOLocal(true);
-
-        return true;
-    }
-
-    bool NewEmitter::DefineMainEntry(llvm::Function *userEntry) {
-
-        // 入口块
-
-        llvm::BasicBlock *entry_block = llvm::BasicBlock::Create(TheContext, "entry", SysEntryFunc);
-        Builder.SetInsertPoint(entry_block);
-
-        // 返回值空间
-
-        llvm::AllocaInst *return_alloca = Builder.CreateAlloca(Builder.getInt32Ty(), nullptr, "$ret");
-
-        // 参数空间
-
-        llvm::AllocaInst *argc_alloca = Builder.CreateAlloca(SysEntryFunc->getFunctionType()->getParamType(0), nullptr, "$argc_alloca");
-        llvm::AllocaInst *argv_alloca = Builder.CreateAlloca(SysEntryFunc->getFunctionType()->getParamType(1), nullptr, "$argv_alloca");
-        llvm::Value *argc = Builder.CreateStore((SysEntryFunc->arg_begin() + 0), argc_alloca);
-        llvm::Value *argv = Builder.CreateStore((SysEntryFunc->arg_begin() + 1), argv_alloca);
-
-        // 用户入口进入块
-
-        llvm::BasicBlock *user_entry_block = llvm::BasicBlock::Create(TheContext, "call_user_func", SysEntryFunc);
-        Builder.CreateBr(user_entry_block);
-        Builder.SetInsertPoint(user_entry_block);
-        llvm::CallInst *call_user_entry = Builder.CreateCall(userEntry);
-        assert(call_user_entry);
-        llvm::ReturnInst *ret_sys = Builder.CreateRet(call_user_entry);
-        assert(ret_sys);
-
-    }
-
-    /*
      * 根据指定的类型和名称，创建全局变量
      */
     llvm::GlobalVariable *NewEmitter::CreateGlobalVariable(VariTypeDecl *type, const std::string &name) {
@@ -219,7 +172,6 @@ namespace rexlang {
 
     llvm::Module *NewEmitter::impl_EmitTranslateUnit(TranslateUnit *TU) {
         RexDbgMgr.GetOrCreateDICompileUnit(TU->getFileName());
-        DeclareMainEntry();
 
         // 声明类型
 
@@ -253,12 +205,6 @@ namespace rexlang {
             function_map_[decl] = llvm_func;
             functor_map_[decl] = llvm_func->getFunctionType();
         }
-
-        // 定义主入口
-
-        llvm::Function *main_entry = function_map_[TU->getFunctor(StringPool::Create("RexStartup"))];
-        assert(main_entry);
-        DefineMainEntry(main_entry);
 
         // 定义函数
 
@@ -794,21 +740,21 @@ namespace rexlang {
         return ty;
     }
 
-    llvm::Type *NewEmitter::impl_EmitBuiltinVoidType    (BuiltinVoidType     *builtinVoidType    ) {                return Builder.getVoidTy  ()                ; }
-    llvm::Type *NewEmitter::impl_EmitBuiltinCommonType  (BuiltinCommonType   *builtinCommonType  ) { assert(false); return Builder.getInt64Ty ()                ; }
-    llvm::Type *NewEmitter::impl_EmitBuiltinCharType    (BuiltinCharType     *builtinCharType    ) {                return Builder.getInt8Ty  ()                ; }
-    llvm::Type *NewEmitter::impl_EmitBuiltinIntegerType (BuiltinIntegerType  *builtinIntegerType ) {                return Builder.getInt32Ty ()                ; }
-    llvm::Type *NewEmitter::impl_EmitBuiltinFloatType   (BuiltinFloatType    *builtinFloatType   ) {                return Builder.getFloatTy ()                ; }
-    llvm::Type *NewEmitter::impl_EmitBuiltinBoolType    (BuiltinBoolType     *builtinBoolType    ) {                return Builder.getInt1Ty  ()                ; }
-    llvm::Type *NewEmitter::impl_EmitBuiltinStringType  (BuiltinStringType   *builtinStringType  ) { assert(false); return Builder.getInt64Ty ()                ; }
-    llvm::Type *NewEmitter::impl_EmitBuiltinDataSetType (BuiltinDataSetType  *builtinDataSetType ) { assert(false); return Builder.getInt64Ty ()                ; }
-    llvm::Type *NewEmitter::impl_EmitBuiltinShortType   (BuiltinShortType    *builtinShortType   ) {                return Builder.getInt16Ty ()                ; }
-    llvm::Type *NewEmitter::impl_EmitBuiltinLongType    (BuiltinLongType     *builtinLongType    ) {                return Builder.getInt64Ty ()                ; }
-    llvm::Type *NewEmitter::impl_EmitBuiltinDatetimeType(BuiltinDatetimeType *builtinDatetimeType) {                return Builder.getInt64Ty ()                ; }
-    llvm::Type *NewEmitter::impl_EmitBuiltinFuncPtrType (BuiltinFuncPtrType  *builtinFuncPtrType ) {                return Builder.getVoidTy  ()->getPointerTo(); }
-    llvm::Type *NewEmitter::impl_EmitBuiltinDoubleType  (BuiltinDoubleType   *builtinDoubleType  ) {                return Builder.getDoubleTy()                ; }
-    llvm::Type *NewEmitter::impl_EmitStructureDecl      (StructureDecl       *structureDecl      ) { assert(false); return Builder.getInt64Ty ()                ; }
-    llvm::Type *NewEmitter::impl_EmitArrayType          (ArrayType           *arrayType          ) { assert(false); return Builder.getInt64Ty ()                ; }
+    llvm::Type *NewEmitter::impl_EmitBuiltinVoidType    (BuiltinVoidType     *builtinVoidType    ) {                return Builder.getVoidTy   (); }
+    llvm::Type *NewEmitter::impl_EmitBuiltinCommonType  (BuiltinCommonType   *builtinCommonType  ) { assert(false); return Builder.getInt64Ty  (); }
+    llvm::Type *NewEmitter::impl_EmitBuiltinCharType    (BuiltinCharType     *builtinCharType    ) {                return Builder.getInt8Ty   (); }
+    llvm::Type *NewEmitter::impl_EmitBuiltinIntegerType (BuiltinIntegerType  *builtinIntegerType ) {                return Builder.getInt32Ty  (); }
+    llvm::Type *NewEmitter::impl_EmitBuiltinFloatType   (BuiltinFloatType    *builtinFloatType   ) {                return Builder.getFloatTy  (); }
+    llvm::Type *NewEmitter::impl_EmitBuiltinBoolType    (BuiltinBoolType     *builtinBoolType    ) {                return Builder.getInt1Ty   (); }
+    llvm::Type *NewEmitter::impl_EmitBuiltinStringType  (BuiltinStringType   *builtinStringType  ) { assert(false); return Builder.getInt64Ty  (); }
+    llvm::Type *NewEmitter::impl_EmitBuiltinDataSetType (BuiltinDataSetType  *builtinDataSetType ) { assert(false); return Builder.getInt64Ty  (); }
+    llvm::Type *NewEmitter::impl_EmitBuiltinShortType   (BuiltinShortType    *builtinShortType   ) {                return Builder.getInt16Ty  (); }
+    llvm::Type *NewEmitter::impl_EmitBuiltinLongType    (BuiltinLongType     *builtinLongType    ) {                return Builder.getInt64Ty  (); }
+    llvm::Type *NewEmitter::impl_EmitBuiltinDatetimeType(BuiltinDatetimeType *builtinDatetimeType) {                return Builder.getInt64Ty  (); }
+    llvm::Type *NewEmitter::impl_EmitBuiltinFuncPtrType (BuiltinFuncPtrType  *builtinFuncPtrType ) {                return Builder.getInt8PtrTy(); }
+    llvm::Type *NewEmitter::impl_EmitBuiltinDoubleType  (BuiltinDoubleType   *builtinDoubleType  ) {                return Builder.getDoubleTy (); }
+    llvm::Type *NewEmitter::impl_EmitStructureDecl      (StructureDecl       *structureDecl      ) { assert(false); return Builder.getInt64Ty  (); }
+    llvm::Type *NewEmitter::impl_EmitArrayType          (ArrayType           *arrayType          ) { assert(false); return Builder.getInt64Ty  (); }
 
     llvm::Type *NewEmitter::impl_EmitReferenceType(ReferenceType *referenceType) {
         VariTypeDecl *vari_ty = rtti::dyn_cast<VariTypeDecl>(referenceType->getPointee());

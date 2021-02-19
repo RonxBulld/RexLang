@@ -660,6 +660,7 @@ namespace rexlang {
             IdentDef *rex_startup_fn_name = B.Create<IdentDef>("RexStartup");
             assert(rex_startup_fn_name);
             FunctionDecl *startup_fn = B.Create<FunctionDecl>(TU->getIntegerTy(), rex_startup_fn_name, std::vector<ParameterDecl *>());
+            startup_fn->setLinkageManglingStyle(FunctorDecl::LinkageManglingStyle::MS_C);
             sys_fw_ps->appendFunctionDecl(startup_fn);  // 添加到代码集
             StatementBlock *startup_stmtblk_ = B.Create<StatementBlock>(std::vector<Statement *>());
 

@@ -57,9 +57,6 @@ namespace rexlang {
         int OnEmitBegin (Node *astNode) ;
         int OnEmitEnd   (Node *astNode) ;
 
-        bool DeclareMainEntry   () ;
-        bool DefineMainEntry    (llvm::Function *userEntry) ;
-
         llvm::GlobalVariable *CreateGlobalVariable(VariTypeDecl *type, const std::string &name) ;
         bool RequestLoadBeforeRead(llvm::Value *value) const ;      // 仅用来判断LLVM对象是否需要Load
         llvm::ConstantInt *CreateInt(uint64_t intValue, unsigned int nBits, bool isSigned) ;
