@@ -13,7 +13,18 @@
 
 namespace rexlang {
     StringRef TagDecl::getMangling() const {
-        return StringPool::Create("_Z", getSelfMangling());
+        switch (getLinkageManglingStyle()) {
+            case LinkageManglingStyle::MS_CXX: {
+                return StringPool::Create("_Z", getSelfMangling());
+            }
+            case LinkageManglingStyle::MS_C: {
+                return getNameRef();
+            }
+            default: {
+                assert(false);
+                return getNameRef();
+            }
+        }
     }
 
     StringRef TagDecl::getSelfMangling() const {
