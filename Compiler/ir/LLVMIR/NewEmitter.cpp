@@ -148,6 +148,15 @@ namespace rexlang {
         }
     }
 
+    llvm::Value * NewEmitter::UseValueAsRight(llvm::Value *V) {
+        if (RequestLoadBeforeRead(V)) {
+            return Builder.CreateLoad(V);
+        }
+        else {
+            return V;
+        }
+    }
+
     llvm::ConstantInt *NewEmitter::CreateInt(uint64_t intValue, unsigned int nBits, bool isSigned) {
         return llvm::ConstantInt::get(TheContext, llvm::APInt(nBits, intValue, isSigned));
     }
@@ -661,12 +670,155 @@ namespace rexlang {
     }
 
     llvm::Value *NewEmitter::impl_EmitUnaryExpression(UnaryExpression *unaryExpression) {
-        // TODO:
+        llvm::Value *V = Emit(unaryExpression->getOperand());
+        if (!V) {
+            assert(false);
+            return nullptr;
+        }
+        V = UseValueAsRight(V);
+        switch (unaryExpression->getOperator().getOperate()) {
+            // region 一元表达式生成
+            case OperatorType::Opt::kOptSub: {
+                return Builder.CreateNeg(V, ".neg");
+            }
+            default: {
+                assert(false);
+                break;
+            }
+            // endregion
+        }
+        assert(false);
         return nullptr;
     }
 
     llvm::Value *NewEmitter::impl_EmitBinaryExpression(BinaryExpression *binaryExpression) {
-        // TODO:
+        llvm::Value *L = Emit(binaryExpression->getLHS());
+        llvm::Value *R = Emit(binaryExpression->getRHS());
+        if (!L || !R) {
+            assert(false);
+            return nullptr;
+        }
+        L = UseValueAsRight(L);
+        R = UseValueAsRight(R);
+        assert(L->getType() == R->getType());
+        llvm::Type *opt_type = L->getType();
+        switch (binaryExpression->getOperator().getOperate()) {
+            // region 二元表达式生成
+            case OperatorType::Opt::kOptAdd: {
+                if (opt_type->isIntegerTy()) {
+                    return Builder.CreateAdd(L, R);
+                } else if (opt_type->isFloatTy() || opt_type->isDoubleTy()) {
+                    return Builder.CreateFAdd(L, R);
+                }
+                break;
+            }
+            case OperatorType::Opt::kOptSub: {
+                if (opt_type->isIntegerTy()) {
+                    return Builder.CreateSub(L, R);
+                } else if (opt_type->isFloatTy() || opt_type->isDoubleTy()) {
+                    return Builder.CreateFSub(L, R);
+                }
+                break;
+            }
+            case OperatorType::Opt::kOptMul: {
+                if (opt_type->isIntegerTy()) {
+                    return Builder.CreateMul(L, R);
+                } else if (opt_type->isFloatTy() || opt_type->isDoubleTy()) {
+                    return Builder.CreateFMul(L, R);
+                }
+                break;
+            }
+            case OperatorType::Opt::kOptDiv: {
+                if (opt_type->isIntegerTy()) {
+                    return Builder.CreateSDiv(L, R);
+                } else if (opt_type->isFloatTy() || opt_type->isDoubleTy()) {
+                    return Builder.CreateFDiv(L, R);
+                }
+                break;
+            }
+            case OperatorType::Opt::kOptFullDiv: {
+                if (opt_type->isIntegerTy()) {
+                    return Builder.CreateFPToSI(Builder.CreateSDiv(L, R), Builder.getInt64Ty());
+                } else if (opt_type->isFloatTy() || opt_type->isDoubleTy()) {
+                    return Builder.CreateFPToSI(Builder.CreateFDiv(L, R), Builder.getInt64Ty());
+                }
+                break;
+            }
+            case OperatorType::Opt::kOptMod: {
+                if (opt_type->isIntegerTy()) {
+                    return Builder.CreateSRem(L, R);
+                } else if (opt_type->isFloatTy() || opt_type->isDoubleTy()) {
+                    return Builder.CreateFRem(L, R);
+                }
+                break;
+            }
+            case OperatorType::Opt::kOptEqual: {
+                if (opt_type->isIntegerTy()) {
+                    return Builder.CreateICmpEQ(L, R);
+                } else if (opt_type->isFloatTy() || opt_type->isDoubleTy()) {
+                    return Builder.CreateFCmpOEQ(L, R);     // 这里用有序比较
+                }
+                break;
+            }
+            case OperatorType::Opt::kOptNotEqual: {
+                if (opt_type->isIntegerTy()) {
+                    return Builder.CreateICmpNE(L, R);
+                } else if (opt_type->isFloatTy() || opt_type->isDoubleTy()) {
+                    return Builder.CreateFCmpONE(L, R);     // 这里用有序比较
+                }
+                break;
+            }
+            case OperatorType::Opt::kOptGreatThan: {
+                if (opt_type->isIntegerTy()) {
+                    return Builder.CreateICmpSGT(L, R);
+                } else if (opt_type->isFloatTy() || opt_type->isDoubleTy()) {
+                    return Builder.CreateFCmpOGT(L, R);     // 这里用有序比较
+                }
+                break;
+            }
+            case OperatorType::Opt::kOptLessThan: {
+                if (opt_type->isIntegerTy()) {
+                    return Builder.CreateICmpSLT(L, R);
+                } else if (opt_type->isFloatTy() || opt_type->isDoubleTy()) {
+                    return Builder.CreateFCmpOLT(L, R);     // 这里用有序比较
+                }
+                break;
+            }
+            case OperatorType::Opt::kOptGreatEqual: {
+                if (opt_type->isIntegerTy()) {
+                    return Builder.CreateICmpSGE(L, R);
+                } else if (opt_type->isFloatTy() || opt_type->isDoubleTy()) {
+                    return Builder.CreateFCmpOGE(L, R);     // 这里用有序比较
+                }
+                break;
+            }
+            case OperatorType::Opt::kOptLessEqual: {
+                if (opt_type->isIntegerTy()) {
+                    return Builder.CreateICmpSLE(L, R);
+                } else if (opt_type->isFloatTy() || opt_type->isDoubleTy()) {
+                    return Builder.CreateFCmpOLE(L, R);     // 这里用有序比较
+                }
+                break;
+            }
+            case OperatorType::Opt::kOptAnd: {
+                if (opt_type->isIntegerTy()) {
+                    return Builder.CreateAnd(L, R);
+                }
+                break;
+            }
+            case OperatorType::Opt::kOptOr: {
+                if (opt_type->isIntegerTy()) {
+                    return Builder.CreateOr(L, R);
+                }
+                break;
+            }
+            default: {
+                assert(false);
+                break;
+            }
+            // endregion
+        }
+        assert(false);
         return nullptr;
     }
 
