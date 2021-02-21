@@ -24,13 +24,24 @@ namespace rexlang {
             llvm::BasicBlock *head = nullptr ;
             llvm::BasicBlock *tail = nullptr ;
         };
+        struct JumpDest {
+            llvm::BasicBlock *dest = nullptr ;
+        };
+        struct BreakContinue {
+            JumpDest break_block ;
+            JumpDest continue_block ;
+        };
 
     private:
+        /*********************************************************************************************
+         * 生成或辅助工具
+         */
         llvm::LLVMContext   TheContext      ;               /* 当前上下文(LLVM) */
         llvm::Module *      TheModule       = nullptr ;     /* 当前模块(LLVM) */
         llvm::IRBuilder<>   Builder         ;               /* IR构造器 */
         llvm::DIBuilder     DebInfoBuilder  ;               /* 调试信息构造器 */
         DebugInfoMgr        RexDbgMgr       ;
+        /*********************************************************************************************/
 
     private:
         /*********************************************************************************************
@@ -51,6 +62,7 @@ namespace rexlang {
         llvm::Function    * TheFunction     = nullptr ;
         llvm::BasicBlock  * TheReturnBB     = nullptr ;
         llvm::Value       * TheReturnValue  = nullptr ;
+        std::stack<BreakContinue>   BreakContinueStack;
         /*********************************************************************************************/
 
     private:
