@@ -426,10 +426,6 @@ namespace rexlang {
         }
     }
 
-    void ExitStmt::sematicAnalysisInternal(SemaContext &semaCtx) {
-        ControlStmt::sematicAnalysisInternal(semaCtx);
-    }
-
     /********************************************************
      * Expression
      ********************************************************/

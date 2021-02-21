@@ -36,7 +36,6 @@ namespace rexlang {
                 else if (stmt->is<Expression>())    { continue; }
                 else if (stmt->is<LoopStatement>()) { continue; }
                 else if (stmt->is<ReturnStmt>())    { return true; }
-                else if (stmt->is<ExitStmt>())      { return true; }
                 else if (IfStmt *if_stmt = stmt->as<IfStmt>()) {
                     bool ok = true;
                     for (size_t idx = 0, count = if_stmt->branchesCount(); idx < count; idx++) {

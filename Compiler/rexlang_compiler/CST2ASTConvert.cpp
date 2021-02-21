@@ -805,6 +805,14 @@ namespace rexlang {
     antlrcpp::Any CST2ASTConvert::visitReturnStmt(rexLangParser::ReturnStmtContext *context) {
         Expression *return_value = GetFromCtxIfExist<Expression *>(context->return_expr);
 
+        // 检查返回值类型是否匹配返回类型
+
+        const FunctionDecl *current_function = ast_context_->getLatestScope<FunctionDecl>().first;
+        assert(current_function);
+        if (current_function->getReturnType()->isAssginValidFrom(return_value->getExpressionType()) == false) {
+            assert(false);
+        }
+
         ReturnStmt *return_stmt = CreateNode<ReturnStmt>(context, return_value);
         return NodeWarp(return_stmt);
     }
