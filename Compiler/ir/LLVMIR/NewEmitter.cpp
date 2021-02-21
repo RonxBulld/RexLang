@@ -157,6 +157,26 @@ namespace rexlang {
         }
     }
 
+    NewEmitter::BasicBlockRange NewEmitter::MergeBlockRange(llvm::BasicBlock *prehead, const BasicBlockRange &blockRange) {
+        assert(prehead);
+        assert(blockRange.head && blockRange.tail);
+        if (llvm::pred_size(blockRange.head) == 0 && blockRange.head != prehead) {
+
+            // blockRange.head 块的前驱数为 0，并且不为上一条语句的尾块
+            // 则需要将当前首块与上一语句尾块连接
+
+            Builder.SetInsertPoint(prehead);
+            Builder.CreateBr(blockRange.head);
+        }
+        else if (llvm::pred_size(blockRange.head) >= 1 && blockRange.head != prehead && blockRange.head->getSinglePredecessor() != prehead) {
+
+            // blockRange.head 块至少有一个前驱块，并且该块或该块的前驱块都不是 prehead，则不知道如何处理
+
+            assert(false);
+        }
+        return {prehead, blockRange.tail};
+    }
+
     llvm::ConstantInt *NewEmitter::CreateInt(uint64_t intValue, unsigned int nBits, bool isSigned) {
         return llvm::ConstantInt::get(TheContext, llvm::APInt(nBits, intValue, isSigned));
     }
