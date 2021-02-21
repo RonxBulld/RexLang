@@ -17,14 +17,38 @@ namespace rexlang {
     class Diagnostic;
     class TranslateUnit;
 
+    // 可迭代栈
+    template <typename V, typename B = std::vector<V>>
+    class iterable_stack : private B {
+    public:
+        iterable_stack() = default ;
+        ~iterable_stack() = default ;
+
+        V &         top()       { return B::back(); }
+        const V &   top() const { return B::back(); }
+
+        void push   (V && v)        { B::push_back(v); }
+        void push   (const V &v)    { B::push_back(v); }
+        void pop    ()              { B::pop_back () ; }
+        bool empty  () const        { return B::empty(); }
+
+        typedef typename B::reverse_iterator        iterator;
+        typedef typename B::const_reverse_iterator  const_iterator;
+
+        iterator        begin()         { return B::rbegin (); }
+        iterator        end  ()         { return B::rend   (); }
+        const_iterator  begin() const   { return B::crbegin(); }
+        const_iterator  end  () const   { return B::crend  (); }
+    };
+
     class ASTContext {
     private:
-        LocationPool        location_pool_;
-        Diagnostic *        diagnostic_ = nullptr;
-        size_t              node_index_ = 0;
-        std::set<StringRef> dependence_libraries_;
-        TranslateUnit *     translate_unit_ = nullptr;
-        std::stack<Node *>  scope_stack_;
+        LocationPool            location_pool_;
+        Diagnostic *            diagnostic_ = nullptr;
+        size_t                  node_index_ = 0;
+        std::set<StringRef>     dependence_libraries_;
+        TranslateUnit *         translate_unit_ = nullptr;
+        iterable_stack<Node *>  scope_stack_;
 
     public:
         ASTContext();
@@ -58,6 +82,8 @@ namespace rexlang {
         Node *  currentScope    () const ;
         void    popScope        (Node *scope) ;
 
+        template <typename T>
+        std::pair<T *, int> getLatestScope() const ;
     };
 
 }

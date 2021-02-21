@@ -6,6 +6,7 @@
 
 #include "ASTContext.h"
 #include "utilities/Diagnostic.h"
+#include "rtti.h"
 
 namespace rexlang {
     ASTContext::ASTContext() = default;
@@ -72,4 +73,21 @@ namespace rexlang {
     Node *ASTContext::currentScope   () const      { return scope_stack_.empty() ? nullptr : scope_stack_.top(); }
     void  ASTContext::popScope       (Node *scope) { assert(currentScope() == scope); scope_stack_.pop(); }
 
+    template<typename T>
+    std::pair<T *, int> ASTContext::getLatestScope() const {
+        int idx = 0;
+        for (Node *scope : scope_stack_) {
+            if (T *match = rtti::dyn_cast<T>(scope)) {
+                return std::make_pair(match, idx);
+            }
+            idx++;
+        }
+        return std::make_pair(nullptr, -1);
+    }
+
+    // 需要显式实例化
+
+    template std::pair<TranslateUnit *, int> ASTContext::getLatestScope<TranslateUnit>() const ;
+    template std::pair<ProgSetDecl   *, int> ASTContext::getLatestScope<ProgSetDecl  >() const ;
+    template std::pair<FunctionDecl  *, int> ASTContext::getLatestScope<FunctionDecl >() const ;
 }
