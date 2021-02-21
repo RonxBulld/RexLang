@@ -518,9 +518,39 @@ namespace rexlang {
     }
 
     NewEmitter::BasicBlockRange NewEmitter::impl_EmitStatementBlock(StatementBlock *statementBlock) {
-        llvm::BasicBlock *bb = llvm::BasicBlock::Create(TheContext, "", TheFunction);
-        // TODO:
-        return NewEmitter::BasicBlockRange{bb, bb};
+        llvm::BasicBlock *head = llvm::BasicBlock::Create(TheContext, "", TheFunction);
+        Builder.SetInsertPoint(head);
+        llvm::BasicBlock *tail = head;
+        for (Statement *statement : statementBlock->getStatements()) {
+            BasicBlockRange bb_range = Emit(statement);
+            assert(bb_range.head && bb_range.tail);
+            if (llvm::pred_size(bb_range.head) == 0 && bb_range.head != tail) {
+
+                // bb_range.head 块的前驱数为 0，并且不为上一条语句的尾块
+                // 则需要将当前首块与上一语句尾块连接
+
+                Builder.SetInsertPoint(tail);
+                Builder.CreateBr(bb_range.head);
+                tail = bb_range.tail;
+            }
+            if (llvm::succ_size(bb_range.tail) > 0) {
+                if (llvm::succ_size(bb_range.tail) == 1 && bb_range.tail->getSingleSuccessor() == TheReturnBB) {
+
+                    // 理论上如果尾部块无条件跳转到返回块，当前顺序块后面的语句不必翻译
+                    // 但是这里我们继续执行翻译，以尽量检查语句
+
+                    // assert(statementBlock->getStatements().back() == statement);
+
+                }
+                else {
+
+                    // 函数中尾块不应有不是返回块的后继
+
+                    assert(false);
+                }
+            }
+        }
+        return NewEmitter::BasicBlockRange{head, tail};
     }
     // endregion
     /*****************************************************************************************************************/
