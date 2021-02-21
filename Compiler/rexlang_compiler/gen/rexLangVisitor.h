@@ -98,8 +98,6 @@ public:
 
     virtual antlrcpp::Any visitReturnStmt(rexLangParser::ReturnStmtContext *context) = 0;
 
-    virtual antlrcpp::Any visitExitStmt(rexLangParser::ExitStmtContext *context) = 0;
-
     virtual antlrcpp::Any visitFuncCall(rexLangParser::FuncCallContext *context) = 0;
 
     virtual antlrcpp::Any visitHierarchy(rexLangParser::HierarchyContext *context) = 0;

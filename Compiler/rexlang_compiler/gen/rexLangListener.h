@@ -133,9 +133,6 @@ public:
   virtual void enterReturnStmt(rexLangParser::ReturnStmtContext *ctx) = 0;
   virtual void exitReturnStmt(rexLangParser::ReturnStmtContext *ctx) = 0;
 
-  virtual void enterExitStmt(rexLangParser::ExitStmtContext *ctx) = 0;
-  virtual void exitExitStmt(rexLangParser::ExitStmtContext *ctx) = 0;
-
   virtual void enterFuncCall(rexLangParser::FuncCallContext *ctx) = 0;
   virtual void exitFuncCall(rexLangParser::FuncCallContext *ctx) = 0;
 

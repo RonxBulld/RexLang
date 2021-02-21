@@ -209,7 +209,6 @@ control_statement
     : '到循环尾' '(' ')'                                # ContinueStmt
     | '跳出循环' '(' ')'                                # BreakStmt
     | '返回' '(' return_expr=expression? ')'            # ReturnStmt
-    | '结束' '(' ')'                                    # ExitStmt
     ;
 
 name_component

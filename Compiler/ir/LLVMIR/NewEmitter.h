@@ -97,7 +97,6 @@ namespace rexlang {
         DEF_EMIT(BasicBlockRange, ContinueStmt  , continueStmt  )
         DEF_EMIT(BasicBlockRange, BreakStmt     , breakStmt     )
         DEF_EMIT(BasicBlockRange, ReturnStmt    , returnStmt    )
-        DEF_EMIT(BasicBlockRange, ExitStmt      , exitStmt      )
         DEF_EMIT(BasicBlockRange, IfStmt        , ifStmt        )
         DEF_EMIT(BasicBlockRange, WhileStmt     , whileStmt     )
         DEF_EMIT(BasicBlockRange, RangeForStmt  , rangeForStmt  )

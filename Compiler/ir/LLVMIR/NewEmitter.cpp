@@ -456,7 +456,6 @@ namespace rexlang {
                 , ContinueStmt
                 , BreakStmt
                 , ReturnStmt
-                , ExitStmt
                 , IfStmt
                 , WhileStmt
                 , RangeForStmt
@@ -483,11 +482,6 @@ namespace rexlang {
     }
 
     NewEmitter::BasicBlockRange NewEmitter::impl_EmitReturnStmt(ReturnStmt *returnStmt) {
-        // TODO:
-        return NewEmitter::BasicBlockRange();
-    }
-
-    NewEmitter::BasicBlockRange NewEmitter::impl_EmitExitStmt(ExitStmt *exitStmt) {
         // TODO:
         return NewEmitter::BasicBlockRange();
     }

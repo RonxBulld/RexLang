@@ -43,7 +43,6 @@ namespace rexlang {
             if (0) { case NodeType::kNTyContinueStmt:        return "ContinueStmt";        }
             if (0) { case NodeType::kNTyBreakStmt:           return "BreakStmt";           }
             if (0) { case NodeType::kNTyReturnStmt:          return "ReturnStmt";          }
-            if (0) { case NodeType::kNTyExitStmt:            return "ExitStmt";            }
             if (0) { case NodeType::kNTyIfStmt:              return "IfStmt";              }
             if (0) { case NodeType::kNTyWhileStmt:           return "WhileStmt";           }
             if (0) { case NodeType::kNTyRangeForStmt:        return "RangeForStmt";        }

@@ -190,7 +190,6 @@ namespace rexlang {
         antlrcpp::Any visitContinueStmt                 (rexLangParser::ContinueStmtContext                 *   context) override;
         antlrcpp::Any visitBreakStmt                    (rexLangParser::BreakStmtContext                    *   context) override;
         antlrcpp::Any visitReturnStmt                   (rexLangParser::ReturnStmtContext                   *   context) override;
-        antlrcpp::Any visitExitStmt                     (rexLangParser::ExitStmtContext                     *   context) override;
     public:
         CST2ASTConvert(ASTContext *ast_context, Diagnostic *diagnostic, REXCompilerInstance *compiler_instance);
 

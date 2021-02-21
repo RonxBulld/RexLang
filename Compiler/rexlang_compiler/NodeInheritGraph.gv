@@ -51,7 +51,6 @@ digraph G {
     "Expression" -> "Statement";
     "LoopControlStmt" -> "ControlStmt";
     "ReturnStmt" -> "ControlStmt";
-    "ExitStmt" -> "ControlStmt";
     "ContinueStmt" -> "LoopControlStmt";
     "BreakStmt" -> "LoopControlStmt";
     "WhileStmt" -> "LoopStatement";

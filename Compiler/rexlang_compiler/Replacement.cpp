@@ -57,9 +57,6 @@ namespace rexlang {
         TRY_REPLACE(getReturnValue(), &ReturnStmt::setReturnValue);
         return ControlStmt::replaceChild(origin, goal);
     }
-    bool ExitStmt::replaceChild(Node *origin, Node *goal) {
-        return ControlStmt::replaceChild(origin, goal);
-    }
     void IfStmt::replaceConditionAt(size_t idx, Expression *condition) {
         if (idx < switches_.size()) {
             switches_[idx].first = condition;

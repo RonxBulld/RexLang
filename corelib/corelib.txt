@@ -8,3 +8,6 @@
 
 .LIB命令 检查, , "corelib", "Assert", , Assert
     .参数 条件, 逻辑型, , 检查条件是否为真，为假则暂停程序
+
+.LIB命令 结束, , "corelib", "Exit", , Exit
+    .参数 返回值, 整数型, 可空,

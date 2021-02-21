@@ -135,9 +135,6 @@ public:
   virtual void enterReturnStmt(rexLangParser::ReturnStmtContext * /*ctx*/) override { }
   virtual void exitReturnStmt(rexLangParser::ReturnStmtContext * /*ctx*/) override { }
 
-  virtual void enterExitStmt(rexLangParser::ExitStmtContext * /*ctx*/) override { }
-  virtual void exitExitStmt(rexLangParser::ExitStmtContext * /*ctx*/) override { }
-
   virtual void enterFuncCall(rexLangParser::FuncCallContext * /*ctx*/) override { }
   virtual void exitFuncCall(rexLangParser::FuncCallContext * /*ctx*/) override { }
 

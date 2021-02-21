@@ -173,10 +173,6 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitExitStmt(rexLangParser::ExitStmtContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
   virtual antlrcpp::Any visitFuncCall(rexLangParser::FuncCallContext *ctx) override {
     return visitChildren(ctx);
   }

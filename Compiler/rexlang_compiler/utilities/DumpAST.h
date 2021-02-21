@@ -83,7 +83,6 @@ namespace rexlang {
         void Visit(ContinueStmt &        node) override;
         void Visit(BreakStmt &           node) override;
         void Visit(ReturnStmt &          node) override;
-        void Visit(ExitStmt &            node) override;
         void Visit(Expression &          node) override;
         void Visit(NameComponent &       node) override;
         void Visit(IdentRefer &          node) override;

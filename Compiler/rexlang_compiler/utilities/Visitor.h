@@ -78,7 +78,6 @@ namespace rexlang {
         virtual void Visit(ContinueStmt        &node) ;
         virtual void Visit(BreakStmt           &node) ;
         virtual void Visit(ReturnStmt          &node) ;
-        virtual void Visit(ExitStmt            &node) ;
 
         virtual void Visit(Expression          &node) ;
         virtual void Visit(NameComponent       &node) ;

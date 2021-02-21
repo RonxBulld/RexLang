@@ -44,7 +44,6 @@ namespace rexlang {
     const NodeType ContinueStmt         ::GetClassId() { return NodeType::kNTyContinueStmt; }
     const NodeType BreakStmt            ::GetClassId() { return NodeType::kNTyBreakStmt; }
     const NodeType ReturnStmt           ::GetClassId() { return NodeType::kNTyReturnStmt; }
-    const NodeType ExitStmt             ::GetClassId() { return NodeType::kNTyExitStmt; }
     const NodeType IfStmt               ::GetClassId() { return NodeType::kNTyIfStmt; }
     const NodeType WhileStmt            ::GetClassId() { return NodeType::kNTyWhileStmt; }
     const NodeType RangeForStmt         ::GetClassId() { return NodeType::kNTyRangeForStmt; }

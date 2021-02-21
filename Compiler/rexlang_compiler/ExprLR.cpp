@@ -51,7 +51,6 @@ namespace rexlang {
     ExprUsage ContinueStmt  ::getSubExprAccessType(const Expression *expr) const { assert(false); return U; }
     ExprUsage BreakStmt     ::getSubExprAccessType(const Expression *expr) const { assert(false); return U; }
     ExprUsage ReturnStmt    ::getSubExprAccessType(const Expression *expr) const { return R; } // 由于目前语言不支持返回引用固返回值一定是右值
-    ExprUsage ExitStmt      ::getSubExprAccessType(const Expression *expr) const { assert(false); return U; }
     ExprUsage IfStmt        ::getSubExprAccessType(const Expression *expr) const { return R; }
     ExprUsage WhileStmt     ::getSubExprAccessType(const Expression *expr) const { return R; }
     ExprUsage RangeForStmt  ::getSubExprAccessType(const Expression *expr) const {

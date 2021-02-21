@@ -809,11 +809,6 @@ namespace rexlang {
         return NodeWarp(return_stmt);
     }
 
-    antlrcpp::Any CST2ASTConvert::visitExitStmt(rexLangParser::ExitStmtContext *context) {
-        ExitStmt* exit_stmt = CreateNode<ExitStmt>(context);
-        return NodeWarp(exit_stmt);
-    }
-
     // --- 表达式语句 ---------------------------------------------------------------------------------
 
     antlrcpp::Any CST2ASTConvert::visitExpressionStatement(rexLangParser::ExpressionStatementContext *context) {

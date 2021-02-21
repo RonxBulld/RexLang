@@ -443,14 +443,6 @@ namespace rexlang {
         PostAction(node);
     }
 
-    void Visitor::Visit(ExitStmt &node) {
-        HeadAction(node);
-        VISIT_BASE(ControlStmt, node);
-        PrevAction(node);
-
-        PostAction(node);
-    }
-
     void Visitor::Visit(Expression &node) {
         HeadAction(node);
         VISIT_BASE(Statement, node);
@@ -641,7 +633,6 @@ namespace rexlang {
     int ContinueStmt       ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
     int BreakStmt          ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
     int ReturnStmt         ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
-    int ExitStmt           ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
     int Expression         ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
     int NameComponent      ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }
     int IdentRefer         ::Visit(Visitor &visitor) { visitor.Visit(*this); return 0; }

@@ -84,7 +84,7 @@ namespace rexlang {
     class LoopStatement;        class WhileStmt;                class RangeForStmt;
     class ForStmt;              class DoWhileStmt;              class AssignStmt;
     class ControlStmt;          class LoopControlStmt;          class ContinueStmt;
-    class BreakStmt;            class ReturnStmt;               class ExitStmt;
+    class BreakStmt;            class ReturnStmt;
 
     // Expression
 
@@ -1701,25 +1701,6 @@ namespace rexlang {
         SEMATIC_ANALYSIS_INTERNAL
 
         Expression * getReturnValue() const ;
-
-    public:
-        int Visit(class Visitor &visitor) override ;
-        bool replaceChild(Node *origin, Node *goal) override ;
-
-    public:
-        static const NodeType GetClassId () ;
-
-    };
-
-    /**
-     * 结束
-     */
-    class ExitStmt : public ControlStmt {
-    protected:
-        ExprUsage getSubExprAccessType(const Expression *expr) const override ;
-
-    public:
-        SEMATIC_ANALYSIS_INTERNAL
 
     public:
         int Visit(class Visitor &visitor) override ;

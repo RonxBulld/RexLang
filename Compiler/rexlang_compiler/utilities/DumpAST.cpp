@@ -364,12 +364,6 @@ namespace rexlang {
         POST_ACTION();
     }
 
-    void DumpAST::Visit(ExitStmt &node) {
-        PREV_ACTION();
-
-        POST_ACTION();
-    }
-
     void DumpAST::Visit(Expression &node) {
         PREV_ACTION();
 
