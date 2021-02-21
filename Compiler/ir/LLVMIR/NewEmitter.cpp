@@ -598,6 +598,74 @@ namespace rexlang {
         return {prehead, merge_block};
     }
 
+    NewEmitter::BasicBlockRange NewEmitter::BuildConditionFirstLoop(llvm::Value *startValue, llvm::Value *stopValue, llvm::Value *stepValue, llvm::Value *loopVari, Statement *loopBody) {
+        // 当前块
+        llvm::BasicBlock *prehead = Builder.GetInsertBlock();
+        // 真实循环变量
+        llvm::Value *real_loop_vari = Builder.CreateAlloca(llvm::Type::getInt32Ty(TheContext), nullptr, "$.real_loop_vari");
+
+        // 判断循环是否有效
+        // Valid = ((stop - start) * step) > 0
+        llvm::Value *range_distance = Builder.CreateSub(stopValue, startValue, "$.distance");
+        llvm::Value *loop_valid = Builder.CreateICmpSGT(Builder.CreateMul(range_distance, stepValue), CreateInt(0, 32, false), "$.valid");
+
+        llvm::BasicBlock *loop_entry_block = llvm::BasicBlock::Create(TheContext, ".loop_entry", TheFunction);
+        Builder.SetInsertPoint(loop_entry_block);
+        // 计算K值 K=(S>-S)*2-1
+        llvm::Value *step_gtz = Builder.CreateICmpSGT(stepValue, Builder.CreateNeg(stepValue));
+        step_gtz = Builder.CreateIntCast(step_gtz, llvm::Type::getInt32Ty(TheContext), false, "$.cast_i1_to_i32");
+        size_t step_gtz_bits = step_gtz->getType()->getIntegerBitWidth();
+        llvm::Value *K = Builder.CreateSub(Builder.CreateMul(step_gtz, CreateInt(2, 32, false)), CreateInt(1, 32, false), "$.K");
+        // 设置初始值
+        Builder.CreateAlignedStore(startValue, real_loop_vari, 4);
+
+        // === 计算循环条件并选择分支 ===
+        // 循环判断块
+        llvm::BasicBlock *loop_cond_block = llvm::BasicBlock::Create(TheContext, ".loop_cond", TheFunction);
+        Builder.CreateBr(loop_cond_block);
+        Builder.SetInsertPoint(loop_cond_block);
+        // 循环条件值 (K*i)<=(K*stop)
+        llvm::Value *loop_val = Builder.CreateAlignedLoad(llvm::Type::getInt32Ty(TheContext), real_loop_vari, 4);
+        llvm::Value *loop_cv = Builder.CreateICmpSLE(Builder.CreateMul(K, loop_val), Builder.CreateMul(K, stopValue));
+        // 循环体块
+        llvm::BasicBlock *loop_body_block = llvm::BasicBlock::Create(TheContext, ".loop_body", TheFunction);
+        // 循环步进块
+        llvm::BasicBlock *step_block = llvm::BasicBlock::Create(TheContext, ".loop_step", TheFunction);
+        // 循环后块
+        llvm::BasicBlock *loop_after_block = llvm::BasicBlock::Create(TheContext, ".after_loop", TheFunction);
+        // 插入循环判断分支跳转
+        Builder.CreateCondBr(loop_cv, loop_body_block, loop_after_block);
+
+        BreakContinueStack.push(BreakContinue{loop_after_block, loop_cond_block});
+        // === 开始为循环体生成代码 ===
+        Builder.SetInsertPoint(loop_body_block);
+        if (loopVari) {
+            // 更新循环值到名义循环变量
+            Builder.CreateAlignedStore(Builder.CreateAlignedLoad(llvm::Type::getInt32Ty(TheContext), real_loop_vari, 4), loopVari, 4);
+        }
+        BasicBlockRange loop_bb_range = Emit(loopBody);
+        loop_bb_range = MergeBlockRange(loop_body_block, loop_bb_range);
+        loop_body_block = loop_bb_range.tail;       // <---- 必须更新块指针
+        Builder.CreateBr(step_block);
+        BreakContinueStack.pop();
+
+        // === 开始处理步进 ===
+        Builder.SetInsertPoint(step_block);
+        // 计算步进后的值
+        llvm::Value *next_var = Builder.CreateAdd(Builder.CreateAlignedLoad(llvm::Type::getInt32Ty(TheContext), real_loop_vari, 4), stepValue, "next_var");
+        Builder.CreateAlignedStore(next_var, real_loop_vari, 4);
+        // 跳转到头部
+        Builder.CreateBr(loop_cond_block);
+        // 回写循环有效判断
+        Builder.SetInsertPoint(prehead);
+        Builder.CreateCondBr(loop_valid, loop_entry_block, loop_after_block);
+
+        // 转到新的块中
+        Builder.SetInsertPoint(loop_after_block);
+
+        return {prehead, loop_after_block};
+    }
+
     NewEmitter::BasicBlockRange NewEmitter::impl_EmitWhileStmt(WhileStmt *whileStmt) {
         // TODO:
         return NewEmitter::BasicBlockRange();

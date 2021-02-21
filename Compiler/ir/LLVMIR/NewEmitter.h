@@ -74,6 +74,7 @@ namespace rexlang {
         llvm::ConstantInt *CreateInt(uint64_t intValue, unsigned int nBits, bool isSigned) ;
         llvm::Value *UseValueAsRight(llvm::Value *V) ;
         BasicBlockRange MergeBlockRange(llvm::BasicBlock *prehead, const BasicBlockRange &blockRange) ;
+        BasicBlockRange BuildConditionFirstLoop(llvm::Value *startValue, llvm::Value *stopValue, llvm::Value *stepValue, llvm::Value *loopVari, Statement *loopBody) ;
 
         /**********************************************************************************************
          * 这是一组路由函数，用于在对基类 Emit 时便捷的转发到子类的 Emit 处理中
