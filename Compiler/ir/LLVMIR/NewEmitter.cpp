@@ -492,23 +492,110 @@ namespace rexlang {
     }
 
     NewEmitter::BasicBlockRange NewEmitter::impl_EmitContinueStmt(ContinueStmt *continueStmt) {
-        // TODO:
-        return NewEmitter::BasicBlockRange();
+        llvm::BasicBlock *cur_bb = Builder.GetInsertBlock();
+        if (BreakContinueStack.empty()) {
+            assert(false);
+            return {cur_bb, cur_bb};
+        }
+        if (llvm::BasicBlock *tgt_bb = BreakContinueStack.top().continue_block.dest) {
+            Builder.CreateBr(tgt_bb);
+        } else {
+            assert(false);
+            return {cur_bb, cur_bb};
+        }
+        return {cur_bb, cur_bb};
     }
 
     NewEmitter::BasicBlockRange NewEmitter::impl_EmitBreakStmt(BreakStmt *breakStmt) {
-        // TODO:
-        return NewEmitter::BasicBlockRange();
+        llvm::BasicBlock *cur_bb = Builder.GetInsertBlock();
+        if (BreakContinueStack.empty()) {
+            assert(false);
+            return {cur_bb, cur_bb};
+        }
+        if (llvm::BasicBlock *tgt_bb = BreakContinueStack.top().break_block.dest) {
+            Builder.CreateBr(tgt_bb);
+        } else {
+            assert(false);
+            return {cur_bb, cur_bb};
+        }
+        return {cur_bb, cur_bb};
     }
 
     NewEmitter::BasicBlockRange NewEmitter::impl_EmitReturnStmt(ReturnStmt *returnStmt) {
-        // TODO:
-        return NewEmitter::BasicBlockRange();
+        if (Expression *retv = returnStmt->getReturnValue()) {
+            llvm::Value *llvm_retv = Emit(retv);
+            llvm_retv = UseValueAsRight(llvm_retv);
+            Builder.CreateStore(llvm_retv, TheReturnValue);
+            Builder.CreateBr(TheReturnBB);
+        } else {
+            Builder.CreateBr(TheReturnBB);
+        }
+        llvm::BasicBlock *cur_bb = Builder.GetInsertBlock();
+        return {cur_bb, cur_bb};
     }
 
     NewEmitter::BasicBlockRange NewEmitter::impl_EmitIfStmt(IfStmt *ifStmt) {
-        // TODO:
-        return NewEmitter::BasicBlockRange();
+        assert(ifStmt->expressionSwitches().size() == 1);
+        llvm::BasicBlock *prehead = Builder.GetInsertBlock();
+
+        Expression *condition_expr = ifStmt->expressionSwitches().front().first;
+        assert(condition_expr);
+        Statement *then_stmt = ifStmt->expressionSwitches().front().second;
+        Statement *else_stmt = ifStmt->defaultBody();
+
+        // 生成判断条件
+
+        llvm::Value *condition = Emit(condition_expr);
+        assert(condition);
+        condition = UseValueAsRight(condition);
+        assert(condition->getType()->getPrimitiveSizeInBits() == 1);
+
+        // THEN 块
+        llvm::BasicBlock *then_block = llvm::BasicBlock::Create(TheContext, ".then", TheFunction);
+        // ELSE 块
+        llvm::BasicBlock *else_block = llvm::BasicBlock::Create(TheContext, ".else", TheFunction);
+        // 汇合块
+        llvm::BasicBlock *merge_block = llvm::BasicBlock::Create(TheContext, ".merge", TheFunction);
+
+        // 分支选择跳转
+
+        Builder.CreateCondBr(condition, then_block, else_block);
+
+        // 生成 Then 块
+
+        Builder.SetInsertPoint(then_block);
+        BasicBlockRange then_bb_range = Emit(then_stmt);
+        then_bb_range = MergeBlockRange(then_block, then_bb_range);
+        then_block = then_bb_range.tail;           // <---- 必须更新块指针
+        if (llvm::succ_size(then_block) == 0) {
+            Builder.SetInsertPoint(then_block);
+            Builder.CreateBr(merge_block);
+        } else if (llvm::succ_size(then_block) == 1 && then_block->getSingleSuccessor() == TheReturnBB) {
+            // 这是一个将会指向返回语句的块，无需处理
+        } else {
+            assert(false);
+        }
+
+        // 生成 Else 块
+
+        Builder.SetInsertPoint(else_block);
+        BasicBlockRange else_bb_range = Emit(else_stmt);
+        else_bb_range = MergeBlockRange(else_block, else_bb_range);
+        else_block = else_bb_range.tail;           // <---- 必须更新块指针
+        if (llvm::succ_size(else_block) == 0) {
+            Builder.SetInsertPoint(else_block);
+            Builder.CreateBr(merge_block);
+        } else if (llvm::succ_size(else_block) == 1 && else_block->getSingleSuccessor() == TheReturnBB) {
+            // 这是一个将会指向返回语句的块，无需处理
+        } else {
+            assert(false);
+        }
+
+        // 处理 Merge 块
+
+        Builder.SetInsertPoint(merge_block);
+
+        return {prehead, merge_block};
     }
 
     NewEmitter::BasicBlockRange NewEmitter::impl_EmitWhileStmt(WhileStmt *whileStmt) {
@@ -537,16 +624,8 @@ namespace rexlang {
         llvm::BasicBlock *tail = head;
         for (Statement *statement : statementBlock->getStatements()) {
             BasicBlockRange bb_range = Emit(statement);
-            assert(bb_range.head && bb_range.tail);
-            if (llvm::pred_size(bb_range.head) == 0 && bb_range.head != tail) {
+            tail = MergeBlockRange(tail, bb_range).tail;
 
-                // bb_range.head 块的前驱数为 0，并且不为上一条语句的尾块
-                // 则需要将当前首块与上一语句尾块连接
-
-                Builder.SetInsertPoint(tail);
-                Builder.CreateBr(bb_range.head);
-                tail = bb_range.tail;
-            }
             if (llvm::succ_size(bb_range.tail) > 0) {
                 if (llvm::succ_size(bb_range.tail) == 1 && bb_range.tail->getSingleSuccessor() == TheReturnBB) {
 
